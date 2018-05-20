@@ -1,97 +1,0 @@
-[0m[0K]0;:/c/Users/iljal/Documents/GitHub/GithubPage[?25l
-[0;32miljal@LG89 [0;35m [0;33m~/Documents/GitHub/GithubPage[0m[0K
-$[0K[3G[?25h[?25l$ h[0K[?25hu[0Kg[0Ko[0K[?25l
-bash: hugo: command not found[0K
-[0K[?25h[?25l
-[0;32miljal@LG89 [0m[0K[1A[?25h[?25l
-[0;32miljal@LG89 [0;35m [0;33m~/Documents/GitHub/GithubPage[0m[0K
-]0;:/c/Users/iljal/Documents/GitHub/GithubPage[?25l
-[0;32miljal@LG89 [0;35m [0;33m~/Documents/GitHub/GithubPage[0m[0K
-$ cd[0K[6G[?25h[?25l$ cd c[0K[?25ho[0Kn[0Kt[0Ke[0Kn[0Kt[0K[?25l
-[0K[?25h]0;:/c/Users/iljal/Documents/GitHub/GithubPage/content[?25l
-[0;32miljal@LG89 [0;35m [0;33m~/Documents/GitHub/GithubPage/content[0m[0K
-$[0K[3G[?25h[?25l$ d[0K[?25hi[0Kr[0K[?25l
-[0K[?25habout.md  post[0K[?25l
-[0K[?25h[?25l
-[0;32miljal@LG89 [0;35m [0;33m~/Documents/GitHub/GithubPage/content[0m[0K
-$[0K[3G[?25h[?25l$ c[0K[?25hd[0K[6G[?25l$ cd p[0K[?25ho[0Ks[0Kt[0K[?25l
-[0K[?25h]0;:/c/Users/iljal/Documents/GitHub/GithubPage/content/post[?25l
-[0;32miljal@LG89 [0;35m [0;33m~/Documents/GitHub/GithubPage/content/post[0m[0K
-$[0K[3G[?25h[?25l$ d[0K[?25hi[0Kr[0K[?25l
-[0K[?25h2015-01-01-lorem-ipsum.md[0K[?25l
-2015-07-23-r-rmarkdown.Rmd[0K
-2015-07-23-r-rmarkdown.html[0K
-2016-12-30-hello-markdown.md[0K
-2018-03-06-joyplot-distribution-of-grades-in-german-laws-state-exam.Rmd[0K
-2018-03-06-joyplot-distribution-of-grades-in-german-laws-state-exam.html[0K
-2018-04-19-low-budget-high-res-mapping-with-r-for-not-for-profit-print.Rmd[0K
-2018-04-19-low-budget-high-res-mapping-with-r-for-not-for-profit-print.html[0K
-2018-04-19-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files[0K
-2018-05-14-hello-blogdown.Rmd[0K
-2018-05-14-hello-blogdown.html[0K
-GIS_NPO_Data[0K
-data[0K
-img[0K
-[0K[?25h[?25l
-[0;32miljal@LG89 [0;35m [0;33m~/Documents/GitHub/GithubPage/content/post[0m[0K
-$[0K[3G[?25h[?25l$ c[0K[?25hd[0K[6G[?25l$ cd d[0K[?25ha[0Kt[0Ka[0K[?25l
-[0K[?25h]0;:/c/Users/iljal/Documents/GitHub/GithubPage/content/post/data[?25l
-[0;32miljal@LG89 [0;35m [0;33m~/Documents/GitHub/GithubPage/content/post/data[0m[0K
-$[0K[3G[?25h[?25l$ d[0K[?25hi[0Kr[0K[?25l
-[0K[?25h201801_notenaushang.csv  NE2_50M_SR_W.tif  NE2_50m_SR_W.zip[0K[?25l
-[0K[?25h[?25l
-[0;32miljal@LG89 [0;35m [0;33m~/Documents/GitHub/GithubPage/content/post/data[0m[0K
-]0;:/c/Users/iljal/Documents/GitHub/GithubPage[?25l
-[0;32miljal@LG89 [0;35m [0;33m~/Documents/GitHub/GithubPage[0m[0K
-$[0K[3G[?25h[?25l$ h[0K[?25hu[0Kg[0Ko[0K[8G[?25l$ hugo -[0K[?25hv[0K[?25l
-[0K[?25hbash: hugo: command not found[0K[?25l
-[0K[?25h[?25l
-[0;32miljal@LG89 [0;35m [0;33m~/Documents/GitHub/GithubPage[0m[0K
-$[0K[3G[?25h[?25l$ h[0K[?25hu[0Kg[0Ko[0K[8G[?25l$ hugo h[0K[?25he[0Kl[0Kp[0K[?25l
-[0K[?25hbash: hugo: command not found[0K[?25l
-[0K[?25h[?25l
-[0;32miljal@LG89 [0;35m [0;33m~/Documents/GitHub/GithubPage[0m[0K
-$[0K[3G[?25h[?25l$ h[0K[?25he[0Kl[0Kp[0K[8G[?25l$ help h[0K[?25hu[0Kg[0Ko[0K[?25l
-bash: help: no help topics match `hugo'.  Try `help help' or `man -k hugo' o[0Kr
- `info hugo'.[0K
-[0K[?25h[?25l
-[0;32miljal@LG89 [0;35m [0;33m~/Documents/GitHub/GithubPage[0m[0K
-$[0K[3G[?25h[?25l$ i[0K[?25hn[0Kf[0Ko[0K[8G[?25l$ info h[0K[?25hu[0Kg[0Ko[0K[?25l
-[0K[?25hbash: info: command not found[0K[?25l
-[0K[?25h[?25l
-[0;32miljal@LG89 [0;35m [0;33m~/Documents/GitHub/GithubPage[0m[0K
-]0;:/c/Users/iljal/Documents/GitHub/GithubPage[?25l
-[0;32miljal@LG89 [0;35m [0;33m~/Documents/GitHub/GithubPage[0m[0K
-$[0K[3G[?25h[?25l$ d[0K[?25hi[0Kr[0K[?25l
-[0K[?25hGithubPage.Rproj  config.toml  data       layouts  static[0K[?25l
-archetypes        content      index.Rmd  public   themes[0K
-[0K[?25h[?25l
-[0;32miljal@LG89 [0;35m [0;33m~/Documents/GitHub/GithubPage[0m[0K
-$[0K[3G[?25h[?25l$ c[0K[?25h[?25ld[0K[4G[?25h[5G[6G[?25l$ cd c[0K[?25h[?25lo[0K[7G[?25h[8G[?25l$ cd con[0K[?25ht[0Ke[0Kn[0Kt[0K[?25l
-[0K[?25h]0;:/c/Users/iljal/Documents/GitHub/GithubPage/content[?25l
-[0;32miljal@LG89 [0;35m [0;33m~/Documents/GitHub/GithubPage/content[0m[0K
-$[0K[3G[?25h[?25l$ d[0K[?25hi[0Kr[0K[?25l
-[0K[?25habout.md  post[0K[?25l
-[0K[?25h[?25l
-[0;32miljal@LG89 [0;35m [0;33m~/Documents/GitHub/GithubPage/content[0m[0K
-$[0K[3G[?25h[?25l$ c[0K[?25hd[0K[6G[?25l$ cd p[0K[?25ho[0Ks[0Kt[0K[?25l
-[0K[?25h]0;:/c/Users/iljal/Documents/GitHub/GithubPage/content/post[?25l
-[0;32miljal@LG89 [0;35m [0;33m~/Documents/GitHub/GithubPage/content/post[0m[0K
-$[0K[3G[?25h[?25l$ d[0K[?25hi[0Kr[0K[?25l
-[0K[?25h2015-07-23-r-rmarkdown.Rmd   japanese-preview.md[0K[?25l
-2015-07-23-r-rmarkdown.html  js-flowchart-diagrams.md[0K
-chinese-preview.md           js-sequence-diagrams.md[0K
-english-preview.md           shortcodes.md[0K
-even-preview.md              syntax-highlighting.md[0K
-hidden-post.md[0K
-[0K[?25h[?25l
-[0;32miljal@LG89 [0;35m [0;33m~/Documents/GitHub/GithubPage/content/post[0m[0K
-$[0K[3G[?25h[?25l$ 2[0K[?25h[?25l$[0K[3G[?25h[?25l$ r[0K[?25he[0Kn[0K[7G[?25l$ ren 2[0K[?25h0[0K1[0K5[0K-07-23-r-rmarkdown.[0KR[0Km[0Kd[0K[34G[?25l$ ren 2015-07-23-r-rmarkdown.Rmd 2[0K[?25h0[0K1[0K5[0K-07-23-r-rmarkdown.[0KR[0Km[0Kd[0K[59G[58G[57G[56G[55G[54G[52G[51G[50G[49G[48G[47G[46G[45G[43G[41G[40G[39G[38G[39G[40G[41G[42G[43G[44G[?25l$ ren 2015-07-23-r-rmarkdown.Rmd 2015-07-2-r-rmarkdown.Rmd[0K[44G[?25h[43G[?25l$ ren 2015-07-23-r-rmarkdown.Rmd 2015-07--r-rmarkdown.Rmd[0K[42G[?25h[?25l$ ren 2015-07-23-r-rmarkdown.Rmd 2015-07-r-rmarkdown.Rmd[0K[41G[?25h[?25l$ ren 2015-07-23-r-rmarkdown.Rmd 2015-0-r-rmarkdown.Rmd[0K[40G[?25h[?25l$ ren 2015-07-23-r-rmarkdown.Rmd 2015--r-rmarkdown.Rmd[0K[40G[?25h[39G[?25l$ ren 2015-07-23-r-rmarkdown.Rmd 2015-r-rmarkdown.Rmd[0K[38G[?25h[?25l$ ren 2015-07-23-r-rmarkdown.Rmd 201-r-rmarkdown.Rmd[0K[37G[?25h[?25l$ ren 2015-07-23-r-rmarkdown.Rmd 2018-r-rmarkdown.Rmd[0K[38G[?25h[?25l$ ren 2015-07-23-r-rmarkdown.Rmd 2018--r-rmarkdown.Rmd[0K[39G[?25h[?25l$ ren 2015-07-23-r-rmarkdown.Rmd 2018-0-r-rmarkdown.Rmd[0K[40G[?25h[?25l$ ren 2015-07-23-r-rmarkdown.Rmd 2018-03-r-rmarkdown.Rmd[0K[41G[?25h[?25l$ ren 2015-07-23-r-rmarkdown.Rmd 2018-03--r-rmarkdown.Rmd[0K[42G[?25h[?25l$ ren 2015-07-23-r-rmarkdown.Rmd 2018-03-2-r-rmarkdown.Rmd[0K[43G[?25h[?25l$ ren 2015-07-23-r-rmarkdown.Rmd 2018-03-23-r-rmarkdown.Rmd[0K[44G[?25h[?25l
-bash: ren: command not found[0K
-[0K[?25h[?25l
-[0;32miljal@LG89 [0;35m [0;33m~/Documents/GitHub/GithubPage/content/post[0m[0K
-$[0K[3G[?25h[?25l$ r[0K[?25he[0K[?25ln[0K[5G[?25h[6G[?25l$ rena[0K[?25hm[0K[?25le[0K[8G[?25h[9G[?25l
-bash: rename: command not found[0K
-[0K[?25h[?25l
-[0;32miljal@LG89 [0;35m [0;33m~/Documents/GitHub/GithubPage/content/post[0m[0K
-$[0K[3G[?25h

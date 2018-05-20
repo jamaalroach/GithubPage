@@ -91,7 +91,7 @@ library(sp)
 <p>Let’s first import the geodata and check the basemap.</p>
 <pre class="r"><code>world &lt;- rnaturalearth::countries110
 plot(world)</code></pre>
-<p><img src="/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p><img src="/docs/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
 <p>Ugh, not so pretty, right? But you have to start somewhere…</p>
 <p><strong>Spoiler: Some Objects – which were only mentioned later on – are missing at Admin-0 level.</strong></p>
 </div>
@@ -114,7 +114,7 @@ load(&quot;../../data/GIS_NPO_Data/countries10.rda&quot;)</code></pre>
 Guam &lt;- rnaturalearth::ne_states(geounit = &#39;guam&#39;)
 Guam$category &lt;- &quot;D&quot; # 4 regions A-D, as requested by colleague
 plot(Guam)</code></pre>
-<p><img src="/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p><img src="/docs/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
 </div>
 <div id="wheres-singapore" class="section level4">
 <h4>Where’s Singapore?</h4>
@@ -128,7 +128,7 @@ Singapore &lt;- countries10[countries10$SOVEREIGNT == &#39;Singapore&#39;,]
 # Caution: Scope of data from countries110 &amp; countries10 might differ!
 Singapore$category &lt;- &quot;C&quot;
 plot(Singapore)</code></pre>
-<p><img src="/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p><img src="/docs/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 </div>
 </div>
 <div id="assemble-the-regions" class="section level3">
@@ -138,7 +138,7 @@ plot(Singapore)</code></pre>
 <pre class="r"><code>asia.china &lt;- world[world$sovereignt == &#39;China&#39;,]
 asia.china$category &lt;- &quot;A&quot;
 plot(asia.china)</code></pre>
-<p><img src="/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p><img src="/docs/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 </div>
 <div id="eastern-asia-subregion-minus-china-mongolia" class="section level4">
 <h4>Eastern Asia (== subregion minus China &amp; Mongolia )</h4>
@@ -147,14 +147,14 @@ plot(asia.china)</code></pre>
                      world$sovereignt != &#39;China&#39;,]
 asia.east$category &lt;- &quot;D&quot;
 plot(asia.east)</code></pre>
-<p><img src="/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p><img src="/docs/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
 </div>
 <div id="south-eastern-asia" class="section level4">
 <h4>South-Eastern Asia</h4>
 <pre class="r"><code>asia.seast &lt;- world[world$subregion == &#39;South-Eastern Asia&#39;,]
 asia.seast$category &lt;- &quot;C&quot;
 plot(asia.seast)</code></pre>
-<p><img src="/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p><img src="/docs/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
 </div>
 <div id="central-and-south-asia" class="section level4">
 <h4>Central and South Asia</h4>
@@ -164,14 +164,14 @@ plot(asia.seast)</code></pre>
                          world$sovereignt == &#39;Russia&#39;,]
 asia.censouth$category &lt;- &quot;B&quot;
 plot(asia.censouth)</code></pre>
-<p><img src="/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-9-1.png" width="672" /> <strong>Why Russia, why?</strong> (cf. <a href="https://twitter.com/HalukaMB/status/974674444970020867">Thread</a> &amp; <a href="https://twitter.com/HalukaMB/status/982306518522527744">Solution</a> by <a href="https://twitter.com/HalukaMB">Haluka</a> )</p>
+<p><img src="/docs/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-9-1.png" width="672" /> <strong>Why Russia, why?</strong> (cf. <a href="https://twitter.com/HalukaMB/status/974674444970020867">Thread</a> &amp; <a href="https://twitter.com/HalukaMB/status/982306518522527744">Solution</a> by <a href="https://twitter.com/HalukaMB">Haluka</a> )</p>
 </div>
 <div id="solution-set-left-bbox-border-to-clip-russias-overlapping-tail" class="section level4">
 <h4>Solution: Set left BBOX-Border to clip Russia’s overlapping tail</h4>
 <pre class="r"><code>leftBorder &lt;- 25
 asia.censouth@bbox[1] &lt;- leftBorder
 plot(asia.censouth)</code></pre>
-<p><img src="/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p><img src="/docs/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
 </div>
 <div id="consolidate-the-core" class="section level4">
 <h4>Consolidate the core</h4>
@@ -182,7 +182,7 @@ plot(asia.censouth)</code></pre>
                         asia.censouth) # or just %&gt;% next time :)
 asia.core@bbox[1] &lt;- leftBorder
 plot(asia.core)</code></pre>
-<p><img src="/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<p><img src="/docs/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
 </div>
 <div id="consolidate-the-rest" class="section level4">
 <h4>Consolidate the rest</h4>
@@ -195,7 +195,7 @@ plot(asia.core)</code></pre>
                      world$region_un == &quot;Europe&quot;,]
 asia.rest@bbox[1] &lt;- leftBorder
 plot(asia.rest)</code></pre>
-<p><img src="/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p><img src="/docs/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
 </div>
 </div>
 <div id="remove-the-core" class="section level4">
@@ -204,7 +204,7 @@ plot(asia.rest)</code></pre>
                               !(asia.rest$sovereignt %in% asia.core$sovereignt))
 asia.rest@bbox[1] &lt;- leftBorder
 plot(asia.rest)</code></pre>
-<p><img src="/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<p><img src="/docs/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
 </div>
 </div>
 <div id="convert-spatial-dataframe-to-a-tidy-dataframe" class="section level3">
@@ -273,7 +273,7 @@ head(centroids.df, 1)</code></pre>
 # Here: NE2, shaded relief, water: http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/50m/raster/NE2_50M_SR_W.zip
 relief.world &lt;- raster(&quot;../../data/NE2_50M_SR_W.tif&quot;) # 170 MB file
 plot(relief.world)</code></pre>
-<p><img src="/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
+<p><img src="/docs/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
 </div>
 <div id="if-needed-reduce-raster-resolution" class="section level4">
 <h4>(If needed: Reduce Raster Resolution)</h4>
@@ -297,7 +297,7 @@ plot(relief.world)</code></pre>
 box &lt;- extent(25, 155, -25, 60) # how to calculate ratio (i.e. 1: 1,48)?
 relief.boxcrop &lt;- crop(relief.world, box)
 plot(relief.boxcrop)</code></pre>
-<p><img src="/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+<p><img src="/docs/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
 </div>
 <div id="raster-for-the-core-regions" class="section level4">
 <h4>Raster for the core regions</h4>
@@ -306,7 +306,7 @@ plot(relief.boxcrop)</code></pre>
 # save(relief.land, file = &quot;GIS_NPO_Data/relief_land.rda&quot;)
 load(&quot;../../data/GIS_NPO_Data/relief_land.rda&quot;)
 plot(relief.land)</code></pre>
-<p><img src="/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
+<p><img src="/docs/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
 </div>
 <div id="convert-core-raster-to-spdf-to-df" class="section level4">
 <h4>Convert core raster to SPDF to DF</h4>
@@ -325,7 +325,7 @@ head(relief.land_df, 1)</code></pre>
 # save(relief.meer, file = &quot;GIS_NPO_Data/relief_meer.rda&quot;)
 load(&quot;../../data/GIS_NPO_Data/relief_meer.rda&quot;)
 plot(relief.meer)</code></pre>
-<p><img src="/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
+<p><img src="/docs/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
 <pre class="r"><code># reliefplot2 &lt;- crop(reliefplot2, box)
 # plot(reliefplot2)</code></pre>
 </div>
@@ -364,7 +364,7 @@ head(relief.meer_df, 1)</code></pre>
   geom_text_repel(data = fortify(centroids.df),
                 aes(label = Name, size = 12, x = Long, y = Lat),
                 segment.colour = NA)</code></pre>
-<p><img src="/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-23-1.png" width="672" /></p>
+<p><img src="/docs/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-23-1.png" width="672" /></p>
 </div>
 <div id="map-without-rasterterrain" class="section level3">
 <h3>Map without raster/terrain</h3>
@@ -397,7 +397,7 @@ map &lt;- ggplot() +
                   aes(label = Name, size = 12, x = Long, y = Lat),
                   segment.colour = NA)
 plot(map)</code></pre>
-<p><img src="/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
+<p><img src="/docs/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
 </div>
 <div id="map-with-full-raster-core-and-rest" class="section level3">
 <h3>Map with full raster (core and rest)</h3>
@@ -432,7 +432,7 @@ plot(map)</code></pre>
 # save(map, file = &quot;output/map_w_raster_full.rda&quot;)
 # load(&quot;output/map_w_raster_full.rda&quot;)
 plot(map)</code></pre>
-<p><img src="/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-25-1.png" width="672" /> Not perfect, but sufficient for post-processing the output SVG with a vector processing app. One issue I wasn’t able to dissolve, is the different interpretations of the left border set to 25. While the raster definitively is cropped to 25°, the polygons extend beyond that. I’m quite sure that this is because of <a href="https://en.wikipedia.org/wiki/Kaliningrad">Kaliningrad</a>, so I guess it should be possible to ID the <strong>exclave</strong> by “String %in% $var” and exclude it from the dataframe. I might test that later.</p>
+<p><img src="/docs/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-25-1.png" width="672" /> Not perfect, but sufficient for post-processing the output SVG with a vector processing app. One issue I wasn’t able to dissolve, is the different interpretations of the left border set to 25. While the raster definitively is cropped to 25°, the polygons extend beyond that. I’m quite sure that this is because of <a href="https://en.wikipedia.org/wiki/Kaliningrad">Kaliningrad</a>, so I guess it should be possible to ID the <strong>exclave</strong> by “String %in% $var” and exclude it from the dataframe. I might test that later.</p>
 <p>Since the map was going to be printed in BW, I decided to provide at least some relieve with regards to the overloaded color scheme. Remember: While ColorBrewer recommends a max of 3 color levels for BW, this map has 4 shades of grey for the 4 core regions, 1 color for water (and borders), and another grey shade for countries which are not part of the core region. Add black for the labels and we end up with 7 colors. So leaving water areas and the rest of the world without relief, while highlighting the core regions by underlying them with a relief kind of works here. Don’t @ me :)</p>
 </div>
 <div id="final-processing-of-output-svg-in-affinity-photo-designer" class="section level3">
