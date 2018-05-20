@@ -1,0 +1,126 @@
+---
+title: '[R] Joyplots: The (un)joyful Distribution of Grades from German State Exam (Laws)'
+author: fubits
+date: '2018-03-06'
+slug: r-joyplots-the-un-joyful-distribution-of-grades-from-german-state-exam-laws
+categories:
+  - Rstats
+  - DataViz
+tags:
+  - joyplot
+  - ggridges
+  - ggplot
+lastmod: '2018-05-20T13:52:11+02:00'
+keywords: []
+description: ''
+comment: no
+toc: no
+autoCollapseToc: no
+postMetaInFooter: no
+hiddenFromHomePage: no
+contentCopyright: no
+reward: no
+mathjax: no
+mathjaxEnableSingleDollar: no
+mathjaxEnableAutoNumber: no
+hideHeaderAndFooter: no
+flowchartDiagrams:
+  enable: no
+  options: ''
+sequenceDiagrams:
+  enable: no
+  options: ''
+---
+
+
+
+<div id="import" class="section level3">
+<h3>Import</h3>
+<pre class="r"><code>library(tidyverse)
+# Datenquelle: https://www.berlin.de/sen/justiz/juristenausbildung/juristische-pruefungen/artikel.264039.php
+noten_raw &lt;- read_csv2(&quot;../../data/201801_notenaushang.csv&quot;) # nach PDF -&gt; Tabulizer</code></pre>
+</div>
+<div id="skim-preview" class="section level3">
+<h3>Skim / Preview</h3>
+<pre class="r"><code>skimr::skim(noten_raw)</code></pre>
+<pre><code>## Skim summary statistics
+##  n obs: 263 
+##  n variables: 9 
+## 
+## Variable type: character 
+##  variable missing complete   n min max empty n_unique
+##        AZ       0      263 263   7   7     0      263
+## 
+## Variable type: numeric 
+##  variable missing complete   n mean   sd   p0  p25  p50  p75 p100     hist
+##       Dur       0      263 263 5.83 2.01 1.42 4.28 5.57 7.28   11 &lt;U+2581&gt;&lt;U+2585&gt;&lt;U+2587&gt;&lt;U+2586&gt;&lt;U+2586&gt;&lt;U+2585&gt;&lt;U+2582&gt;&lt;U+2581&gt;
+##      OR I       0      263 263 5.92 2.77 2    4    5    8      14 &lt;U+2586&gt;&lt;U+2587&gt;&lt;U+2583&gt;&lt;U+2585&gt;&lt;U+2582&gt;&lt;U+2582&gt;&lt;U+2581&gt;&lt;U+2581&gt;
+##     OR II       0      263 263 5.57 2.57 1    4    5    7      14 &lt;U+2583&gt;&lt;U+2587&gt;&lt;U+2585&gt;&lt;U+2587&gt;&lt;U+2585&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;
+##       S I       0      263 263 5.9  2.91 1    3    6    8      15 &lt;U+2582&gt;&lt;U+2587&gt;&lt;U+2586&gt;&lt;U+2585&gt;&lt;U+2582&gt;&lt;U+2583&gt;&lt;U+2581&gt;&lt;U+2581&gt;
+##      S II       0      263 263 5.58 2.95 0    3    5    7      16 &lt;U+2583&gt;&lt;U+2587&gt;&lt;U+2586&gt;&lt;U+2585&gt;&lt;U+2582&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;
+##       WPF       0      263 263 5.95 2.77 1    4    6    8      14 &lt;U+2582&gt;&lt;U+2587&gt;&lt;U+2583&gt;&lt;U+2586&gt;&lt;U+2585&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;
+##       Z I       0      263 263 6.18 2.87 1    4    6    8      15 &lt;U+2583&gt;&lt;U+2586&gt;&lt;U+2587&gt;&lt;U+2586&gt;&lt;U+2582&gt;&lt;U+2582&gt;&lt;U+2581&gt;&lt;U+2581&gt;
+##      Z II       0      263 263 5.72 2.77 1    4    5    7      14 &lt;U+2583&gt;&lt;U+2587&gt;&lt;U+2585&gt;&lt;U+2586&gt;&lt;U+2583&gt;&lt;U+2581&gt;&lt;U+2582&gt;&lt;U+2581&gt;</code></pre>
+</div>
+<div id="long---short-tidy" class="section level3">
+<h3>Long -&gt; Short (Tidy)</h3>
+<pre class="r"><code>noten_raw %&gt;%
+  select(-AZ) %&gt;% 
+  gather(key = Fach, value = noten_raw[,2:8]) %&gt;% 
+  rename(Punkte = `noten_raw[, 2:8]`) -&gt; noten_long
+head(noten_long, 1)</code></pre>
+<pre><code>## # A tibble: 1 x 2
+##   Fach  Punkte
+##   &lt;chr&gt;  &lt;dbl&gt;
+## 1 Z I        8</code></pre>
+</div>
+<div id="joyplot" class="section level3">
+<h3>Joyplot</h3>
+<pre class="r"><code>library(ggridges)
+library(viridis)</code></pre>
+<pre><code>## Lade nötiges Paket: viridisLite</code></pre>
+<div id="beschriftungen" class="section level4">
+<h4>Beschriftungen</h4>
+<pre class="r"><code># Beschriftungen
+title_a &lt;- c(&quot;2. Juristisches Staatsexamen, GJPA Berlin/Brandenburg&quot;)
+subtitle_a = c(&quot;Notenverteilung Kampagne 4/17; n = 263; \&quot;Dur\&quot; = durchschnittl. Examensnote\r\nLinien: blau  = \&quot;bestanden (ausreichend)\&quot;, rot  = \&quot;vollbefriedigend\&quot;, schwarz  = Median Gesamtnote (5,57&quot;)
+caption_a = c(&quot;@fubits; Daten: GJPA 2018&quot;)</code></pre>
+<pre class="r"><code># Plot
+noten_long %&gt;% 
+  ggplot() +
+  geom_density_ridges(aes(x = Punkte, y = Fach, fill = Fach),
+                      rel_min_height = 0.025,
+                      scale = 1.75) +
+  # Linie: Vollbefriedigend
+  geom_vline(xintercept = 10, color = &quot;red&quot;, linetype = 4, size = 1) + 
+  # Linie: Bestanden
+  geom_vline(xintercept = 4, color = &quot;blue&quot;, linetype = 4, size = 1) +
+  # Linie: Median Gesamtnote
+  geom_vline(xintercept = 5.57, color = &quot;black&quot;, size = 1) +
+  labs(title = title_a, subtitle = subtitle_a, caption = caption_a) +
+  scale_x_continuous(breaks = c(0:18), limits = c(0,18)) +
+  scale_y_discrete(expand = c(0.01,0.0)) +
+  scale_fill_viridis(option = &quot;D&quot;, name = &quot;Frequency n&quot;,
+                     direction = -1, discrete = TRUE) +
+  theme(legend.position = &quot;none&quot;)</code></pre>
+<p><img src="/post/2018-03-06-joyplots-the-un-joyful-distribution-of-grades-from-german-state-exam-laws_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+</div>
+</div>
+<div id="boxplots-fur-gesamtergebnis-dur-und-nach-fachern" class="section level3">
+<h3>Boxplots für Gesamtergebnis (Dur) und nach Fächern</h3>
+<pre class="r"><code>noten_long %&gt;% 
+ggplot() +
+  geom_boxplot(aes(x = Fach, y = Punkte, fill = Fach)) +
+  scale_y_continuous(breaks = c(0:18), limits = c(0, 18)) +
+  scale_fill_viridis(
+    option = &quot;C&quot;,
+    direction = -1, discrete = TRUE
+  ) +
+  labs(title = title_a, subtitle = subtitle_a, caption = caption_a) +
+  theme(legend.position = &quot;none&quot;) +
+  # Linien zur Orientierung
+  geom_hline(yintercept = 10, color = &quot;red&quot;, linetype = 4, size = 1) +
+  geom_hline(yintercept = 4, color = &quot;blue&quot;, linetype = 4, size = 1) +
+  geom_hline(yintercept = 5.57, color = &quot;black&quot;, size = 1)</code></pre>
+<p><img src="/post/2018-03-06-joyplots-the-un-joyful-distribution-of-grades-from-german-state-exam-laws_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+</div>

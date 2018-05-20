@@ -1,0 +1,33 @@
+.header .logo-wrapper{
+  float:left;
+  display:inline-block;
+  vertical-align: middle;
+  margin: 10px 0;
+}
+
+.header .logo-wrapper .logo{
+  font-size:1.6rem;
+  font-weight:700;
+  font-family: 'Fira Mono',monospace;
+  text-transform: uppercase;
+}
+
+@media screen and (max-width:800px){
+  .header .logo-wrapper{
+    display:none
+  }
+}
+
+.mobile-navbar .mobile-header-logo .logo{
+  font-size:1.4rem;
+  line-height:50px;
+  font-family: 'Fira Mono',monospace;
+}
+
+.header .site-navbar .menu {
+    font-family: 'Fira Mono',monospace;
+    text-transform: uppercase;
+    font-weight:600;
+}
+
+icon-keybase:before{content:"\E08c";position:relative;top:-3px}
