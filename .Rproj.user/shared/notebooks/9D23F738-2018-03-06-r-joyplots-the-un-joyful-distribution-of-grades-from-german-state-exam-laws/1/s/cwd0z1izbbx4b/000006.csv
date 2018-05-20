@@ -1,0 +1,3 @@
+"0","library(tidyverse)"
+"0","# Datenquelle: https://www.berlin.de/sen/justiz/juristenausbildung/juristische-pruefungen/artikel.264039.php"
+"0","noten_raw <- read_csv2(""../../data/201801_notenaushang.csv"") # nach PDF -> Tabulizer"

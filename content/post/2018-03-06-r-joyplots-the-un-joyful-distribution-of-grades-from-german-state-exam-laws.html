@@ -10,7 +10,7 @@ tags:
   - joyplot
   - ggridges
   - ggplot
-lastmod: '2018-05-20T13:52:11+02:00'
+lastmod: '2018-05-20T16:52:11+02:00'
 keywords: []
 description: ''
 comment: no
@@ -34,15 +34,18 @@ sequenceDiagrams:
 
 
 
-<p>German <strong>Staatsexamen</strong> (State Exam in Laws) is hard. Let’s have a look how hard it is by visualising the distribution of grades from the written exams from the Berlin 2017/IV campaign.</p>
+<p>German <strong>Zweites Juristisches Staatsexamen</strong> (2nd State Exam in Laws) is said to be tough. Let’s have a look at how hard it really is by visualising the distribution of grades from the Berlin 2017/IV campaign. The written part of the final exam consists of 7 handwritten 5-hour length cases.</p>
+<p>Notice that you can achieve 0-18 points, where 8/9 allows to become a judge and 10 means outstanding…</p>
 <div id="import" class="section level3">
 <h3>Import</h3>
+<p>Let’s fetch the date from the official page of the Berlin Senate. You’ll get a PDF which you have to destill with the tabulizer package (or by hand) in order to get a CSV.</p>
 <pre class="r"><code>library(tidyverse)
 # Datenquelle: https://www.berlin.de/sen/justiz/juristenausbildung/juristische-pruefungen/artikel.264039.php
 noten_raw &lt;- read_csv2(&quot;../../data/201801_notenaushang.csv&quot;) # nach PDF -&gt; Tabulizer</code></pre>
 </div>
 <div id="skim-preview" class="section level3">
 <h3>Skim / Preview</h3>
+<p>The skimr-Package is great for quickly inspecting the kind of data you get.</p>
 <pre class="r"><code>skimr::skim(noten_raw)</code></pre>
 <pre><code>## Skim summary statistics
 ##  n obs: 263 
@@ -62,6 +65,7 @@ noten_raw &lt;- read_csv2(&quot;../../data/201801_notenaushang.csv&quot;) # nach
 ##       WPF       0      263 263 5.95 2.77 1    4    6    8      14 &lt;U+2582&gt;&lt;U+2587&gt;&lt;U+2583&gt;&lt;U+2586&gt;&lt;U+2585&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;
 ##       Z I       0      263 263 6.18 2.87 1    4    6    8      15 &lt;U+2583&gt;&lt;U+2586&gt;&lt;U+2587&gt;&lt;U+2586&gt;&lt;U+2582&gt;&lt;U+2582&gt;&lt;U+2581&gt;&lt;U+2581&gt;
 ##      Z II       0      263 263 5.72 2.77 1    4    5    7      14 &lt;U+2583&gt;&lt;U+2587&gt;&lt;U+2585&gt;&lt;U+2586&gt;&lt;U+2583&gt;&lt;U+2581&gt;&lt;U+2582&gt;&lt;U+2581&gt;</code></pre>
+<p>(In RStudio / R Markdown the hist column is rendered properly. You get a nice histogram per (numeric) variable:) <img src="/img/Staatsexamen_Skimr.jpg" alt="(Screenshot of skimr from RStudio)" /></p>
 </div>
 <div id="long---short-tidy" class="section level3">
 <h3>Long -&gt; Short (Tidy)</h3>
@@ -80,8 +84,8 @@ head(noten_long, 1)</code></pre>
 <pre class="r"><code>library(ggridges)
 library(viridis)</code></pre>
 <pre><code>## Lade nötiges Paket: viridisLite</code></pre>
-<div id="beschriftungen" class="section level4">
-<h4>Beschriftungen</h4>
+<div id="labels" class="section level4">
+<h4>Labels</h4>
 <pre class="r"><code># Beschriftungen
 title_a &lt;- c(&quot;2. Juristisches Staatsexamen, GJPA Berlin/Brandenburg&quot;)
 subtitle_a = c(&quot;Notenverteilung Kampagne 4/17; n = 263; \&quot;Dur\&quot; = durchschnittl. Examensnote\r\nLinien: blau  = \&quot;bestanden (ausreichend)\&quot;, rot  = \&quot;vollbefriedigend\&quot;, schwarz  = Median Gesamtnote (5,57&quot;)
@@ -107,8 +111,8 @@ noten_long %&gt;%
 <p><img src="/post/2018-03-06-r-joyplots-the-un-joyful-distribution-of-grades-from-german-state-exam-laws_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 </div>
 </div>
-<div id="boxplots-fur-gesamtergebnis-dur-und-nach-fachern" class="section level3">
-<h3>Boxplots für Gesamtergebnis (Dur) und nach Fächern</h3>
+<div id="boxplots-dur-overall-result-final-grade" class="section level3">
+<h3>Boxplots (Dur = overall result / final grade)</h3>
 <pre class="r"><code>noten_long %&gt;% 
 ggplot() +
   geom_boxplot(aes(x = Fach, y = Punkte, fill = Fach)) +
