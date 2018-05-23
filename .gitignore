@@ -1,4 +1,6 @@
 *.tif
+*.7z
 *.RData
 .RData
 *.rdb
+.Rproj.user

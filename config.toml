@@ -35,16 +35,17 @@ copyright = ""            # default: author.name ↓
   weight = 20
   identifier = "posts"
   url = "/post/"
-# [[menu.main]]
-#  name = "Tags"
-#  weight = 30
-#  identifier = "tags"
-#  url = "/tags/"
-# [[menu.main]]
-#  name = "Categories"
-#  weight = 40
-#  identifier = "categories"
-#  url = "/categories/"
+ [[menu.main]]
+  name = "Categories"
+  weight = 30
+  identifier = "categories"
+  url = "/categories/"
+ [[menu.main]]
+  name = "About"
+  weight = 40
+  identifier = "about"
+  url = "/about/"
+
 
 [params]
   version = "3.x"           # Used to give a friendly message when you have an incompatible update

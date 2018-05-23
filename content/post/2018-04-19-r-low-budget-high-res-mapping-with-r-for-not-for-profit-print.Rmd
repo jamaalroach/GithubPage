@@ -220,7 +220,7 @@ plot(asia.rest)
 
 
 ### 2.4 Convert spatial dataframe to a tidy dataframe
-(this was done before geom_sf and ggsf where introduced. There might exist a 
+(this was done before [geom_sf / ggsf](http://ggplot2.tidyverse.org/reference/ggsf.html) where introduced to [ggplot2](http://ggplot2.tidyverse.org/index.html). There might exist a 
 more elegant solution right now, esp. with ggplot.)
 
 
