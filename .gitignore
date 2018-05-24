@@ -1,6 +1,9 @@
+.Rhistory
 *.tif
 *.7z
 *.RData
 .RData
 *.rdb
+*.rdx
 .Rproj.user
+.Rhistory

@@ -1,3 +1,13 @@
+@charset "utf-8"!important;
+@font-face {
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Lato Regular'), local('Lato-Regular'),
+       url('../fonts/lato-v11-latin-regular.woff2') format('woff2'),
+       url('../fonts/lato-v11-latin-regular.woff') format('woff');
+}
+
 .header .logo-wrapper{
   float:left;
   display:inline-block;
@@ -22,6 +32,7 @@
   font-size:1.4rem;
   line-height:50px;
   font-family: 'Fira Mono',monospace;
+  text-transform: uppercase;
 }
 
 .header .site-navbar .menu {
@@ -30,4 +41,21 @@
     font-weight:600;
 }
 
-icon-keybase:before{content:"\E08c";position:relative;top:-3px}
+.icon-instagram:before{content:"\E08c";position:relative;top:-3px}
+
+
+
+h4{
+	font-size: 18px;
+	font-weight: bolder;
+}
+
+.post .post-content h1,.post .post-content h2,.post .post-content h3,.post .post-content h4,.post .post-content h5{
+	font-family: 'Lato', sans-serif!important;
+  	font-weight:400;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Lato', sans-serif!important;
+  	font-weight:400;
+}
