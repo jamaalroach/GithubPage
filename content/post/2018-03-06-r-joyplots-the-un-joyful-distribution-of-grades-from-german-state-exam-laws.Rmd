@@ -34,10 +34,10 @@ sequenceDiagrams:
 
 German **Zweites Juristisches Staatsexamen** (2nd State Exam in Laws) is said to be tough. Let's have a look at how hard it really is by visualising the distribution of grades from the Berlin 2017/IV campaign. The written part of the final exam consists of 7 handwritten 5-hour length cases.
 
-Notice that you can achieve 0-18 points, where 8/9 allows to become a judge and 10 means outstanding...
+Notice that you can score 0-18 points, where a final score of 8 allows you to become a judge and 10 means outstanding...
 
-### Import
-Let's fetch the date from the official page of the Berlin Senate. You'll get a PDF which you have to destill with the tabulizer package (or by hand) in order to get a CSV.
+## Import the Data
+Let's fetch the date from the official page of the Berlin Senate. You'll get a PDF which you have to destill with the tabulizer package (or by hand) in order to get a CSV. I will follow up with a post on using tabulizer from within RStudio anytime soon.
 
 ```{r, message=FALSE}
 library(tidyverse)
@@ -45,33 +45,37 @@ library(tidyverse)
 noten_raw <- read_csv2("../../data/201801_notenaushang.csv") # nach PDF -> Tabulizer
 ```
 
-### Skim / Preview
-The skimr-Package is great for quickly inspecting the kind of data you get.
+### Skim / Preview the Data
+The skimr-Package - among others - is great for quickly inspecting what kind of data (variables, data type, NAs etc.) you get.
 ```{r}
 skimr::skim(noten_raw)
 ```
 
-(In RStudio / R Markdown the hist column is rendered properly. You get a nice histogram per (numeric) variable:)
+(In RStudio / R Markdown the hist column is rendered properly. You get a nice histogram per (numeric) variable. There seems to be an issue with Knitr & UTF-8 encoding on MS Windows systems.)
+
 ![(Screenshot of skimr from RStudio)](/img/Staatsexamen_Skimr.jpg)
 
-### Long -> Short (Tidy)
+## Long -> Short (Tidy)
+Now we need to tidy the data. We first drop the AZ column (Student id) and then "pivot" all the exam subjects into a single column (= variable) named "Fach" (GER for subject).
 ```{r echo=TRUE}
 noten_raw %>%
   select(-AZ) %>% 
   gather(key = Fach, value = noten_raw[,2:8]) %>% 
   rename(Punkte = `noten_raw[, 2:8]`) -> noten_long
-head(noten_long, 1)
 
+head(noten_long, 1)
 ```
 
 
-### Joyplot
+## Joyplot 
+### ggridges-Pkg + colors
+We load the ggridges Pkg and the beautiful Viridis color palette
 ```{r, echo=TRUE}
 library(ggridges)
 library(viridis)
 ```
 
-#### Labels
+### Labels
 ```{r echo=TRUE}
 # Beschriftungen
 title_a <- c("2. Juristisches Staatsexamen, GJPA Berlin/Brandenburg")
