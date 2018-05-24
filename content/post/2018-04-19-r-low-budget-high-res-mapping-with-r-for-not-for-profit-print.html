@@ -3,9 +3,6 @@ title: '[R] Low-Budget High-Res Mapping with R for Not-for-Profit Print'
 author: fubits
 date: '2018-04-19'
 slug: r-low-budget-high-res-mapping-with-r-for-not-for-profit-print
-output:
-  html_document:
-    toc: true
 categories:
   - Rstats
   - Mapping
@@ -40,8 +37,8 @@ sequenceDiagrams:
 
 <p><img src="/img/map_final_v20_96dpi.png" title="#MyFirstMap" alt="(Spoiler: final version of the map)" style="width:100.0%" /> <em>Presented as a Lightning Talk at <a href="http://code-geo-graphic.com/">CODE/GEO/GRAPHIC, Berlin, 19 April 2018</a></em></p>
 <p>(This is my first ever “how-to”, so please be so kind and point me to any errors and feel free to help me improve my code and approach!)</p>
-<div id="setting" class="section level2">
-<h2>1. Setting</h2>
+<div id="setting" class="section level1">
+<h1>1. Setting</h1>
 <p>Once upon a time (and long before I learned about the <a href="https://twitter.com/hashtag/Tidyverse?src=hash">tidyverse</a> and %&gt;%), a colleague from a not-for-profit org asked for help with a map for a book. The conversation may or may not have sounded like that:</p>
 <blockquote>
 <p><em>We need a map for a book but we don’t have a budget.</em><br />
@@ -51,8 +48,8 @@ sequenceDiagrams:
 <em>And you know that the editors work with MS Word…</em></p>
 </blockquote>
 </div>
-<div id="workflow" class="section level2">
-<h2>2. Workflow</h2>
+<div id="workflow" class="section level1">
+<h1>2. Workflow</h1>
 <p>“Simple” 3-step-process (actually 4):</p>
 <ul>
 <li>find Public Domain / CC-0 geodata (vector &amp; raster)</li>
@@ -65,8 +62,8 @@ sequenceDiagrams:
 <img src="/img/monkeyuser_everytime.png" title="#Everytime" alt="(c) Monkey User" style="width:100.0%" />
 <p class="caption">(c) Monkey User</p>
 </div>
-<div id="packages" class="section level3">
-<h3>2.1 Packages</h3>
+<div id="packages" class="section level2">
+<h2>2.1 Packages</h2>
 <pre class="r"><code>knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2)
 library(ggrepel)
@@ -78,13 +75,13 @@ library(maptools)
 library(sp)
 # library(rnaturalearth) # &lt;- source for geodata, but pkg masks some needed fun() from other packages, so rather address methods by rnaturalearth::fun() </code></pre>
 </div>
-<div id="geodata-world-map-data-from-natural-earth" class="section level3">
-<h3>2.2 Geodata: World Map Data from Natural Earth</h3>
+<div id="geodata-world-map-data-from-natural-earth" class="section level2">
+<h2>2.2 Geodata: World Map Data from Natural Earth</h2>
 <blockquote>
 <p><em>“Natural Earth is a public domain map dataset available at 1:10m, 1:50m, and 1:110 million scales. Featuring tightly integrated vector and raster data, with Natural Earth you can make a variety of visually pleasing, well-crafted maps with cartography or GIS software.”</em> <a href="http://www.naturalearthdata.com/">(Link to Natural Earth)</a></p>
 </blockquote>
-<div id="base-map-admin-0-level" class="section level4">
-<h4>Base Map (Admin-0 Level)</h4>
+<div id="base-map-admin-0-level" class="section level3">
+<h3>Base Map (Admin-0 Level)</h3>
 <p>Let’s first import the geodata and check the basemap.</p>
 <pre class="r"><code>world &lt;- rnaturalearth::countries110
 plot(world)</code></pre>
@@ -92,16 +89,16 @@ plot(world)</code></pre>
 <p>Ugh, not so pretty, right? But you have to start somewhere…</p>
 <p><strong>Spoiler: Some Geo-Objects – which were only mentioned later on – are missing at Admin-0 level.</strong></p>
 </div>
-<div id="fetch-non-admin-0-elements-guam-singapore" class="section level4">
-<h4>(-&gt; Fetch Non-Admin-0 Elements (Guam &amp; Singapore))</h4>
+<div id="fetch-non-admin-0-elements-guam-singapore" class="section level3">
+<h3>(-&gt; Fetch Non-Admin-0 Elements (Guam &amp; Singapore))</h3>
 <pre class="r"><code># countries10 &lt;- rnaturalearth::ne_download(scale = 10,
 #                                           type = &#39;countries&#39;,
 #                                           category = &#39;cultural&#39;)
 # save(countries10, file = &quot;GIS_NPO_Data/countries10.rda&quot;)
 load(&quot;../../data/GIS_NPO_Data/countries10.rda&quot;)</code></pre>
 </div>
-<div id="wheres-guam" class="section level4">
-<h4>Where’s Guam?</h4>
+<div id="wheres-guam" class="section level3">
+<h3>Where’s Guam?</h3>
 <pre class="r"><code># First, let&#39;s search for Guam:
 # &quot;Guam&quot; %in% rnaturalearth::countries110$SOVEREIGNT #&gt; FALSE, not &quot;souvereign&quot;
 # Let&#39;s search below Admin-0 level within rnaturalearth::ne_states() 
@@ -113,8 +110,8 @@ Guam$category &lt;- &quot;D&quot; # 4 regions A-D, as requested by colleague
 plot(Guam)</code></pre>
 <p><img src="/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
 </div>
-<div id="wheres-singapore" class="section level4">
-<h4>Where’s Singapore?</h4>
+<div id="wheres-singapore" class="section level3">
+<h3>Where’s Singapore?</h3>
 <pre class="r"><code>#&gt; &quot;Singapore&quot; %in% rnaturalearth::countries110$SOVEREIGNT is FALSE, so apparently,
 # it is a souvereign state, but as a city-state to granular for the 1:110m data.
 # Let&#39;s search in the 1:10m data
@@ -128,17 +125,17 @@ plot(Singapore)</code></pre>
 <p><img src="/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 </div>
 </div>
-<div id="assemble-the-regions" class="section level3">
-<h3>2.3 Assemble the Regions</h3>
-<div id="china" class="section level4">
-<h4>China</h4>
+<div id="assemble-the-regions" class="section level2">
+<h2>2.3 Assemble the Regions</h2>
+<div id="china" class="section level3">
+<h3>China</h3>
 <pre class="r"><code>asia.china &lt;- world[world$sovereignt == &#39;China&#39;,]
 asia.china$category &lt;- &quot;A&quot;
 plot(asia.china)</code></pre>
 <p><img src="/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 </div>
-<div id="eastern-asia-subregion-minus-china-mongolia" class="section level4">
-<h4>Eastern Asia (== $subregion minus China &amp; Mongolia )</h4>
+<div id="eastern-asia-subregion-minus-china-mongolia" class="section level3">
+<h3>Eastern Asia (== $subregion minus China &amp; Mongolia )</h3>
 <pre class="r"><code>asia.east &lt;- world[world$subregion == &#39;Eastern Asia&#39; &amp;
                      world$sovereignt != &#39;Mongolia&#39; &amp;
                      world$sovereignt != &#39;China&#39;,]
@@ -146,15 +143,15 @@ asia.east$category &lt;- &quot;D&quot;
 plot(asia.east)</code></pre>
 <p><img src="/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
 </div>
-<div id="south-eastern-asia" class="section level4">
-<h4>South-Eastern Asia</h4>
+<div id="south-eastern-asia" class="section level3">
+<h3>South-Eastern Asia</h3>
 <pre class="r"><code>asia.seast &lt;- world[world$subregion == &#39;South-Eastern Asia&#39;,]
 asia.seast$category &lt;- &quot;C&quot;
 plot(asia.seast)</code></pre>
 <p><img src="/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
 </div>
-<div id="central-and-south-asia-plus-russia-mongolia" class="section level4">
-<h4>Central and South Asia (plus Russia &amp; Mongolia)</h4>
+<div id="central-and-south-asia-plus-russia-mongolia" class="section level3">
+<h3>Central and South Asia (plus Russia &amp; Mongolia)</h3>
 <pre class="r"><code>asia.censouth &lt;- world[world$region_wb == &#39;South Asia&#39; |
                          world$subregion == &#39;Central Asia&#39; |
                          world$sovereignt == &#39;Mongolia&#39; |
@@ -164,15 +161,15 @@ plot(asia.censouth)</code></pre>
 <p><img src="/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
 <p><strong>Why Russia, why?</strong> (cf. <a href="https://twitter.com/HalukaMB/status/974674444970020867">Thread</a> &amp; <a href="https://twitter.com/HalukaMB/status/982306518522527744">Solution</a> by <a href="https://twitter.com/HalukaMB">Haluka</a> )</p>
 </div>
-<div id="solution-set-left-bbox-border-to-clip-russias-overlapping-tail" class="section level4">
-<h4>Solution: Set left BBOX-Border to clip Russia’s overlapping tail</h4>
+<div id="solution-set-left-bbox-border-to-clip-russias-overlapping-tail" class="section level3">
+<h3>Solution: Set left BBOX-Border to clip Russia’s overlapping tail</h3>
 <pre class="r"><code>leftBorder &lt;- 25
 asia.censouth@bbox[1] &lt;- leftBorder
 plot(asia.censouth)</code></pre>
 <p><img src="/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
 </div>
-<div id="consolidate-the-core" class="section level4">
-<h4>Consolidate the Core</h4>
+<div id="consolidate-the-core" class="section level3">
+<h3>Consolidate the Core</h3>
 <pre class="r"><code>asia.core &lt;-  spRbind(
                 spRbind(
                   spRbind(asia.china, asia.east),
@@ -182,10 +179,10 @@ asia.core@bbox[1] &lt;- leftBorder
 plot(asia.core)</code></pre>
 <p><img src="/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
 </div>
-<div id="consolidate-the-rest" class="section level4">
-<h4>Consolidate the Rest</h4>
-<div id="preview" class="section level5">
-<h5>(Preview)</h5>
+<div id="consolidate-the-rest" class="section level3">
+<h3>Consolidate the Rest</h3>
+<div id="preview" class="section level4">
+<h4>(Preview)</h4>
 <pre class="r"><code>asia.rest &lt;- world[world$region_un == &quot;Asia&quot; &amp;
                      world$sovereignt != &#39;China&#39; | 
                      world$region_un == &quot;Oceania&quot; | 
@@ -196,8 +193,8 @@ plot(asia.rest)</code></pre>
 <p><img src="/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
 </div>
 </div>
-<div id="remove-the-core" class="section level4">
-<h4>Remove the Core</h4>
+<div id="remove-the-core" class="section level3">
+<h3>Remove the Core</h3>
 <pre class="r"><code>asia.rest &lt;- subset.data.frame(asia.rest,
                               !(asia.rest$sovereignt %in% asia.core$sovereignt))
 asia.rest@bbox[1] &lt;- leftBorder
@@ -205,13 +202,13 @@ plot(asia.rest)</code></pre>
 <p><img src="/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
 </div>
 </div>
-<div id="convert-spatial-dataframe-to-a-tidy-dataframe" class="section level3">
-<h3>2.4 Convert Spatial Dataframe to a tidy dataframe</h3>
+<div id="convert-spatial-dataframe-to-a-tidy-dataframe" class="section level2">
+<h2>2.4 Convert Spatial Dataframe to a tidy dataframe</h2>
 <blockquote>
 <p>(this was done before <a href="http://ggplot2.tidyverse.org/reference/ggsf.html">geom_sf / ggsf</a> where introduced to <a href="http://ggplot2.tidyverse.org/index.html">ggplot2</a>. There might exist a more elegant solution right now, esp. with ggplot.)</p>
 </blockquote>
-<div id="tidy-the-vector-data" class="section level4">
-<h4>Tidy the Vector Data</h4>
+<div id="tidy-the-vector-data" class="section level3">
+<h3>Tidy the Vector Data</h3>
 <pre class="r"><code>asia.core@data$id &lt;- row.names(asia.core@data)
 Singapore@data$id &lt;- row.names(Singapore@data)
 Guam@data$id &lt;- row.names(Guam@data)
@@ -239,8 +236,8 @@ head(asia.main, 1)</code></pre>
 ##   long_len abbrev_len tiny homepart category
 ## 1        5          5   NA        1        A</code></pre>
 </div>
-<div id="create-centered-country-labels" class="section level4">
-<h4>Create centered Country Labels</h4>
+<div id="create-centered-country-labels" class="section level3">
+<h3>Create centered Country Labels</h3>
 <pre class="r"><code>centroids.df &lt;- as.data.frame(coordinates(asia.core)) # returns centered points
 centroids.df$sovereignt &lt;- asia.core$sovereignt # add country names
 
@@ -260,10 +257,10 @@ head(centroids.df, 1)</code></pre>
 ## 30 103.8654 36.60943 China</code></pre>
 </div>
 </div>
-<div id="relief-raster" class="section level3">
-<h3>2.5 Relief Raster</h3>
-<div id="get-the-relief-raster-file" class="section level4">
-<h4>Get the Relief Raster File</h4>
+<div id="relief-raster" class="section level2">
+<h2>2.5 Relief Raster</h2>
+<div id="get-the-relief-raster-file" class="section level3">
+<h3>Get the Relief Raster File</h3>
 <pre class="r"><code># Either:
 # physics &lt;- rnaturalearth::ne_download(scale = 50, category = &#39;raster&#39;,
 #                                       type = &#39;NE2_50M_SR_W&#39;, load = TRUE)
@@ -275,14 +272,14 @@ relief.world &lt;- raster(&quot;../../data/NE2_50M_SR_W.tif&quot;) # 170 MB file
 plot(relief.world)</code></pre>
 <p><img src="/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
 </div>
-<div id="if-needed-reduce-raster-resolution" class="section level4">
-<h4>(If needed: reduce Raster Resolution)</h4>
+<div id="if-needed-reduce-raster-resolution" class="section level3">
+<h3>(If needed: reduce Raster Resolution)</h3>
 <pre class="r"><code># reduce resolution by 50% (I didn&#39;t do it since we want high-res for print)
 # s2 &lt;- aggregate(s, fact = 2)
 # plot(s2)</code></pre>
 </div>
-<div id="crop-the-raster-file" class="section level4">
-<h4>Crop the Raster File</h4>
+<div id="crop-the-raster-file" class="section level3">
+<h3>Crop the Raster File</h3>
 <pre class="r"><code># deprecated:
 # manually select the box for the region with mouse pointer -&gt; quick but bad!!!
 # s &lt;- raster::select(relief)
@@ -299,8 +296,8 @@ relief.boxcrop &lt;- crop(relief.world, box)
 plot(relief.boxcrop)</code></pre>
 <p><img src="/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
 </div>
-<div id="raster-for-the-core-regions" class="section level4">
-<h4>Raster for the Core Regions</h4>
+<div id="raster-for-the-core-regions" class="section level3">
+<h3>Raster for the Core Regions</h3>
 <pre class="r"><code># Mask everything apart from the core regions terrain
 # relief.land &lt;- raster::mask(relief.boxcrop, asia.core) # mask {E} != asia.core
 # save(relief.land, file = &quot;GIS_NPO_Data/relief_land.rda&quot;)
@@ -308,8 +305,8 @@ load(&quot;../../data/GIS_NPO_Data/relief_land.rda&quot;)
 plot(relief.land)</code></pre>
 <p><img src="/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
 </div>
-<div id="convert-core-raster-to-spdf-to-df" class="section level4">
-<h4>Convert Core Raster to SPDF to DF</h4>
+<div id="convert-core-raster-to-spdf-to-df" class="section level3">
+<h3>Convert Core Raster to SPDF to DF</h3>
 <pre class="r"><code># Raster to SPDF
 relief.land_spdf &lt;- as(relief.land, &quot;SpatialPixelsDataFrame&quot;)
 # SPDF to DF (for ggplot)
@@ -319,16 +316,16 @@ head(relief.land_df, 1)</code></pre>
 <pre><code>##   value     x        y
 ## 1   113 29.05 59.98333</code></pre>
 </div>
-<div id="raster-for-the-rest-water-terrain" class="section level4">
-<h4>Raster for the Rest (Water &amp; Terrain)</h4>
+<div id="raster-for-the-rest-water-terrain" class="section level3">
+<h3>Raster for the Rest (Water &amp; Terrain)</h3>
 <pre class="r"><code># relief.meer &lt;- raster::mask(relief.boxcrop, asia.core, inverse=TRUE) # maskiert alles == asia.core
 # save(relief.meer, file = &quot;GIS_NPO_Data/relief_meer.rda&quot;)
 load(&quot;../../data/GIS_NPO_Data/relief_meer.rda&quot;)
 plot(relief.meer)</code></pre>
 <p><img src="/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
 </div>
-<div id="convert-2nd-raster-to-df" class="section level4">
-<h4>Convert 2nd Raster to DF</h4>
+<div id="convert-2nd-raster-to-df" class="section level3">
+<h3>Convert 2nd Raster to DF</h3>
 <pre class="r"><code>relief.meer_spdf &lt;- as(relief.meer, &quot;SpatialPixelsDataFrame&quot;)
 relief.meer_df &lt;- as.data.frame(relief.meer_spdf) %&gt;% 
   rename(value = `NE2_50M_SR_W`)
@@ -338,10 +335,10 @@ head(relief.meer_df, 1)</code></pre>
 </div>
 </div>
 </div>
-<div id="results" class="section level2">
-<h2>3. Results</h2>
-<div id="preview-with-default-colors" class="section level3">
-<h3>Preview with Default Colors</h3>
+<div id="results" class="section level1">
+<h1>3. Results</h1>
+<div id="preview-with-default-colors" class="section level2">
+<h2>Preview with Default Colors</h2>
 <pre class="r"><code>ggplot() +
   # Polygons for the 4 regions
   geom_polygon(data = fortify(asia.main), alpha = 0.5,
@@ -367,8 +364,8 @@ head(relief.meer_df, 1)</code></pre>
                 segment.colour = NA)</code></pre>
 <p><img src="/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-23-1.png" width="672" /></p>
 </div>
-<div id="map-without-rasterterrain" class="section level3">
-<h3>Map without raster/terrain</h3>
+<div id="map-without-rasterterrain" class="section level2">
+<h2>Map without raster/terrain</h2>
 <pre class="r"><code># Better approach:  Setting dimensions for {r}-snippet according to requirements
 # for print would be much better for serialisation and polishing in Illustrator et al.
 map &lt;- ggplot() +
@@ -400,8 +397,8 @@ map &lt;- ggplot() +
 plot(map)</code></pre>
 <p><img src="/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
 </div>
-<div id="map-with-full-raster-core-and-rest" class="section level3">
-<h3>Map with full raster (core and rest)</h3>
+<div id="map-with-full-raster-core-and-rest" class="section level2">
+<h2>Map with full raster (core and rest)</h2>
 <p>(~3 min rendering time with Intel i7 7500 / 16 GB / SSD)</p>
 <pre class="r"><code>map &lt;- ggplot() +
  # raster
@@ -435,8 +432,8 @@ plot(map)</code></pre>
 <p>Not perfect, but sufficient for post-processing the output SVG with a vector processing app. One issue I wasn’t able to dissolve, is the different interpretations of the left border set to 25. While the raster definitively is cropped to 25°, the polygons extend beyond that. I’m quite sure that this is because of <a href="https://en.wikipedia.org/wiki/Kaliningrad">Kaliningrad</a>, so I guess it should be possible to ID the <strong>exclave</strong> by “String %in% $var” and exclude it from the dataframe. I might test that later.</p>
 <p>Since the map was going to be printed in BW, I decided to provide at least some relieve with regards to the overloaded color scheme. Remember: While ColorBrewer recommends a max of 3 color levels for BW, this map has 4 shades of grey for the 4 core regions, 1 color for water (and borders), and another grey shade for countries which are not part of the core region. Add black for the labels and we end up with 7 colors. So leaving water areas and the rest of the world without relief, while highlighting the core regions by underlying them with a relief kind of works here. Don’t @ me :)</p>
 </div>
-<div id="final-processing-of-output-svg-in-affinity-photo-designer" class="section level3">
-<h3>Final processing of output SVG in Affinity Photo / Designer</h3>
+<div id="final-processing-of-output-svg-in-affinity-photo-designer" class="section level2">
+<h2>Final processing of output SVG in Affinity Photo / Designer</h2>
 <div class="figure">
 <img src="/img/map_affinity.jpg" title="Processing the SVG" alt="Processing the SVG in Affinity" style="width:100.0%" />
 <p class="caption"><em>“Processing the SVG in Affinity”</em></p>
@@ -444,8 +441,8 @@ plot(map)</code></pre>
 <p>Basically, I just scaled the SVG to 300 dpi, changed the fonts and slightly readjusted the alpha levels of the regions. That’s it. We’re done here. (PS: We’re not, since someone has to blog about it and maybe even hold it as a lighting talk at a cool workshop)</p>
 </div>
 </div>
-<div id="lessons-learned" class="section level2">
-<h2>4. Lessons Learned</h2>
+<div id="lessons-learned" class="section level1">
+<h1>4. Lessons Learned</h1>
 <ul>
 <li><p>(<a href="https://xkcd.com/977/">Map Projections, anyone?</a>)</p></li>
 <li><p>Print != “JPEG”. We need high-res data and have to check for artifacts (i.e. small islands which might be rendered with 1px and then be printed as “corns”)</p></li>
@@ -471,8 +468,8 @@ plot(map)</code></pre>
 <p class="caption"><em>“Fun with <del>flags</del> <strong>maps</strong>”</em></p>
 </div>
 </div>
-<div id="some-sources" class="section level2">
-<h2>5. (Some) Sources</h2>
+<div id="some-sources" class="section level1">
+<h1>5. (Some) Sources</h1>
 <p>These links are some of the key sources, which helped me to get started with mapping in R:</p>
 <ul>
 <li><p><a href="https://ikashnitsky.github.io/">Ilya Kashnitsky’s Blog</a>, whose posts were the reason I started to map with R on my own</p></li>

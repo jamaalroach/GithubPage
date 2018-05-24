@@ -78,7 +78,8 @@ copyright = ""            # default: author.name ↓
 
   postMetaInFooter = true   # contain author, lastMod, markdown link, license
   linkToMarkDown = false    # Only effective when hugo will output .md files.
-  contentCopyright = ''     # e.g. '<a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank">CC BY-NC-ND 4.0</a>'
+  contentCopyright = '<a rel="license noopener" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a>'
+  
   # Link custom CSS and JS assets
   #   (relative to /static/css and /static/js respectively)
   customCSS = ["custom.css"]
@@ -98,5 +99,5 @@ copyright = ""            # default: author.name ↓
    [params.social]                                    
 
     c-twitter = "https://www.twitter.com/fubits/"
-    g-github = "https://www.github.com/ellocke"
+    g-github = "https://www.github.com/ellocke/"
    # m-instagram = "https://keybase.com/fubits"
