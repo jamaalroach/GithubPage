@@ -1,6 +1,6 @@
 ---
 title: '[R] Low-Budget High-Res Mapping with R for Not-for-Profit Print'
-author: fubits
+author: Ilja @fubits
 date: '2018-04-19'
 slug: r-low-budget-high-res-mapping-with-r-for-not-for-profit-print
 categories:
@@ -12,10 +12,13 @@ tags:
   - Publishing
   - Print
 lastmod: '2018-05-20T17:11:53+02:00'
+output:
+  blogdown::html_page:
+      number_sections: true
+      toc: TRUE
 keywords: []
 description: ''
 comment: no
-toc: no
 autoCollapseToc: no
 postMetaInFooter: no
 hiddenFromHomePage: no
@@ -34,11 +37,12 @@ sequenceDiagrams:
 ---
 
 ![*(Spoiler: final version of the map)*](/img/map_final_v20_96dpi.png "#MyFirstMap"){width=100%}
+
 *Presented as a Lightning Talk at [CODE/GEO/GRAPHIC, Berlin, 19 April 2018](http://code-geo-graphic.com/)*
 
 (This is my first ever "how-to", so please be so kind and point me to any errors and feel free to help me improve my code and approach!)
 
-# 1. Setting
+# Setting
 Once upon a time (and long before I learned about the [tidyverse](https://twitter.com/hashtag/Tidyverse?src=hash) and %>%), a colleague from a not-for-profit org asked for help with a map for a book. The conversation may or may not have sounded like that:
 
 >*We need a map for a book but we don't have a budget.*\
@@ -48,7 +52,7 @@ Once upon a time (and long before I learned about the [tidyverse](https://twitte
 >*And you know that the editors work with MS Word...*
 
 
-# 2. Workflow
+# Workflow
 "Simple" 3-step-process (actually 4):
 
 * find Public Domain / CC-0 geodata (vector & raster)
@@ -61,7 +65,7 @@ How hard could that be, right?
 ![(c) Monkey User](/img/monkeyuser_everytime.png "#Everytime"){width=100%}
 
 
-## 2.1 Packages
+## Packages
 ```{r message=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2)
@@ -76,11 +80,11 @@ library(sp)
 ```
 
 
-## 2.2 Geodata: World Map Data from Natural Earth
+## Geodata: World Map Data from Natural Earth
 >*"Natural Earth is a public domain map dataset available at 1:10m, 1:50m, and 1:110 million scales. Featuring tightly integrated vector and raster data, with Natural Earth you can make a variety of visually pleasing, well-crafted maps with cartography or GIS software."* [(Link to Natural Earth)](http://www.naturalearthdata.com/)
 
 
-### Base Map (Admin-0 Level)
+**Base Map (Admin-0 Level)**
 Let's first import the geodata and check the basemap.
 
 ```{r echo=TRUE}
@@ -93,7 +97,7 @@ Ugh, not so pretty, right? But you have to start somewhere...
 **Spoiler: Some Geo-Objects – which were only mentioned later on – are missing at Admin-0 level.**
 
 
-### (-> Fetch Non-Admin-0 Elements (Guam & Singapore))
+**(-> Fetch Non-Admin-0 Elements (Guam & Singapore))**
 ```{r}
 # countries10 <- rnaturalearth::ne_download(scale = 10,
 #                                           type = 'countries',
@@ -103,7 +107,7 @@ load("../../data/GIS_NPO_Data/countries10.rda")
 ```
 
 
-### Where's Guam?
+**Where's Guam?**
 ```{r}
 # First, let's search for Guam:
 # "Guam" %in% rnaturalearth::countries110$SOVEREIGNT #> FALSE, not "souvereign"
@@ -117,7 +121,7 @@ plot(Guam)
 ```
 
 
-### Where's Singapore?
+**Where's Singapore?**
 ```{r}
 #> "Singapore" %in% rnaturalearth::countries110$SOVEREIGNT is FALSE, so apparently,
 # it is a souvereign state, but as a city-state to granular for the 1:110m data.
@@ -132,9 +136,9 @@ plot(Singapore)
 ```
 
 
-## 2.3 Assemble the Regions
+## Assemble the Regions
 
-### China
+**China**
 ```{r}
 asia.china <- world[world$sovereignt == 'China',]
 asia.china$category <- "A"
@@ -142,7 +146,7 @@ plot(asia.china)
 ```
 
 
-### Eastern Asia (== $subregion minus China & Mongolia )
+**Eastern Asia (== $subregion minus China & Mongolia )**
 ```{r}
 asia.east <- world[world$subregion == 'Eastern Asia' &
                      world$sovereignt != 'Mongolia' &
@@ -152,7 +156,7 @@ plot(asia.east)
 ```
 
 
-### South-Eastern Asia
+**South-Eastern Asia**
 ```{r}
 asia.seast <- world[world$subregion == 'South-Eastern Asia',]
 asia.seast$category <- "C"
@@ -160,7 +164,7 @@ plot(asia.seast)
 ```
 
 
-### Central and South Asia (plus Russia & Mongolia)
+**Central and South Asia (plus Russia & Mongolia)**
 ```{r}
 asia.censouth <- world[world$region_wb == 'South Asia' |
                          world$subregion == 'Central Asia' |
@@ -173,7 +177,7 @@ plot(asia.censouth)
 **Why Russia, why?** (cf. [Thread](https://twitter.com/HalukaMB/status/974674444970020867) & [Solution](https://twitter.com/HalukaMB/status/982306518522527744) by [Haluka](https://twitter.com/HalukaMB)
 )
 
-### Solution: Set left BBOX-Border to clip Russia's overlapping tail
+**Solution: Set left BBOX-Border to clip Russia's overlapping tail**
 ```{r}
 leftBorder <- 25
 asia.censouth@bbox[1] <- leftBorder
@@ -181,7 +185,7 @@ plot(asia.censouth)
 ```
 
 
-### Consolidate the Core
+**Consolidate the Core**
 ```{r}
 asia.core <-  spRbind(
                 spRbind(
@@ -193,8 +197,8 @@ plot(asia.core)
 ```
 
 
-### Consolidate the Rest
-#### (Preview)
+**Consolidate the Rest**
+*(Preview)*
 ```{r}
 asia.rest <- world[world$region_un == "Asia" &
                      world$sovereignt != 'China' | 
@@ -206,7 +210,7 @@ plot(asia.rest)
 ```
 
 
-### Remove the Core
+**Remove the Core**
 ```{r}
 asia.rest <- subset.data.frame(asia.rest,
                               !(asia.rest$sovereignt %in% asia.core$sovereignt))
@@ -215,11 +219,11 @@ plot(asia.rest)
 ```
 
 
-## 2.4 Convert Spatial Dataframe to a tidy dataframe
+## Convert Spatial Dataframe to a tidy dataframe
 >(this was done before [geom_sf / ggsf](http://ggplot2.tidyverse.org/reference/ggsf.html) where introduced to [ggplot2](http://ggplot2.tidyverse.org/index.html). There might exist a more elegant solution right now, esp. with ggplot.)
 
 
-### Tidy the Vector Data
+**Tidy the Vector Data**
 ```{r message=FALSE}
 asia.core@data$id <- row.names(asia.core@data)
 Singapore@data$id <- row.names(Singapore@data)
@@ -231,7 +235,7 @@ head(asia.main, 1)
 
 
 
-### Create centered Country Labels
+**Create centered Country Labels**
 ```{r echo=TRUE}
 centroids.df <- as.data.frame(coordinates(asia.core)) # returns centered points
 centroids.df$sovereignt <- asia.core$sovereignt # add country names
@@ -251,9 +255,9 @@ head(centroids.df, 1)
 ```
 
 
-## 2.5 Relief Raster
+## Relief Raster
 
-### Get the Relief Raster File
+**Get the Relief Raster File**
 ```{r echo=TRUE, cache=TRUE}
 # Either:
 # physics <- rnaturalearth::ne_download(scale = 50, category = 'raster',
@@ -267,7 +271,7 @@ plot(relief.world)
 ```
 
 
-### (If needed: reduce Raster Resolution)
+**(If needed: reduce Raster Resolution)**
 ```{r include=TRUE, echo=TRUE, cache=TRUE}
 # reduce resolution by 50% (I didn't do it since we want high-res for print)
 # s2 <- aggregate(s, fact = 2)
@@ -275,7 +279,7 @@ plot(relief.world)
 ```
 
 
-### Crop the Raster File
+**Crop the Raster File**
 ```{r, cache=TRUE}
 # deprecated:
 # manually select the box for the region with mouse pointer -> quick but bad!!!
@@ -294,7 +298,7 @@ plot(relief.boxcrop)
 ```
 
 
-### Raster for the Core Regions
+**Raster for the Core Regions**
 ```{r, cache=TRUE}
 # Mask everything apart from the core regions terrain
 # relief.land <- raster::mask(relief.boxcrop, asia.core) # mask {E} != asia.core
@@ -304,7 +308,7 @@ plot(relief.land)
 ```
 
 
-### Convert Core Raster to SPDF to DF
+**Convert Core Raster to SPDF to DF**
 ```{r}
 # Raster to SPDF
 relief.land_spdf <- as(relief.land, "SpatialPixelsDataFrame")
@@ -315,7 +319,7 @@ head(relief.land_df, 1)
 ```
 
 
-### Raster for the Rest (Water & Terrain)
+**Raster for the Rest (Water & Terrain)**
 ```{r, cache=TRUE}
 # relief.meer <- raster::mask(relief.boxcrop, asia.core, inverse=TRUE) # maskiert alles == asia.core
 # save(relief.meer, file = "GIS_NPO_Data/relief_meer.rda")
@@ -324,7 +328,7 @@ plot(relief.meer)
 ```
 
 
-### Convert 2nd Raster to DF
+**Convert 2nd Raster to DF**
 ```{r}
 relief.meer_spdf <- as(relief.meer, "SpatialPixelsDataFrame")
 relief.meer_df <- as.data.frame(relief.meer_spdf) %>% 
@@ -333,7 +337,7 @@ head(relief.meer_df, 1)
 ```
 
 
-# 3. Results
+# Results
 ## Preview with Default Colors
 ```{r message=FALSE}
 ggplot() +
@@ -396,7 +400,7 @@ plot(map)
 
 
 ## Map with full raster (core and rest)
-(~3 min rendering time with Intel i7 7500 / 16 GB / SSD)
+>Caution: ~3 min rendering time with Intel i7 7500 / 16 GB / SSD
 
 ```{r message=FALSE, cache=TRUE}
 map <- ggplot() +
@@ -441,7 +445,7 @@ Basically, I just scaled the SVG to 300 dpi, changed the fonts and slightly read
 That's it. We're done here.
 (PS: We're not, since someone has to blog about it and maybe even hold it as a lighting talk at a cool workshop)
 
-# 4. Lessons Learned
+# Lessons Learned
 
 * ([Map Projections, anyone?](https://xkcd.com/977/))
 
@@ -483,7 +487,7 @@ That's it. We're done here.
 ![*"Fun with ~~flags~~ **maps**"*](/img/sheldon_maps.jpg "Fun with ~~flags~~ **maps**"){width=100%}
 
 
-# 5. (Some) Sources
+# (Some) Sources
 These links are some of the key sources, which helped me to get started with mapping in R:
 
 * [Ilya Kashnitsky's Blog](https://ikashnitsky.github.io/), whose posts were the reason I started to map with R on my own

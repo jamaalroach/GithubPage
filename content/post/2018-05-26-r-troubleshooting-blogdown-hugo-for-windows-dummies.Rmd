@@ -1,0 +1,191 @@
+---
+title: '[R] Troubleshooting Blogdown & Hugo for (Windows) Dummies'
+author: Ilja @fubits
+date: '2018-05-26'
+slug: r-troubleshooting-blogdown-hugo-for-windows-dummies
+categories:
+  - Rstats
+  - Publishing
+tags:
+  - Blogdown
+  - Windows
+  - Hugo
+  - Linux
+lastmod: '2018-05-26T11:13:55+02:00'
+output:
+  blogdown::html_page:
+      number_sections: true
+      toc: TRUE
+keywords: []
+description: ''
+comment: no
+autoCollapseToc: no
+postMetaInFooter: no
+hiddenFromHomePage: no
+contentCopyright: no
+reward: no
+mathjax: no
+mathjaxEnableSingleDollar: no
+mathjaxEnableAutoNumber: no
+hideHeaderAndFooter: no
+flowchartDiagrams:
+  enable: no
+  options: ''
+sequenceDiagrams:
+  enable: no
+  options: ''
+---
+
+>**TL;DR version: I had to figure out how to debug() Hugo / my Blogdown page on Windows 10 and came up with 3 methods. Jump [there](#how-to-debug-hugo-esp.-on-windows) if you know that this is what you're looking for:\
+> \>\>\> [How to debug Hugo (esp. on Windows)](#how-to-debug-hugo-esp.-on-windows)**
+
+>**Besides, I've documented [some common _not-Windows-specific_ errors / troubles with Blogdown / Hugo](#some-other-commons-errors-troubles-with-blogdownhugo) which are hard to Google somehow, but far more easier to solve:\
+> \>\>\> [Dealing with *config.toml*, *seImpl()* & *tomlparseImpl()* errors](#some-other-commons-errors-troubles-with-blogdownhugo)**
+
+# When blogdown::serve_site() stops working
+
+>(This was written [especially] for an audience as Windows-noobish (and therefore GUI-driven and CLI-hostile) as myself. The post became rather exhaustive because it seems that running Blogdown (and a lot of other packages) on Windows is rather less documented, and figuring out how to get CLI-based Hugo running again helped me a lot to get more familiar with Windows as an evironment for heavily Linux/UNIX driven tools. So I hope that me documenting my problem-solving approach might help others to figure out their way out of similar scenarios.)
+
+Recently – totally motivated by the [#TidyTuesday](https://twitter.com/hashtag/TidyTuesday)-spirit from the magnificent [#Rstats](https://twitter.com/hashtag/rstats?src=hash) / [#R4DS](https://twitter.com/hashtag/R4DS?src=hash) community, I finally forced myself to set up [Blogdown](https://bookdown.org/yihui/blogdown/) with [Hugo](https://gohugo.io/) & [GitHub Pages](https://pages.github.com/).
+
+Following Blogdown (and [Bookdown(!)](https://bookdown.org/)) creator [Yihui  Xie](https://twitter.com/xieyihui)'s [book-ish manual](https://bookdown.org/yihui/blogdown/), it took me less than an hour to see an older `.Rmd` notebook of mine being rendered as a `.html` on MY first-ever [personal website](https://ellocke.github.io/). In case you've not been "Blogdowning" your stuff yet, you should know that running Blogdown from within RStudio gives you the convenient `blogdown::serve_site()` function, which immediately previews any saved edits to your posts (whether `.Rmd` or plain `.md`) in RStudio's viewer pane – before you have to publish them online.
+
+**Amazing**, right?
+
+![(*This is what writing this post looks in my RStudio. Notice the preview pane on the bottom right.*)](/img/hugo_troubles/rstudio_blogdown_preview.jpg "Preview in RStudio"){width=100%}
+
+**A Word of Caution**
+Notice how Yihui et al. actually have included a predictive word of **caution** – full of wisdom, q.e.d.:
+
+ >*"If you do not understand HTML, CSS, or JavaScript, and have no experience with Hugo themes or templates, it may take you about **10 minutes to get started** with your new website, since you have to accept everything you are given (such as the default theme); if you do have the knowledge and experience (and desire to highly customize your site), it may take you **several days** to get started. Hugo is really powerful. Be cautious with power."* ([Xie et al. 2018, Ch. 1.6, *emphasis added*](https://bookdown.org/yihui/blogdown/other-themes.html)\)
+
+Consequently, after going straight^[And implementing a customized theme, setting up my own Netlify-less R/Git-only workflow +++, and everything in parallel without controlled double-checking FML] after (re-)publishing my first ever written *500-lines-of-code-with-binaries*-[tutorial](https://ellocke.github.io/post/r-low-budget-high-res-mapping-with-r-for-not-for-profit-print/), the preview function suddenly stopped working and **I couldn't figure out why**. After numerous brute-force-ish re-set-ups of Blogdown and/or my git page repo[s]^[I ended up with 127 commits...] I was finally able to pin-point the problem and get the crucial `hugo -v` debugging command running. From here on, it was a piece of cake. *But*... 
+
+Since there seemed to be only a few hints at my exact problem – which is rather a stack of interdependent problems (and which I'm gonna describe in a minute) and no tailored working solution, I decide to write down what I've encountered and what eventually did the job for me. Depending on how many more "problems" I might encounter in my future blogdown-blogging "career" I will update this post from time to time.
+
+# My ~~Problem Space~~ Working Enivironment
+*(Spoiler: It's Windows, Stupid!)*
+
+OK, so let's briefly have a look at my environment in which I set up Blogdown & Hugo & GitHub Pages. This actually should be true for any **basic** R @ Windows 10 user.
+ 
+ + **OS**: Windows 10 (with [Linux / Ubuntu subsystem installed](https://docs.microsoft.com/en-us/windows/wsl/install-win10)^[Fun fact: It seems that when you have the Linux subsystem activated, you can use `cd C:\Users\` (Windows' `\`) and `cd C:/Users/`  (Linux' `/`) interchangeably in CMD and Explorer ]) (<-- highly recommended!)
+ + **blogdown**: The RProject for my blogdown website (=source) is located in my local GitHub folder since it has been initialized as a repo `<GitHubPage_Raw>`.^[The reasons are, of course, version control, and the fact that I often work from two different laptops. Therefore, my git repo also serves as some kind of a cloud drive.] However, I'm working with two folders = two repos.
+    + **config.toml**:  I've decided to re-locate the page's `\public` folder to my `<myRepo.github.io>` repo^[This is done setting `publishDir = "..\myRepo.github.io\"` in the site's `config.toml`.\ICYMI: With Hugo, everything that gets rendered or is going to be necessary part of your website (i.e. images, data files) is being outputted/copied to `\public` by default. This is your website's root folder and therefore the only thing you need to put it online.] and therefore to separate the page's (raw) source from the rendered output.
+    + **Hugo**: installed with `blogdown::install_hugo()`
+ + **GitHub Page**: That's for a different topic, actually, but since I've separated my blogdown page source from the `/public` folder, it's somehow relevant to my problem. To sum up, my raw page source and thereby editing environment is located in `%HOMEPATH%\Documents\GitHub\<GitHubPage_Raw>\`^[FYI this translates to `C:\Users\Locke\Documents\GitHub\<GitHubPage_Raw>\`] and the rendered website is located in `%HOMEPATH%\Documents\GitHub\<myRepo.github.io>\`.
+
+**And suddently there was no Preview**
+At some point, `blogdown::serve_site()` stopped previewing my edits and calling this command gave to error message. At the same time, the .Rmd files would still render / output properly. I was able to `git push` them to my `<myRepo.github.io>` and see the `html` posts on [https://ellocke.github.io/](https://ellocke.github.io/). I wrongly supposed that this had been caused by my messing around with the theme's CSS or the `config.toml` file, but even with the default theme and/or `config.toml` the preview in RStudio would not launch.
+
+# How to Debug Hugo (esp. on Windows)
+As suggested in almost any resource on Blogdown & Hugo issues ([cf. here](https://github.com/gcushen/hugo-academic/issues/517)\), running `hugo -v` should be your first step. 
+
+Of course, on Windows that's neither working from CMD nor from RStudio's terminal by default, since both do not know what the `hugo` command is supposed to be or where to find the binary. What's next?
+
+## Where is ~~Carmen Sandiego~~ Hugo?
+
+Eventually, I came up with 3 approaches and would recommend the third one. If you'll continue blogging with Blogdown/Hugo on a regular basis, this seems to be the most convenient result (!= effort).
+
+** Hugo & Windows / Windows 10**
+
+On Windows 10, by using the default approach with `blogdown::install_hugo()` in R/RStudio, the `hugo.exe` will be saved to:
+
+>`C:\Users\<YourAccount>\AppData\Roaming\Hugo\hugo.exe`
+
+In order to *grab* it you can either click-through your way to the (by default **hidden**) AppData folder in Explorer, OR `cd <folder>` there via CMD **OR** (which is far more elegant) simply use
+
+>`%APPDATA%\Hugo`
+
+in CMD or Explorer's address field.
+
+So we found it. However, calling the debugger here won't work since `hugo.exe` actually needs your site's `config.toml`:
+
+![](/img/hugo_troubles/hugo_config.jpg "CMD: no config.toml"){width=100%}
+
+In order to run Hugo's debugger on your site you need to execute `hugo -v` in your site's source root folder (that's where the `config.toml` file is located). In my case it's in `C:\Users\Locke\Documents\GitHub\GithubPage` which can be generalized to
+
+>`%HOMEPATH%\Documents\GitHub\GitHubPage\`
+
+This is the folder where we somehow need to execute `hugo -v`.
+
+##The 3 Methods to run hugo -v
+
++ [**Quick & Dirty**: just the CMD](#quick-dirty)
++ [**Stable**: PATH-variable + CMD](#stable)
++ [**Sophisticated**: RStudio's terminal + Linux](#sophisticated-with-windows.linux)
+
+
+**Quick & Dirty**
+
+Launch Windows CMD, go to your (raw!) page's source with
+
+> `cd %HOMEPATH%\Documents\GitHub\GitHubPage\`
+
+and then execute `hugo -v` by calling it from afar:
+
+>`%APPDATA%\Hugo\hugo.exe -v` OR `%APPDATA%\Hugo\hugo -v`
+
+You will finally see some feedback and should be searching for any lines starting with `ERROR`:
+
+![Notice the last line and then lines 4-8: There are some (data file) binaries, which Hugo can't render](/img/hugo_troubles/hugo_error_quick.jpg "Preview in RStudio"){width=100%}
+
+**#Fix 'em**
+In my case, it was the data files for my .Rmd notebooks (`.csv` data, `.tif` basemap, and processed R data objects exported as `.rda`. So what I needed to do here was to add these data types to the `ignoreFiles = []` parameter in `config.toml`. This parameter now looks like this:
+
+>`ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$", "\\.csv$", "\\.rda$", "\\.tif$"]`
+
+Mission achieved! **Well, partly...**. You fixed what you needed to, but are you going to be able to easily redo this the next time you run into Hugo problems? Let's say when you write your next in post in like a couple of months or so? I probably wouldn't. Remember: `hugo -v` is your first option and you need to run it in your page's source folder. Therefore, we might want to register Hugo (or rather `hugo.exe`) with Windows as a USER variable and make launching Hugo a stable method.
+
+** Stable**
+
+Follow [this steps from Hugo's offical documentation](https://gohugo.io/getting-started/installing/#for-windows-10-users) and simply add `%APPDATA\Hugo` (or an absolute path, if you managed to put hugo.exe somewhere else) to the user `path` variable. Reboot Windows.
+
+Now you just need to launch a **CMD** or PowerShell (i.e. by Shift + right-click in Explorer) in your page's source folder or launch the CMD/PowerShell from anywhere else and `cd <folder>` your way to the source. Now just run `hugo -v` without any references:
+
+![](/img/hugo_troubles/hugo_error_stable.jpg "plain hugo -v in action"){width=100%}
+
+**Alternativly**, you can even use RStudio's Terminal for both methods, if CMD/PowerShell is set up as your default Shell. You can do this by `Menu->Tools->Global Options->Terminal->Shell`:
+
+![](/img/hugo_troubles/rstudio_terminal.jpg){width=100%}
+
+Either call `hugo -v` from afar, or set the path variable and run it without reference.
+
+Voila! We did some nice stuff for your average Windows user. **However**, there's one even more elegant and streamlined way which I totally would suggest to set up and use for your standard workflow.
+
+** Sophisticated with "Windows.Linux"**
+
+As [documented here](https://docs.microsoft.com/en-us/windows/wsl/install-win10), with recent Windows 10 builds you can now implant a Linux subsystem (i.e. Ubuntu) into your Windows environment. So if you decided so install Linux for your Windows system, make sure, that `bash` is your default shell (see above) and launch a Terminal in RStudio (`Menu->Tools->Terminal->New Terminal` or `Alt+Shift+T`). 
+
+Install hugo into your Linux environment:
+
+>`apt-get install hugo`
+
+When this is done, run `hugo -v` in the Terminal anytime without ever leaving RStudio.^[The output somehow is a bit more messy than the windows Windows CMD method but these template errors don't seem to have any impact on the preview-function or Hugo's rendering output.] We don't need to navigate nowhere (if you're running the command from you site's source's project in R). We don't need to set a user path variable. **We're done.**
+
+# Some other commons Errors / Troubles with Blogdown/Hugo
+When running `blogdown:::serve_site()` or trying to render your website by other means you might encounter one of the following warning messages:
+
+>'---did you forget a '#'? at line 1>**seImpl**(path.expand(input), verbose, fromFile):\
+>Unidentified trailing character'\
+>\* Retrying in *X* seconds...
+
+OR
+
+>Error in **tomlparseImpl**(path.expand(input), verbose, fromFile) :\
+>Unidentified trailing character 'l'---did you forget a '#'? at line **XY**
+  
+It's probably because you made (**legit**) changes to your `config.toml` while the preview was still running or you made a syntactical **mistake** while/before the preview was running. In both cases the preview fails to render.
+
+##seImpl()
+
+For `seImpl` (appears to mostly concern legit changes to config.toml) it seems that simply restarting the R session helps. Just run the following command in the console, and everything should be fine:
+```{r eval=FALSE}
+.rs.restartR() # keep the leading "."
+blogdown::serve_site()
+```
+##tomlparseImpl()
+For `tomlparseImpl` (syntactical error in config.toml) you usually get a pointer `at line **XY**`. Double-check what you did there, undo it when in doubt, and then restart your session and try previewing again.
+
+So far, that's the three most common troubles / errors I ran into while working with Blogdown & Hugo. As soon as I have figured out a **pain**-free way to run my GitHub Page from a sub-folder of the repo (i.e. `repo/html/index.html` or `repo/src/index.html` or `repo/docs/index.html` (which weirdly does not work if you use `https://youraccount.github.io` as your page) I'll probably run into new problems (I actually did, already, by trying), I'll document them here or link to a new post.)
+
+Cheers!
