@@ -21,6 +21,9 @@
     {{ T "theme" }} - 
     <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
   </span>
+  <span class="theme-info">
+	| <a href="https://github.com/ellocke/GithubPage" target="_blank">Site's Repo</a>
+  </span>
 
   {{ if .Site.Params.busuanzi.enable -}}
   <div class="busuanzi-footer">
@@ -48,5 +51,6 @@
       <i class="iconfont icon-heart"></i>
     </span>
     <span class="author">{{if .Site.Copyright }}{{ .Site.Copyright | safeHTML }}{{ else }}{{ .Site.Author.name | safeHTML }}{{ end }}</span>
+	<span>| <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span>
   </span>
 </div>
