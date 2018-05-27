@@ -15,16 +15,16 @@ I'm a Combat Veteran^[Army / Mechanized Infantry] turned Accidental Academic / S
 
 ## This Site
 
-Mostly, I'll be writing about solutions to problems you didn't know you had or won't ever have since you're not using Windows 10. My current **focus** is on creating stuff with R (SNA, DataViz, Maps, Publishing/Writing/Blogging). However, Python + Machine Learning / Deep Learning is around the corner, so feel free to come by later.
+Mostly, I'll be writing about solutions to problems you didn't know you had or won't ever have since you're not using Windows 10. My current **focus** is on creating stuff with R (SNA, DataViz, Maps, Publishing/Writing/Blogging). However, Python + Machine Learning / Deep Learning is around the corner, so feel free to check back later.
 
 After all, it's [#SummerOfMachineLearning](https://twitter.com/fubits/status/981532034106576901):
 
 {{< tweet 981532034106576901 >}}
 
 ## Projects
-My biggest **project** so far was being a `Digital Officer` (project-based, 1 year) for a large German think tank's shot at digital publishing, digitally supported research, and digitalized science communication. I also wrote a bit on the [methodology](https://projekt.swp-berlin.org/urbaneraeume/kapitel/zur-methode/#aufbau-konzept-und-tools-der-webseite) re: `digital tools` & the makings of the project's `website`. You can find out more [here](https://medium.com/@Fubits/urbane-r%C3%A4ume-proteste-weltpolitik-21f05d512cc4) (in German) or have your own look at the visuals [here](https://projekt.swp-berlin.org/urbaneraeume/kapitel/blacklivesmatter/#chronologie-blacklivesmatter).
+My largest **project** so far was being a `Digital Officer` (project-based, 1 year) for a large German think tank's shot at digital publishing, digitally supported research, and digitalized science communication. I also wrote a bit on the [methodology](https://projekt.swp-berlin.org/urbaneraeume/kapitel/zur-methode/#aufbau-konzept-und-tools-der-webseite) re: `digital tools` & the makings of the project's `website`. You can find out more [here](https://medium.com/@Fubits/urbane-r%C3%A4ume-proteste-weltpolitik-21f05d512cc4) (in German) or have your own look at the visuals [here](https://projekt.swp-berlin.org/urbaneraeume/kapitel/blacklivesmatter/#chronologie-blacklivesmatter).
 
-![(**One visual element from the "Urban Spaces" project @ SWP Berlin)**](/img/about/urban_spaces_cover.jpeg "One visual element from the 'Urban Spaces' project @ SWP Berlin")
+<a href="(https://projekt.swp-berlin.org/urbaneraeume/">![(**One visual element from the "Urban Spaces" project @ SWP Berlin)**](/img/about/urban_spaces_cover.jpeg "One visual element from the 'Urban Spaces' project @ SWP Berlin")</a>
 
 
 ## Contact
@@ -35,5 +35,3 @@ You'll find me on:
   + https://keybase.io/fubits
 
 Feel free to drop a line any time.
-
-

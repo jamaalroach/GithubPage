@@ -36,11 +36,11 @@ sequenceDiagrams:
   options: ''
 ---
 
-![*(Spoiler: final version of the map)*](/img/map_final_v20_96dpi.png "#MyFirstMap"){width=100%}
+![*(Spoiler: final version of the map)*](/img/mapping_talk/map_final_v20_96dpi.png "#MyFirstMap"){width=100%}
 
-*Presented as a Lightning Talk at [CODE/GEO/GRAPHIC, Berlin, 19 April 2018](http://code-geo-graphic.com/)*
+>*Presented as a Lightning Talk at [CODE/GEO/GRAPHIC, Berlin, 19 April 2018](http://code-geo-graphic.com/)*
 
-(This is my first ever "how-to", so please be so kind and point me to any errors and feel free to help me improve my code and approach!)
+>*(This is my first ever "how-to", so please be so kind and point me to any errors and feel free to help me improve my code and approach!)*
 
 # Setting
 Once upon a time (and long before I learned about the [tidyverse](https://twitter.com/hashtag/Tidyverse?src=hash) and %>%), a colleague from a not-for-profit org asked for help with a map for a book. The conversation may or may not have sounded like that:
@@ -62,7 +62,7 @@ Once upon a time (and long before I learned about the [tidyverse](https://twitte
 
 How hard could that be, right?
 
-![(c) Monkey User](/img/monkeyuser_everytime.png "#Everytime"){width=100%}
+![(c) Monkey User](/img/mapping_talk/monkeyuser_everytime.png "#Everytime"){width=100%}
 
 
 ## Packages
@@ -198,6 +198,7 @@ plot(asia.core)
 
 
 **Consolidate the Rest**
+
 *(Preview)*
 ```{r}
 asia.rest <- world[world$region_un == "Asia" &
@@ -400,6 +401,7 @@ plot(map)
 
 
 ## Map with full raster (core and rest)
+
 >Caution: ~3 min rendering time with Intel i7 7500 / 16 GB / SSD
 
 ```{r message=FALSE, cache=TRUE}
@@ -438,7 +440,7 @@ Not perfect, but sufficient for post-processing the output SVG with a vector pro
 Since the map was going to be printed in BW, I decided to provide at least some relieve with regards to the overloaded color scheme. Remember: While ColorBrewer recommends a max of 3 color levels for BW, this map has 4 shades of grey for the 4 core regions, 1 color for water (and borders), and another grey shade for countries which are not part of the core region. Add black for the labels and we end up with 7 colors. So leaving water areas and the rest of the world without relief, while highlighting the core regions by underlying them with a relief kind of works here. Don't @ me :)
 
 ## Final processing of output SVG in Affinity Photo / Designer
-![*"Processing the SVG in Affinity"*](/img/map_affinity.jpg "Processing the SVG"){width=100%}
+![*"Processing the SVG in Affinity"*](/img/mapping_talk/map_affinity.jpg "Processing the SVG"){width=100%}
 
 
 Basically, I just scaled the SVG to 300 dpi, changed the fonts and slightly readjusted the alpha levels of the regions.
@@ -484,7 +486,7 @@ That's it. We're done here.
 
 **Thanks for reading!**
 
-![*"Fun with ~~flags~~ **maps**"*](/img/sheldon_maps.jpg "Fun with ~~flags~~ **maps**"){width=100%}
+![*"Fun with ~~flags~~ **maps**"*](/img/mapping_talk/sheldon_maps.jpg "Fun with ~~flags~~ **maps**"){width=100%}
 
 
 # (Some) Sources

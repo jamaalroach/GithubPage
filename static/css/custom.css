@@ -27,8 +27,18 @@
 	font-size: 26px;
 }
 
+/* inline-code for markdown */
+
+.post .post-content code {
+padding: 3px 5px;
+border-radius: 4px;
+color: #000000;
+font-size: 0.85em;
+}
+
 #TOC{
 border-bottom: 1px dashed gray;
+margin-bottom: 1em;
 }
 
 .header .logo-wrapper{
@@ -66,13 +76,13 @@ border-bottom: 1px dashed gray;
 
 .icon-instagram:before{content:"\E08c";position:relative;top:-3px}
 
-
-
-h4{
-	font-size: 18px;
-	font-weight: bolder;
+/* Blockquote */
+.post .post-content blockquote{
+	margin-left: 2em;
+	margin-right: 2em;
 }
 
+/* Headings*/
 .post .post-content h1,.post .post-content h2,.post .post-content h3,.post .post-content h4,.post .post-content h5{
 	font-family: 'Lato', sans-serif!important;
   	font-weight:400;
