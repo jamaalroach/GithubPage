@@ -12,12 +12,11 @@
 
 .rs.restartR()
 
-# Preview
-blogdown::serve_site()
-
 # Stop Server & restart R-Session if needed
 blogdown::stop_server()
 
+# Preview
+blogdown::serve_site()
+
 # PUBSLISH (better than blogdown::build_site())
 blogdown::hugo_build()
-

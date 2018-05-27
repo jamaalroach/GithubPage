@@ -8,6 +8,29 @@
        url('../fonts/lato-v11-latin-regular.woff') format('woff');
 }
 
+/* Numbering suffix in Body/Content */
+.header-section-number:after{
+	content: ". "
+}
+
+/* Numbering suffix in TOC */
+.toc-section-number:after{
+	content: ". "
+}
+
+/* Heading / Title before the TOC */
+
+#TOC:before{
+	content: "Contents";
+	font-family: 'Lato', sans-serif!important;
+  	font-weight:400;
+	font-size: 26px;
+}
+
+#TOC{
+border-bottom: 1px dashed gray;
+}
+
 .header .logo-wrapper{
   float:left;
   display:inline-block;

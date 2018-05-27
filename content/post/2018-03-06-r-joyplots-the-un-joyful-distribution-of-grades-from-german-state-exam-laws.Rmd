@@ -12,7 +12,7 @@ tags:
   - ggplot
 lastmod: '2018-05-20T16:52:11+02:00'
 keywords: []
-description: ''
+description: 'German Zweites Juristisches Staatsexamen (2nd State Exam in Laws) is said to be tough. Let’s have a look at how hard it really is by visualising the distribution of grades from the Berlin 2017/IV campaign.'
 comment: no
 toc: no
 autoCollapseToc: no

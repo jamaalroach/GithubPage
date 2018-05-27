@@ -1,0 +1,194 @@
+---
+title: '[R] Some Tricks for Blogdown & Hugo (Working Draft)'
+author: Ilja / fubits
+date: '2018-05-27'
+slug: r-some-tricks-when-working-with-blogdown-hugo-working-draft
+categories:
+  - Publishing
+  - Rstats
+  - WebTech
+tags:
+  - Hugo
+  - Blogdown
+  - CSS
+output:
+  blogdown::html_page:
+      number_sections: true
+      toc: TRUE
+lastmod: '2018-05-27T15:07:29+02:00'
+keywords: []
+description: 'This summary was written and included by hand :) A continuous collection of tricks & hacks for Blogdown & Hugo. Learn how to add your own TOC and Numbering suffixes and so on.'
+comment: no
+autoCollapseToc: no
+postMetaInFooter: no
+hiddenFromHomePage: no
+contentCopyright: no
+reward: no
+mathjax: no
+mathjaxEnableSingleDollar: no
+mathjaxEnableAutoNumber: no
+hideHeaderAndFooter: no
+flowchartDiagrams:
+  enable: no
+  options: ''
+sequenceDiagrams:
+  enable: no
+  options: ''
+---
+
+
+<div id="TOC">
+<ul>
+<li><a href="#fix-your-table-of-contents-toc-with-.rmd"><span class="toc-section-number">1</span> Fix your Table of Contents / TOC (with .Rmd)</a><ul>
+<li><a href="#numbering"><span class="toc-section-number">1.1</span> Numbering</a></li>
+<li><a href="#custom-toc-numbering-css"><span class="toc-section-number">1.2</span> Custom TOC &amp; Numbering CSS</a></li>
+<li><a href="#toc-heading-i.e.-outline"><span class="toc-section-number">1.3</span> TOC-Heading (i.e. “Outline”)</a></li>
+<li><a href="#toc-summary"><span class="toc-section-number">1.4</span> TOC &amp; Summary</a></li>
+</ul></li>
+<li><a href="#summary-.summary"><span class="toc-section-number">2</span> Summary / {{ .Summary}}</a></li>
+<li><a href="#shortcuts-shortcodes"><span class="toc-section-number">3</span> Shortcuts / Shortcodes</a><ul>
+<li><a href="#images-img"><span class="toc-section-number">3.1</span> Images / img</a></li>
+<li><a href="#links"><span class="toc-section-number">3.2</span> Links</a></li>
+<li><a href="#blockquote"><span class="toc-section-number">3.3</span> Blockquote</a></li>
+</ul></li>
+<li><a href="#todo"><span class="toc-section-number">4</span> TODO</a></li>
+<li><a href="#done"><span class="toc-section-number">5</span> Done</a></li>
+</ul>
+</div>
+
+<div id="fix-your-table-of-contents-toc-with-.rmd" class="section level1">
+<h1><span class="header-section-number">1</span> Fix your Table of Contents / TOC (with .Rmd)</h1>
+<p>If for your theme the TOC is not working as expected or you simply want back the familiar Knitr-style TOC</p>
+<ul>
+<li>set <code>toc = false</code> in <code>config.toml</code></li>
+<li>remove <code>toc: &lt;boolean&gt;</code> from the <code>yaml</code> header of your post</li>
+<li>and insert</li>
+</ul>
+<pre><code>output:
+  blogdown::html_page:
+      toc: TRUE</code></pre>
+<p>Mind the tabs!</p>
+<div id="numbering" class="section level2">
+<h2><span class="header-section-number">1.1</span> Numbering</h2>
+<p>If you want numbering (in your TOC and for your headings/chapters), add <code>number_sections: true</code> to <code>yaml</code></p>
+<pre><code>output:
+  blogdown::html_page:`
+      number_sections: true
+      toc: TRUE</code></pre>
+</div>
+<div id="custom-toc-numbering-css" class="section level2">
+<h2><span class="header-section-number">1.2</span> Custom TOC &amp; Numbering CSS</h2>
+<p>If numbering is not pre-defined in your theme, you might need to add a <code>custom.css</code> as a <strong>Parameter</strong> to <code>config.toml</code> and then do some formatting in <code>CSS</code>:</p>
+<ul>
+<li><p><code>config.toml</code></p>
+<pre><code>[params]
+  customCSS = [&quot;custom.css&quot;]</code></pre>
+<blockquote>
+<p>Notice that your <code>custom.css</code> has to be saved in <code>\static\css\</code></p>
+</blockquote></li>
+<li><p>Now add the following definitions to your <code>custom.css</code></p>
+<pre><code>/* Numbering suffix in TOC */
+.toc-section-number:after{
+    content: &quot;. &quot;
+}
+
+/* Numbering suffix in Body/Content */
+.header-section-number:after{
+    content: &quot;. &quot;
+}</code></pre></li>
+</ul>
+<p>I’m not sure whether the <code>CSS-selectors</code> are the same for all templates but you can figure them out easily by running some Page Inspector/Web Development Tools in your browser (just right-click an object and search for a similar function). You can even do this from RStudio’s preview pane btw!</p>
+<div class="figure">
+<img src="/img/hugo_pool/page_inspector.jpg" alt="(Preview of a page inspector function could look like and where to find the selectors)" style="width:100.0%" />
+<p class="caption">(<em>Preview of a page inspector function could look like and where to find the selectors</em>)</p>
+</div>
+</div>
+<div id="toc-heading-i.e.-outline" class="section level2">
+<h2><span class="header-section-number">1.3</span> TOC-Heading (i.e. “Outline”)</h2>
+<p>And last but not least, your TOC currently has no Heading/Title, so if you want one include this in your</p>
+<ul>
+<li><p><code>custom.css</code>:</p>
+<pre><code>/* Add some Heading / Title before the TOC */
+#TOC:before{
+    content: &quot;Outline&quot;;
+    font-family: &#39;Lato&#39;, sans-serif!important;
+    font-weight:400;
+    font-size: 26px;
+}</code></pre></li>
+</ul>
+</div>
+<div id="toc-summary" class="section level2">
+<h2><span class="header-section-number">1.4</span> TOC &amp; Summary</h2>
+<p>If you’re using a theme which displays a summary on your site’s index.html, you’ll notice that the contents of TOC will now be included in your summary. See here how to fix your theme’s summary:</p>
+</div>
+</div>
+<div id="summary-.summary" class="section level1">
+<h1><span class="header-section-number">2</span> Summary / {{ .Summary}}</h1>
+<p>By default, Hugo</p>
+<ul>
+<li>a.) simply parses the first 70 characters of a post (stripped of any html). Or</li>
+<li>b.) looks for a <code>&lt;!--more--&gt;</code> line in your post’s content. Hugo then simply parses all the content until it reaches<code>&lt;!--more--&gt;</code>.</li>
+</ul>
+<p>In order to fix this / automate your own summary, IMHO the easiest workaround seems to be to change the variable <code>.Summary</code> to <code>.Description</code> in your theme’s <code>summary.html</code> template (you’ll find it here: <code>&lt;PageSource&gt;\themes\&lt;your-theme&gt;\layouts\post\summary.html</code>) and use <code>description = 'text'</code> in your post’s <code>YAML</code> header instead.</p>
+<ul>
+<li><p>edit <code>summary.html</code> and find the following passage:</p>
+<pre><code>&lt;!-- Content --&gt;
+&lt;div class=&quot;post-content&quot;&gt;
+  &lt;div class=&quot;post-summary&quot;&gt;
+    {{ .Summary }}
+  &lt;/div&gt;
+  &lt;div class=&quot;read-more&quot;&gt;
+    &lt;a href=&quot;{{ .URL }}&quot; class=&quot;read-more-link&quot;&gt;{{ T &quot;readMore&quot; }}&lt;/a&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre></li>
+<li><p>replace <code>{{ .Summary }}</code> with <code>{{ .Description }}</code></p></li>
+</ul>
+<p>Now in your <strong>post’s</strong></p>
+<ul>
+<li><p><code>yaml</code>-header write insert your own “summary” with the <code>description: ''</code> parameter:</p>
+<p><code>description: &quot;This post is about something something.&quot;</code></p></li>
+</ul>
+</div>
+<div id="shortcuts-shortcodes" class="section level1">
+<h1><span class="header-section-number">3</span> Shortcuts / Shortcodes</h1>
+<div id="images-img" class="section level2">
+<h2><span class="header-section-number">3.1</span> Images / img</h2>
+<blockquote>
+<p><code>![(*Text, italic in ()*)](/img/hugo_pool/page_inspector.jpg){width=100%}</code></p>
+</blockquote>
+</div>
+<div id="links" class="section level2">
+<h2><span class="header-section-number">3.2</span> Links</h2>
+<blockquote>
+<p><code>[Linked Text](https://ellocke.github.io/)</code></p>
+</blockquote>
+</div>
+<div id="blockquote" class="section level2">
+<h2><span class="header-section-number">3.3</span> Blockquote</h2>
+<blockquote>
+<p>This is some blockquoted text. You can use it for <em>citing</em> or for highlighting paragraphs (such as an <strong>abstract</strong>)<br />
+<br />
+Use<br />
+<code>previos line.\</code><br />
+<code>\&gt;</code><br />
+for empty newlines<br />
+<br />
+<code>you can even blockquote CODE</code> by prefixing <code>``</code> with &gt;</p>
+</blockquote>
+</div>
+</div>
+<div id="todo" class="section level1">
+<h1><span class="header-section-number">4</span> TODO</h1>
+<ul>
+<li>Add Logo</li>
+</ul>
+</div>
+<div id="done" class="section level1">
+<h1><span class="header-section-number">5</span> Done</h1>
+<ul>
+<li>change Fonts and Formatting for H1-H6 (post: tba)</li>
+<li>exclude h4+ from TOC (post: tba)</li>
+<li>add “.” :after TOC-numbering for H1,H2 in custom.css</li>
+<li>add “Outline” :before TOC</li>
+</ul>
+</div>

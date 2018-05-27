@@ -2,22 +2,23 @@
 title: '[R] Troubleshooting Blogdown & Hugo for (Windows) Dummies'
 author: Ilja @fubits
 date: '2018-05-26'
-slug: r-troubleshooting-blogdown-hugo-for-windows-dummies
 categories:
-  - Rstats
   - Publishing
+  - Rstats
 tags:
   - Blogdown
-  - Windows
   - Hugo
   - Linux
+  - Windows
+slug: r-troubleshooting-blogdown-hugo-for-windows-dummies
 lastmod: '2018-05-26T11:13:55+02:00'
 output:
   blogdown::html_page:
-      number_sections: true
-      toc: TRUE
-keywords: []
-description: ''
+    number_sections: yes
+    toc: yes
+description: 'TL;DR: I had to figure out how to debug() Hugo / my Blogdown page on
+  Windows 10 and came up with 3 methods. Besides, I''ve documented some common not-Windows-specific
+  errors / troubles with Blogdown / Hugo'
 comment: no
 autoCollapseToc: no
 postMetaInFooter: no
@@ -43,22 +44,27 @@ sequenceDiagrams:
 <li><a href="#my-problem-space-working-enivironment"><span class="toc-section-number">2</span> My <del>Problem Space</del> Working Enivironment</a></li>
 <li><a href="#how-to-debug-hugo-esp.-on-windows"><span class="toc-section-number">3</span> How to Debug Hugo (esp. on Windows)</a><ul>
 <li><a href="#where-is-carmen-sandiego-hugo"><span class="toc-section-number">3.1</span> Where is <del>Carmen Sandiego</del> Hugo?</a></li>
-<li><a href="#the-3-methods-to-run-hugo--v"><span class="toc-section-number">3.2</span> The 3 Methods to run hugo -v</a></li>
+<li><a href="#the-3-methods-to-run-hugo--v"><span class="toc-section-number">3.2</span> The 3 Methods to run hugo -v</a><ul>
+<li><a href="#quick-dirty"><span class="toc-section-number">3.2.1</span> Quick &amp; Dirty</a></li>
+<li><a href="#stable"><span class="toc-section-number">3.2.2</span> Stable</a></li>
+<li><a href="#sophisticated-with-windows.linux"><span class="toc-section-number">3.2.3</span> Sophisticated with “Windows.Linux”&quot;</a></li>
 </ul></li>
-<li><a href="#some-other-commons-errors-troubles-with-blogdownhugo"><span class="toc-section-number">4</span> Some other commons Errors / Troubles with Blogdown/Hugo</a><ul>
+</ul></li>
+<li><a href="#some-other-common-errors-troubles-with-blogdownhugo"><span class="toc-section-number">4</span> Some other common Errors / Troubles with Blogdown/Hugo</a><ul>
 <li><a href="#seimpl"><span class="toc-section-number">4.1</span> seImpl()</a></li>
 <li><a href="#tomlparseimpl"><span class="toc-section-number">4.2</span> tomlparseImpl()</a></li>
+<li><a href="#render_pagef"><span class="toc-section-number">4.3</span> render_page(f)</a></li>
 </ul></li>
 </ul>
 </div>
 
 <blockquote>
-<p><strong>TL;DR version: I had to figure out how to debug() Hugo / my Blogdown page on Windows 10 and came up with 3 methods. Jump <a href="#how-to-debug-hugo-esp.-on-windows">there</a> if you know that this is what you’re looking for:<br />
+<p><strong>TL;DR: I had to figure out how to debug() Hugo / my Blogdown page on Windows 10 and came up with 3 methods. Jump <a href="#how-to-debug-hugo-esp.-on-windows">there</a> if you know that this is what you’re looking for:<br />
 &gt;&gt;&gt; <a href="#how-to-debug-hugo-esp.-on-windows">How to debug Hugo (esp. on Windows)</a></strong></p>
 </blockquote>
 <blockquote>
-<p><strong>Besides, I’ve documented <a href="#some-other-commons-errors-troubles-with-blogdownhugo">some common <em>not-Windows-specific</em> errors / troubles with Blogdown / Hugo</a> which are hard to Google somehow, but far more easier to solve:<br />
-&gt;&gt;&gt; <a href="#some-other-commons-errors-troubles-with-blogdownhugo">Dealing with <em>config.toml</em>, <em>seImpl()</em> &amp; <em>tomlparseImpl()</em> errors</a></strong></p>
+<p><strong>Besides, I’ve documented <a href="#some-other-common-errors-troubles-with-blogdownhugo">some common <em>not-Windows-specific</em> errors / troubles with Blogdown / Hugo</a> which are hard to Google somehow, but far more easier to solve:<br />
+&gt;&gt;&gt; <a href="#some-other-common-errors-troubles-with-blogdownhugo">Dealing with <em>config.toml</em>, <em>seImpl()</em> &amp; <em>tomlparseImpl()</em> errors</a></strong></p>
 </blockquote>
 <div id="when-blogdownserve_site-stops-working" class="section level1">
 <h1><span class="header-section-number">1</span> When blogdown::serve_site() stops working</h1>
@@ -84,15 +90,16 @@ sequenceDiagrams:
 <p><em>(Spoiler: It’s Windows, Stupid!)</em></p>
 <p>OK, so let’s briefly have a look at my environment in which I set up Blogdown &amp; Hugo &amp; GitHub Pages. This actually should be true for any <strong>basic</strong> R @ Windows 10 user.</p>
 <ul>
-<li><strong>OS</strong>: Windows 10 (with <a href="https://docs.microsoft.com/en-us/windows/wsl/install-win10">Linux / Ubuntu subsystem installed</a><a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a>) (&lt;– highly recommended!)</li>
+<li><p><strong>OS</strong>: Windows 10 (with <a href="https://docs.microsoft.com/en-us/windows/wsl/install-win10">Linux / Ubuntu subsystem installed</a><a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a>) (&lt;– highly recommended!)</p></li>
 <li><strong>blogdown</strong>: The RProject for my blogdown website (=source) is located in my local GitHub folder since it has been initialized as a repo <code>&lt;GitHubPage_Raw&gt;</code>.<a href="#fn4" class="footnoteRef" id="fnref4"><sup>4</sup></a> However, I’m working with two folders = two repos.
 <ul>
 <li><strong>config.toml</strong>: I’ve decided to re-locate the page’s <code>\public</code> folder to my <code>&lt;myRepo.github.io&gt;</code> repo<a href="#fn5" class="footnoteRef" id="fnref5"><sup>5</sup></a> and therefore to separate the page’s (raw) source from the rendered output.</li>
 <li><strong>Hugo</strong>: installed with <code>blogdown::install_hugo()</code></li>
 </ul></li>
-<li><strong>GitHub Page</strong>: That’s for a different topic, actually, but since I’ve separated my blogdown page source from the <code>/public</code> folder, it’s somehow relevant to my problem. To sum up, my raw page source and thereby editing environment is located in <code>%HOMEPATH%\Documents\GitHub\&lt;GitHubPage_Raw&gt;\</code><a href="#fn6" class="footnoteRef" id="fnref6"><sup>6</sup></a> and the rendered website is located in <code>%HOMEPATH%\Documents\GitHub\&lt;myRepo.github.io&gt;\</code>.</li>
+<li><p><strong>GitHub Page</strong>: That’s for a different topic, actually, but since I’ve separated my blogdown page source from the <code>/public</code> folder, it’s somehow relevant to my problem. To sum up, my raw page source and thereby editing environment is located in <code>%HOMEPATH%\Documents\GitHub\&lt;GitHubPage_Raw&gt;\</code><a href="#fn6" class="footnoteRef" id="fnref6"><sup>6</sup></a> and the rendered website is located in <code>%HOMEPATH%\Documents\GitHub\&lt;myRepo.github.io&gt;\</code>.</p></li>
 </ul>
-<p><strong>And suddently there was no Preview</strong> At some point, <code>blogdown::serve_site()</code> stopped previewing my edits and calling this command gave to error message. At the same time, the .Rmd files would still render / output properly. I was able to <code>git push</code> them to my <code>&lt;myRepo.github.io&gt;</code> and see the <code>html</code> posts on <a href="https://ellocke.github.io/" class="uri">https://ellocke.github.io/</a>. I wrongly supposed that this had been caused by my messing around with the theme’s CSS or the <code>config.toml</code> file, but even with the default theme and/or <code>config.toml</code> the preview in RStudio would not launch.</p>
+<p><strong>And suddently there was no Preview</strong></p>
+<p>At some point, <code>blogdown::serve_site()</code> stopped previewing my edits and executing this command gave no error message. At the same time, the .Rmd files would still render / output properly. I was able to <code>git push</code> them to my <code>&lt;myRepo.github.io&gt;</code> and see the <code>html</code> posts on <a href="https://ellocke.github.io/" class="uri">https://ellocke.github.io/</a>. I wrongly supposed that this had been caused by messing around with the theme’s CSS or the <code>config.toml</code> file, but even with the default theme and/or <code>config.toml</code> the preview in RStudio would not launch.</p>
 </div>
 <div id="how-to-debug-hugo-esp.-on-windows" class="section level1">
 <h1><span class="header-section-number">3</span> How to Debug Hugo (esp. on Windows)</h1>
@@ -101,7 +108,7 @@ sequenceDiagrams:
 <div id="where-is-carmen-sandiego-hugo" class="section level2">
 <h2><span class="header-section-number">3.1</span> Where is <del>Carmen Sandiego</del> Hugo?</h2>
 <p>Eventually, I came up with 3 approaches and would recommend the third one. If you’ll continue blogging with Blogdown/Hugo on a regular basis, this seems to be the most convenient result (!= effort).</p>
-<p>** Hugo &amp; Windows / Windows 10**</p>
+<p><strong>Hugo &amp; Windows / Windows 10</strong></p>
 <p>On Windows 10, by using the default approach with <code>blogdown::install_hugo()</code> in R/RStudio, the <code>hugo.exe</code> will be saved to:</p>
 <blockquote>
 <p><code>C:\Users\&lt;YourAccount&gt;\AppData\Roaming\Hugo\hugo.exe</code></p>
@@ -129,7 +136,8 @@ sequenceDiagrams:
 <li><a href="#stable"><strong>Stable</strong>: PATH-variable + CMD</a></li>
 <li><a href="#sophisticated-with-windows.linux"><strong>Sophisticated</strong>: RStudio’s terminal + Linux</a></li>
 </ul>
-<p><strong>Quick &amp; Dirty</strong></p>
+<div id="quick-dirty" class="section level3">
+<h3><span class="header-section-number">3.2.1</span> Quick &amp; Dirty</h3>
 <p>Launch Windows CMD, go to your (raw!) page’s source with</p>
 <blockquote>
 <p><code>cd %HOMEPATH%\Documents\GitHub\GitHubPage\</code></p>
@@ -143,12 +151,15 @@ sequenceDiagrams:
 <img src="/img/hugo_troubles/hugo_error_quick.jpg" title="Preview in RStudio" alt="Notice the last line and then lines 4-8: There are some (data file) binaries, which Hugo can’t render" style="width:100.0%" />
 <p class="caption">Notice the last line and then lines 4-8: There are some (data file) binaries, which Hugo can’t render</p>
 </div>
-<p><strong>#Fix ’em</strong> In my case, it was the data files for my .Rmd notebooks (<code>.csv</code> data, <code>.tif</code> basemap, and processed R data objects exported as <code>.rda</code>. So what I needed to do here was to add these data types to the <code>ignoreFiles = []</code> parameter in <code>config.toml</code>. This parameter now looks like this:</p>
+<p><strong>Fix ’em</strong></p>
+<p>In my case, it was the data files for my .Rmd notebooks (<code>.csv</code> data, <code>.tif</code> basemap, and processed R data objects exported as <code>.rda</code>. So what I needed to do here was to add these data types to the <code>ignoreFiles = []</code> parameter in <code>config.toml</code>. This parameter now looks like this:</p>
 <blockquote>
 <p><code>ignoreFiles = [&quot;\\.Rmd$&quot;, &quot;\\.Rmarkdown$&quot;, &quot;_files$&quot;, &quot;_cache$&quot;, &quot;\\.csv$&quot;, &quot;\\.rda$&quot;, &quot;\\.tif$&quot;]</code></p>
 </blockquote>
 <p>Mission achieved! <strong>Well, partly…</strong>. You fixed what you needed to, but are you going to be able to easily redo this the next time you run into Hugo problems? Let’s say when you write your next in post in like a couple of months or so? I probably wouldn’t. Remember: <code>hugo -v</code> is your first option and you need to run it in your page’s source folder. Therefore, we might want to register Hugo (or rather <code>hugo.exe</code>) with Windows as a USER variable and make launching Hugo a stable method.</p>
-<p>** Stable**</p>
+</div>
+<div id="stable" class="section level3">
+<h3><span class="header-section-number">3.2.2</span> Stable</h3>
 <p>Follow <a href="https://gohugo.io/getting-started/installing/#for-windows-10-users">this steps from Hugo’s offical documentation</a> and simply add <code>%APPDATA\Hugo</code> (or an absolute path, if you managed to put hugo.exe somewhere else) to the user <code>path</code> variable. Reboot Windows.</p>
 <p>Now you just need to launch a <strong>CMD</strong> or PowerShell (i.e. by Shift + right-click in Explorer) in your page’s source folder or launch the CMD/PowerShell from anywhere else and <code>cd &lt;folder&gt;</code> your way to the source. Now just run <code>hugo -v</code> without any references:</p>
 <div class="figure">
@@ -162,7 +173,9 @@ sequenceDiagrams:
 </div>
 <p>Either call <code>hugo -v</code> from afar, or set the path variable and run it without reference.</p>
 <p>Voila! We did some nice stuff for your average Windows user. <strong>However</strong>, there’s one even more elegant and streamlined way which I totally would suggest to set up and use for your standard workflow.</p>
-<p>** Sophisticated with “Windows.Linux”**</p>
+</div>
+<div id="sophisticated-with-windows.linux" class="section level3">
+<h3><span class="header-section-number">3.2.3</span> Sophisticated with “Windows.Linux”&quot;</h3>
 <p>As <a href="https://docs.microsoft.com/en-us/windows/wsl/install-win10">documented here</a>, with recent Windows 10 builds you can now implant a Linux subsystem (i.e. Ubuntu) into your Windows environment. So if you decided so install Linux for your Windows system, make sure, that <code>bash</code> is your default shell (see above) and launch a Terminal in RStudio (<code>Menu-&gt;Tools-&gt;Terminal-&gt;New Terminal</code> or <code>Alt+Shift+T</code>).</p>
 <p>Install hugo into your Linux environment:</p>
 <blockquote>
@@ -171,20 +184,25 @@ sequenceDiagrams:
 <p>When this is done, run <code>hugo -v</code> in the Terminal anytime without ever leaving RStudio.<a href="#fn7" class="footnoteRef" id="fnref7"><sup>7</sup></a> We don’t need to navigate nowhere (if you’re running the command from you site’s source’s project in R). We don’t need to set a user path variable. <strong>We’re done.</strong></p>
 </div>
 </div>
-<div id="some-other-commons-errors-troubles-with-blogdownhugo" class="section level1">
-<h1><span class="header-section-number">4</span> Some other commons Errors / Troubles with Blogdown/Hugo</h1>
+</div>
+<div id="some-other-common-errors-troubles-with-blogdownhugo" class="section level1">
+<h1><span class="header-section-number">4</span> Some other common Errors / Troubles with Blogdown/Hugo</h1>
 <p>When running <code>blogdown:::serve_site()</code> or trying to render your website by other means you might encounter one of the following warning messages:</p>
 <blockquote>
-<p>‘—did you forget a’#‘? at line 1&gt;<strong>seImpl</strong>(path.expand(input), verbose, fromFile):<br />
+<p>‘—did you forget a’#‘? at line 1&gt;<code>seImpl(path.expand(input)</code>, verbose, fromFile):<br />
 Unidentified trailing character’<br />
 * Retrying in <em>X</em> seconds…</p>
 </blockquote>
 <p>OR</p>
 <blockquote>
-<p>Error in <strong>tomlparseImpl</strong>(path.expand(input), verbose, fromFile) :<br />
+<p>Error in <code>tomlparseImpl(path.expand(input)</code>, verbose, fromFile) :<br />
 Unidentified trailing character ‘l’—did you forget a ‘#’? at line <strong>XY</strong></p>
 </blockquote>
-<p>It’s probably because you made (<strong>legit</strong>) changes to your <code>config.toml</code> while the preview was still running or you made a syntactical <strong>mistake</strong> while/before the preview was running. In both cases the preview fails to render.</p>
+<p>OR</p>
+<blockquote>
+<p>something ending with <code>Error in render_page(f)</code></p>
+</blockquote>
+<p>It’s probably because you either made (<strong>legit</strong>) changes to your <code>config.toml</code> while the preview was still running or you made a syntactical <strong>mistake</strong> to your <code>config.toml</code> or your <code>.Rmd</code> post’s <code>yaml</code>-header while/before the preview was running. In these cases the preview fails to (re-)render.</p>
 <div id="seimpl" class="section level2">
 <h2><span class="header-section-number">4.1</span> seImpl()</h2>
 <p>For <code>seImpl</code> (appears to mostly concern legit changes to config.toml) it seems that simply restarting the R session helps. Just run the following command in the console, and everything should be fine:</p>
@@ -195,6 +213,15 @@ blogdown::serve_site()</code></pre>
 <h2><span class="header-section-number">4.2</span> tomlparseImpl()</h2>
 <p>For <code>tomlparseImpl</code> (syntactical error in config.toml) you usually get a pointer <code>at line **XY**</code>. Double-check what you did there, undo it when in doubt, and then restart your session and try previewing again.</p>
 <p>So far, that’s the three most common troubles / errors I ran into while working with Blogdown &amp; Hugo. As soon as I have figured out a <strong>pain</strong>-free way to run my GitHub Page from a sub-folder of the repo (i.e. <code>repo/html/index.html</code> or <code>repo/src/index.html</code> or <code>repo/docs/index.html</code> (which weirdly does not work if you use <code>https://youraccount.github.io</code> as your page) I’ll probably run into new problems (I actually did, already, by trying), I’ll document them here or link to a new post.)</p>
+</div>
+<div id="render_pagef" class="section level2">
+<h2><span class="header-section-number">4.3</span> render_page(f)</h2>
+<p>This corresponding error message might look like this &gt;Fehler in yaml::yaml.load(string, …) : &gt; Parser error: while parsing a block mapping at line 1, column 1 did not find expected key at line 1, column 12 &gt;Ruft auf: local … parse_yaml_front_matter -&gt; yaml_load_utf8 -&gt; <Anonymous> &gt;Ausführung angehalten &gt;<simpleError in render_page(f): Failed to render 'content/post/2018-05-27-some-tricks-when-working-with-blogdown-hugo-working-draft.Rmd'></p>
+<p>This happened when I manually changed the <code>title</code> and <code>slug</code> of a post. After getting the error message I renamed the corresponging <code>.Rmd</code>. This makes sense but didn’t do the trick. What I noticed however, was that the page’s title in the <code>yaml</code> header was not surrounded by quotation marks (“” / ’’) anymore. After adding them and relaunching blogdown::serve_site() everything was fine again. But seriously:</p>
+<blockquote>
+<p>Don’t rename your stuff by hand. Always use RStudio’s <code>Update Metadata</code> function (via Addins)</p>
+</blockquote>
+<hr />
 <p>Cheers!</p>
 </div>
 </div>

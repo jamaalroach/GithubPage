@@ -6,10 +6,10 @@ slug: r-low-budget-high-res-mapping-with-r-for-not-for-profit-print
 categories:
   - Rstats
   - Mapping
+  - Publishing
 tags:
   - Map
   - CC0
-  - Publishing
   - Print
 lastmod: '2018-05-20T17:11:53+02:00'
 output:
@@ -17,7 +17,7 @@ output:
       number_sections: true
       toc: TRUE
 keywords: []
-description: ''
+description: "Once upon a time (and long before I learned about the tidyverse and %>%, a colleague from a not-for-profit org asked for help with a map for a book. This is a how-to based on a lightning talk on how I created a CC-0 based high-res map with Rstats."
 comment: no
 autoCollapseToc: no
 postMetaInFooter: no

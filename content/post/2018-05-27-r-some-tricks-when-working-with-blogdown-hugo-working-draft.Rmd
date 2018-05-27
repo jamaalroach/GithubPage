@@ -1,0 +1,169 @@
+---
+title: '[R] Some Tricks for Blogdown & Hugo (Working Draft)'
+author: Ilja / fubits
+date: '2018-05-27'
+slug: r-some-tricks-when-working-with-blogdown-hugo-working-draft
+categories:
+  - Publishing
+  - Rstats
+  - WebTech
+tags:
+  - Hugo
+  - Blogdown
+  - CSS
+output:
+  blogdown::html_page:
+      number_sections: true
+      toc: TRUE
+lastmod: '2018-05-27T15:07:29+02:00'
+keywords: []
+description: 'This summary was written and included by hand :) A continuous collection of tricks & hacks for Blogdown & Hugo. Learn how to add your own TOC and Numbering suffixes and so on.'
+comment: no
+autoCollapseToc: no
+postMetaInFooter: no
+hiddenFromHomePage: no
+contentCopyright: no
+reward: no
+mathjax: no
+mathjaxEnableSingleDollar: no
+mathjaxEnableAutoNumber: no
+hideHeaderAndFooter: no
+flowchartDiagrams:
+  enable: no
+  options: ''
+sequenceDiagrams:
+  enable: no
+  options: ''
+---
+
+# Fix your Table of Contents / TOC (with .Rmd)
+
+If for your theme the TOC is not working as expected or you simply want back the familiar Knitr-style TOC
+
+   * set `toc = false` in `config.toml`
+   * remove `toc: <boolean>` from the `yaml` header of your post
+   * and insert  
+   
+```
+output:
+  blogdown::html_page:
+      toc: TRUE
+```
+Mind the tabs!
+
+## Numbering
+
+If you want numbering (in your TOC and for your headings/chapters), add `number_sections: true` to `yaml`
+
+```
+output:
+  blogdown::html_page:`
+      number_sections: true
+      toc: TRUE
+```
+
+## Custom TOC & Numbering CSS
+If numbering is not pre-defined in your theme, you might need to add a `custom.css` as a **Parameter** to `config.toml` and then do some formatting in `CSS`:
+
+  + `config.toml`
+    ```
+    [params]
+      customCSS = ["custom.css"]
+    ```
+>Notice that your `custom.css` has to be saved in `\static\css\`
+
+  + Now add the following definitions to your `custom.css`
+    ```
+    /* Numbering suffix in TOC */
+    .toc-section-number:after{
+    	content: ". "
+    }
+    
+    /* Numbering suffix in Body/Content */
+    .header-section-number:after{
+    	content: ". "
+    }
+    ```
+    
+I'm not sure whether the `CSS-selectors` are the same for all templates but you can figure them out easily by running some Page Inspector/Web Development Tools in your browser (just right-click an object and search for a similar function). You can even do this from RStudio's preview pane btw!
+
+![(*Preview of a page inspector function could look like and where to find the selectors*)](/img/hugo_pool/page_inspector.jpg){width=100%}
+
+
+
+##TOC-Heading (i.e. "Outline")
+
+And last but not least, your TOC currently has no Heading/Title, so if you want one include this in your
+  
+  + `custom.css`:
+
+    ```
+    /* Add some Heading / Title before the TOC */
+    #TOC:before{
+    	content: "Outline";
+    	font-family: 'Lato', sans-serif!important;
+      	font-weight:400;
+    	font-size: 26px;
+    }
+    ```
+
+## TOC & Summary
+If you're using a theme which displays a summary on your site's index.html, you'll notice that the contents of TOC will now be included in your summary. See here how to fix your theme's summary: 
+
+# Summary / {{ .Summary}}
+By default, Hugo 
+
+  + a.) simply parses the first 70 characters of a post (stripped of any html). Or
+  + b.) looks for a `<!--more-->` line in your post's content. Hugo then simply parses all the content until it reaches`<!--more-->`.
+  
+In order to fix this / automate your own summary, IMHO the easiest workaround seems to be to change the variable `.Summary` to `.Description` in your theme's `summary.html` template (you'll find it here: `<PageSource>\themes\<your-theme>\layouts\post\summary.html`) and use `description = 'text'` in your post's `YAML` header instead.
+
+  + edit `summary.html` and find the following passage:
+  
+    ```
+    <!-- Content -->
+    <div class="post-content">
+      <div class="post-summary">
+        {{ .Summary }}
+      </div>
+      <div class="read-more">
+        <a href="{{ .URL }}" class="read-more-link">{{ T "readMore" }}</a>
+      </div>
+    </div>
+    ```
+  
+  + replace `{{ .Summary }}` with `{{ .Description }}`
+  
+Now in your **post's**
+
+  + `yaml`-header write insert your own "summary" with the `description: ''` parameter:
+
+    `description: "This post is about something something."`
+
+# Shortcuts / Shortcodes
+## Images / img
+>`![(*Text, italic in ()*)](/img/hugo_pool/page_inspector.jpg){width=100%}`
+
+## Links
+>`[Linked Text](https://ellocke.github.io/)`
+
+## Blockquote
+>This is some blockquoted text. You can use it for *citing* or for highlighting paragraphs (such as an **abstract**)\
+>\
+> Use\
+>`previos line.\`\
+>`\>`\
+>for empty newlines\
+>\
+>`you can even blockquote CODE` by prefixing ` `` ` with \>
+
+
+#TODO
+  + Add Logo
+  
+#Done 
+  + change Fonts and Formatting for H1-H6 (post: tba)
+  + exclude h4+ from TOC  (post: tba)
+  + add "." :after TOC-numbering for H1,H2 in custom.css
+  + add "Outline" :before TOC
+  
