@@ -8,6 +8,16 @@
        url('../fonts/lato-v11-latin-regular.woff') format('woff');
 }
 
+/* BODY */
+
+.container{
+	min-width: 235px;
+}
+
+.mobile-navbar{
+	min-width: 235px;
+}
+
 /* Numbering suffix in Body/Content */
 .header-section-number:after{
 	content: ". "
@@ -30,9 +40,9 @@
 /* Thumbnails */
 .list__thumbnail{
 	width: 40%;
-	max-width: 500px;
+	max-width: 333px;
 	min-width: 200px;
-	max-height: 350px;
+	max-height: 333px;
 	min-height: 100px;
 	float: left;
 	padding-right: 1.5em;
@@ -44,7 +54,7 @@
 	.list__thumbnail{
 		height: 100%;
 		width: 100%;
-		max-width: 300px;
+		max-width: 333px;
 		margin: 0 auto;
 		padding-right: 0;
 		float: none;
