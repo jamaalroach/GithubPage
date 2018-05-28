@@ -18,3 +18,10 @@ blogdown::serve_site()
 
 # PUBSLISH (better than blogdown::build_site())
 blogdown::hugo_build()
+
+
+# Undocumented
+#####
+thumbnail: "/img/thumbs/file.jpg" # Optional
+
+#####

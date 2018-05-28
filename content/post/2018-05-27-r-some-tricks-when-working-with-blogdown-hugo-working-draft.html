@@ -17,7 +17,8 @@ output:
       toc: TRUE
 lastmod: '2018-05-27T15:07:29+02:00'
 keywords: []
-description: 'This summary was written and included by hand :) A continuous collection of tricks & hacks for Blogdown & Hugo. Learn how to add your own TOC and Numbering suffixes and so on.'
+description: 'This summary was written and included by hand ;) A continuous collection of tricks & hacks for Blogdown & Hugo. Learn how to add your own TOC and Numbering suffixes and so on.'
+thumbnail: "/img/thumbs/hugo_tricks.jpg" # Optional
 comment: no
 autoCollapseToc: no
 postMetaInFooter: no
@@ -82,10 +83,12 @@ sequenceDiagrams:
 <ul>
 <li><p><code>config.toml</code></p>
 <pre><code>[params]
-  customCSS = [&quot;custom.css&quot;]</code></pre>
+  customCSS = [&quot;custom.css&quot;]</code></pre></li>
+</ul>
 <blockquote>
 <p>Notice that your <code>custom.css</code> has to be saved in <code>\static\css\</code></p>
-</blockquote></li>
+</blockquote>
+<ul>
 <li><p>Now add the following definitions to your <code>custom.css</code></p>
 <pre><code>/* Numbering suffix in TOC */
 .toc-section-number:after{
@@ -99,8 +102,8 @@ sequenceDiagrams:
 </ul>
 <p>I’m not sure whether the <code>CSS-selectors</code> are the same for all templates but you can figure them out easily by running some Page Inspector/Web Development Tools in your browser (just right-click an object and search for a similar function). You can even do this from RStudio’s preview pane btw!</p>
 <div class="figure">
-<img src="/img/hugo_pool/page_inspector.jpg" alt="(Preview of a page inspector function could look like and where to find the selectors)" style="width:100.0%" />
-<p class="caption">(<em>Preview of a page inspector function could look like and where to find the selectors</em>)</p>
+<img src="/img/hugo_pool/page_inspector.jpg" alt="(Preview of what a page inspector function in your Browser could look like and how to ID the selectors)" style="width:100.0%" />
+<p class="caption">(<em>Preview of what a page inspector function in your Browser could look like and how to ID the selectors</em>)</p>
 </div>
 </div>
 <div id="toc-heading-i.e.-outline" class="section level2">
@@ -187,6 +190,7 @@ for empty newlines<br />
 <h1><span class="header-section-number">5</span> Done</h1>
 <ul>
 <li>change Fonts and Formatting for H1-H6 (post: tba)</li>
+<li>enable Thumbnail for post summaries (post: tba)</li>
 <li>exclude h4+ from TOC (post: tba)</li>
 <li>add “.” :after TOC-numbering for H1,H2 in custom.css</li>
 <li>add “Outline” :before TOC</li>

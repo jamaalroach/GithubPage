@@ -16,9 +16,8 @@ output:
   blogdown::html_page:
     number_sections: yes
     toc: yes
-description: 'TL;DR: I had to figure out how to debug() Hugo / my Blogdown page on
-  Windows 10 and came up with 3 methods. Besides, I''ve documented some common not-Windows-specific
-  errors / troubles with Blogdown / Hugo'
+description: 'TL;DR: I had to figure out how to debug() Hugo / my Blogdown page on Windows 10 and came up with 3 methods. Besides, I''ve documented some common not-Windows-specific errors / troubles with Blogdown / Hugo'
+thumbnail: "/img/thumbs/debug_hugo.jpg" # Optional
 comment: no
 autoCollapseToc: no
 postMetaInFooter: no

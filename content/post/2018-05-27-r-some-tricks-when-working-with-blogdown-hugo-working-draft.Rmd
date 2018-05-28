@@ -17,7 +17,8 @@ output:
       toc: TRUE
 lastmod: '2018-05-27T15:07:29+02:00'
 keywords: []
-description: 'This summary was written and included by hand :) A continuous collection of tricks & hacks for Blogdown & Hugo. Learn how to add your own TOC and Numbering suffixes and so on.'
+description: 'This summary was written and included by hand ;) A continuous collection of tricks & hacks for Blogdown & Hugo. Learn how to add your own TOC and Numbering suffixes and so on.'
+thumbnail: "/img/thumbs/hugo_tricks.jpg" # Optional
 comment: no
 autoCollapseToc: no
 postMetaInFooter: no
@@ -70,6 +71,7 @@ If numbering is not pre-defined in your theme, you might need to add a `custom.c
     [params]
       customCSS = ["custom.css"]
     ```
+    
 >Notice that your `custom.css` has to be saved in `\static\css\`
 
   + Now add the following definitions to your `custom.css`
@@ -87,7 +89,7 @@ If numbering is not pre-defined in your theme, you might need to add a `custom.c
     
 I'm not sure whether the `CSS-selectors` are the same for all templates but you can figure them out easily by running some Page Inspector/Web Development Tools in your browser (just right-click an object and search for a similar function). You can even do this from RStudio's preview pane btw!
 
-![(*Preview of a page inspector function could look like and where to find the selectors*)](/img/hugo_pool/page_inspector.jpg){width=100%}
+![(*Preview of what a page inspector function in your Browser could look like and how to ID the selectors*)](/img/hugo_pool/page_inspector.jpg){width=100%}
 
 
 
@@ -163,6 +165,7 @@ Now in your **post's**
   
 #Done 
   + change Fonts and Formatting for H1-H6 (post: tba)
+  + enable Thumbnail for post summaries (post: tba)
   + exclude h4+ from TOC  (post: tba)
   + add "." :after TOC-numbering for H1,H2 in custom.css
   + add "Outline" :before TOC
