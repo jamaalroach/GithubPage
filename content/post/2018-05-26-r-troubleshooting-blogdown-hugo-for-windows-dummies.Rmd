@@ -55,7 +55,8 @@ Following Blogdown (and [Bookdown(!)](https://bookdown.org/)) creator [Yihui  Xi
 ![(*This is what writing this post looks in my RStudio. Notice the preview pane on the bottom right.*)](/img/hugo_troubles/rstudio_blogdown_preview.jpg "Preview in RStudio"){width=100%}
 
 **A Word of Caution**
-Notice how Yihui et al. actually have included a predictive word of **caution** – full of wisdom, q.e.d.:
+
+Notice how Xie et al. actually have included a predictive word of **caution** – full of wisdom, q.e.d.:
 
  >*"If you do not understand HTML, CSS, or JavaScript, and have no experience with Hugo themes or templates, it may take you about **10 minutes to get started** with your new website, since you have to accept everything you are given (such as the default theme); if you do have the knowledge and experience (and desire to highly customize your site), it may take you **several days** to get started. Hugo is really powerful. Be cautious with power."* ([Xie et al. 2018, Ch. 1.6, *emphasis added*](https://bookdown.org/yihui/blogdown/other-themes.html)\)
 
@@ -211,5 +212,4 @@ This happened when I manually changed the `title` and `slug` of a post. After ge
 
 >Don't rename your stuff by hand. Always use RStudio's `Update Metadata` function (via Addins)
 
-<hr />
 Cheers!

@@ -22,7 +22,7 @@ After all, it's [#SummerOfMachineLearning](https://twitter.com/fubits/status/981
 {{< tweet 981532034106576901 >}}
 
 ## Projects
-My largest **project** so far was being a `Digital Officer` (project-based, 1 year) for a large German think tank's shot at digital publishing, digitally supported research, and digitalized science communication. I also wrote a bit on the [methodology](https://projekt.swp-berlin.org/urbaneraeume/kapitel/zur-methode/#aufbau-konzept-und-tools-der-webseite) re: `digital tools` & the makings of the project's `website`. You can find out more [here](https://medium.com/@Fubits/urbane-r%C3%A4ume-proteste-weltpolitik-21f05d512cc4) (in German) or have your own look at the visuals [here](https://projekt.swp-berlin.org/urbaneraeume/kapitel/blacklivesmatter/#chronologie-blacklivesmatter).
+My largest **project** so far was being a `Digital Officer` (project-based, 1 year) for a large German think tank's shot at digital publishing, digitally supported research, and digitized science communication. I also wrote a bit on the [methodology](https://projekt.swp-berlin.org/urbaneraeume/kapitel/zur-methode/#aufbau-konzept-und-tools-der-webseite) re: `digital tools` & the makings of the project's `website`. You can find out more [here](https://medium.com/@Fubits/urbane-r%C3%A4ume-proteste-weltpolitik-21f05d512cc4) (in German) or have your own look at the visuals [here](https://projekt.swp-berlin.org/urbaneraeume/kapitel/blacklivesmatter/#chronologie-blacklivesmatter).
 
 <a href="(https://projekt.swp-berlin.org/urbaneraeume/">![(**One visual element from the "Urban Spaces" project @ SWP Berlin)**](/img/about/urban_spaces_cover.jpeg "One visual element from the 'Urban Spaces' project @ SWP Berlin")</a>
 
@@ -35,3 +35,7 @@ You'll find me on:
   + https://keybase.io/fubits
 
 Feel free to drop a line any time.
+
+# Data Protection, Privacy, GPDR
+
+This is a static site written with R Markdown and compiled and rendered locally (with [Hugo](https://gohugo.io/) powered by [Blogdown](https://github.com/rstudio/blogdown) on my laptop without a third-party CMS, data bases, cookies, trackers, whatever. I don't run a mailing list, don't collect any data and there's nothing to opt in on MY website [https://ellocke.github.io/*](https://ellocke.github.io/). When in doubt, consult [this](https://discourse.gohugo.io/t/hugo-vs-the-general-data-protection-regulations-gdpr-in-eu-eea/11526).
