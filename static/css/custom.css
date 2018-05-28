@@ -27,8 +27,27 @@
 	font-size: 26px;
 }
 
-/* inline-code for markdown */
+/* Thumbnails */
+.list__thumbnail{
+width: 100%;
+height: 100%;
+max-width: 280px;
+min-width: 200px;
+max-height: 200px;
+min-height: 100px;
+float: left;
+padding-right: 1.5em;
+}
 
+.posts>article {
+display: inline-block;
+}
+.list__thumbnail img{
+	width: 100%;
+	height: 100%;
+}
+
+/* inline-code for markdown */
 .post .post-content code {
 padding: 3px 5px;
 border-radius: 4px;
