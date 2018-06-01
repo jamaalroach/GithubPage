@@ -38,4 +38,4 @@ Feel free to drop a line any time.
 
 # Data Protection, Privacy, GPDR
 
-This is a static site written with R Markdown and compiled and rendered locally (with [Hugo](https://gohugo.io/) powered by [Blogdown](https://github.com/rstudio/blogdown) on my laptop without a third-party CMS, data bases, cookies, trackers, whatever. I don't run a mailing list, don't collect any data and there's nothing to opt in on MY website [https://ellocke.github.io/*](https://ellocke.github.io/). When in doubt, consult [this](https://discourse.gohugo.io/t/hugo-vs-the-general-data-protection-regulations-gdpr-in-eu-eea/11526).
+This is a static site written with R Markdown and compiled and rendered locally (with [Hugo](https://gohugo.io/) powered by [Blogdown](https://github.com/rstudio/blogdown)) on my laptop without a third-party CMS, data bases, cookies, trackers, whatever. I don't run a mailing list, don't collect any data and there's nothing to opt in on MY website [https://ellocke.github.io/*](https://ellocke.github.io/). When in doubt, consult [this](https://discourse.gohugo.io/t/hugo-vs-the-general-data-protection-regulations-gdpr-in-eu-eea/11526).
