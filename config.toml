@@ -59,7 +59,7 @@ copyright = ""            # default: author.name ↓
 
   # site info (optional)      
   logoTitle = ""        # default: the title value
-  keywords = ["Computational Social Science", "DataViz","Rstats"]
+  keywords = ["Computational Social Science", "DataViz","Rstats", "SciComm"]
   description = "GitHub Page made with R, Blogdown, and Hugo theme even"
 
   # paginate of archives, tags and categories
@@ -80,7 +80,7 @@ copyright = ""            # default: author.name ↓
   mathjaxEnableSingleDollar = false
   mathjaxEnableAutoNumber = false
 
-  postMetaInFooter = true   # contain author, lastMod, markdown link, license
+  postMetaInFooter = false   # contain author, lastMod, markdown link, license
   linkToMarkDown = false    # Only effective when hugo will output .md files.
   contentCopyright = '<a rel="license noopener" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a>'
   

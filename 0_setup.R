@@ -20,8 +20,9 @@ blogdown::serve_site()
 blogdown::hugo_build()
 
 
-# Undocumented
+# Undocumented (yet)
 #####
 thumbnail: "/img/thumbs/file.jpg" # Optional
 
+{{< tweet 981532034106576901 >}}
 #####

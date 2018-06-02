@@ -1,5 +1,5 @@
 ---
-title: '[R] Low-Budget High-Res Mapping with R for Not-for-Profit Print'
+title: '[R] Hi-Res Mapping with R for Not-for-Profit Print'
 author: Ilja @fubits
 date: '2018-04-19'
 slug: r-low-budget-high-res-mapping-with-r-for-not-for-profit-print
@@ -82,10 +82,12 @@ library(sp)
 
 
 ## Geodata: World Map Data from Natural Earth
+
 >*"Natural Earth is a public domain map dataset available at 1:10m, 1:50m, and 1:110 million scales. Featuring tightly integrated vector and raster data, with Natural Earth you can make a variety of visually pleasing, well-crafted maps with cartography or GIS software."* [(Link to Natural Earth)](http://www.naturalearthdata.com/)
 
 
 **Base Map (Admin-0 Level)**
+
 Let's first import the geodata and check the basemap.
 
 ```{r echo=TRUE}
@@ -95,10 +97,10 @@ plot(world)
 
 Ugh, not so pretty, right? But you have to start somewhere...
 
-**Spoiler: Some Geo-Objects – which were only mentioned later on – are missing at Admin-0 level.**
+>**Spoiler:** Some Geo-Objects – which were only mentioned later on – are missing at Admin-0 level.
 
+**-> Fetch Non-Admin-0 Elements (Guam & Singapore)**
 
-**(-> Fetch Non-Admin-0 Elements (Guam & Singapore))**
 ```{r}
 # countries10 <- rnaturalearth::ne_download(scale = 10,
 #                                           type = 'countries',
@@ -121,12 +123,12 @@ Guam$category <- "D" # 4 regions A-D, as requested by colleague
 plot(Guam)
 ```
 
-
 **Where's Singapore?**
 ```{r}
 #> "Singapore" %in% rnaturalearth::countries110$SOVEREIGNT is FALSE, so apparently,
-# it is a souvereign state, but as a city-state to granular for the 1:110m data.
-# Let's search in the 1:10m data
+# it is a souvereign state, but as a city-state too *granular* for the 1:110m data.
+#
+# Let's have a look in the 1:10m data
 
 Singapore <- countries10[countries10$SOVEREIGNT == 'Singapore',]
 # "Singapore" %in% world.sub$geonunit #> is also TRUE, while
@@ -141,60 +143,60 @@ plot(Singapore)
 
 **China**
 ```{r}
-asia.china <- world[world$sovereignt == 'China',]
-asia.china$category <- "A"
-plot(asia.china)
+asia_china <- world[world$sovereignt == 'China',]
+asia_china$category <- "A"
+plot(asia_china)
 ```
 
 
-**Eastern Asia (== $subregion minus China & Mongolia )**
+**Eastern Asia (== `$subregion` minus China & Mongolia )**
 ```{r}
-asia.east <- world[world$subregion == 'Eastern Asia' &
+asia_east <- world[world$subregion == 'Eastern Asia' &
                      world$sovereignt != 'Mongolia' &
                      world$sovereignt != 'China',]
-asia.east$category <- "D"
-plot(asia.east)
+asia_east$category <- "D"
+plot(asia_east)
 ```
 
 
 **South-Eastern Asia**
 ```{r}
-asia.seast <- world[world$subregion == 'South-Eastern Asia',]
-asia.seast$category <- "C"
-plot(asia.seast)
+asia_seast <- world[world$subregion == 'South-Eastern Asia',]
+asia_seast$category <- "C"
+plot(asia_seast)
 ```
 
 
 **Central and South Asia (plus Russia & Mongolia)**
 ```{r}
-asia.censouth <- world[world$region_wb == 'South Asia' |
+asia_censouth <- world[world$region_wb == 'South Asia' |
                          world$subregion == 'Central Asia' |
                          world$sovereignt == 'Mongolia' |
                          world$sovereignt == 'Russia',]
-asia.censouth$category <- "B"
-plot(asia.censouth)
+asia_censouth$category <- "B"
+plot(asia_censouth)
 ```
 
-**Why Russia, why?** (cf. [Thread](https://twitter.com/HalukaMB/status/974674444970020867) & [Solution](https://twitter.com/HalukaMB/status/982306518522527744) by [Haluka](https://twitter.com/HalukaMB)
+>**Why Russia, why?** (cf. [Thread](https://twitter.com/HalukaMB/status/974674444970020867) & [Solution for QGIS ](https://twitter.com/HalukaMB/status/982306518522527744) by [Haluka](https://twitter.com/HalukaMB)
 )
 
-**Solution: Set left BBOX-Border to clip Russia's overlapping tail**
+**Solution: Set left `BBOX`-Border to clip off Russia's overlapping Tail**
 ```{r}
 leftBorder <- 25
-asia.censouth@bbox[1] <- leftBorder
-plot(asia.censouth)
+asia_censouth@bbox[1] <- leftBorder
+plot(asia_censouth)
 ```
 
 
 **Consolidate the Core**
 ```{r}
-asia.core <-  spRbind(
+asia_core <-  spRbind(
                 spRbind(
-                  spRbind(asia.china, asia.east),
-                     asia.seast),
-                        asia.censouth) # or just %>% next time :)
-asia.core@bbox[1] <- leftBorder
-plot(asia.core)
+                  spRbind(asia_china, asia_east),
+                     asia_seast),
+                        asia_censouth) # or just %>% next time :)
+asia_core@bbox[1] <- leftBorder
+plot(asia_core)
 ```
 
 
@@ -202,58 +204,55 @@ plot(asia.core)
 
 *(Preview)*
 ```{r}
-asia.rest <- world[world$region_un == "Asia" &
+asia_rest <- world[world$region_un == "Asia" &
                      world$sovereignt != 'China' | 
                      world$region_un == "Oceania" | 
                      world$region_un == "Africa" |
                      world$region_un == "Europe",]
-asia.rest@bbox[1] <- leftBorder
-plot(asia.rest)
+asia_rest@bbox[1] <- leftBorder
+plot(asia_rest)
 ```
 
 
 **Remove the Core**
 ```{r}
-asia.rest <- subset.data.frame(asia.rest,
-                              !(asia.rest$sovereignt %in% asia.core$sovereignt))
-asia.rest@bbox[1] <- leftBorder
-plot(asia.rest)
+asia_rest <- subset.data.frame(asia_rest,
+                              !(asia_rest$sovereignt %in% asia_core$sovereignt))
+asia_rest@bbox[1] <- leftBorder
+plot(asia_rest)
 ```
 
 
-## Convert Spatial Dataframe to a tidy dataframe
->(this was done before [geom_sf / ggsf](http://ggplot2.tidyverse.org/reference/ggsf.html) where introduced to [ggplot2](http://ggplot2.tidyverse.org/index.html). There might exist a more elegant solution right now, esp. with ggplot.)
-
+## Convert Spatial Dataframe to Tidy Dataframe
+>(This was done before [`geom_sf` / `ggsf`](http://ggplot2.tidyverse.org/reference/ggsf.html) were introduced to [ggplot2](http://ggplot2.tidyverse.org/index.html). There might exist a far more efficient solution right now, esp. with `ggplot2`.)
 
 **Tidy the Vector Data**
 ```{r message=FALSE}
-asia.core@data$id <- row.names(asia.core@data)
+asia_core@data$id <- row.names(asia_core@data)
 Singapore@data$id <- row.names(Singapore@data)
 Guam@data$id <- row.names(Guam@data)
-asia.main <- broom::tidy(asia.core)
-asia.main <- dplyr::left_join(asia.main, asia.core@data, by = 'id')
-head(asia.main, 1)
+asia_main <- broom::tidy(asia_core)
+asia_main <- dplyr::left_join(asia_main, asia_core@data, by = 'id')
+head(asia_main, 1)
 ```
-
-
 
 **Create centered Country Labels**
 ```{r echo=TRUE}
-centroids.df <- as.data.frame(coordinates(asia.core)) # returns centered points
-centroids.df$sovereignt <- asia.core$sovereignt # add country names
+centroids_df <- as.data.frame(coordinates(asia_core)) # returns centered points
+centroids_df$sovereignt <- asia_core$sovereignt # add country names
 
 # I had to include Guam and Singapore only after I already rendered the core
 # map, so this is my rather awkward work-around to include them subsequently
-sing.centroids.df <- as.data.frame(coordinates(Singapore))
-sing.centroids.df$sovereignt <- Singapore$SOVEREIGNT
-centroids.df <- rbind(centroids.df, sing.centroids.df)
-Guam.centroids.df <- as.data.frame(coordinates(Guam))
-Guam.centroids.df$sovereignt <- Guam$name
-centroids.df <- rbind(centroids.df, Guam.centroids.df)
+sing_centroids_df <- as.data.frame(coordinates(Singapore))
+sing_centroids_df$sovereignt <- Singapore$SOVEREIGNT
+centroids_df <- rbind(centroids_df, sing_centroids_df)
+Guam_centroids_df <- as.data.frame(coordinates(Guam))
+Guam_centroids_df$sovereignt <- Guam$name
+centroids_df <- rbind(centroids_df, Guam_centroids_df)
 
 # rename the colnames
-names(centroids.df) <- c("Long", "Lat", "Name")
-head(centroids.df, 1)
+names(centroids_df) <- c("Long", "Lat", "Name")
+head(centroids_df, 1)
 ```
 
 
@@ -268,8 +267,8 @@ head(centroids.df, 1)
 # OR:
 # Download from: http://www.naturalearthdata.com/downloads/50m-raster-data/
 # Here: NE2, shaded relief, water: http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/50m/raster/NE2_50M_SR_W.zip
-relief.world <- raster("../../data/NE2_50M_SR_W.tif") # 170 MB file
-plot(relief.world)
+relief_world <- raster("../../data/NE2_50M_SR_W.tif") # 170 MB file
+plot(relief_world)
 ```
 
 
@@ -290,52 +289,52 @@ plot(relief.world)
 
 # OR:
 # Crop around dataframe
-# relief.sub <- crop(relief, extent(asia.rest))
+# relief_sub <- crop(relief, extent(asia_rest))
 
 # OR
 # Clean & easy: just define the extend of the box
 box <- extent(25, 155, -25, 60) # how to calculate ratio (i.e. 1: 1,48)?
-relief.boxcrop <- crop(relief.world, box)
-plot(relief.boxcrop)
+relief_boxcrop <- crop(relief_world, box)
+plot(relief_boxcrop)
 ```
 
 
 **Raster for the Core Regions**
 ```{r, cache=TRUE}
 # Mask everything apart from the core regions terrain
-# relief.land <- raster::mask(relief.boxcrop, asia.core) # mask {E} != asia.core
-# save(relief.land, file = "GIS_NPO_Data/relief_land.rda")
+# relief_land <- raster::mask(relief_boxcrop, asia_core) # mask {E} != asia_core
+# save(relief_land, file = "../../data/GIS_NPO_Data/relief_land.rda")
 load("../../data/GIS_NPO_Data/relief_land.rda")
-plot(relief.land)
+plot(relief_land)
 ```
 
 
 **Convert Core Raster to SPDF to DF**
 ```{r}
 # Raster to SPDF
-relief.land_spdf <- as(relief.land, "SpatialPixelsDataFrame")
+relief_land_spdf <- as(relief_land, "SpatialPixelsDataFrame")
 # SPDF to DF (for ggplot)
-relief.land_df <- as.data.frame(relief.land_spdf) %>% 
+relief_land_df <- as.data.frame(relief_land_spdf) %>% 
   rename(value = `NE2_50M_SR_W`)
-head(relief.land_df, 1)
+head(relief_land_df, 1)
 ```
 
 
 **Raster for the Rest (Water & Terrain)**
 ```{r, cache=TRUE}
-# relief.meer <- raster::mask(relief.boxcrop, asia.core, inverse=TRUE) # maskiert alles == asia.core
-# save(relief.meer, file = "GIS_NPO_Data/relief_meer.rda")
+# relief_meer <- raster::mask(relief_boxcrop, asia_core, inverse=TRUE) # maskiert alles == asia_core
+# save(relief_meer, file = "../../data/GIS_NPO_Data/relief_meer.rda")
 load("../../data/GIS_NPO_Data/relief_meer.rda")
-plot(relief.meer)
+plot(relief_meer)
 ```
 
 
 **Convert 2nd Raster to DF**
 ```{r}
-relief.meer_spdf <- as(relief.meer, "SpatialPixelsDataFrame")
-relief.meer_df <- as.data.frame(relief.meer_spdf) %>% 
+relief_meer_spdf <- as(relief_meer, "SpatialPixelsDataFrame")
+relief_meer_df <- as.data.frame(relief_meer_spdf) %>% 
   rename(value = `NE2_50M_SR_W`)
-head(relief.meer_df, 1)
+head(relief_meer_df, 1)
 ```
 
 
@@ -344,11 +343,11 @@ head(relief.meer_df, 1)
 ```{r message=FALSE}
 ggplot() +
   # Polygons for the 4 regions
-  geom_polygon(data = fortify(asia.main), alpha = 0.5,
+  geom_polygon(data = fortify(asia_main), alpha = 0.5,
                aes(x = long, y = lat, group = group,
-                   fill = asia.main$category),
+                   fill = asia_main$category),
                color = "white", size = 1) +
-  geom_polygon(data = fortify(asia.rest), alpha = 0.5,
+  geom_polygon(data = fortify(asia_rest), alpha = 0.5,
                aes(x = long, y = lat, group = group),
                fill = "grey89", color = "white", size = 1) +
   geom_polygon(data = fortify(Singapore), alpha = 0.5,
@@ -362,25 +361,25 @@ ggplot() +
   theme_map() +
   theme(legend.position = "none") +
   # repel =  no overlapping between labels
-  geom_text_repel(data = fortify(centroids.df),
+  geom_text_repel(data = fortify(centroids_df),
                 aes(label = Name, size = 12, x = Long, y = Lat),
                 segment.colour = NA)
 ```
 
-## Map without raster/terrain
+## Map without Raster/Terrain
 ```{r message=FALSE}
 # Better approach:  Setting dimensions for {r}-snippet according to requirements
 # for print would be much better for serialisation and polishing in Illustrator et al.
 map <- ggplot() +
  # raster
-  # geom_raster(data = relief.land_df, aes(x = x, y = y, alpha = value)) +
-  # geom_raster(data = relief.meer_df, aes(x = x, y = y, alpha = value)) +
+  # geom_raster(data = relief_land_df, aes(x = x, y = y, alpha = value)) +
+  # geom_raster(data = relief_meer_df, aes(x = x, y = y, alpha = value)) +
   # scale_alpha(name = "", range = c(0.4, 0), guide = F) + #  "alpha hack"
-  geom_polygon(data = fortify(asia.rest), alpha = 0.5,
+  geom_polygon(data = fortify(asia_rest), alpha = 0.5,
                aes(x = long, y = lat, group = group),
                fill = "grey89", color = "white", size = 1) +
-  geom_polygon(data = fortify(asia.main), alpha = 0.5,
-               aes(x = long, y = lat, group = group, fill = asia.main$category),
+  geom_polygon(data = fortify(asia_main), alpha = 0.5,
+               aes(x = long, y = lat, group = group, fill = asia_main$category),
                color = "white", size = 1) +
   geom_polygon(data = fortify(Singapore), alpha = 0.5,
                aes(x = long, y = lat, group = group),
@@ -394,29 +393,29 @@ map <- ggplot() +
   coord_equal(ratio = 1, xlim = c(25,149), ylim = c(54.9, -25)) + # cropped
   theme_map() +
   theme(legend.position = "none") +
-  geom_text_repel(data = fortify(centroids.df),
+  geom_text_repel(data = fortify(centroids_df),
                   aes(label = Name, size = 12, x = Long, y = Lat),
                   segment.colour = NA)
 plot(map)
 ```
 
 
-## Map with full raster (core and rest)
+## Map with full Raster (Core & Rest)
 
 >Caution: ~3 min rendering time with Intel i7 7500 / 16 GB / SSD
 
 ```{r message=FALSE, cache=TRUE}
 map <- ggplot() +
  # raster
-  geom_raster(data = relief.land_df, aes(x = x, y = y, alpha = value)) +
-  geom_raster(data = relief.meer_df, aes(x = x, y = y, alpha = value)) +
+  geom_raster(data = relief_land_df, aes(x = x, y = y, alpha = value)) +
+  geom_raster(data = relief_meer_df, aes(x = x, y = y, alpha = value)) +
   scale_alpha(name = "", range = c(0.4, 0), guide = F) + # "alpha hack"
-  geom_polygon(data = fortify(asia.rest), alpha = 0.5,
+  geom_polygon(data = fortify(asia_rest), alpha = 0.5,
                aes(x = long, y = lat, group = group),
                fill = "grey89", color = "white", size = 1) +
-  geom_polygon(data = fortify(asia.main), alpha = 0.5,
+  geom_polygon(data = fortify(asia_main), alpha = 0.5,
                aes(x = long, y = lat, group = group,
-                   fill = asia.main$category),
+                   fill = asia_main$category),
                color = "white", size = 1) +
   geom_polygon(data = fortify(Singapore), alpha = 0.5,
                aes(x = long, y = lat, group = group),
@@ -430,7 +429,7 @@ map <- ggplot() +
   coord_equal(ratio = 1, xlim = c(25,149), ylim = c(54.9, -25)) + # cropped
   theme_map() +
   theme(legend.position = "none") +
-  geom_text_repel(data = fortify(centroids.df),
+  geom_text_repel(data = fortify(centroids_df),
                   aes(label = Name, size = 12, x = Long, y = Lat),
                   segment.colour = NA)
 plot(map)
@@ -440,11 +439,11 @@ Not perfect, but sufficient for post-processing the output SVG with a vector pro
 
 Since the map was going to be printed in BW, I decided to provide at least some relieve with regards to the overloaded color scheme. Remember: While ColorBrewer recommends a max of 3 color levels for BW, this map has 4 shades of grey for the 4 core regions, 1 color for water (and borders), and another grey shade for countries which are not part of the core region. Add black for the labels and we end up with 7 colors. So leaving water areas and the rest of the world without relief, while highlighting the core regions by underlying them with a relief kind of works here. Don't @ me :)
 
-## Final processing of output SVG in Affinity Photo / Designer
+## Final Processing of Output SVG in Affinity Photo / Designer
 ![*"Processing the SVG in Affinity"*](/img/mapping_talk/map_affinity.jpg "Processing the SVG"){width=100%}
 
 
-Basically, I just scaled the SVG to 300 dpi, changed the fonts and slightly readjusted the alpha levels of the regions.
+Basically, I just scaled the SVG to 300 dpi, changed the fonts, moved the labels and slightly readjusted the alpha levels of the regions.
 That's it. We're done here.
 (PS: We're not, since someone has to blog about it and maybe even hold it as a lighting talk at a cool workshop)
 
@@ -457,19 +456,19 @@ That's it. We're done here.
 * Demand **precise** specifics:
 
     
-    Full list of ALL features
+    + Full list of ALL **features**
   
-    Print **dimensions** for the map (absoulte in cm/inch or ratio)
+    + Print **dimensions** for the map (absoulte in cm/inch or ratio)
   
-    Publication/**layout** dimensions (page size, font size, orientation/layout, keep in mind 300dpi)
+    + Publication/**layout** dimensions (page size, font size, orientation/layout, keep in mind 300dpi)
     
-    Check whether there's some **Corporate Design** Manual (i.e. for fonts & colors)
+    + Check whether there's some **Corporate Design** Manual (i.e. for fonts & colors)
   
-    Will there be a **caption**? -> If yes, leave some space for it.
+    + Will there be a **caption**? -> If yes, leave some space for it.
     
-    For printing on white paper: do we need a black **border** around the map?
+    + For printing on white paper: do we need a black **border** around the map?
     
-    **Probably best way to start with is to ask for a *sketch*!**
+    + **Probably best way to start with is to ask for a *sketch*!**
 
 * Show-case your first **prototype** as early as possible -> early error detection
 
@@ -483,7 +482,7 @@ That's it. We're done here.
 
 * Encountered some problems and found a way out? --> **Share your knowledge**: Blog / GitHub / Present / Discuss / Revise
 
-* Send the final version as a pre-rendered **robust** PDF (but still include the SVG).
+* Send the final version as a pre-rendered **robust PDF**.
 
 **Thanks for reading!**
 

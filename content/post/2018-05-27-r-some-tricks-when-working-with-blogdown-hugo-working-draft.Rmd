@@ -72,7 +72,7 @@ If numbering is not pre-defined in your theme, you might need to add a `custom.c
       customCSS = ["custom.css"]
     ```
     
->Notice that your `custom.css` has to be saved in `\static\css\`
+>Notice that your `custom.css` has to be saved to `\static\css\`
 
   + Now add the following definitions to your `custom.css`
     ```

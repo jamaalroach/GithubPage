@@ -32,15 +32,9 @@
       {{ .Content }}
     </div>
 
-    <!-- Copyright -->
-    {{ partial "post/copyright.html" . }}
-
-    <!-- Reward -->
-    {{ partial "post/reward.html" . }}
-
     <footer class="post-footer">
       {{ with .Params.tags -}}
-        <div class="post-tags">
+        <div class="post-tags"><strong># Tagged:&nbsp;</strong> 
           {{ range . }}
           <a href="{{ "tags" | relLangURL }}/{{ . | urlize }}/">{{ . }}</a>
           {{ end }}
