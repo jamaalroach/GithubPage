@@ -68,6 +68,8 @@ twitterwidget {
 
 .mobile-navbar{
 	min-width: 235px;
+	max-width: 800px;
+	width: 100%;
 }
 
 /* Headings*/
@@ -207,7 +209,7 @@ h1, h2, h3, h4, h5, h6 {
 /* END styles for regular screens */
 
 
-@media screen and (max-width:799px){
+@media screen and (max-width:800px){
 	.header .logo-wrapper{
     display:none
   }
@@ -302,15 +304,8 @@ h1, h2, h3, h4, h5, h6 {
 	float: right;
 	position: relative;
 	text-align: center;
-	visibility: hidden;
 	height: 50px;
 	width: 50px;
-}
-
-@media screen and (max-width:799px){
-	.icon-twittr-mobile:before {
-		visibility: visible;
-	}
 }
 
 .footer {
