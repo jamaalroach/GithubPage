@@ -235,6 +235,9 @@ h1, h2, h3, h4, h5, h6 {
 	border-top: 2px solid #c05b4d;
 }
 
+.mobile-navbar .mobile-navbar-icon {
+	cursor: pointer;
+}
 .mobile-navbar .mobile-header-logo .logo{
 	font-size:1.4rem;
 	line-height:50px;

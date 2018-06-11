@@ -1,0 +1,13 @@
+base
+ggplot2
+ggrepel
+maps
+ggthemes
+sp
+raster
+lattice
+RColorBrewer
+latticeExtra
+rasterVis
+dplyr
+maptools

@@ -13,6 +13,10 @@
   {{- end }}
 </div>
 -->
+<script>
+    hljs.configure({languages: []});
+    hljs.initHighlightingOnLoad();
+</script>
 
 <div class="copyright">
   <span class="copyright-year">
@@ -22,14 +26,14 @@
 	<span class="division">|</span>
 	<span class="theme-info"><a href="https://github.com/ellocke/GithubPage" class="iconfont icon-github2" target="_blank"><code>Site's Repo</code></a>&nbsp;</span>
   </span>
-  
+
   <span class="power-by">
     {{ (printf (T "powered") `<a class="hexo-link" href="https://gohugo.io">Hugo</a>`) | safeHTML }}
   </span>
   <span class="division">|</span>
   <span class="theme-info">
-    {{ T "theme" }} - 
+    {{ T "theme" }} -
     <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a> <a href="/post/r-some-tricks-when-working-with-blogdown-hugo-working-draft/">(mod.)</a>
   </span>
- 
+
 </div>

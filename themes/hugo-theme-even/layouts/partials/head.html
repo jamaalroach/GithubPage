@@ -28,10 +28,6 @@
   <meta name="keywords" content="{{ range $index, $element := .Site.Params.keywords }}{{ $element | safeHTML }}{{if ne $index $length }}, {{ end }}{{ end }}" />
 {{- end }}
 
-<!-- baidu & google verification  -->
-{{ with .Site.Params.baidu_verification }}<meta name="baidu-site-verification" content="{{.}}" />{{ end }}
-{{ with .Site.Params.google_verification }}<meta name="google-site-verification" content="{{.}}" />{{ end }}
-
 <!-- Site Generator -->
 <meta name="generator" content="Hugo {{ .Hugo.Version }}" />
 
@@ -49,17 +45,6 @@
 <link rel="manifest" href="{{ "manifest.json" | relURL }}">
 <link rel="mask-icon" href="{{ "safari-pinned-tab.svg" | relURL }}" color="#5bbad5">
 
-<!-- debug -->
-{{- if .Site.Params.debug }}
-<script src="https://cdn.jsdelivr.net/npm/eruda@1.2.6/eruda.min.js" integrity="sha256-Jmz4bc3kp+rRrXX2tGadNBKFLwtzMapr8kHABxSAAP8=" crossorigin="anonymous"></script>
-<script>eruda.init();</script>
-{{- end }}
-
-<!-- busuanzi -->
-{{ if .Site.Params.busuanzi.enable -}}
-<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-{{- end }}
-
 <!-- Styles -->
 <link href="{{ "dist/even.min.css?v=3.1.1" | relURL }}" rel="stylesheet">
 {{ if .Site.Params.publicCDN.enable -}}
@@ -67,6 +52,19 @@
 {{- else -}}
   {{ if .Site.Params.fancybox }}<link href="{{ "lib/fancybox/jquery.fancybox-3.1.20.min.css" | relURL }}" rel="stylesheet">{{ end }}
 {{- end }}
+
+<!-- CUSTOM highlighJS -->
+{{ if and (not .Params.disable_highlight) (in (string .Content) "</pre>") }}
+{{ $highTheme := .Site.Params.highlightjsTheme }}
+{{ with .Site.Params.highlightjsVersion }}
+<link rel="stylesheet" href="{{ "/css/styles/" | relURL }}{{ $highTheme }}.css" type="text/css">
+<!-- <script src="{{ "/js/highlight.pack.js" | relURL }}" /></script> -->
+{{ end }}
+{{ end }}
+
+{{ range .Site.Params.customJS }}
+<script src="{{ "/js/" | relURL }}{{ . }}"></script>
+{{ end }}
 
 <!-- custom css -->
 {{ range .Site.Params.customCSS }}

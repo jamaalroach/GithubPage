@@ -1,0 +1,302 @@
+---
+title: '[R] Fetching JSON: Data on the "GitHub to GitLab" Exodus from June 2018'
+author: ''
+date: '2018-06-11'
+slug: r-fetching-json-data-on-the-github-to-gitlab-exodus-from-june-2018
+categories:
+  - Rstats
+  - WebTech
+tags:
+  - JSON
+  - httr
+  - jsonlite
+lastmod: '2018-06-11T11:26:32+02:00'
+output:
+  blogdown::html_page:
+      number_sections: TRUE
+      toc: TRUE
+keywords: []
+description: "I wanted to find a fast approach for fetching JSON data from a API by grabbing the request URL for GET() directly from a dashboard's DOM. Bonus: Dealing with JSON nested lists in R without going crazy."
+thumbnail: "/img/thumbs/gitlab_json_thumb.jpg" # Optional
+comment: no
+autoCollapseToc: no
+postMetaInFooter: no
+hiddenFromHomePage: no
+contentCopyright: no
+reward: no
+mathjax: no
+mathjaxEnableSingleDollar: no
+mathjaxEnableAutoNumber: no
+hideHeaderAndFooter: no
+flowchartDiagrams:
+  enable: no
+  options: ''
+sequenceDiagrams:
+  enable: no
+  options: ''
+---
+
+
+<div id="TOC">
+<ul>
+<li><a href="#inspect-a-websites-dom-http-requests"><span class="toc-section-number">1</span> Inspect a Website’s DOM &amp; HTTP Requests</a></li>
+<li><a href="#extract-json"><span class="toc-section-number">2</span> Extract JSON</a><ul>
+<li><a href="#quick-json-from-file-copy-paste"><span class="toc-section-number">2.1</span> Quick: JSON from File (copy &amp; paste)</a><ul>
+<li><a href="#its-all-about-1"><span class="toc-section-number">2.1.1</span> It’s all about [[1]]</a></li>
+<li><a href="#two-lines-pt.-1"><span class="toc-section-number">2.1.2</span> Two Lines, Pt. 1</a></li>
+</ul></li>
+<li><a href="#robust-fetch-json-from-api-with-get"><span class="toc-section-number">2.2</span> Robust: Fetch JSON from API with GET</a></li>
+<li><a href="#parse-json"><span class="toc-section-number">2.3</span> Parse JSON</a></li>
+</ul></li>
+<li><a href="#from-json-to-tidy"><span class="toc-section-number">3</span> From JSON to Tidy</a><ul>
+<li><a href="#tidy-date-1-with-lubridate"><span class="toc-section-number">3.1</span> Tidy Date #1 with lubridate</a></li>
+<li><a href="#tidy-date-2-type_convert-to-the-rescue-two-lines-pt.-2"><span class="toc-section-number">3.2</span> Tidy Date #2: type_convert() to the Rescue / Two Lines, Pt. 2</a></li>
+</ul></li>
+<li><a href="#plots"><span class="toc-section-number">4</span> Plots</a><ul>
+<li><a href="#hourly-of-repos-migrated-from-github-to-gitlab"><span class="toc-section-number">4.1</span> Hourly # of Repos migrated from GitHub to GitLab</a></li>
+<li><a href="#total-of-repos-cumulated-over-time"><span class="toc-section-number">4.2</span> Total # of Repos, cumulated over Time</a></li>
+<li><a href="#bonus-github-api-rate-limit-hits"><span class="toc-section-number">4.3</span> Bonus: GitHub API Rate Limit Hits</a></li>
+<li><a href="#plot-of-repos-github-api-rate-limit-hits"><span class="toc-section-number">4.4</span> Plot # of Repos &amp; GitHub API Rate Limit Hits</a></li>
+</ul></li>
+</ul>
+</div>
+
+<p><strong>The Problem</strong></p>
+<p>When news broke that <a href="https://www.theverge.com/2018/6/3/17422752/microsoft-github-acquisition-rumors?utm_campaign=theverge&amp;utm_content=chorus&amp;utm_medium=social&amp;utm_source=twitter">Microsoft acquired GitHub</a> on June 3rd 2018, Twitter was lit. I stumbled upon a Tweet with a link to GitLab’s dashboard where you could see various metrics for GitLab’s importer API for GitHub:</p>
+<div class="figure">
+<img src="/img/GitLab_JSON/gitlab_dashboard.jpg" alt="(Screenshot of the GitLab Dashboard for the GitHub Importer on June 4th; Source)" />
+<p class="caption"><em>(Screenshot of the GitLab Dashboard for the GitHub Importer on June 4th; <a href="https://monitor.gitlab.net/dashboard/db/github-importer?orgId=1&amp;from=1528041600000&amp;to=now">Source</a>)</em></p>
+</div>
+<p>Intrigued by the numbers I immediately wanted to calculate the total of repositories imported from GitHub so far, and I wanted to do this with R. However, it turned out that dealing with JSON is not that easy if you’re working with it for the first time, so it took me a couple of <a href="https://twitter.com/fubits/status/1003989014037323778">Tweets</a> (and days) to finally come up with an automated approach. This is how I proceeded:</p>
+<div id="inspect-a-websites-dom-http-requests" class="section level1">
+<h1><span class="header-section-number">1</span> Inspect a Website’s DOM &amp; HTTP Requests</h1>
+<p>My first idea was to extract the data directly from the according HTML object from the dashboard’s <a href="https://monitor.gitlab.net/dashboard/db/github-importer?orgId=1&amp;from=1528041600000&amp;to=now">source</a>. After navigating through the DOM tree I realized that the data is rendered on a <code>canvas</code> element and therefore is not part of the syntax.</p>
+<div class="figure">
+<img src="/img/GitLab_JSON/gitlab_dom.jpg" alt="(The dashboard element in the DOM tree. There’s no data in the canvas object.)" />
+<p class="caption"><em>(The dashboard element in the DOM tree. There’s no data in the canvas object.)</em></p>
+</div>
+<p>We can see that the dashboard is loading the data dynamically (i.e. you can refresh every item) and there are parameters in the URL. This means that there must be some <code>API</code> and <code>GET/POST</code> requests in the site’s HTML.</p>
+<p><em>The formal way would be to consult GitLab’s API documentation…</em></p>
+<p>The quick &amp; dirty way is to locate the request we need <strong>directly in the DOM</strong>. Just right-click somewhere on the page, open the Web Inspector and switch to the <code>Network Analysis</code> Tab. There you see all the requests being processed when the dashboard is loaded in your browser (<em>you might need to reload the page if the tab is empty</em>).</p>
+<p>We’re looking for some queries which return data (most probably <code>XML</code> or <code>JSON</code>), and there you go: The 2nd entry with <code>type: json</code> is the request (and response) for the repositories metric:</p>
+<div class="figure">
+<img src="/img/GitLab_JSON/gitlab_dom2.jpg" alt="(Screenshot of the Network Analysis Tab in Firefox’ DOM inspector)" />
+<p class="caption"><em>(Screenshot of the Network Analysis Tab in Firefox’ DOM inspector)</em></p>
+</div>
+</div>
+<div id="extract-json" class="section level1">
+<h1><span class="header-section-number">2</span> Extract JSON</h1>
+<div id="quick-json-from-file-copy-paste" class="section level2">
+<h2><span class="header-section-number">2.1</span> Quick: JSON from File (copy &amp; paste)</h2>
+<p>If you’re in a hurry, you can copy the JSON data as a string from the response tab, save it as <code>data.json</code> and use the magnificent <code>jsonlite::fromJSON</code> package to get the data into R.</p>
+<div class="figure">
+<img src="/img/GitLab_JSON/gitlab_json.jpg" alt="(Direct copy &amp; past access to the JSON data from the query response tab. Fold the values node if you can’t access the content field)" />
+<p class="caption"><em>(Direct copy &amp; past access to the JSON data from the query response tab. Fold the values node if you can’t access the content field)</em></p>
+</div>
+<p>You’ll get a list of nested lists<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>, have to locate the data node and convert the data into something you can work with (i.e. a tidy data frame). This is the level of insanity where I gave up since I couldn’t manage to iterate over the list without a for-loop:</p>
+<div class="figure">
+<img src="/img/GitLab_JSON/gitlab_json_ugly.jpg" alt="(*Help!*. I can’t process the atomic level.)" />
+<p class="caption"><em>(*Help!*. I can’t process the atomic level.)</em></p>
+</div>
+<p>After all, <strong>my goal</strong> was to find a <strong>2-lines solution</strong> in the manners of <code>readr::read_&lt;data_type&gt;</code>, which must not resort to any <code>map_*</code> / <code>transpose()</code> / <code>DataNinja()</code> multi-line (and often: single specific use-case) approaches.</p>
+{{% tweet "1003989014037323778" %}}
+<div id="its-all-about-1" class="section level3">
+<h3><span class="header-section-number">2.1.1</span> It’s all about [[1]]</h3>
+<p>Just in case you eventually end up with a similar problem, here’s my (pre-)final 2-lines solution. Addressing the <em>“lastest”</em> list of values with <code>[[1]]</code> eventually did the trick. Since the data in this JSON is stored as n+ pairs of lists nested in a single <del>variable</del> list (<code>values</code>) I either ended up with a single column with all the values or with two rows of strings. The only working solution until then seemed to be <a href="https://twitter.com/LandonLehman/status/1004055709875654656">@LandonLehman</a>’s suggested <a href="https://twitter.com/LandonLehman/status/1004055709875654656">double-transpose()</a> approach:</p>
+{{% tweet "1004055709875654656" %}}
+<blockquote>
+<p>Also, Maëlle Salmon was so kind to suggest <a href="https://twitter.com/ma_salmon/status/1003994439793106944">jqr</a> and <a href="https://twitter.com/ma_salmon/status/1004042139435749376">roomba</a> which both seem very promising but did not get me to the point where I could turn the nested lists into a data frame. You should definitely check out both and follow <a href="https://twitter.com/ma_salmon">@ma_salmon</a>.</p>
+</blockquote>
+<p>Only yesterday it somehow striked me that I’m not after the <code>$values</code> <del>variable</del> list, but the list’s unnamed content <code>[[1]]</code>:</p>
+<div class="figure">
+<img src="/img/GitLab_JSON/gitlab_json_file.jpg" alt="(Bummer)" />
+<p class="caption"><em>(Bummer)</em></p>
+</div>
+</div>
+<div id="two-lines-pt.-1" class="section level3">
+<h3><span class="header-section-number">2.1.2</span> Two Lines, Pt. 1</h3>
+<p>From here on, it’s rather straightforward:</p>
+<pre class="r"><code>library(tidyverse) # this line doesn&#39;t count. 
+json_file &lt;- &quot;https://gist.githubusercontent.com/ellocke/498d492dfefd339b8c9884fd07c8f4bb/raw/0efef128bb7dbfe9f3f43c9ce034c6bcdd2ec00a/data.json&quot; # Link to the json.data file in a Gist
+
+# Two lines
+json_copy &lt;- jsonlite::fromJSON(json_file)
+json_copy$data$result$values[[1]] %&gt;% as.tibble() %&gt;% head(5)</code></pre>
+<pre><code>## # A tibble: 5 x 2
+##   V1         V2                
+##   &lt;chr&gt;      &lt;chr&gt;             
+## 1 1528041600 102.43391526291488
+## 2 1528045200 65.27196652719665 
+## 3 1528048800 124.51882845188284
+## 4 1528052400 364.87669611378044
+## 5 1528056000 183.96696534350002</code></pre>
+<blockquote>
+<p>Notice that the values are processed as character strings… We’ll deal with this in a second. Same for the V1 variable which actually is date &amp; time in the <a href="https://en.wikipedia.org/wiki/Unix_time">Unix Timestamp format aka <code>POSIX</code></a>.</p>
+</blockquote>
+<p>Ok, that’ll basically suffice for a quick analysis, but if you want to <em>automate</em> fetching the JSON data from an <code>API</code> instead of manually copying &amp; pasting it every time you update your analysis, there’s only one way: We need to automate the <code>GET</code> request from within <code>R</code>.</p>
+</div>
+</div>
+<div id="robust-fetch-json-from-api-with-get" class="section level2">
+<h2><span class="header-section-number">2.2</span> Robust: Fetch JSON from API with GET</h2>
+<p>First, we need the <code>httr</code>-package, which is a convenient wrapper for lots of common <code>HTTP</code> / <code>curl</code> methods. Check out the <a href="https://cran.r-project.org/web/packages/httr/vignettes/quickstart.html">vignette for <code>httr</code></a>.</p>
+<pre class="r"><code>library(httr)</code></pre>
+<p>Next, we need the query as an <code>URL</code> which we can grab from the Network Analysis tab (see above).</p>
+<pre class="r"><code>DOM_URL &lt;- parse_url(&#39;https://monitor.gitlab.net/api/datasources/proxy/2/api/v1/query_range?query=sum(rate(github_importer_imported_repositories{environment = &quot;prd&quot;}[9000s])) * 3600&amp;start=1528041600&amp;end=1528698457&amp;step=9000&#39;) # we either need to escape &quot;prd&quot; with \&quot;prd\&quot; or use &#39; &#39; for the outer string wrapping
+
+json_raw &lt;- GET(url = DOM_URL)
+http_status(json_raw)$message # let&#39;s check if the GET request was a success (=200)</code></pre>
+<pre><code>## [1] &quot;Success: (200) OK&quot;</code></pre>
+<pre class="r"><code># content(json_dom, &quot;parsed&quot;) # one way to see the content</code></pre>
+</div>
+<div id="parse-json" class="section level2">
+<h2><span class="header-section-number">2.3</span> Parse JSON</h2>
+<p>Now we need to parse the content we received from the request to something we can further process. Right now, the <code>$content</code> node is literally raw:</p>
+<pre class="r"><code># json_raw$content</code></pre>
+<div class="figure">
+<img src="/img/GitLab_JSON/gitlab_json_raw.jpg" alt="(Rawrrrrrr)" />
+<p class="caption"><em>(Rawrrrrrr)</em></p>
+</div>
+<p>Let’s parse it. <code>httr</code> offers a couple of convenient shortcuts here. We can parse the JSON as a <code>String</code> (with <code>as = &quot;text&quot;</code>) and then process it with <code>jsonlite::fromJSON</code>. <del>Or we can instantly parse it to “parsed”&quot; JSON with 1 line.</del> (Not working properly for me, yet)</p>
+<pre class="r"><code>json_parsed &lt;- content(json_raw, as = &quot;text&quot;) # simple, for follow-up with jsonlite::fromJSON()</code></pre>
+<pre><code>## No encoding supplied: defaulting to UTF-8.</code></pre>
+<pre class="r"><code># str(json_parsed)
+# json_object &lt;- content(json_raw, as = &quot;parsed&quot;, type = &quot;application/json&quot;, encoding = &quot;UTF-8&quot;)</code></pre>
+</div>
+</div>
+<div id="from-json-to-tidy" class="section level1">
+<h1><span class="header-section-number">3</span> From JSON to Tidy</h1>
+<p>Now - either on the JSON string or the JSON object (list of lists) - we just need to <code>%&gt;% as.tibble()</code></p>
+<pre class="r"><code>json_object &lt;- jsonlite::fromJSON(json_parsed) # (if parsed with &#39;as = &quot;text&quot;&#39;)
+json_object$data$result$values[[1]] %&gt;% as.tibble() -&gt; json_dirty
+# json_object$data$result[[1]][[2]] %&gt;% as.tibble() -&gt; json_dirty # not working, yet
+# json_object[[&quot;data&quot;]][[&quot;result&quot;]][[1]][[&quot;values&quot;]] %&gt;% as.tibble() # not working, yet
+head(json_dirty, 5) #&gt; 2x chr</code></pre>
+<pre><code>## # A tibble: 5 x 2
+##   V1         V2                
+##   &lt;chr&gt;      &lt;chr&gt;             
+## 1 1528038000 111.38641689921683
+## 2 1528047000 85.34487094798286 
+## 3 1528056000 250.02770088331968
+## 4 1528065000 1817.690458983883 
+## 5 1528074000 2722.2921871994813</code></pre>
+<p>As both columns/variables are coded as character strings - and we want to have the first column as a <code>Date</code> type variable - we’d need to use <code>mutate</code> on both. Furthermore, <code>lubridate::as_datetime</code> is of insane value here but needs something numeric, too. We actually have Unix Timestamp data here which would be <code>something * something * 86400</code> seconds if you wanted to convert it to a human readable format. <code>as_datetime()</code> simply does it with one call.</p>
+<div id="tidy-date-1-with-lubridate" class="section level2">
+<h2><span class="header-section-number">3.1</span> Tidy Date #1 with lubridate</h2>
+<pre class="r"><code>json_dirty %&gt;%
+  mutate(V1 = lubridate::as_datetime(as.numeric(V1)), # first to int, then to date
+         V2 = as.numeric(V2)) -&gt; json_tidy
+head(json_tidy)</code></pre>
+<pre><code>## # A tibble: 6 x 2
+##   V1                      V2
+##   &lt;dttm&gt;               &lt;dbl&gt;
+## 1 2018-06-03 15:00:00  111. 
+## 2 2018-06-03 17:30:00   85.3
+## 3 2018-06-03 20:00:00  250. 
+## 4 2018-06-03 22:30:00 1818. 
+## 5 2018-06-04 01:00:00 2722. 
+## 6 2018-06-04 03:30:00 3688.</code></pre>
+<p>However, we can simplify this <strong>even further</strong>!</p>
+</div>
+<div id="tidy-date-2-type_convert-to-the-rescue-two-lines-pt.-2" class="section level2">
+<h2><span class="header-section-number">3.2</span> Tidy Date #2: type_convert() to the Rescue / Two Lines, Pt. 2</h2>
+<pre class="r"><code># json_object &lt;- jsonlite::fromJSON(json_parsed)
+json_object$data$result$values[[1]] %&gt;% as.tibble() %&gt;% type_convert() -&gt; json_dirty</code></pre>
+<pre><code>## Parsed with column specification:
+## cols(
+##   V1 = col_integer(),
+##   V2 = col_double()
+## )</code></pre>
+<pre class="r"><code>head(json_dirty, 5) # &gt; int &amp; dbl</code></pre>
+<pre><code>## # A tibble: 5 x 2
+##           V1     V2
+##        &lt;int&gt;  &lt;dbl&gt;
+## 1 1528038000  111. 
+## 2 1528047000   85.3
+## 3 1528056000  250. 
+## 4 1528065000 1818. 
+## 5 1528074000 2722.</code></pre>
+<p>Now the date &amp; time / <code>POSIX</code> column:</p>
+<pre class="r"><code>json_dirty %&gt;%
+  mutate(V1 = lubridate::as_datetime((V1))) -&gt; json_tidy
+head(json_tidy) # &gt; V1 == &lt;dttm&gt;</code></pre>
+<pre><code>## # A tibble: 6 x 2
+##   V1                      V2
+##   &lt;dttm&gt;               &lt;dbl&gt;
+## 1 2018-06-03 15:00:00  111. 
+## 2 2018-06-03 17:30:00   85.3
+## 3 2018-06-03 20:00:00  250. 
+## 4 2018-06-03 22:30:00 1818. 
+## 5 2018-06-04 01:00:00 2722. 
+## 6 2018-06-04 03:30:00 3688.</code></pre>
+<p><strong>Ok, almost done. Let’s rename the variables to something meaningful with <code>rename()</code> and finally plot the data</strong></p>
+<p>(Yes, we could also have used</p>
+<blockquote>
+<p><code>json_tidy %&gt;% mutate(date = V1, repos = V2) %&gt;% select(-V1, -V2)</code></p>
+</blockquote>
+<p>but <code>rename()</code> seems more efficient here.</p>
+<pre class="r"><code>json_tidy %&gt;% rename(date = V1, repos = V2) -&gt; json_tidy</code></pre>
+</div>
+</div>
+<div id="plots" class="section level1">
+<h1><span class="header-section-number">4</span> Plots</h1>
+<div id="hourly-of-repos-migrated-from-github-to-gitlab" class="section level2">
+<h2><span class="header-section-number">4.1</span> Hourly # of Repos migrated from GitHub to GitLab</h2>
+<pre class="r"><code>json_tidy %&gt;%
+  ggplot(aes(x = date, y = repos)) +
+  geom_line()</code></pre>
+<p><img src="/post/2018-06-11-r-fetching-json-data-on-the-github-to-gitlab-exodus-from-june-2018_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+</div>
+<div id="total-of-repos-cumulated-over-time" class="section level2">
+<h2><span class="header-section-number">4.2</span> Total # of Repos, cumulated over Time</h2>
+<pre class="r"><code>json_tidy %&gt;% 
+  ggplot(aes(x = date, y = repos)) + 
+    geom_line(aes(y = cumsum(repos)))</code></pre>
+<p><img src="/post/2018-06-11-r-fetching-json-data-on-the-github-to-gitlab-exodus-from-june-2018_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+</div>
+<div id="bonus-github-api-rate-limit-hits" class="section level2">
+<h2><span class="header-section-number">4.3</span> Bonus: GitHub API Rate Limit Hits</h2>
+<p>Same procedure as above:</p>
+<ul>
+<li>find the request’s URL</li>
+<li>fetch with <code>httr</code>, parse with <code>jsonlite</code></li>
+<li>tidy with <code>dplyr</code> &amp; plot with <code>ggplot</code></li>
+</ul>
+<p><strong>GET the Query</strong></p>
+<pre class="r"><code>DOM_URL_rates &lt;- parse_url(&#39;https://monitor.gitlab.net/api/datasources/proxy/2/api/v1/query_range?query=sum(rate(github_importer_rate_limit_hits%7Benvironment%3D%22prd%22%7D%5B3600s%5D))%20*%203600&amp;start=1528041600&amp;end=1528698457&amp;step=3600&#39;) # we either need to escape &quot;prd&quot; with \&quot;prd\&quot; or use &#39; &#39; for the outer string wrapping
+json_rates &lt;- GET(url = DOM_URL_rates)
+# http_status(json_rates)
+# content(json_dom, &quot;parsed&quot;)</code></pre>
+<p><strong>Parse JSON</strong></p>
+<p>Now that we know how deal with the JSON output we can actually do the processing in a single working step.</p>
+<blockquote>
+<p>Technically, without intending this would fit in two lines of code :)</p>
+</blockquote>
+<pre class="r"><code>json_rates &lt;- content(json_rates, &quot;text&quot;, encoding = &quot;UTF-8&quot;) # UTF-8 == default
+jsonlite::fromJSON(json_rates)$data$result$values[[1]] %&gt;%
+  as.tibble() %&gt;% 
+  type_convert() %&gt;%
+  mutate(V1 = lubridate::as_datetime(V1)) %&gt;% 
+  rename(date = V1, limit_hits = V2) -&gt; json_rates</code></pre>
+<pre><code>## Parsed with column specification:
+## cols(
+##   V1 = col_integer(),
+##   V2 = col_double()
+## )</code></pre>
+</div>
+<div id="plot-of-repos-github-api-rate-limit-hits" class="section level2">
+<h2><span class="header-section-number">4.4</span> Plot # of Repos &amp; GitHub API Rate Limit Hits</h2>
+<pre class="r"><code>ggplot() +
+  geom_line(data = json_tidy, aes(x = date, y = repos), color = &quot;blue&quot;) +
+  geom_line(data = json_rates, aes(x = date, y = limit_hits), color = &quot;red&quot;)</code></pre>
+<p><img src="/post/2018-06-11-r-fetching-json-data-on-the-github-to-gitlab-exodus-from-june-2018_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<blockquote>
+<p>Done! Actually, not that hard right? Only took me a couple of days to figure this out… I’ll update this post as soon as I have found a more efficient way (in lines of code).</p>
+</blockquote>
+</div>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>An analogy I came up with while writing this is think of arriving at the <em>last</em> node - but actually you need the <em>“lastest”</em>. This is a reference to the German miss-term <em>Einzigste</em> which is a superlative of the superlative for “the one and only” which would be something like “the one and <em>onlyest</em>”.<a href="#fnref1">↩</a></p></li>
+</ol>
+</div>

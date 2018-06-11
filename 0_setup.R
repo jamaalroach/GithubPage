@@ -24,5 +24,20 @@ blogdown::hugo_build()
 #####
 thumbnail: "/img/thumbs/file.jpg" # Optional
 
-{{< tweet 981532034106576901 >}}
+{{< tweet 981532034106576901 >}} # Markdon
+
+#R Markdown
+
+```{r echo=FALSE}
+blogdown::shortcode('tweet', '852205086956818432')
+```
 #####
+
+# YAML Header
+output:
+  blogdown::html_page:
+    number_sections: TRUE
+    toc: TRUE
+keywords: []
+description: ""
+thumbnail: "/img/thumbs/map_asia.jpg" # Optional

@@ -58,7 +58,7 @@ If you want numbering (in your TOC and for your headings/chapters), add `number_
 
 ```
 output:
-  blogdown::html_page:`
+  blogdown::html_page:
       number_sections: true
       toc: TRUE
 ```
