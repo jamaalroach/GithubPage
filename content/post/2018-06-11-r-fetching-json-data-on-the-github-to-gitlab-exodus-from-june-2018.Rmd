@@ -137,9 +137,25 @@ Now we need to parse the content we received from the request to something we ca
 Let's parse it. `httr` offers a couple of convenient shortcuts here. We can parse the JSON as a `String` (with `as = "text"`) and then process it with `jsonlite::fromJSON`. ~~Or we can instantly parse it to "parsed"" JSON with 1 line.~~ (Not working properly for me, yet)
 
 ```{r}
+# as = "text"
 json_parsed <- content(json_raw, as = "text") # simple, for follow-up with jsonlite::fromJSON()
 # str(json_parsed)
+
+#  as = "parsed" 
 # json_object <- content(json_raw, as = "parsed", type = "application/json", encoding = "UTF-8")
+## this forces us to use something like
+## json_object$data$result[[1]]$values %>%
+##    transpose() %>%
+##      {do.call(cbind,.)} %>%
+##      as.tibble() %>%
+##      unnest()
+## OR
+## json_object$data$result[[1]]$values %>%
+##      transpose() %>%
+##      set_names(c("date", "value")) %>%
+##      as.tibble() %>%
+##      unnest()
+## HORRIBLE!
 ```
 
 # From JSON to Tidy
