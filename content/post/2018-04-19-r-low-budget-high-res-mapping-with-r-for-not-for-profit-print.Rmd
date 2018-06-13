@@ -19,6 +19,7 @@ output:
 keywords: []
 description: "Once upon a time (and long before I learned about the tidyverse and %>%, a colleague from a not-for-profit org asked for help with a map for a book. This is a how-to based on a lightning talk on how I created a CC-0 based high-res map with Rstats."
 thumbnail: "/img/thumbs/map_asia.jpg" # Optional
+rmdlink: TRUE
 comment: no
 autoCollapseToc: no
 postMetaInFooter: no

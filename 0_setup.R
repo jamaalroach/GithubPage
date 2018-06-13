@@ -41,3 +41,4 @@ output:
 keywords: []
 description: ""
 thumbnail: "/img/thumbs/map_asia.jpg" # Optional
+rmdlink: TRUE # Optional

@@ -18,6 +18,7 @@ output:
 keywords: []
 description: "I wanted to find a fast approach for fetching JSON data from a API by grabbing the request URL for GET() directly from a dashboard's DOM. Bonus: Dealing with JSON nested lists in R without going crazy."
 thumbnail: "/img/thumbs/gitlab_json_thumb.jpg" # Optional
+rmdlink: TRUE
 comment: no
 autoCollapseToc: no
 postMetaInFooter: no
@@ -35,7 +36,7 @@ sequenceDiagrams:
   enable: no
   options: ''
 ---
-**The Problem**
+# The Setting
 
 When news broke that [Microsoft acquired GitHub](https://www.theverge.com/2018/6/3/17422752/microsoft-github-acquisition-rumors?utm_campaign=theverge&utm_content=chorus&utm_medium=social&utm_source=twitter) on June 3rd 2018, Twitter was lit. I stumbled upon a Tweet with a link to GitLab's dashboard where you could see various metrics for GitLab's importer API for GitHub:
 
