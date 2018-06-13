@@ -87,7 +87,7 @@ blogdown::shortcode('tweet', '1004055709875654656')
 
 >Also, Maëlle Salmon was so kind to suggest [jqr](https://twitter.com/ma_salmon/status/1003994439793106944) and [roomba](https://twitter.com/ma_salmon/status/1004042139435749376) which both seem very promising but did not get me to the point where I could turn the nested lists into a data frame. You should definitely check out both and follow [\@ma_salmon](https://twitter.com/ma_salmon).
 
-Only yesterday it somehow striked me that I'm not after the `$values` ~~variable~~ list, but the list's unnamed content `[[1]]`:
+Only yesterday it somehow struck me that I'm not after the `$values` ~~variable~~ list, but the list's unnamed content `[[1]]`:
 
 ![*(Bummer)*](/img/GitLab_JSON/gitlab_json_file.jpg)
 
