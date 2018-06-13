@@ -157,10 +157,26 @@ http_status(json_raw)$message # let&#39;s check if the GET request was a success
 <p class="caption"><em>(Rawrrrrrr)</em></p>
 </div>
 <p>Let’s parse it. <code>httr</code> offers a couple of convenient shortcuts here. We can parse the JSON as a <code>String</code> (with <code>as = &quot;text&quot;</code>) and then process it with <code>jsonlite::fromJSON</code>. <del>Or we can instantly parse it to “parsed”&quot; JSON with 1 line.</del> (Not working properly for me, yet)</p>
-<pre class="r"><code>json_parsed &lt;- content(json_raw, as = &quot;text&quot;) # simple, for follow-up with jsonlite::fromJSON()</code></pre>
+<pre class="r"><code># as = &quot;text&quot;
+json_parsed &lt;- content(json_raw, as = &quot;text&quot;) # simple, for follow-up with jsonlite::fromJSON()</code></pre>
 <pre><code>## No encoding supplied: defaulting to UTF-8.</code></pre>
 <pre class="r"><code># str(json_parsed)
-# json_object &lt;- content(json_raw, as = &quot;parsed&quot;, type = &quot;application/json&quot;, encoding = &quot;UTF-8&quot;)</code></pre>
+
+#  as = &quot;parsed&quot; 
+# json_object &lt;- content(json_raw, as = &quot;parsed&quot;, type = &quot;application/json&quot;, encoding = &quot;UTF-8&quot;)
+## this forces us to use something like
+## json_object$data$result[[1]]$values %&gt;%
+##    transpose() %&gt;%
+##      {do.call(cbind,.)} %&gt;%
+##      as.tibble() %&gt;%
+##      unnest()
+## OR
+## json_object$data$result[[1]]$values %&gt;%
+##      transpose() %&gt;%
+##      set_names(c(&quot;date&quot;, &quot;value&quot;)) %&gt;%
+##      as.tibble() %&gt;%
+##      unnest()
+## HORRIBLE!</code></pre>
 </div>
 </div>
 <div id="from-json-to-tidy" class="section level1">
