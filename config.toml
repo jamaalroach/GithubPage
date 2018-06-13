@@ -42,6 +42,11 @@ copyright = ""            # default: author.name ↓
   identifier = "categories"
   url = "/categories/"
  [[menu.main]]
+  name = "Tags"
+  weight = 35
+  identifier = "tags"
+  url = "/tags/"
+ [[menu.main]]
   name = "About"
   weight = 40
   identifier = "about"
