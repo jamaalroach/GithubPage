@@ -22,7 +22,7 @@
 
   <!-- custom Thumbnail content -->
 	{{- if .Params.thumbnail }}
-	<div class="list__thumbnail">
+	<div class="thumbnail-post">
 		<a href="{{ .Permalink }}">
 			<img src="{{ .Params.thumbnail | relURL }}" alt="{{ .Title }}" />
 		</a>

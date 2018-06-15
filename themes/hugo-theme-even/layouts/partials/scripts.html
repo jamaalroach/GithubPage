@@ -1,11 +1,10 @@
 <!-- js -->
 <!-- <script src="{{ "lib/highlight/highlight.pack.js?v=20171001" | relURL }}"></script> -->
+<script type="text/javascript" src="{{ "lib/jquery/jquery-3.2.1.min.js" | relURL }}"></script>
 {{- if .Site.Params.publicCDN.enable }}
-  {{ .Site.Params.publicCDN.jquery | safeHTML }}
   {{ .Site.Params.publicCDN.slideout | safeHTML }}
   {{ if .Site.Params.fancybox }}{{ .Site.Params.publicCDN.fancyboxJs | safeHTML }}{{ end }}
 {{- else -}}
-  <script type="text/javascript" src="{{ "lib/jquery/jquery-3.2.1.min.js" | relURL }}"></script>
   <script type="text/javascript" src="{{ "lib/slideout/slideout-1.0.1.min.js" | relURL }}"></script>
   {{ if .Site.Params.fancybox }}<script type="text/javascript" src="{{ "lib/fancybox/jquery.fancybox-3.1.20.min.js" | relURL }}"></script>{{ end }}
 {{- end -}}
@@ -18,6 +17,7 @@ jQuery(function () {
     var page = location.pathname.split('/')[1];
     if (page == "") {page = "home"};
     if (page == "post") {page = "posts"};
+    if (page == "categories") {page = "tags"};
     $('nav ul a').each(
       function() {
       if (page == this.id.toLowerCase()) {
@@ -25,9 +25,14 @@ jQuery(function () {
         }
       })
 })
+
+jQuery(function () {
+  $("pre").addClass("r");
+})
 </script>
 <!-- custom Ende -->
 
+<!--
 {{- if and (or .Params.mathjax (and .Site.Params.mathjax (ne .Params.mathjax false))) (or .IsPage .IsHome) }}
   <script type="text/javascript">
     window.MathJax = {
@@ -43,8 +48,4 @@ jQuery(function () {
   </script>
   <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML"></script>
 {{- end }}
-
-
-
-<!-- custom js -->
-<!-- moved to head.html -->
+-->

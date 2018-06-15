@@ -3,17 +3,19 @@
 {{ define "content"}}
 {{ $paginator := .Paginate (where .Data.Pages.ByDate.Reverse "Type" "post") .Site.Params.archivePaginate }}
 <section id="archive" class="archive">
+
   {{ if not $paginator.HasPrev }}
     {{ if eq .Data.Plural "tags" }}
       <div class="archive-title tag">
-        <h2 class="archive-name">{{ .Title }}</h2>
+        <h2 class="archive-name">Tag: {{ .Title }}</h2>
       </div>
     {{ else if eq .Data.Plural "categories" }}
       <div class="archive-title category">
-        <h2 class="archive-name">{{ .Title }}</h2>
+        <h2 class="archive-name">Category: {{ .Title }}</h2>
       </div>
     {{ end }}
   {{ end }}
+
 
   {{ range $paginator.Pages }}
     <div class="archive-post">
