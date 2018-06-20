@@ -15,7 +15,9 @@ I'm a Combat Veteran^[Army / Mechanized Infantry] turned Accidental Academic / S
 
 ## This Site
 
-Mostly, I'll be writing about solutions to problems you didn't know you had or won't ever have since you're not using Windows 10. My current **focus** is on creating stuff with R (SNA, DataViz, Maps, Publishing/Writing/Blogging). However, Python + Machine Learning / Deep Learning is around the corner, so feel free to check back later.
+~~Mostly, I'll be writing about solutions to problems you didn't know you had or won't ever have since you're not using Windows 10.~~ My current **focus** is on creating stuff with R (SNA, DataViz, Maps, Publishing/Writing/Blogging). Right now, I'm taking Geocomputation / GIS and Web Technologies classes in preperation for my thesis, so I'll propbaly cover that, too, soon-ish.
+
+However, Python + Machine Learning / Deep Learning is around the corner, so feel free to check back later. 
 
 After all, it's [#SummerOfMachineLearning](https://twitter.com/fubits/status/981532034106576901):
 
@@ -38,4 +40,4 @@ Feel free to drop a line any time.
 
 # Data Protection, Privacy, GPDR
 
-This is a **static site** written with R Markdown and compiled and rendered locally (with [Hugo](https://gohugo.io/) powered by [Blogdown](https://github.com/rstudio/blogdown)) on my laptop without a CMS, data bases, cookies, trackers, whatever. I don't run a mailing list, don't collect any data and there's nothing to opt in on MY website [https://ellocke.github.io/*](https://ellocke.github.io/). When in doubt, consult [this](https://discourse.gohugo.io/t/hugo-vs-the-general-data-protection-regulations-gdpr-in-eu-eea/11526) or [**XKCD**](https://www.explainxkcd.com/wiki/index.php/1998:_GDPR).
+This is a **static site** written with R Markdown and compiled and rendered locally (with [Hugo](https://gohugo.io/) powered by [Blogdown](https://github.com/rstudio/blogdown)) on my laptop without a CMS, data bases, cookies, trackers, whatever. I don't run a mailing list, don't collect any data and there's nothing to opt in here [https://ellocke.github.io/*](https://ellocke.github.io/). When in doubt, consult [this](https://discourse.gohugo.io/t/hugo-vs-the-general-data-protection-regulations-gdpr-in-eu-eea/11526) or [**XKCD**](https://www.explainxkcd.com/wiki/index.php/1998:_GDPR).

@@ -36,6 +36,9 @@ sequenceDiagrams:
   enable: no
   options: ''
 ---
+
+> Update: [Further Reading](#further-reading) included
+
 # The Setting
 
 When news broke that [Microsoft acquired GitHub](https://www.theverge.com/2018/6/3/17422752/microsoft-github-acquisition-rumors?utm_campaign=theverge&utm_content=chorus&utm_medium=social&utm_source=twitter) on June 3rd 2018, Twitter was lit. I stumbled upon a Tweet with a link to GitLab's dashboard where you could see various metrics for GitLab's importer API for GitHub:
@@ -268,3 +271,13 @@ ggplot() +
 ```
 
 > Done! Actually, not that hard right? Only took me a couple of days to figure this out... I'll update this post as soon as I have found a more efficient way (in lines of code).
+
+# Update: Further Reading
+
+ + [Oscar Lane](https://twitter.com/OscarNLane) just published a more generalized approach to mining data from "Browser-based" APIs: ["Reverse engineering web APIs for scraping"](https://oscarl.netlify.com/2018/06/14/reverse-engineering-web-apis-for-scraping/)
+ 
+ 
+    His `map_*`-approach to JSON looks very efficient:
+    
+    
+    ![](/img/Gitlab_JSON/oscar_lane_map.jpg)

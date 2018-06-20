@@ -362,6 +362,7 @@ h1, h2, h3, h4, h5, h6 {
 	border-top: 1px dashed #c05b4d;
 }
 
+/* change late to code:not(.post) */
 .footer code{
 	padding: 3px 5px;
 	border-radius: 4px;
@@ -387,5 +388,5 @@ h1, h2, h3, h4, h5, h6 {
 	border-radius: 4px;
 	font-family: Consolas,Monaco,Menlo,monospace;
 	background: #f8f5ec;
-	font-size: 0.85em;
+	font-size: 1em;
 }

@@ -60,9 +60,13 @@ sequenceDiagrams:
 <li><a href="#bonus-github-api-rate-limit-hits"><span class="toc-section-number">5.3</span> Bonus: GitHub API Rate Limit Hits</a></li>
 <li><a href="#plot-of-repos-github-api-rate-limit-hits"><span class="toc-section-number">5.4</span> Plot # of Repos &amp; GitHub API Rate Limit Hits</a></li>
 </ul></li>
+<li><a href="#update-further-reading"><span class="toc-section-number">6</span> Update: Further Reading</a></li>
 </ul>
 </div>
 
+<blockquote>
+<p>Update: <a href="#further-reading">Further Reading</a> included</p>
+</blockquote>
 <div id="the-setting" class="section level1">
 <h1><span class="header-section-number">1</span> The Setting</h1>
 <p>When news broke that <a href="https://www.theverge.com/2018/6/3/17422752/microsoft-github-acquisition-rumors?utm_campaign=theverge&amp;utm_content=chorus&amp;utm_medium=social&amp;utm_source=twitter">Microsoft acquired GitHub</a> on June 3rd 2018, Twitter was lit. I stumbled upon a Tweet with a link to GitLab’s dashboard where you could see various metrics for GitLab’s importer API for GitHub:</p>
@@ -194,11 +198,11 @@ head(json_dirty, 5) #&gt; 2x chr</code></pre>
 <pre><code>## # A tibble: 5 x 2
 ##   V1         V2                
 ##   &lt;chr&gt;      &lt;chr&gt;             
-## 1 1528038000 111.38641689921683
-## 2 1528047000 85.34487094798286 
-## 3 1528056000 250.02770088331968
-## 4 1528065000 1817.690458983883 
-## 5 1528074000 2722.2921871994813</code></pre>
+## 1 1529136000 20.475281924890098
+## 2 1529136000 20.475281924890098
+## 3 1529136000 20.475281924890098
+## 4 1529145000 63.30551319533758 
+## 5 1529154000 66.11018332724854</code></pre>
 <p>As both columns/variables are coded as character strings - and we want to have the first column as a <code>Date</code> type variable - we’d need to use <code>mutate</code> on both. Furthermore, <code>lubridate::as_datetime</code> is of insane value here but needs something numeric, too. We actually have Unix Timestamp data here which would be <code>something * something * 86400</code> seconds if you wanted to convert it to a human readable format. <code>as_datetime()</code> simply does it with one call.</p>
 <div id="tidy-date-1-with-lubridate" class="section level2">
 <h2><span class="header-section-number">4.1</span> Tidy Date #1 with lubridate</h2>
@@ -207,14 +211,14 @@ head(json_dirty, 5) #&gt; 2x chr</code></pre>
          V2 = as.numeric(V2)) -&gt; json_tidy
 head(json_tidy)</code></pre>
 <pre><code>## # A tibble: 6 x 2
-##   V1                      V2
-##   &lt;dttm&gt;               &lt;dbl&gt;
-## 1 2018-06-03 15:00:00  111. 
-## 2 2018-06-03 17:30:00   85.3
-## 3 2018-06-03 20:00:00  250. 
-## 4 2018-06-03 22:30:00 1818. 
-## 5 2018-06-04 01:00:00 2722. 
-## 6 2018-06-04 03:30:00 3688.</code></pre>
+##   V1                     V2
+##   &lt;dttm&gt;              &lt;dbl&gt;
+## 1 2018-06-16 08:00:00  20.5
+## 2 2018-06-16 08:00:00  20.5
+## 3 2018-06-16 08:00:00  20.5
+## 4 2018-06-16 10:30:00  63.3
+## 5 2018-06-16 13:00:00  66.1
+## 6 2018-06-16 15:30:00 193.</code></pre>
 <p>However, we can simplify this <strong>even further</strong>!</p>
 </div>
 <div id="tidy-date-2-type_convert-to-the-rescue-two-lines-pt.-2" class="section level2">
@@ -228,26 +232,26 @@ json_object$data$result$values[[1]] %&gt;% as.tibble() %&gt;% type_convert() -&g
 ## )</code></pre>
 <pre class="r"><code>head(json_dirty, 5) # &gt; int &amp; dbl</code></pre>
 <pre><code>## # A tibble: 5 x 2
-##           V1     V2
-##        &lt;int&gt;  &lt;dbl&gt;
-## 1 1528038000  111. 
-## 2 1528047000   85.3
-## 3 1528056000  250. 
-## 4 1528065000 1818. 
-## 5 1528074000 2722.</code></pre>
+##           V1    V2
+##        &lt;int&gt; &lt;dbl&gt;
+## 1 1529136000  20.5
+## 2 1529136000  20.5
+## 3 1529136000  20.5
+## 4 1529145000  63.3
+## 5 1529154000  66.1</code></pre>
 <p>Now the date &amp; time / <code>POSIX</code> column:</p>
 <pre class="r"><code>json_dirty %&gt;%
   mutate(V1 = lubridate::as_datetime((V1))) -&gt; json_tidy
 head(json_tidy) # &gt; V1 == &lt;dttm&gt;</code></pre>
 <pre><code>## # A tibble: 6 x 2
-##   V1                      V2
-##   &lt;dttm&gt;               &lt;dbl&gt;
-## 1 2018-06-03 15:00:00  111. 
-## 2 2018-06-03 17:30:00   85.3
-## 3 2018-06-03 20:00:00  250. 
-## 4 2018-06-03 22:30:00 1818. 
-## 5 2018-06-04 01:00:00 2722. 
-## 6 2018-06-04 03:30:00 3688.</code></pre>
+##   V1                     V2
+##   &lt;dttm&gt;              &lt;dbl&gt;
+## 1 2018-06-16 08:00:00  20.5
+## 2 2018-06-16 08:00:00  20.5
+## 3 2018-06-16 08:00:00  20.5
+## 4 2018-06-16 10:30:00  63.3
+## 5 2018-06-16 13:00:00  66.1
+## 6 2018-06-16 15:30:00 193.</code></pre>
 <p><strong>Ok, almost done. Let’s rename the variables to something meaningful with <code>rename()</code> and finally plot the data</strong></p>
 <p>(Yes, we could also have used</p>
 <blockquote>
@@ -313,6 +317,17 @@ jsonlite::fromJSON(json_rates)$data$result$values[[1]] %&gt;%
 <p>Done! Actually, not that hard right? Only took me a couple of days to figure this out… I’ll update this post as soon as I have found a more efficient way (in lines of code).</p>
 </blockquote>
 </div>
+</div>
+<div id="update-further-reading" class="section level1">
+<h1><span class="header-section-number">6</span> Update: Further Reading</h1>
+<ul>
+<li><p><a href="https://twitter.com/OscarNLane">Oscar Lane</a> just published a more generalized approach to mining data from “Browser-based” APIs: <a href="https://oscarl.netlify.com/2018/06/14/reverse-engineering-web-apis-for-scraping/">“Reverse engineering web APIs for scraping”</a></p>
+<p>His <code>map_*</code>-approach to JSON looks very efficient:</p>
+<div class="figure">
+<img src="/img/Gitlab_JSON/oscar_lane_map.jpg" />
+
+</div></li>
+</ul>
 </div>
 <div class="footnotes">
 <hr />
