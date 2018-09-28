@@ -49,8 +49,8 @@ sequenceDiagrams:
 <li><a href="#sophisticated-with-windows.linux"><span class="toc-section-number">3.2.3</span> Sophisticated with “Windows.Linux”&quot;</a></li>
 </ul></li>
 </ul></li>
-<li><a href="#some-other-common-errors-troubles-with-blogdownhugo"><span class="toc-section-number">4</span> Some other common Errors / Troubles with Blogdown/Hugo</a><ul>
-<li><a href="#seimpl"><span class="toc-section-number">4.1</span> seImpl()</a></li>
+<li><a href="#some-other-common-errors-troubles-with-blogdownhugo-updated"><span class="toc-section-number">4</span> Some other common Errors / Troubles with Blogdown/Hugo (Updated)</a><ul>
+<li><a href="#seimpl-updated-resolved"><span class="toc-section-number">4.1</span> <del>seImpl()</del> (Updated / resolved)</a></li>
 <li><a href="#tomlparseimpl"><span class="toc-section-number">4.2</span> tomlparseImpl()</a></li>
 <li><a href="#render_pagef"><span class="toc-section-number">4.3</span> render_page(f)</a></li>
 </ul></li>
@@ -185,8 +185,8 @@ sequenceDiagrams:
 </div>
 </div>
 </div>
-<div id="some-other-common-errors-troubles-with-blogdownhugo" class="section level1">
-<h1><span class="header-section-number">4</span> Some other common Errors / Troubles with Blogdown/Hugo</h1>
+<div id="some-other-common-errors-troubles-with-blogdownhugo-updated" class="section level1">
+<h1><span class="header-section-number">4</span> Some other common Errors / Troubles with Blogdown/Hugo (Updated)</h1>
 <p>When running <code>blogdown:::serve_site()</code> or trying to render your website by other means you might encounter one of the following warning messages:</p>
 <blockquote>
 <p>‘—did you forget a’#‘? at line 1&gt;<code>seImpl(path.expand(input)</code>, verbose, fromFile):<br />
@@ -203,9 +203,12 @@ Unidentified trailing character ‘l’—did you forget a ‘#’? at line <str
 <p>something ending with <code>Error in render_page(f)</code></p>
 </blockquote>
 <p>It’s probably because you either made (<strong>legit</strong>) changes to your <code>config.toml</code> while the preview was still running or you made a syntactical <strong>mistake</strong> to your <code>config.toml</code> or your <code>.Rmd</code> post’s <code>yaml</code>-header while/before the preview was running. In these cases the preview fails to (re-)render.</p>
-<div id="seimpl" class="section level2">
-<h2><span class="header-section-number">4.1</span> seImpl()</h2>
-<p>For <code>seImpl</code> (appears to mostly concern legit changes to config.toml) it seems that simply restarting the R session helps. Just run the following command in the console, and everything should be fine:</p>
+<div id="seimpl-updated-resolved" class="section level2">
+<h2><span class="header-section-number">4.1</span> <del>seImpl()</del> (Updated / resolved)</h2>
+<blockquote>
+<p>UPDATE: <a href="https://github.com/ellocke/GithubPage/issues/1#issue-339175165" target="_blank">As Yihui has pointed out</a>, the <code>seImpl()</code> problem was Windows-specific and has been fixed in <code>blogdown v.0.7</code>.</p>
+</blockquote>
+<p><del>For <code>seImpl</code> (appears to mostly concern legit changes to config.toml) it seems that simply restarting the R session helps. Just run the following command in the console, and everything should be fine:</del></p>
 <pre class="r"><code>.rs.restartR() # keep the leading &quot;.&quot;
 blogdown::serve_site()</code></pre>
 </div>

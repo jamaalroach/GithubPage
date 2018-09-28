@@ -22,6 +22,10 @@ blogdown::hugo_build()
 
 # Undocumented (yet)
 #####
+# Links
+[Text](URL){target="_blank"}
+
+
 thumbnail: "/img/thumbs/file.jpg" # Optional
 
 {{< tweet 981532034106576901 >}} # Markdon

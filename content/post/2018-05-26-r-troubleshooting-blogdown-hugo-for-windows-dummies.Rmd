@@ -167,8 +167,11 @@ Install hugo into your Linux environment:
 
 When this is done, run `hugo -v` in the Terminal anytime without ever leaving RStudio.^[The output somehow is a bit more messy than the windows Windows CMD method but these template errors don't seem to have any impact on the preview-function or Hugo's rendering output.] We don't need to navigate nowhere (if you're running the command from you site's source's project in R). We don't need to set a user path variable. **We're done.**
 
-# Some other common Errors / Troubles with Blogdown/Hugo
+# Some other common Errors / Troubles with Blogdown/Hugo (Updated)
+
 When running `blogdown:::serve_site()` or trying to render your website by other means you might encounter one of the following warning messages:
+
+    
 
 >'---did you forget a '#'? at line 1>`seImpl(path.expand(input)`, verbose, fromFile):\
 >Unidentified trailing character'\
@@ -186,9 +189,11 @@ OR
 
 It's probably because you either made (**legit**) changes to your `config.toml` while the preview was still running or you made a syntactical **mistake** to your `config.toml` or your `.Rmd` post's `yaml`-header while/before the preview was running. In these cases the preview fails to (re-)render.
 
-##seImpl()
+##~~seImpl()~~ (Updated / resolved)
 
-For `seImpl` (appears to mostly concern legit changes to config.toml) it seems that simply restarting the R session helps. Just run the following command in the console, and everything should be fine:
+>UPDATE: [As Yihui has pointed out](https://github.com/ellocke/GithubPage/issues/1#issue-339175165){target="_blank"}, the `seImpl()` problem was Windows-specific and has been fixed in `blogdown v.0.7`.
+
+~~For `seImpl` (appears to mostly concern legit changes to config.toml) it seems that simply restarting the R session helps. Just run the following command in the console, and everything should be fine:~~
 ```{r eval=FALSE}
 .rs.restartR() # keep the leading "."
 blogdown::serve_site()
