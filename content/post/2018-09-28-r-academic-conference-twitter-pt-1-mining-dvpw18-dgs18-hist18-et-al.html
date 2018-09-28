@@ -1,0 +1,727 @@
+---
+title: '[R] Academic Conference Twitter, Pt. 1: Mining #dvpw18, #dgs18, #hist18 et
+  al.'
+author: Ilja / fubits
+date: '2018-09-28'
+categories:
+  - Data Mining
+  - Rstats
+tags:
+  - rtweet
+  - Twitter
+slug: r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al
+output:
+  blogdown::html_page:
+    number_sections: yes
+    toc: yes
+lastmod: '2018-09-28T20:17:07+02:00'
+description: In September, four big academic societies in Germany had their annual
+  meeting - at the same time! You can **not not** harvest their tweets
+thumbnail: /img/thumbs/conference_tweets.jpg
+comment: no
+autoCollapseToc: no
+postMetaInFooter: no
+hiddenFromHomePage: no
+contentCopyright: no
+reward: no
+mathjax: no
+mathjaxEnableSingleDollar: no
+mathjaxEnableAutoNumber: no
+hideHeaderAndFooter: no
+flowchartDiagrams:
+  enable: no
+  options: ''
+sequenceDiagrams:
+  enable: no
+  options: ''
+---
+
+
+<div id="TOC">
+<ul>
+<li><a href="#setting-up-rtweet"><span class="toc-section-number">1</span> Setting up <code>rtweet</code></a><ul>
+<li><a href="#get-the-token"><span class="toc-section-number">1.1</span> Get the Token</a><ul>
+<li><a href="#token-in-root-speichern"><span class="toc-section-number">1.1.1</span> Token in Root speichern</a></li>
+</ul></li>
+<li><a href="#token-check"><span class="toc-section-number">1.2</span> Token check</a></li>
+<li><a href="#gettimestring-helper-function"><span class="toc-section-number">1.3</span> <code>getTimeString()</code> Helper Function</a></li>
+<li><a href="#prepare-filepath-for-.rds-with-here"><span class="toc-section-number">1.4</span> (Prepare filepath for .rds with <code>here()</code>)</a></li>
+</ul></li>
+<li><a href="#collect-the-conference-tweets-with-search_tweets"><span class="toc-section-number">2</span> Collect the Conference Tweets with <code>search_tweets()</code></a><ul>
+<li><a href="#political-science-dvpw18-dvpw2018-and-dvpw"><span class="toc-section-number">2.1</span> Political Science: #dvpw18 / #dvpw2018 (and #dvpw)</a><ul>
+<li><a href="#treemap-dvpw-dvpw18-dvpw2018"><span class="toc-section-number">2.1.1</span> Treemap: #dvpw / #dvpw18 / #dvpw2018</a></li>
+<li><a href="#closer-look-into-of-tweets-rts-favs-per-user"><span class="toc-section-number">2.1.2</span> Closer look into # of Tweets / RTs / Favs per User</a></li>
+<li><a href="#scatterplot"><span class="toc-section-number">2.1.3</span> Scatterplot</a></li>
+<li><a href="#scatterplot-without-dvpw-and-with-labels-for-the-top-20"><span class="toc-section-number">2.1.4</span> Scatterplot without <span class="citation">@dvpw</span> and with labels for the top 20</a></li>
+</ul></li>
+<li><a href="#creating-twitter-lists"><span class="toc-section-number">2.2</span> (Creating Twitter Lists)</a></li>
+<li><a href="#sociology-dgs18-dgs2018"><span class="toc-section-number">2.3</span> Sociology: #dgs18 / #dgs2018</a><ul>
+<li><a href="#sociology-treemap"><span class="toc-section-number">2.3.1</span> Sociology: Treemap</a></li>
+<li><a href="#sociology-user"><span class="toc-section-number">2.3.2</span> Sociology: User</a></li>
+<li><a href="#sociology-top-20-labelled"><span class="toc-section-number">2.3.3</span> Sociology: Top 20 labelled</a></li>
+</ul></li>
+<li><a href="#historians-histag18-histag2018-historikertag2018"><span class="toc-section-number">2.4</span> Historians; #histag18 / #histag2018 / #historikertag2018</a><ul>
+<li><a href="#historians-treemap"><span class="toc-section-number">2.4.1</span> Historians: Treemap</a></li>
+<li><a href="#historians-per-user"><span class="toc-section-number">2.4.2</span> Historians: per-User</a></li>
+<li><a href="#historians-top-20-labelled"><span class="toc-section-number">2.4.3</span> Historians: Top 20 labelled</a></li>
+</ul></li>
+<li><a href="#computer-science-informatik2018"><span class="toc-section-number">2.5</span> Computer Science: #informatik2018</a><ul>
+<li><a href="#treemap"><span class="toc-section-number">2.5.1</span> Treemap</a></li>
+<li><a href="#scatterplot-with-per-user-activity"><span class="toc-section-number">2.5.2</span> Scatterplot with per-user activity</a></li>
+<li><a href="#scatterplot-top-20-labelled"><span class="toc-section-number">2.5.3</span> Scatterplot: Top 20 labelled</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#some-comparisons"><span class="toc-section-number">3</span> Some Comparisons</a><ul>
+<li><a href="#joint-scatterplot"><span class="toc-section-number">3.0.1</span> Joint Scatterplot:</a></li>
+<li><a href="#joint-scatterplot-top-20-labelled"><span class="toc-section-number">3.0.2</span> Joint Scatterplot: Top 20 labelled</a></li>
+<li><a href="#overall-distribution-of-activities-by-discipline"><span class="toc-section-number">3.1</span> Overall Distribution of Activities by Discipline</a></li>
+</ul></li>
+<li><a href="#whats-next"><span class="toc-section-number">4</span> What’s next</a></li>
+</ul>
+</div>
+
+<p>As (bad) luck has it, four big academic societies in Germany – Political Science, Sociology, History, Computer Science – somehow decided to hold their respective annual meetings within the same week. Even though Germany is still a bit behind with regards to Twitter, four conferences = 4x the chance to work on your Twitter mining and text wrangling skills ;). Plus, we get some interesting data for the future practice of our NLP / text processing and social network analysis skills…</p>
+<p>So let’s just get started with mining. We will use <a href="https://twitter.com/kearneymw" target="_blank">Mike Kearney’s</a> superb <code>rtweet</code> (<a href="https://rtweet.info/" target="_blank">package</a>).</p>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>## Warning: Paket &#39;tidyverse&#39; wurde unter R Version 3.5.1 erstellt</code></pre>
+<pre><code>## Warning: Paket &#39;dplyr&#39; wurde unter R Version 3.5.1 erstellt</code></pre>
+<pre class="r"><code>library(rtweet)</code></pre>
+<pre><code>## Warning: Paket &#39;rtweet&#39; wurde unter R Version 3.5.1 erstellt</code></pre>
+<div id="setting-up-rtweet" class="section level1">
+<h1><span class="header-section-number">1</span> Setting up <code>rtweet</code></h1>
+<div id="get-the-token" class="section level2">
+<h2><span class="header-section-number">1.1</span> Get the Token</h2>
+<p>Follow the instructions <a href="https://rtweet.info/#api-authorization" target="_blank">here</a>, set up your Twitter app and save your token.</p>
+<p>You’ll get something like this (caution: fake credentials)</p>
+<pre class="r"><code>appname &lt;- &quot;your_app_name&quot;
+key &lt;- &quot;your_consumer_key&quot;
+secret &lt;- &quot;your_seceret&quot;</code></pre>
+<p>Register your App with R.</p>
+<pre class="r"><code>twitter_token &lt;- create_token(
+  app = appname,
+  consumer_key = key,
+  consumer_secret = secret)</code></pre>
+<p>And save your token in your environment / home path / working directory.</p>
+<div id="token-in-root-speichern" class="section level3">
+<h3><span class="header-section-number">1.1.1</span> Token in Root speichern</h3>
+<pre class="r"><code>## path of home directory
+home_directory &lt;- path.expand(&quot;~/R&quot;)
+file_name &lt;- file.path(home_directory, &quot;twitter_token.rds&quot;)
+
+## save token to home directory
+saveRDS(twitter_token, file = file_name)
+# saveRDS(twitter_token, &quot;twitter_token.rds&quot;)
+twitter_token &lt;- readRDS(str_c(home_directory,&quot;/twitter_token.rds&quot;))</code></pre>
+</div>
+</div>
+<div id="token-check" class="section level2">
+<h2><span class="header-section-number">1.2</span> Token check</h2>
+<pre class="r"><code>identical(twitter_token, get_token())
+#&gt; TRUE</code></pre>
+</div>
+<div id="gettimestring-helper-function" class="section level2">
+<h2><span class="header-section-number">1.3</span> <code>getTimeString()</code> Helper Function</h2>
+<p>I will use this function for saving time-stamped samples of Tweets</p>
+<pre class="r"><code>getTimeString &lt;- function() {
+  Sys.time() %&gt;% str_extract_all(regex(&quot;[0-9]&quot;)) %&gt;%
+    unlist() %&gt;% glue::glue_collapse()
+  }
+getTimeString()</code></pre>
+<pre><code>## 20180928235508</code></pre>
+</div>
+<div id="prepare-filepath-for-.rds-with-here" class="section level2">
+<h2><span class="header-section-number">1.4</span> (Prepare filepath for .rds with <code>here()</code>)</h2>
+<pre class="r"><code># blogdown-specific work-around for the `data`-folder
+data_path &lt;- &quot;../../data/&quot;
+tweets_folder &lt;- &quot;/ConferenceTweets/&quot;
+data_path &lt;- str_c(here::here(&quot;data&quot;), tweets_folder)
+dir.create(data_path)</code></pre>
+<pre><code>## Warning in dir.create(data_path): &#39;C:\Users\Locke\Documents\GitHub
+## \GithubPage\data\ConferenceTweets&#39; existiert bereits</code></pre>
+<pre class="r"><code># saveRDS(mtcars, str_c(data_path, &quot;test&quot;, &quot;.rds&quot;)) # test filepath</code></pre>
+</div>
+</div>
+<div id="collect-the-conference-tweets-with-search_tweets" class="section level1">
+<h1><span class="header-section-number">2</span> Collect the Conference Tweets with <code>search_tweets()</code></h1>
+<div id="political-science-dvpw18-dvpw2018-and-dvpw" class="section level2">
+<h2><span class="header-section-number">2.1</span> Political Science: #dvpw18 / #dvpw2018 (and #dvpw)</h2>
+<pre class="r"><code>dvpw_tweets &lt;- search_tweets(q = &quot;#dvpw18 OR #dvpw2018 OR #dvpw&quot;, # explicit QUERY
+      include_rts = FALSE,
+      # max_id = ,
+      n = 5000,
+      verbose = TRUE,
+      retryonratelimit = TRUE,
+      type = &quot;mixed&quot;) # mixed recent (popular)
+
+saveRDS(dvpw_tweets, file = str_c(data_path,&quot;dvpw_tweets_&quot;,getTimeString(),&quot;.rds&quot;))</code></pre>
+<pre class="r"><code>## this is just a bit complicated because I&#39;m using an external data folder
+## for blogdown. If you work localliy, you can just use:
+# map_dfr(dir(path = &quot;.&quot;, &quot;dvpw_&quot;), readRDS)
+
+dvpw_rds &lt;- dir(path = data_path, pattern = &quot;dvpw_&quot;) %&gt;%
+  str_c(data_path, .) %&gt;%
+  map_dfr(readRDS)
+dvpw_collection &lt;- dvpw_rds %&gt;% distinct(status_id, .keep_all = TRUE)</code></pre>
+<pre class="r"><code>min(dvpw_collection$status_id) # https://twitter.com/statuses/1045627032900636673</code></pre>
+<pre><code>## [1] &quot;1041748634486931465&quot;</code></pre>
+<pre class="r"><code>max(dvpw_collection$status_id) </code></pre>
+<pre><code>## [1] &quot;1045756668766810114&quot;</code></pre>
+<pre class="r"><code>timeString &lt;- paste0(lubridate::hour(Sys.time()), &quot;:&quot;, lubridate::minute(Sys.time()))</code></pre>
+<div id="treemap-dvpw-dvpw18-dvpw2018" class="section level3">
+<h3><span class="header-section-number">2.1.1</span> Treemap: #dvpw / #dvpw18 / #dvpw2018</h3>
+<p>We’ll need the <code>treemapify</code> package for this.</p>
+<pre class="r"><code>dvpw_n_tweets &lt;- nrow(dvpw_collection)
+dvpw_n_accounts &lt;- length(unique(dvpw_collection$screen_name))
+# tidy/dplyr: distinct(screen_name) %&gt;% count()
+
+dvpw_collection %&gt;%
+  group_by(screen_name) %&gt;%
+  summarise(n = n()) %&gt;%
+  mutate(share = n / sum(n)) %&gt;%
+  arrange(desc(n)) %&gt;%
+  ggplot(aes(area = share)) +
+    treemapify::geom_treemap(aes(fill = log10(n))) +
+    treemapify::geom_treemap_text(
+      aes(label = paste0(screen_name, &quot; (&quot;, round(share*100,1),&quot;%)&quot;))
+      ) +
+  scale_fill_viridis_c(direction = -1, option = &quot;C&quot;, begin = 0.8) +
+  labs(title = &quot;Twitter-Aktivität zu #dvpw / #dvpw18 / #dvpw2018&quot;,
+       subtitle = paste0(&quot;(n = &quot;, dvpw_n_tweets,
+                         &quot; Tweets von m = &quot;, dvpw_n_accounts,
+                         &quot; Accounts; Stand: 28.09.18, &quot;,
+                         timeString , &quot; Uhr;&quot;,
+                         &quot; by @fubits)&quot;)) +
+  guides(fill = FALSE)</code></pre>
+<p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+</div>
+<div id="closer-look-into-of-tweets-rts-favs-per-user" class="section level3">
+<h3><span class="header-section-number">2.1.2</span> Closer look into # of Tweets / RTs / Favs per User</h3>
+<pre class="r"><code>dvpw_counts &lt;- dvpw_collection %&gt;%
+  group_by(screen_name) %&gt;%
+  summarise(Tweets = n(),
+            RT = sum(retweet_count),
+            Favs = sum(favorite_count)) %&gt;% 
+  mutate(discipline = &quot;PolSci&quot;) %&gt;% 
+  arrange(desc(Tweets))
+  # top_n(n = 50, wt = tweets) %&gt;% </code></pre>
+</div>
+<div id="scatterplot" class="section level3">
+<h3><span class="header-section-number">2.1.3</span> Scatterplot</h3>
+<pre class="r"><code>ggplot(dvpw_counts, aes(x = Favs, y = RT)) +
+  geom_point(aes(size = Tweets, color = screen_name)) +
+  # ggrepel::geom_text_repel(data = counts[1:10,], aes(label = screen_name)) +
+  coord_fixed() +
+  scale_color_viridis_d() +
+  # scale_size_continuous(breaks = c(50, 100, 150, 200, 250, 300)) +
+  guides(color = FALSE) +
+  theme_minimal() +
+  labs(size = &quot;Anzahl Tweets&quot;,
+       title = &quot;Twitter-Aktivität zu #dvpw / #dvpw18 / #dvpw2018: Retweets &amp; Favs&quot;,
+       subtitle = paste0(&quot;(n = &quot;, dvpw_n_tweets,
+                       &quot; Tweets von m = &quot;, dvpw_n_accounts,
+                       &quot; Accounts; Stand: 28.09.18, &quot;, timeString , &quot; Uhr;&quot;),
+       x = &quot;Anzahl Favourites&quot;,
+       y = &quot;Anzahl Retweets&quot;,
+       caption = &quot;@fubits&quot;)</code></pre>
+<p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-14-1.png" width="1152" /></p>
+<p>The official society account has been quite busy! Well done, <span class="citation">@dvpw</span> (and <span class="citation">@wahlbeobachter</span> for introducing the idea of a Twitter take-over. That worked out rather well! &lt;- <strong>Note to myself.</strong>)</p>
+</div>
+<div id="scatterplot-without-dvpw-and-with-labels-for-the-top-20" class="section level3">
+<h3><span class="header-section-number">2.1.4</span> Scatterplot without <span class="citation">@dvpw</span> and with labels for the top 20</h3>
+<p>Here we’ll need <code>ggrepel</code> for non-overlapping labeling</p>
+<pre class="r"><code>dvpw_counts %&gt;% filter(screen_name != &quot;dvpw&quot;) %&gt;%
+  ggplot(aes(x = Favs, y = RT)) +
+    geom_point(aes(size = Tweets, color = screen_name), alpha = 0.5) +
+    ggrepel::geom_text_repel(data = dvpw_counts[2:21,],
+                             aes(label = screen_name)) +
+    coord_fixed() +
+    scale_color_viridis_d() +
+    scale_x_continuous(breaks = c(0, 50, 100, 150, 200, 250)) +
+    guides(color = FALSE) +
+    theme_minimal() +
+    labs(size = &quot;Anzahl Tweets&quot;,
+         title = &quot;Twitter-Aktivität zu #dvpw18 / #dvpw2018: Top 20 Accounts (ohne @dvpw)&quot;,
+         subtitle = paste0(&quot;(n = &quot;, sum(filter(dvpw_counts,
+                                               screen_name != &quot;dvpw&quot;)$Tweets),
+                           &quot; Tweets von m = &quot;, dvpw_n_accounts - 1,
+                         &quot; Accounts, ohne @dvpw; Top 20 Label, Stand: 28.09.18, &quot;,
+                         timeString,&quot; Uhr)&quot;),
+         x = &quot;Anzahl Favourites&quot;,
+         y = &quot;Anzahl Retweets&quot;,
+         caption = &quot;@fubits&quot;)</code></pre>
+<p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-15-1.png" width="1152" /></p>
+</div>
+</div>
+<div id="creating-twitter-lists" class="section level2">
+<h2><span class="header-section-number">2.2</span> (Creating Twitter Lists)</h2>
+<blockquote>
+<p>tba, but we could automate creating user lists from hashtags for conferences.</p>
+</blockquote>
+<pre class="r"><code># we need a plain character vector here
+dvpw_nicks &lt;- dvpw_collection %&gt;% distinct(screen_name) %&gt;% unlist()
+post_list(dvpw_nicks[1:100], name = &quot;dvpw2018&quot;, private = TRUE, destroy = FALSE)
+#&gt; Can only add 100 users at a time. Adding users[1:100]...
+list_length &lt;- length(dvpw_nicks)
+post_list(dvpw_nicks[101:200], slug = &quot;dvpw2018&quot;, private = TRUE, destroy = FALSE)
+post_list(dvpw_nicks[200:length(dvpw_nicks)], slug = &quot;dvpw2018&quot;, private = TRUE, destroy = FALSE)
+
+# delete with
+# post_list(slug = &quot;dvpw2018&quot;, destroy = TRUE)</code></pre>
+</div>
+<div id="sociology-dgs18-dgs2018" class="section level2">
+<h2><span class="header-section-number">2.3</span> Sociology: #dgs18 / #dgs2018</h2>
+<p>Mine multiple times to get a good sample.</p>
+<pre class="r"><code>dgs_tweets &lt;- search_tweets(q = &quot;#dgs18 OR #dgs2018&quot;, # explicit QUERY
+      include_rts = FALSE,
+      # max_id = ,
+      n = 5000,
+      verbose = TRUE,
+      retryonratelimit = TRUE,
+      type = &quot;recent&quot;) # mixed recent (popular)
+
+saveRDS(dgs_tweets, file = str_c(data_path,&quot;dgs_tweets_&quot;,getTimeString(),&quot;.rds&quot;))</code></pre>
+<pre class="r"><code>dgs_rds &lt;- dir(path = data_path, pattern = &quot;dgs_&quot;) %&gt;%
+  str_c(data_path, .) %&gt;%
+  map_dfr(readRDS)
+dgs_collection &lt;- dgs_rds %&gt;% distinct(status_id, .keep_all = TRUE)</code></pre>
+<div id="sociology-treemap" class="section level3">
+<h3><span class="header-section-number">2.3.1</span> Sociology: Treemap</h3>
+<pre class="r"><code>dgs_n_tweets &lt;- nrow(dgs_collection)
+dgs_n_accounts &lt;- length(unique(dgs_collection$screen_name))
+
+dgs_collection %&gt;%
+  group_by(screen_name) %&gt;%
+  summarise(n = n()) %&gt;%
+  mutate(share = n / sum(n)) %&gt;%
+  arrange(desc(n)) %&gt;%
+  ggplot(aes(area = share)) +
+    treemapify::geom_treemap(aes(fill = log10(n))) +
+    treemapify::geom_treemap_text(
+      aes(label = paste0(screen_name, &quot; (&quot;, round(share*100,1),&quot;%)&quot;))
+      ) +
+  scale_fill_viridis_c(direction = -1, option = &quot;C&quot;, begin = 0.8) +
+  labs(title = &quot;Twitter-Aktivität zu #dgs18 / #dgs2018&quot;,
+       subtitle = str_c(&quot;(n = &quot;, dgs_n_tweets,
+                         &quot; Tweets von m = &quot;, dgs_n_accounts,
+                         &quot; Accounts; Stand: 28.09.18, &quot;, timeString , &quot; Uhr;&quot;,
+                         &quot; by @fubits)&quot;)) +
+  guides(fill = FALSE)</code></pre>
+<p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
+</div>
+<div id="sociology-user" class="section level3">
+<h3><span class="header-section-number">2.3.2</span> Sociology: User</h3>
+<pre class="r"><code>dgs_counts &lt;- dgs_collection %&gt;%
+  group_by(screen_name) %&gt;%
+  # filter(screen_name != &quot;fubits&quot;) %&gt;% 
+  summarise(Tweets = n(),
+            RT = sum(retweet_count),
+            Favs = sum(favorite_count)) %&gt;%
+  mutate(discipline = &quot;Sociology&quot;) %&gt;% 
+  arrange(desc(Tweets))
+  # top_n(n = 50, wt = tweets) %&gt;% </code></pre>
+<pre class="r"><code>ggplot(dgs_counts, aes(x = Favs, y = RT)) +
+  geom_point(aes(size = Tweets, color = screen_name)) +
+  # ggrepel::geom_text_repel(data = counts[1:10,], aes(label = screen_name)) +
+  coord_fixed() +
+  scale_color_viridis_d() +
+  # scale_size_continuous(breaks = c(50, 100, 150, 200, 250, 300)) +
+  guides(color = FALSE) +
+  theme_minimal() +
+  labs(size = &quot;Anzahl Tweets&quot;,
+       title = &quot;Twitter-Aktivität zu #dgs18 / #dgs2018: Retweets &amp; Favs&quot;,
+       subtitle = paste0(&quot;(n = &quot;, dgs_n_tweets,
+                       &quot; Tweets von m = &quot;, dgs_n_accounts,
+                       &quot; Accounts; Stand: 28.09.18, &quot;, timeString , &quot; Uhr;&quot;),
+       x = &quot;Anzahl Favourites&quot;,
+       y = &quot;Anzahl Retweets&quot;,
+       caption = &quot;@fubits&quot;)</code></pre>
+<p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-21-1.png" width="1152" /></p>
+</div>
+<div id="sociology-top-20-labelled" class="section level3">
+<h3><span class="header-section-number">2.3.3</span> Sociology: Top 20 labelled</h3>
+<pre class="r"><code>ggplot(dgs_counts, aes(x = Favs, y = RT)) +
+    geom_point(aes(size = Tweets, color = screen_name), alpha = 0.5) +
+    ggrepel::geom_text_repel(data = dgs_counts[1:20,],
+                             aes(label = screen_name)) +
+    coord_fixed() +
+    scale_color_viridis_d() +
+    scale_x_continuous(breaks = c(0, 50, 100, 150, 200, 250)) +
+    guides(color = FALSE) +
+    theme_minimal() +
+    labs(size = &quot;Anzahl Tweets&quot;,
+         title = &quot;Twitter-Aktivität zu #dvpw18 / #dvpw2018: Top 20 Accounts&quot;,
+         subtitle = paste0(&quot;(n = &quot;, dgs_n_tweets,
+                         &quot; Tweets von m = &quot;, dgs_n_accounts,
+                         &quot; Accounts; Top 20 Label, Stand: 28.09.18, &quot;, 
+                         timeString, &quot; Uhr)&quot;),
+         x = &quot;Anzahl Favourites&quot;,
+         y = &quot;Anzahl Retweets&quot;,
+         caption = &quot;@fubits&quot;)</code></pre>
+<p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-22-1.png" width="1152" /></p>
+</div>
+</div>
+<div id="historians-histag18-histag2018-historikertag2018" class="section level2">
+<h2><span class="header-section-number">2.4</span> Historians; #histag18 / #histag2018 / #historikertag2018</h2>
+<pre class="r"><code>hist_tweets &lt;- search_tweets(q = &quot;#histag18 OR #histag2018 OR #historikertag2018&quot;, # explicit QUERY
+      include_rts = FALSE,
+      # max_id = ,
+      n = 5000,
+      verbose = TRUE,
+      retryonratelimit = TRUE,
+      type = &quot;recent&quot;) # mixed recent popular
+
+saveRDS(hist_tweets, file = str_c(data_path,&quot;hist_tweets_&quot;,getTimeString(),&quot;.rds&quot;))</code></pre>
+<pre class="r"><code>hist_rds &lt;- dir(path = data_path, pattern = &quot;hist_&quot;) %&gt;%
+  str_c(data_path, .) %&gt;%
+  map_dfr(readRDS)
+hist_collection &lt;- hist_rds %&gt;% distinct(status_id, .keep_all = TRUE)</code></pre>
+<div id="historians-treemap" class="section level3">
+<h3><span class="header-section-number">2.4.1</span> Historians: Treemap</h3>
+<pre class="r"><code>hist_n_tweets &lt;- nrow(hist_collection)
+hist_n_accounts &lt;- length(unique(hist_collection$screen_name))
+
+hist_collection %&gt;%
+  group_by(screen_name) %&gt;%
+  summarise(n = n()) %&gt;%
+  mutate(share = n / sum(n)) %&gt;%
+  arrange(desc(n)) %&gt;%
+  ggplot(aes(area = share)) +
+    treemapify::geom_treemap(aes(fill = log10(n))) +
+    treemapify::geom_treemap_text(
+      aes(label = paste0(screen_name, &quot; (&quot;, round(share*100,1),&quot;%)&quot;))
+      ) +
+  scale_fill_viridis_c(direction = -1, option = &quot;C&quot;, begin = 0.8) +
+  labs(title = &quot;Twitter-Aktivität zu #histag18 / #histag2018 / #historikertag2018&quot;,
+       subtitle = paste0(&quot;(n = &quot;, hist_n_tweets,
+                         &quot; Tweets von m = &quot;, hist_n_accounts,
+                         &quot; Accounts; Stand: 28.09.18, &quot;, timeString , &quot; Uhr;&quot;,
+                         &quot; by @fubits)&quot;)) +
+  guides(fill = FALSE)</code></pre>
+<p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-25-1.png" width="672" /></p>
+</div>
+<div id="historians-per-user" class="section level3">
+<h3><span class="header-section-number">2.4.2</span> Historians: per-User</h3>
+<pre class="r"><code>hist_counts &lt;- hist_collection %&gt;%
+  group_by(screen_name) %&gt;%
+  # filter(screen_name != &quot;fubits&quot;) %&gt;% 
+  summarise(Tweets = n(),
+            RT = sum(retweet_count),
+            Favs = sum(favorite_count)) %&gt;%
+  mutate(discipline = &quot;History&quot;) %&gt;% 
+  arrange(desc(Tweets))
+  # top_n(n = 50, wt = tweets) %&gt;% </code></pre>
+<pre class="r"><code>ggplot(hist_counts, aes(x = Favs, y = RT)) +
+  geom_point(aes(size = Tweets, color = screen_name)) +
+  # ggrepel::geom_text_repel(data = counts[1:10,], aes(label = screen_name)) +
+  coord_fixed() +
+  scale_color_viridis_d() +
+  # scale_size_continuous(breaks = c(50, 100, 150, 200, 250, 300)) +
+  guides(color = FALSE) +
+  theme_minimal() +
+  labs(size = &quot;Anzahl Tweets&quot;,
+       title = &quot;Twitter-Aktivität zu #dgs18 / #dgs2018: Retweets &amp; Favs&quot;,
+       subtitle = paste0(&quot;(n = &quot;, hist_n_tweets,
+                       &quot; Tweets von m = &quot;, hist_n_accounts,
+                       &quot; Accounts; Stand: 28.09.18, &quot;, timeString , &quot; Uhr;&quot;),
+       x = &quot;Anzahl Favourites&quot;,
+       y = &quot;Anzahl Retweets&quot;,
+       caption = &quot;@fubits&quot;)</code></pre>
+<p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-27-1.png" width="1152" /></p>
+</div>
+<div id="historians-top-20-labelled" class="section level3">
+<h3><span class="header-section-number">2.4.3</span> Historians: Top 20 labelled</h3>
+<pre class="r"><code>ggplot(hist_counts, aes(x = Favs, y = RT)) +
+    geom_point(aes(size = Tweets, color = screen_name), alpha = 0.5) +
+    ggrepel::geom_text_repel(data = hist_counts[1:20,],
+                             aes(label = screen_name)) +
+    coord_fixed() +
+    scale_color_viridis_d() +
+    scale_x_continuous(breaks = c(0, 50, 100, 150, 200, 250)) +
+    guides(color = FALSE) +
+    theme_minimal() +
+    labs(size = &quot;Anzahl Tweets&quot;,
+         title = &quot;Twitter-Aktivität zu #histag18 / #histag2018 / #historikertag2018: Top 20 Accounts&quot;,
+         subtitle = paste0(&quot;(n = &quot;, hist_n_tweets,
+                         &quot; Tweets von m = &quot;, hist_n_accounts,
+                         &quot; Accounts; Top 20 Label, Stand: 28.09.18, &quot;,
+                         timeString, &quot; Uhr)&quot;),
+         x = &quot;Anzahl Favourites&quot;,
+         y = &quot;Anzahl Retweets&quot;,
+         caption = &quot;@fubits&quot;)</code></pre>
+<p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-28-1.png" width="1152" /></p>
+</div>
+</div>
+<div id="computer-science-informatik2018" class="section level2">
+<h2><span class="header-section-number">2.5</span> Computer Science: #informatik2018</h2>
+<p>(Of course, CS scholars are rather disciplined and stick to one hashtag :) #informatik18 has only 3 Tweets so far, and #informatiktage only 2 users…) ### Mining Tweets</p>
+<pre class="r"><code>inf_tweets &lt;- search_tweets(q = &quot;#informatik2018&quot;, # explicit QUERY
+      include_rts = FALSE,
+      # max_id = ,
+      n = 5000,
+      verbose = TRUE,
+      retryonratelimit = TRUE,
+      type = &quot;mixed&quot;) # mixed recent popular
+
+saveRDS(inf_tweets, file = str_c(data_path,&quot;inf_tweets_&quot;,getTimeString(),&quot;.rds&quot;))</code></pre>
+<pre class="r"><code>inf_rds &lt;- dir(path = data_path, pattern = &quot;inf_&quot;) %&gt;%
+  str_c(data_path, .) %&gt;%
+  map_dfr(readRDS)
+inf_collection &lt;- inf_rds %&gt;% distinct(status_id, .keep_all = TRUE)</code></pre>
+<div id="treemap" class="section level3">
+<h3><span class="header-section-number">2.5.1</span> Treemap</h3>
+<pre class="r"><code>inf_n_tweets &lt;- nrow(inf_collection)
+inf_n_accounts &lt;- length(unique(inf_collection$screen_name))
+
+inf_collection %&gt;%
+  group_by(screen_name) %&gt;%
+  summarise(n = n()) %&gt;%
+  mutate(share = n / sum(n)) %&gt;%
+  arrange(desc(n)) %&gt;%
+  ggplot(aes(area = share)) +
+    treemapify::geom_treemap(aes(fill = log10(n))) +
+    treemapify::geom_treemap_text(
+      aes(label = paste0(screen_name, &quot; (&quot;, round(share*100,1),&quot;%)&quot;))
+      ) +
+  scale_fill_viridis_c(direction = -1, option = &quot;C&quot;, begin = 0.8) +
+  labs(title = &quot;Twitter-Aktivität zu #informatik2018&quot;,
+       subtitle = paste0(&quot;(n = &quot;, inf_n_tweets,
+                         &quot; Tweets von m = &quot;, inf_n_accounts,
+                         &quot; Accounts; Stand: 28.09.18, &quot;, 
+                         timeString , &quot; Uhr;&quot;,
+                         &quot; by @fubits)&quot;)) +
+  guides(fill = FALSE)</code></pre>
+<p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-31-1.png" width="672" /></p>
+</div>
+<div id="scatterplot-with-per-user-activity" class="section level3">
+<h3><span class="header-section-number">2.5.2</span> Scatterplot with per-user activity</h3>
+<pre class="r"><code>inf_counts &lt;- inf_collection %&gt;%
+  group_by(screen_name) %&gt;%
+  # filter(screen_name != &quot;fubits&quot;) %&gt;% 
+  summarise(Tweets = n(),
+            RT = sum(retweet_count),
+            Favs = sum(favorite_count)) %&gt;% 
+  mutate(discipline = &quot;CS&quot;) %&gt;% 
+  arrange(desc(Tweets))
+  # top_n(n = 50, wt = tweets) %&gt;% </code></pre>
+<pre class="r"><code>ggplot(inf_counts, aes(x = Favs, y = RT)) +
+  geom_point(aes(size = Tweets, color = screen_name)) +
+  # ggrepel::geom_text_repel(data = counts[1:10,], aes(label = screen_name)) +
+  coord_fixed() +
+  scale_color_viridis_d() +
+  # scale_size_continuous(breaks = c(50, 100, 150, 200, 250, 300)) +
+  guides(color = FALSE) +
+  theme_minimal() +
+  labs(size = &quot;Anzahl Tweets&quot;,
+       title = &quot;Twitter-Aktivität zu #informatik2018: Retweets &amp; Favs&quot;,
+       subtitle = paste0(&quot;(n = &quot;, inf_n_tweets,
+                       &quot; Tweets von m = &quot;, inf_n_accounts,
+                       &quot; Accounts; Stand: 28.09.18, &quot;, timeString , &quot; Uhr;&quot;),
+       x = &quot;Anzahl Favourites&quot;,
+       y = &quot;Anzahl Retweets&quot;,
+       caption = &quot;@fubits&quot;)</code></pre>
+<p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-33-1.png" width="1152" /> &gt; So there’s some truth in “I’m a Computer Scientist. We don’t use Twitter”…</p>
+</div>
+<div id="scatterplot-top-20-labelled" class="section level3">
+<h3><span class="header-section-number">2.5.3</span> Scatterplot: Top 20 labelled</h3>
+<pre class="r"><code>ggplot(inf_counts, aes(x = Favs, y = RT)) +
+    geom_point(aes(size = Tweets, color = screen_name), alpha = 0.5) +
+    ggrepel::geom_text_repel(data = inf_counts[1:20,],
+                             aes(label = screen_name)) +
+    coord_fixed() +
+    scale_color_viridis_d() +
+    scale_x_continuous(breaks = c(0, 50, 100, 150, 200, 250)) +
+    guides(color = FALSE) +
+    theme_minimal() +
+    labs(size = &quot;Anzahl Tweets&quot;,
+         title = &quot;Twitter-Aktivität zu #informatik2018: Top 20 Accounts&quot;,
+         subtitle = paste0(&quot;(n = &quot;, inf_n_tweets,
+                         &quot; Tweets von m = &quot;, inf_n_accounts,
+                         &quot; Accounts; Top 20 Label, Stand: 28.09.18, &quot;,
+                         timeString, &quot; Uhr)&quot;),
+         x = &quot;Anzahl Favourites&quot;,
+         y = &quot;Anzahl Retweets&quot;,
+         caption = &quot;@fubits&quot;)</code></pre>
+<p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-34-1.png" width="1152" /></p>
+</div>
+</div>
+</div>
+<div id="some-comparisons" class="section level1">
+<h1><span class="header-section-number">3</span> Some Comparisons</h1>
+<pre class="r"><code>all_cons &lt;- bind_rows(dvpw_collection, dgs_collection, hist_collection, inf_collection)
+all_n_accounts &lt;- all_cons %&gt;% distinct(screen_name) %&gt;% nrow()
+all_n_tweets &lt;- all_cons %&gt;% distinct(status_id) %&gt;% nrow()
+
+all_cons_per_user &lt;- bind_rows(dvpw_counts, dgs_counts, hist_counts, inf_counts) %&gt;%
+  group_by(screen_name) %&gt;% 
+  distinct(screen_name, .keep_all = TRUE) %&gt;% 
+  mutate(avg_output = (Tweets + RT + Favs)/3) %&gt;% 
+  arrange(desc(avg_output)) #&gt; 1260
+all_cons_per_user %&gt;% distinct(screen_name) %&gt;% count() #&gt; 1260</code></pre>
+<pre><code>## # A tibble: 1,260 x 2
+## # Groups:   screen_name [1,260]
+##    screen_name         n
+##    &lt;chr&gt;           &lt;int&gt;
+##  1 __ebuuuu            1
+##  2 __elifunal          1
+##  3 __evamaria__        1
+##  4 _AlexanderRabe_     1
+##  5 _Bart___            1
+##  6 _Bubbles90          1
+##  7 _BWINF              1
+##  8 _KNHG               1
+##  9 _m_art_in_          1
+## 10 _RabiaAyas          1
+## # ... with 1,250 more rows</code></pre>
+<div id="joint-scatterplot" class="section level3">
+<h3><span class="header-section-number">3.0.1</span> Joint Scatterplot:</h3>
+<pre class="r"><code>ggplot(all_cons_per_user, aes(x = Favs, y = RT, color = discipline)) +
+    geom_point(aes(size = Tweets), alpha = 0.5) +
+    ggrepel::geom_text_repel(data = all_cons_per_user[1,],
+                             aes(label = screen_name)) +
+    coord_fixed() +
+    scale_color_viridis_d(option = &quot;D&quot;) +
+    scale_x_continuous(breaks = c(0, 50, 100, 150, 200, 250)) +
+    theme_minimal() +
+    guides(colour = guide_legend(override.aes = list(size = 5, stroke = 1.5))) +
+    labs(size = &quot;Anzahl Tweets&quot;,
+         title = &quot;Twitter-Aktivität zu #informatik2018: Top 20 Accounts&quot;,
+         subtitle = paste0(&quot;(n = &quot;, all_n_tweets,
+                         &quot; Tweets von m = &quot;, all_n_accounts,
+                         &quot; Accounts; Top 20 Label, Stand: 28.09.18, &quot;,
+                         timeString, &quot; Uhr)&quot;),
+         x = &quot;Anzahl Favourites&quot;,
+         y = &quot;Anzahl Retweets&quot;,
+         caption = &quot;@fubits&quot;)</code></pre>
+<p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-36-1.png" width="1152" /></p>
+</div>
+<div id="joint-scatterplot-top-20-labelled" class="section level3">
+<h3><span class="header-section-number">3.0.2</span> Joint Scatterplot: Top 20 labelled</h3>
+<pre class="r"><code>all_cons_per_user %&gt;% 
+  filter(screen_name != &quot;dvpw&quot;) %&gt;%
+  ggplot(aes(x = Favs, y = RT, color = discipline)) +
+    geom_point(aes(size = Tweets), alpha = 0.5) +
+    ggrepel::geom_text_repel(data = all_cons_per_user[2:21,],
+                             aes(label = screen_name), alpha = 1) +
+    coord_fixed() +
+    scale_color_viridis_d(option = &quot;D&quot;) +
+    scale_x_continuous(breaks = c(0, 50, 100, 150, 200, 250)) +
+    theme_minimal() +
+    guides(colour = guide_legend(override.aes = list(size = 5, stroke = 1.5))) +
+    labs(size = &quot;Anzahl Tweets&quot;,
+         title = &quot;Twitter-Aktivität zu #dvpw*18, #dgs*18, #hist*18, #informatik2018: Top 20 Accounts&quot;,
+         subtitle = paste0(&quot;(n = &quot;, all_n_tweets,
+                         &quot; Tweets von m = &quot;, all_n_accounts,
+                         &quot; Accounts (ohne @dvpw); Top 20 Label, Stand: 28.09.18, &quot;,
+                         timeString, &quot; Uhr)&quot;),
+         x = &quot;Anzahl Favourites&quot;,
+         y = &quot;Anzahl Retweets&quot;,
+         caption = &quot;@fubits&quot;)</code></pre>
+<p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-37-1.png" width="1152" /> That’s what a kind of one week of academic twitter activity in Germany looks like, Duh!</p>
+<pre class="r"><code>dvpw_box &lt;- dvpw_counts %&gt;% 
+  gather(&quot;Metric&quot;, &quot;Total&quot;, 2:4) %&gt;%
+  mutate(Discipline = &quot;PolSci&quot;)
+dvpw_box</code></pre>
+<pre><code>## # A tibble: 708 x 5
+##    screen_name     discipline Metric Total Discipline
+##    &lt;chr&gt;           &lt;chr&gt;      &lt;chr&gt;  &lt;int&gt; &lt;chr&gt;     
+##  1 dvpw            PolSci     Tweets   368 PolSci    
+##  2 SassanGholiagha PolSci     Tweets    86 PolSci    
+##  3 PetraGuasti     PolSci     Tweets    84 PolSci    
+##  4 ronpatz         PolSci     Tweets    58 PolSci    
+##  5 thothiel        PolSci     Tweets    44 PolSci    
+##  6 elvira_rosert   PolSci     Tweets    41 PolSci    
+##  7 wahlforschung   PolSci     Tweets    35 PolSci    
+##  8 daniellambach   PolSci     Tweets    33 PolSci    
+##  9 VanHuellen      PolSci     Tweets    33 PolSci    
+## 10 antje_wiener    PolSci     Tweets    31 PolSci    
+## # ... with 698 more rows</code></pre>
+<pre class="r"><code>dgs_box &lt;- dgs_counts %&gt;% 
+  gather(&quot;Metric&quot;, &quot;Total&quot;, 2:4) %&gt;%
+  mutate(Discipline = &quot;Socio&quot;)
+dgs_box</code></pre>
+<pre><code>## # A tibble: 2,091 x 5
+##    screen_name     discipline Metric Total Discipline
+##    &lt;chr&gt;           &lt;chr&gt;      &lt;chr&gt;  &lt;int&gt; &lt;chr&gt;     
+##  1 sozmethode      Sociology  Tweets    82 Socio     
+##  2 outputin22      Sociology  Tweets    28 Socio     
+##  3 LordElend       Sociology  Tweets    26 Socio     
+##  4 papatyaizii_    Sociology  Tweets    25 Socio     
+##  5 dlindner79      Sociology  Tweets    24 Socio     
+##  6 annalytika      Sociology  Tweets    22 Socio     
+##  7 katharinahppe   Sociology  Tweets    17 Socio     
+##  8 ToBeAsBold      Sociology  Tweets    16 Socio     
+##  9 AndreArmbruster Sociology  Tweets    14 Socio     
+## 10 klegantke       Sociology  Tweets    14 Socio     
+## # ... with 2,081 more rows</code></pre>
+<pre class="r"><code>hist_box &lt;- hist_counts %&gt;% 
+  gather(&quot;Metric&quot;, &quot;Total&quot;, 2:4) %&gt;%
+  mutate(Discipline = &quot;History&quot;)
+hist_box</code></pre>
+<pre><code>## # A tibble: 891 x 5
+##    screen_name     discipline Metric Total Discipline
+##    &lt;chr&gt;           &lt;chr&gt;      &lt;chr&gt;  &lt;int&gt; &lt;chr&gt;     
+##  1 Kasutaja_n      History    Tweets    74 History   
+##  2 jakobfrohmann   History    Tweets    41 History   
+##  3 aberehrlich     History    Tweets    39 History   
+##  4 digigw          History    Tweets    34 History   
+##  5 MaxGrund4       History    Tweets    26 History   
+##  6 Mareike2405     History    Tweets    24 History   
+##  7 PortalLISA      History    Tweets    20 History   
+##  8 schuleschilling History    Tweets    20 History   
+##  9 DenkBrei        History    Tweets    19 History   
+## 10 esciencestrier  History    Tweets    17 History   
+## # ... with 881 more rows</code></pre>
+<pre class="r"><code>inf_box &lt;- inf_counts %&gt;% 
+  gather(&quot;Metric&quot;, &quot;Total&quot;, 2:4) %&gt;%
+  mutate(Discipline = &quot;CS&quot;)
+inf_box</code></pre>
+<pre><code>## # A tibble: 291 x 5
+##    screen_name     discipline Metric Total Discipline
+##    &lt;chr&gt;           &lt;chr&gt;      &lt;chr&gt;  &lt;int&gt; &lt;chr&gt;     
+##  1 SilSte          CS         Tweets    27 CS        
+##  2 hiig_berlin     CS         Tweets    26 CS        
+##  3 stillinsky      CS         Tweets    26 CS        
+##  4 Jessieevaline   CS         Tweets    22 CS        
+##  5 TommyBlfd       CS         Tweets    17 CS        
+##  6 gross_dc        CS         Tweets    11 CS        
+##  7 informatikradar CS         Tweets    11 CS        
+##  8 Fraunhofer_IUK  CS         Tweets    10 CS        
+##  9 herdom          CS         Tweets     8 CS        
+## 10 kryptomania84   CS         Tweets     7 CS        
+## # ... with 281 more rows</code></pre>
+</div>
+<div id="overall-distribution-of-activities-by-discipline" class="section level2">
+<h2><span class="header-section-number">3.1</span> Overall Distribution of Activities by Discipline</h2>
+<pre class="r"><code>bind_rows(dvpw_box, dgs_box, hist_box, inf_box) %&gt;% 
+  ggplot() +
+  geom_boxplot(aes(fct_inorder(Metric), Total)) +
+  scale_x_discrete() +
+  scale_fill_viridis_d() +
+  facet_wrap(vars(Discipline))</code></pre>
+<p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-42-1.png" width="672" /></p>
+<pre class="r"><code>bind_rows(dvpw_box, dgs_box, hist_box, inf_box) %&gt;% 
+  ggplot() +
+  geom_violin(aes(fct_inorder(Metric), Total, fill = Metric)) +
+  scale_x_discrete() +
+  scale_fill_viridis_d() +
+  facet_wrap(vars(Discipline)) +
+  labs(x = &quot;Distribution of Tweets / RT / Favs per User&quot;,
+       legend = NULL) +
+  theme_light()</code></pre>
+<p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-43-1.png" width="672" /> Mmmh, I think I should try those <a href="https://github.com/eclarke/ggbeeswarm" target="_blank">beeswarm-plots</a> soon-ish here…</p>
+</div>
+</div>
+<div id="whats-next" class="section level1">
+<h1><span class="header-section-number">4</span> What’s next</h1>
+<pre class="r"><code>library(quanteda)</code></pre>
+<pre><code>## Warning: Paket &#39;quanteda&#39; wurde unter R Version 3.5.1 erstellt</code></pre>
+<pre><code>## Package version: 1.3.4</code></pre>
+<pre><code>## Parallel computing: 2 of 4 threads used.</code></pre>
+<pre><code>## See https://quanteda.io for tutorials and examples.</code></pre>
+<pre><code>## 
+## Attache Paket: &#39;quanteda&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:utils&#39;:
+## 
+##     View</code></pre>
+<p>But that is for another post…</p>
+</div>
