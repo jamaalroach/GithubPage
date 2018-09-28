@@ -9,6 +9,12 @@
 	   url('../fonts/lato-v11-latin-regular.woff') format('woff');
 }
 
+/* Test: Word Wrapping for code */
+pre {
+	word-break: break-all;
+	word-wrap: break-word;
+}
+
 /* Header */
 .header{
 	padding-top: 0;

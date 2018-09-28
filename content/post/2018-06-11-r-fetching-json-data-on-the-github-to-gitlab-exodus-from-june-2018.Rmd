@@ -274,7 +274,7 @@ ggplot() +
 
 # Update: Further Reading
 
- + [Oscar Lane](https://twitter.com/OscarNLane) just published a more generalized approach to mining data from "Browser-based" APIs: ["Reverse engineering web APIs for scraping"](https://oscarl.netlify.com/2018/06/14/reverse-engineering-web-apis-for-scraping/)
+ + [Oscar Lane](https://twitter.com/OscarNLane/status/1008273786980917248) just published a more generalized approach to mining data from "Browser-based" APIs: ["Reverse engineering web APIs for scraping"](https://oscarl.netlify.com/2018/06/14/reverse-engineering-web-apis-for-scraping/)
  
  
     His `map_*`-approach to JSON looks very efficient:

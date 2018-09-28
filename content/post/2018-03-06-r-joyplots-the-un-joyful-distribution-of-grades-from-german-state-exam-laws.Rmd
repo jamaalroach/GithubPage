@@ -15,8 +15,11 @@ keywords: []
 description: 'German Zweites Juristisches Staatsexamen (2nd State Exam in Laws) is said to be tough. Let’s have a look at how hard it really is by visualising the distribution of grades from the Berlin 2017/IV campaign.'
 thumbnail: "/img/thumbs/joyplot_law.jpg" # Optional
 rmdlink: TRUE
+output:
+  blogdown::html_page:
+    number_sections: TRUE
+    toc: TRUE
 comment: no
-toc: no
 autoCollapseToc: no
 postMetaInFooter: no
 hiddenFromHomePage: no
@@ -38,16 +41,18 @@ German **Zweites Juristisches Staatsexamen** (2nd State Exam in Laws) is said to
 
 Notice that you can score 0-18 points, where a final score of 8 allows you to become a judge and 10 means outstanding...
 
+# 2017/IV Campaign
 ## Import the Data
 Let's fetch the date from the official page of the Berlin Senate. You'll get a PDF which you have to destill with the tabulizer package (or by hand) in order to get a CSV. I will follow up with a post on using tabulizer from within RStudio anytime soon.
 
 ```{r, message=FALSE}
 library(tidyverse)
 # Datenquelle: https://www.berlin.de/sen/justiz/juristenausbildung/juristische-pruefungen/artikel.264039.php
-noten_raw <- read_csv2("../../data/201801_notenaushang.csv") # nach PDF -> Tabulizer
+noten_raw <- read_csv2("../../data/noten_201704.csv") # nach PDF -> Tabulizer
+head(noten_raw)
 ```
 
-### Skim / Preview the Data
+## Skim / Preview the Data
 The skimr-Package - among others - is great for quickly inspecting what kind of data (variables, data type, NAs etc.) you get.
 ```{r}
 skimr::skim(noten_raw)
@@ -57,9 +62,10 @@ skimr::skim(noten_raw)
 
 ![(Screenshot of skimr from RStudio)](/img/joyplot_laws/Staatsexamen_Skimr.jpg)
 
-## Long -> Short (Tidy)
+## Long -> Short with gather()
 Now we need to tidy the data. We first drop the AZ column (Student id) and then "pivot" all the exam subjects into a single column (= variable) named "Fach" (GER for subject).
 ```{r echo=TRUE}
+median_2017 <- median(noten_raw$Dur, na.rm = TRUE)
 noten_raw %>%
   select(-AZ) %>% 
   gather(key = Fach, value = noten_raw[,2:8]) %>% 
@@ -69,7 +75,7 @@ head(noten_long, 1)
 ```
 
 
-## Joyplot 
+## 2017/IV Joyplot 
 ### ggridges-Pkg + colors
 We load the ggridges Pkg and the beautiful Viridis color palette
 ```{r, echo=TRUE}
@@ -81,7 +87,7 @@ library(viridis)
 ```{r echo=TRUE}
 # Beschriftungen
 title_a <- c("2. Juristisches Staatsexamen, GJPA Berlin/Brandenburg")
-subtitle_a = c("Notenverteilung Kampagne 4/17; n = 263; \"Dur\" = durchschnittl. Examensnote\r\nLinien: blau  = \"bestanden (ausreichend)\", rot  = \"vollbefriedigend\", schwarz  = Median Gesamtnote (5,57")
+subtitle_a = paste0("Notenverteilung Kampagne 4/17; n = 263; \"Dur\" = durchschnittl. Examensnote\r\nLinien: rot  = \"bestanden (ausreichend)\", blau  = \"vollbefriedigend\",\r\nschwarz  = Median Gesamtnote (",median_2017,")")
 caption_a = c("@fubits; Daten: GJPA 2018")
 ```
 
@@ -94,11 +100,11 @@ noten_long %>%
                       rel_min_height = 0.025,
                       scale = 1.75) +
   # Linie: Vollbefriedigend
-  geom_vline(xintercept = 10, color = "red", linetype = 4, size = 1) + 
+  geom_vline(xintercept = 10, color = "blue", linetype = 4, size = 1) + 
   # Linie: Bestanden
-  geom_vline(xintercept = 4, color = "blue", linetype = 4, size = 1) +
+  geom_vline(xintercept = 4, color = "red", linetype = 4, size = 1) +
   # Linie: Median Gesamtnote
-  geom_vline(xintercept = 5.57, color = "black", size = 1) +
+  geom_vline(xintercept = median_2017, color = "black", size = 1) +
   labs(title = title_a, subtitle = subtitle_a, caption = caption_a) +
   scale_x_continuous(breaks = c(0:18), limits = c(0,18)) +
   scale_y_discrete(expand = c(0.01,0.0)) +
@@ -108,7 +114,9 @@ noten_long %>%
 ```
 
 
-### Boxplots (Dur = overall result / final grade)
+## 2017/IV Boxplot
+(Dur = overall result / final grade)
+
 ```{r ECHO=TRUE, fig.asp=1}
 noten_long %>% 
 ggplot() +
@@ -121,7 +129,80 @@ ggplot() +
   labs(title = title_a, subtitle = subtitle_a, caption = caption_a) +
   theme(legend.position = "none") +
   # Linien zur Orientierung
-  geom_hline(yintercept = 10, color = "red", linetype = 4, size = 1) +
-  geom_hline(yintercept = 4, color = "blue", linetype = 4, size = 1) +
-  geom_hline(yintercept = 5.57, color = "black", size = 1)
+  geom_hline(yintercept = 10, color = "blue", linetype = 4, size = 1) +
+  geom_hline(yintercept = 4, color = "red", linetype = 4, size = 1) +
+  geom_hline(yintercept = median_2017, color = "black", size = 1)
+```
+
+# Update: 2018/I Campaign
+Grades from the 2018/01 campaign just have been released. Let's plot them for comparison:
+
+```{r, message=FALSE}
+# Datenquelle: https://www.berlin.de/sen/justiz/juristenausbildung/juristische-pruefungen/artikel.264039.php
+noten_raw_2018 <- read_csv2("../../data/noten_201801.csv") # nach PDF -> Tabulizer
+head(noten_raw_2018)
+```
+
+
+```{r}
+skimr::skim(noten_raw_2018)
+```
+
+```{r echo=TRUE}
+median_2018 <- median(noten_raw_2018$Dur, na.rm = TRUE)
+noten_raw_2018 %>%
+  select(-AZ) %>% 
+  gather(key = Fach, value = noten_raw_2018[,2:8]) %>% 
+  rename(Punkte = `noten_raw_2018[, 2:8]`) -> noten_long_2018
+
+head(noten_long_2018, 1)
+```
+
+```{r echo=TRUE}
+# Beschriftungen
+title_a <- c("2. Juristisches Staatsexamen, GJPA Berlin/Brandenburg")
+subtitle_a = paste0("Notenverteilung Kampagne 1/18; n = 277; \"Dur\" = durchschnittl. Examensnote\r\nLinien: rot  = \"bestanden (ausreichend)\", blau  = \"vollbefriedigend\",\r\nschwarz  = Median Gesamtnote (",median_2018,")")
+caption_a = c("@fubits; Daten: GJPA 2018")
+```
+
+## 2018/I Joyplot
+(Dur = overall result / final grade)
+```{r fig.asp=1, echo=TRUE, message=FALSE}
+# Plot
+noten_long_2018 %>% 
+  ggplot() +
+  geom_density_ridges(aes(x = Punkte, y = Fach, fill = Fach),
+                      rel_min_height = 0.025,
+                      scale = 1.75) +
+  # Linie: Vollbefriedigend
+  geom_vline(xintercept = 10, color = "blue", linetype = 4, size = 1) + 
+  # Linie: Bestanden
+  geom_vline(xintercept = 4, color = "red", linetype = 4, size = 1) +
+  # Linie: Median Gesamtnote
+  geom_vline(xintercept = median_2018, color = "black", size = 1) +
+  labs(title = title_a, subtitle = subtitle_a, caption = caption_a) +
+  scale_x_continuous(breaks = c(0:18), limits = c(0,18)) +
+  scale_y_discrete(expand = c(0.01,0.0)) +
+  scale_fill_viridis(option = "D", name = "Frequency n",
+                     direction = -1, discrete = TRUE) +
+  theme(legend.position = "none")
+```
+
+
+## 2018/I Boxplot
+```{r ECHO=TRUE, fig.asp=1}
+noten_long_2018 %>% 
+ggplot() +
+  geom_boxplot(aes(x = Fach, y = Punkte, fill = Fach)) +
+  scale_y_continuous(breaks = c(0:18), limits = c(0, 18)) +
+  scale_fill_viridis(
+    option = "C",
+    direction = -1, discrete = TRUE
+  ) +
+  labs(title = title_a, subtitle = subtitle_a, caption = caption_a) +
+  theme(legend.position = "none") +
+  # Linien zur Orientierung
+  geom_hline(yintercept = 10, color = "blue", linetype = 4, size = 1) +
+  geom_hline(yintercept = 4, color = "red", linetype = 4, size = 1) +
+  geom_hline(yintercept = median_2018, color = "black", size = 1)
 ```
