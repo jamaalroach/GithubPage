@@ -45,10 +45,11 @@ Notice that you can score 0-18 points, where a final score of 8 allows you to be
 ## Import the Data
 Let's fetch the date from the official page of the Berlin Senate. You'll get a PDF which you have to destill with the tabulizer package (or by hand) in order to get a CSV. I will follow up with a post on using tabulizer from within RStudio anytime soon.
 
-```{r, message=FALSE}
+```{r, message=TRUE}
 library(tidyverse)
 # Datenquelle: https://www.berlin.de/sen/justiz/juristenausbildung/juristische-pruefungen/artikel.264039.php
-noten_raw <- read_csv2("../../data/noten_201704.csv") # nach PDF -> Tabulizer
+data_path <- here::here("static", "data", "/")
+noten_raw <- read_csv2(str_c(data_path, "noten_201704.csv")) # nach PDF -> Tabulizer
 head(noten_raw)
 ```
 
@@ -139,7 +140,7 @@ Grades from the 2018/01 campaign just have been released. Let's plot them for co
 
 ```{r, message=FALSE}
 # Datenquelle: https://www.berlin.de/sen/justiz/juristenausbildung/juristische-pruefungen/artikel.264039.php
-noten_raw_2018 <- read_csv2("../../data/noten_201801.csv") # nach PDF -> Tabulizer
+noten_raw_2018 <- read_csv2(str_c(data_path, "noten_201801.csv")) # nach PDF -> Tabulizer
 head(noten_raw_2018)
 ```
 

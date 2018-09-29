@@ -70,14 +70,14 @@ How hard could that be, right?
 ## Packages
 ```{r message=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-library(ggplot2)
+library(tidyverse)
 library(ggrepel)
 library(maps)
 library(ggthemes)
 library(rasterVis)
-library(dplyr)
 library(maptools)
 library(sp)
+library(here)
 # library(rnaturalearth) # <- source for geodata, but pkg masks some needed fun() from other packages, so rather address methods by rnaturalearth::fun() 
 ```
 
@@ -107,7 +107,8 @@ Ugh, not so pretty, right? But you have to start somewhere...
 #                                           type = 'countries',
 #                                           category = 'cultural')
 # save(countries10, file = "GIS_NPO_Data/countries10.rda")
-load("../../data/GIS_NPO_Data/countries10.rda")
+data_path <- here("static","data", "GIS_NPO_Data", "/")
+load(str_c(data_path, "countries10.rda"))
 ```
 
 
@@ -268,7 +269,7 @@ head(centroids_df, 1)
 # OR:
 # Download from: http://www.naturalearthdata.com/downloads/50m-raster-data/
 # Here: NE2, shaded relief, water: http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/50m/raster/NE2_50M_SR_W.zip
-relief_world <- raster("../../data/NE2_50M_SR_W.tif") # 170 MB file
+relief_world <- raster(str_c(data_path, "NE2_50M_SR_W.tif")) # 170 MB file
 plot(relief_world)
 ```
 
@@ -305,7 +306,7 @@ plot(relief_boxcrop)
 # Mask everything apart from the core regions terrain
 # relief_land <- raster::mask(relief_boxcrop, asia_core) # mask {E} != asia_core
 # save(relief_land, file = "../../data/GIS_NPO_Data/relief_land.rda")
-load("../../data/GIS_NPO_Data/relief_land.rda")
+load(str_c(data_path, "relief_land.rda"))
 plot(relief_land)
 ```
 
@@ -325,7 +326,7 @@ head(relief_land_df, 1)
 ```{r, cache=TRUE}
 # relief_meer <- raster::mask(relief_boxcrop, asia_core, inverse=TRUE) # maskiert alles == asia_core
 # save(relief_meer, file = "../../data/GIS_NPO_Data/relief_meer.rda")
-load("../../data/GIS_NPO_Data/relief_meer.rda")
+load(str_c(data_path, "relief_meer.rda"))
 plot(relief_meer)
 ```
 

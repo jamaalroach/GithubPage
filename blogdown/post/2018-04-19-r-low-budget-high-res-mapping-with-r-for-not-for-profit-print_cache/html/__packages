@@ -11,3 +11,11 @@ latticeExtra
 rasterVis
 dplyr
 maptools
+tidyverse
+tibble
+tidyr
+readr
+purrr
+stringr
+forcats
+here
