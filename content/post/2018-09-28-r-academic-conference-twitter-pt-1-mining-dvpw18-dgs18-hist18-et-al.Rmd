@@ -1,5 +1,5 @@
 ---
-title: '[R] German Academic Twitter, Pt. 1: Mining #dvpw18, #dgs18, #hist18 et al.'
+title: '[R] German Academic Twitter, Pt. 1: Mining #dvpw18, #dgs18, #hist18, #informatik2018 et al.'
 author: Ilja / fubits
 date: '2018-09-28'
 categories:
@@ -14,8 +14,7 @@ output:
     number_sections: yes
     toc: yes
 lastmod: '2018-09-28T20:17:07+02:00'
-description: In September, four big academic societies in Germany had their annual
-  meeting - at the same time! You can **not not** harvest their tweets
+description: In September, four big academic societies in Germany had their annual meeting - all at the same time! You can **not not** harvest their tweets...
 thumbnail: /img/thumbs/conference_tweets.jpg
 rmdlink: TRUE # Optional
 comment: no
@@ -35,20 +34,24 @@ sequenceDiagrams:
   enable: no
   options: ''
 ---
-![](/img/Twitter_conf/Twitter_conf.png "This is what 4 German academic conferences look like on Twitter"){width=100%}
+![](/img/Twitter_conf/Twitter_conf.png "This is what ~~4~~ 5 German academic conferences look like on Twitter"){width=100%}
 
-As (bad) luck has it, four big academic societies in Germany somehow decided to hold their respective annual meetings within the same week:
+> Update: Since the conferences are over but there's still some Twitter activity, Tweets posted after 29.09.2018 have been filtered out from the samples.
 
-  * [Political Science](https://www.dvpw.de/kongresse/dvpw-kongresse/dvpw2018/){target="_blank"} (#dvpw18, #dvpw2018, #dvpw)
+>Update 2: The Media Studies conference (\#gfm2018) has been included
+
+As (bad) luck has it, ~~four~~ five big academic societies in Germany somehow decided to hold their respective annual meetings within the same week:
+
+  * [Deutsche Vereinigung für Politikwissenschaft / Political Science](https://www.dvpw.de/kongresse/dvpw-kongresse/dvpw2018/){target="_blank"} (\#dvpw18, \#dvpw2018, \#dvpw)
     
-  * [Sociology](https://kongress2018.soziologie.de/aktuelles/){target="_blank"} (#dgs18, #dgs2018)
+  * [Deutsche Gesellschaft für Soziologie / Sociology](https://kongress2018.soziologie.de/aktuelles/){target="_blank"} (\#dgs18, \#dgs2018)
     
-  * [History](https://www.historikertag.de/Muenster2018/){target="_blank"} (#histag18 / #histag2018 / #historikertag2018)
+  * [Verband der Historiker und Historikerinnen Deutschlands / History](https://www.historikertag.de/Muenster2018/){target="_blank"} (\#histag18 / \#histag2018 / \#historikertag2018)
     
-  * [Computer Science](https://informatik2018.gi.de/){target="_blank"} (informatik2018)
+  * [Gesellschaft für Informatik e.V. / Computer Science](https://informatik2018.gi.de/){target="_blank"} (\#informatik2018)
+  * [Gesellschaft für Medienwissenschaft / Media Studies](https://gfmedienwissenschaft.de/jahrestagung){target="_blank"} (\#gfm2018)
         
-        
-Even though Germany is still a bit behind with regards to Twitter, four conferences = 4x the chance to work on your Twitter mining and text wrangling skills ;). Plus, we get some interesting data for the future practice of our NLP / text processing and social network analysis skills...
+Even though Germany is still a bit behind with regards to Twitter, ~~four~~ five conferences = ~~4x~~ 5x the chance to work on your Twitter mining and text wrangling skills ;). Plus, we get some interesting data for the future practice of our NLP / text processing and social network analysis skills...
 
 So let's just get started with mining. We will use [Mike Kearney's](https://twitter.com/kearneymw){target="_blank"} superb `rtweet` ([package](https://rtweet.info/){target="_blank"}).
 
@@ -90,7 +93,7 @@ file_name <- file.path(home_directory, "twitter_token.rds")
 
 ## save token to home directory
 saveRDS(twitter_token, file = file_name)
-# saveRDS(twitter_token, "twitter_token.rds")
+# saveRDS(twitter_token, "twitter_token.rds") # save locally in wd
 twitter_token <- readRDS(str_c(home_directory,"/twitter_token.rds"))
 
 ```
@@ -197,7 +200,7 @@ dvpw_collection %>%
        subtitle = paste0("(n = ", dvpw_n_tweets,
                          " Tweets von m = ", dvpw_n_accounts,
                          " Accounts; Stand: 29.09.18, ",
-                         timeString , " Uhr;",
+                         "23:59" , " Uhr;",
                          " by @fubits)")) +
   guides(fill = FALSE)
 ```
@@ -229,7 +232,7 @@ ggplot(dvpw_counts, aes(x = Favs, y = RT)) +
        title = "Twitter-Aktivität zu #dvpw / #dvpw18 / #dvpw2018: Retweets & Favs",
        subtitle = paste0("(n = ", dvpw_n_tweets,
                        " Tweets von m = ", dvpw_n_accounts,
-                       " Accounts; Stand: 29.09.18, ", timeString , " Uhr;"),
+                       " Accounts; Stand: 29.09.18, ", "23:59" , " Uhr;"),
        x = "Anzahl Favourites",
        y = "Anzahl Retweets",
        caption = "@fubits")
@@ -257,7 +260,7 @@ dvpw_counts %>% filter(screen_name != "dvpw") %>%
                                                screen_name != "dvpw")$Tweets),
                            " Tweets von m = ", dvpw_n_accounts - 1,
                          " Accounts, ohne @dvpw; Top 20 Label, Stand: 29.09.18, ",
-                         timeString," Uhr)"),
+                         "23:59"," Uhr)"),
          x = "Anzahl Favourites",
          y = "Anzahl Retweets",
          caption = "@fubits")
@@ -327,7 +330,7 @@ dgs_collection %>%
   labs(title = "Twitter-Aktivität zu #dgs18 / #dgs2018",
        subtitle = str_c("(n = ", dgs_n_tweets,
                          " Tweets von m = ", dgs_n_accounts,
-                         " Accounts; Stand: 29.09.18, ", timeString , " Uhr;",
+                         " Accounts; Stand: 29.09.18, ", "23:59" , " Uhr;",
                          " by @fubits)")) +
   guides(fill = FALSE)
 ```
@@ -359,7 +362,7 @@ ggplot(dgs_counts, aes(x = Favs, y = RT)) +
        title = "Twitter-Aktivität zu #dgs18 / #dgs2018: Retweets & Favs",
        subtitle = paste0("(n = ", dgs_n_tweets,
                        " Tweets von m = ", dgs_n_accounts,
-                       " Accounts; Stand: 29.09.18, ", timeString , " Uhr;"),
+                       " Accounts; Stand: 29.09.18, ", "23:59" , " Uhr;"),
        x = "Anzahl Favourites",
        y = "Anzahl Retweets",
        caption = "@fubits")
@@ -382,7 +385,7 @@ ggplot(dgs_counts, aes(x = Favs, y = RT)) +
          subtitle = paste0("(n = ", dgs_n_tweets,
                          " Tweets von m = ", dgs_n_accounts,
                          " Accounts; Top 20 Label, Stand: 29.09.18, ", 
-                         timeString, " Uhr)"),
+                         "23:59", " Uhr)"),
          x = "Anzahl Favourites",
          y = "Anzahl Retweets",
          caption = "@fubits")
@@ -434,7 +437,7 @@ hist_collection %>%
   labs(title = "Twitter-Aktivität zu #histag18 / #histag2018 / #historikertag2018",
        subtitle = paste0("(n = ", hist_n_tweets,
                          " Tweets von m = ", hist_n_accounts,
-                         " Accounts; Stand: 29.09.18, ", timeString , " Uhr;",
+                         " Accounts; Stand: 29.09.18, ", "23:59" , " Uhr;",
                          " by @fubits)")) +
   guides(fill = FALSE)
 ```
@@ -465,7 +468,7 @@ ggplot(hist_counts, aes(x = Favs, y = RT)) +
        title = "Twitter-Aktivität zu #histag18 / #histag2018 / #historikertag2018: Retweets & Favs",
        subtitle = paste0("(n = ", hist_n_tweets,
                        " Tweets von m = ", hist_n_accounts,
-                       " Accounts; Stand: 29.09.18, ", timeString , " Uhr;"),
+                       " Accounts; Stand: 29.09.18, ", "23:59" , " Uhr;"),
        x = "Anzahl Favourites",
        y = "Anzahl Retweets",
        caption = "@fubits")
@@ -487,7 +490,7 @@ ggplot(hist_counts, aes(x = Favs, y = RT)) +
          subtitle = paste0("(n = ", hist_n_tweets,
                          " Tweets von m = ", hist_n_accounts,
                          " Accounts; Top 20 Label, Stand: 29.09.18, ",
-                         timeString, " Uhr)"),
+                         "23:59", " Uhr)"),
          x = "Anzahl Favourites",
          y = "Anzahl Retweets",
          caption = "@fubits")
@@ -542,7 +545,7 @@ inf_collection %>%
        subtitle = paste0("(n = ", inf_n_tweets,
                          " Tweets von m = ", inf_n_accounts,
                          " Accounts; Stand: 29.09.18, ", 
-                         timeString , " Uhr;",
+                         "23:59" , " Uhr;",
                          " by @fubits)")) +
   guides(fill = FALSE)
 ```
@@ -574,7 +577,7 @@ ggplot(inf_counts, aes(x = Favs, y = RT)) +
        title = "Twitter-Aktivität zu #informatik2018: Retweets & Favs",
        subtitle = paste0("(n = ", inf_n_tweets,
                        " Tweets von m = ", inf_n_accounts,
-                       " Accounts; Stand: 29.09.18, ", timeString , " Uhr;"),
+                       " Accounts; Stand: 29.09.18, ", "23:59" , " Uhr;"),
        x = "Anzahl Favourites",
        y = "Anzahl Retweets",
        caption = "@fubits")
@@ -598,7 +601,99 @@ ggplot(inf_counts, aes(x = Favs, y = RT)) +
          subtitle = paste0("(n = ", inf_n_tweets,
                          " Tweets von m = ", inf_n_accounts,
                          " Accounts; Top 20 Label, Stand: 29.09.18, ",
-                         timeString, " Uhr)"),
+                         "23:59", " Uhr)"),
+         x = "Anzahl Favourites",
+         y = "Anzahl Retweets",
+         caption = "@fubits")
+```
+
+## Media Studies: #gfm2018
+> As I have just been informed, the German Society for Media Studies als had their annual meeting this week. That's like some weird multidisciplinary but still strictly unidisciplinary academic conspiracy...
+
+Let's have a look at \#gfm2018
+
+**Mine**
+```{r cache=TRUE, eval=FALSE}
+gfm_tweets <- search_tweets(q = "#gfm2018", # explicit QUERY
+      include_rts = FALSE,
+      # max_id = ,
+      n = 5000,
+      verbose = TRUE,
+      retryonratelimit = TRUE,
+      type = "recent") # mixed recent popular
+
+saveRDS(gfm_tweets, file =
+          str_c(data_path,"gfm_tweets_",getTimeString(),".rds"))
+```
+
+**Wrangle**
+```{r cache=TRUE}
+gfm_rds <- dir(path = data_path, pattern = "gfm_") %>%
+  str_c(data_path, .) %>%
+  map_dfr(readRDS)
+gfm_collection <- gfm_rds %>% distinct(status_id, .keep_all = TRUE) %>%
+  filter(created_at < "2018-09-30") %>%
+  arrange(created_at)
+```
+
+**Treemap**
+```{r cache=TRUE}
+gfm_n_tweets <- nrow(gfm_collection)
+gfm_n_accounts <- length(unique(gfm_collection$screen_name))
+
+gfm_collection %>%
+  group_by(screen_name) %>%
+  summarise(n = n()) %>%
+  mutate(share = n / sum(n)) %>%
+  arrange(desc(n)) %>%
+  ggplot(aes(area = share)) +
+    treemapify::geom_treemap(aes(fill = log10(n))) +
+    treemapify::geom_treemap_text(
+      aes(label = paste0(screen_name, " (", round(share*100,1),"%)"))
+      ) +
+  scale_fill_viridis_c(direction = -1, option = "C", begin = 0.8) +
+  labs(title = "Twitter-Aktivität zu #gfm2018",
+       subtitle = paste0("(n = ", gfm_n_tweets,
+                         " Tweets von m = ", gfm_n_accounts,
+                         " Accounts; Stand: 29.09.18, ", 
+                         "23:59" , " Uhr;",
+                         " by @fubits)")) +
+  guides(fill = FALSE)
+```
+> Let's treat this as preliminary. I've just mined the Tweets for the first time, so a couple more samples might another couple of Tweets.
+
+**Scatterplot with per-user activity**
+```{r cache=TRUE}
+gfm_counts <- gfm_collection %>%
+  group_by(screen_name) %>%
+  # filter(screen_name != "fubits") %>% 
+  summarise(Tweets = n(),
+            RT = sum(retweet_count),
+            Favs = sum(favorite_count)) %>% 
+  mutate(discipline = "MediaStudies") %>% 
+  arrange(desc(Tweets))
+  # top_n(n = 50, wt = tweets) %>% 
+```
+
+Since there's not too much activity for \#gfm2018, we can jump to the labelled scatterplot.
+
+**Scatterplot: Top 20 labelled**
+```{r cache=TRUE, fig.width=12}
+ggplot(gfm_counts, aes(x = Favs, y = RT)) +
+    geom_point(aes(size = Tweets, color = screen_name), alpha = 0.5) +
+    ggrepel::geom_text_repel(data = gfm_counts[1:20,],
+                             aes(label = screen_name)) +
+    coord_fixed() +
+    scale_color_viridis_d() +
+    scale_x_continuous(breaks = c(0, 10, 20, 40, 60, 80, 100, 110)) +
+    guides(color = FALSE) +
+    theme_minimal() +
+    labs(size = "Anzahl Tweets",
+         title = "Twitter-Aktivität zu #gfm2018: Top 20 Accounts",
+         subtitle = paste0("(n = ", gfm_n_tweets,
+                         " Tweets von m = ", gfm_n_accounts,
+                         " Accounts; Top 20 Label, Stand: 29.09.18, ",
+                         "23:59", " Uhr)"),
          x = "Anzahl Favourites",
          y = "Anzahl Retweets",
          caption = "@fubits")
@@ -607,7 +702,7 @@ ggplot(inf_counts, aes(x = Favs, y = RT)) +
 # Some Comparisons
 First, we will need to bind the four tibbles together. First, let's get the total numbers of unique Tweets and unique users:
 ```{r}
-all_cons <- bind_rows(dvpw_collection, dgs_collection, hist_collection, inf_collection)
+all_cons <- bind_rows(dvpw_collection, dgs_collection, hist_collection, inf_collection, gfm_collection)
 all_n_accounts <- all_cons %>% distinct(screen_name) %>% nrow()
 all_n_tweets <- all_cons %>% distinct(status_id) %>% nrow()
 ```
@@ -615,7 +710,7 @@ So, this week, `r all_n_accounts` German academic Twitter accounts have been act
 
 Now we can bind the aggregated *_counts.
 ```{r}
-all_cons_per_user <- bind_rows(dvpw_counts, dgs_counts, hist_counts, inf_counts) %>%
+all_cons_per_user <- bind_rows(dvpw_counts, dgs_counts, hist_counts, inf_counts, gfm_counts) %>%
   group_by(screen_name) %>% 
   distinct(screen_name, .keep_all = TRUE) %>% 
   mutate(avg_output = (Tweets + RT + Favs)/3) %>% 
@@ -625,7 +720,7 @@ all_cons_per_user %>% head(20)
 ```
 
 ## Joint Scatterplot: per-User
-Let's have a look at the German academic Twitter crowd:
+Let's have a look at this week's German academic Twitter crowd as a whole:
 ```{r cache=TRUE, fig.width=12}
 ggplot(all_cons_per_user, aes(x = Favs, y = RT, color = discipline)) +
     geom_point(aes(size = Tweets), alpha = 0.5) +
@@ -638,11 +733,11 @@ ggplot(all_cons_per_user, aes(x = Favs, y = RT, color = discipline)) +
     guides(colour = guide_legend(override.aes = list(size = 5, stroke = 1.5))) +
     labs(size = "Anzahl Tweets",
          color = "Disziplin",
-         title = "Twitter-Aktivität zu Twitter-Aktivität zu #dvpw*18, #dgs*18, #hist*18, #informatik2018: Top 20 Accounts",
+         title = "Twitter-Aktivität zu Twitter-Aktivität zu #dvpw*18, #dgs*18, #hist*18, #informatik2018 und #gfm2018: Top 20 Accounts",
          subtitle = paste0("(n = ", all_n_tweets,
                          " Tweets von m = ", all_n_accounts,
                          " Accounts; Top 20 Label, Stand: 29.09.18, ",
-                         timeString, " Uhr)"),
+                         "23:59", " Uhr)"),
          x = "Anzahl Favourites",
          y = "Anzahl Retweets",
          caption = "@fubits")
@@ -663,11 +758,10 @@ all_cons_per_user %>%
     guides(colour = guide_legend(override.aes = list(size = 5, stroke = 1.5))) +
     labs(size = "Anzahl Tweets",
          color = "Disziplin",
-         title = "Twitter-Aktivität zu #dvpw*18, #dgs*18, #hist*18, #informatik2018: Top 20 Accounts",
+         title = "Twitter-Aktivität zu #dvpw*18, #dgs*18, #hist*18, #informatik2018 und #gfm2018: Top 20 Accounts",
          subtitle = paste0("(n = ", all_n_tweets,
                          " Tweets von m = ", all_n_accounts-1,
-                         " Accounts (ohne @dvpw); Top 20 Label, Stand: 29.09.18, ",
-                         timeString, " Uhr)"),
+                         " Accounts (ohne @dvpw); Top 20 Label, Stand: 29.09.18, ","23:59", " Uhr)"),
          x = "Anzahl Favourites",
          y = "Anzahl Retweets",
          caption = "@fubits")
@@ -695,16 +789,19 @@ hist_box <- hist_counts %>%
   # mutate(Discipline = "History")
 ```
 
-
 ```{r}
 inf_box <- inf_counts %>% 
   gather("Metric", "Total", 2:4) # %>%
   # mutate(Discipline = "CS")
 ```
-
+```{r}
+gfm_box <- gfm_counts %>% 
+  gather("Metric", "Total", 2:4) # %>%
+  # mutate(Discipline = "CS")
+```
 
 ```{r}
-bind_rows(dvpw_box, dgs_box, hist_box, inf_box) %>% 
+bind_rows(dvpw_box, dgs_box, hist_box, inf_box, gfm_box) %>% 
   ggplot() +
   geom_boxplot(aes(fct_inorder(Metric), Total)) +
   scale_x_discrete() +
@@ -713,7 +810,7 @@ bind_rows(dvpw_box, dgs_box, hist_box, inf_box) %>%
 ```
 
 ```{r}
-bind_rows(dvpw_box, dgs_box, hist_box, inf_box) %>% 
+bind_rows(dvpw_box, dgs_box, hist_box, inf_box, gfm_box) %>% 
   ggplot() +
   geom_violin(aes(fct_inorder(Metric), Total, fill = Metric)) +
   scale_x_discrete() +
@@ -728,7 +825,7 @@ Mmmh, I think I should try those [beeswarm-plots](https://github.com/eclarke/ggb
 # One final table: The overall activity compared by numbers
 What, if we simply compare the disciplines' Twitter performance by simple totals?
 ```{r}
-bind_rows(dvpw_counts, dgs_counts, hist_counts, inf_counts) %>%
+bind_rows(dvpw_counts, dgs_counts, hist_counts, inf_counts, gfm_counts) %>%
   group_by(discipline) %>% 
   summarise(Users = n(), Tweets = sum(Tweets),
             RT = sum(RT), Fav = sum(Favs)) %>% 
@@ -737,7 +834,7 @@ bind_rows(dvpw_counts, dgs_counts, hist_counts, inf_counts) %>%
 
 And we if we average out Tweets+RTs+Favs per User?
 ```{r}
-bind_rows(dvpw_counts, dgs_counts, hist_counts, inf_counts) %>%
+bind_rows(dvpw_counts, dgs_counts, hist_counts, inf_counts, gfm_counts) %>%
   group_by(discipline) %>% 
   summarise(Users = n(), Tweets = sum(Tweets),
             RT = sum(RT), Fav = sum(Favs)) %>% 
@@ -745,7 +842,20 @@ bind_rows(dvpw_counts, dgs_counts, hist_counts, inf_counts) %>%
   arrange(desc(avg_output))
 ```
 
-The interpretation is up to you.
+And now let's have look without the `#TeamTakeOver` coup by `@dvpw`:
+```{r}
+bind_rows(dvpw_counts, dgs_counts, hist_counts, inf_counts, gfm_counts) %>%
+  filter(screen_name != "dvpw") %>% 
+  group_by(discipline) %>% 
+  summarise(Users = n(), Tweets = sum(Tweets),
+            RT = sum(RT), Fav = sum(Favs)) %>% 
+  mutate(avg_output = (Tweets + RT + Fav)/Users) %>% 
+  arrange(desc(avg_output))
+```
+
+I guess it is fair to conclude that well organised Twitter takeovers by conference participants have quite an effect on the visibility of a conference.
+
+Further interpretation is up to you :)
   
 # What's next
 
