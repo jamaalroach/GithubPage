@@ -14,7 +14,7 @@ output:
     number_sections: yes
     toc: yes
 lastmod: '2018-09-28T20:17:07+02:00'
-description: In September, four big academic societies in Germany had their annual meeting - all at the same time! You can **not not** harvest their tweets...
+description: In September, four (update! - five) big academic societies in Germany had their annual meeting - all at the same time! You can **not not** harvest their tweets...
 thumbnail: /img/thumbs/conference_tweets.jpg
 rmdlink: TRUE # Optional
 comment: no
@@ -62,8 +62,8 @@ sequenceDiagrams:
 <li><a href="#joint-scatterplot-top-20-labelled-wo-dvpw"><span class="toc-section-number">3.2</span> Joint Scatterplot: Top 20 labelled (w/o <span class="citation">@dvpw</span>)</a></li>
 <li><a href="#boxplots-overall-distribution-of-activities-by-discipline"><span class="toc-section-number">3.3</span> Boxplots: Overall Distribution of Activities by Discipline</a></li>
 </ul></li>
-<li><a href="#one-final-table-the-overall-activity-compared-by-numbers"><span class="toc-section-number">4</span> One final table: The overall activity compared by numbers</a></li>
-<li><a href="#whats-next"><span class="toc-section-number">5</span> What’s next</a></li>
+<li><a href="#final-scores-the-overall-activity-compared-by-numbers"><span class="toc-section-number">4</span> Final scores: The overall activity compared by numbers</a></li>
+<li><a href="#whats-next"><span class="toc-section-number">5</span> What’s next?</a></li>
 </ul>
 </div>
 
@@ -127,7 +127,7 @@ twitter_token &lt;- readRDS(str_c(home_directory,&quot;/twitter_token.rds&quot;)
     unlist() %&gt;% glue::glue_collapse()
   }
 getTimeString()</code></pre>
-<pre><code>## 20180930172836</code></pre>
+<pre><code>## 20180930195545</code></pre>
 </div>
 <div id="prepare-filepath-for-.rds-with-here" class="section level2">
 <h2><span class="header-section-number">1.3</span> (Prepare filepath for .rds with <code>here()</code>)</h2>
@@ -141,13 +141,13 @@ if (!dir.exists(data_path)) dir.create(data_path)
 </div>
 <div id="mining-tweets-with-search_tweets" class="section level1">
 <h1><span class="header-section-number">2</span> Mining Tweets with <code>search_tweets()</code></h1>
+<p>We probably won’t get all the tweets with a single request, so what we are going to do is, to request the Tweets multiple times, consolidate the requests, and finally extract unique Tweets with <code>dplyr::distinct()</code> to get a pretty good sample.</p>
+<p>Notice, that we can request <code>recent</code> and <code>mixed</code> samples (However, <code>popular</code> doesn’t seem to work for me, atm.)</p>
 <div id="political-science-dvpw18-dvpw2018-and-dvpw" class="section level2">
 <h2><span class="header-section-number">2.1</span> Political Science: #dvpw18 / #dvpw2018 (and #dvpw)</h2>
-<p>We probably won’t get all the tweets with a single request, so what we are going to do is, to request the Tweets multiple times, consolidate the requests, and finally extract unique Tweets with <code>dplyr::distinct()</code> to get a pretty good sample.</p>
-<p>Notice, that we can request <code>recent</code> and <code>mixed</code> samples (<code>popular</code> doesn’t seem to work for me.)</p>
 <div id="mining" class="section level3">
 <h3><span class="header-section-number">2.1.1</span> Mining</h3>
-<p>The workflow suggested here is that you mine a couple of samples (or mine new samples hours or days later), save these sample with time-stamped and therefore unique file names (as <code>.rds</code>), and than consolidate and extract unique tweets with <code>dplyr::distinct()</code></p>
+<p>The workflow suggested here is that you mine a couple of samples (or mine new samples hours or days later), save these samples with time-stamped and therefore unique file names (as <code>group_timestamp.rds</code>), and than consolidate and extract unique tweets with <code>dplyr::distinct()</code></p>
 <pre class="r"><code>dvpw_tweets &lt;- search_tweets(q = &quot;#dvpw18 OR #dvpw2018 OR #dvpw&quot;, # explicit QUERY
       include_rts = FALSE,
       # max_id = ,
@@ -219,7 +219,7 @@ dvpw_collection %&gt;%
   mutate(discipline = &quot;PolSci&quot;) %&gt;% 
   arrange(desc(Tweets)) # %&gt;% 
   # top_n(n = 50, wt = tweets) </code></pre>
-<p>Scatterplot</p>
+<p><strong>Scatterplot</strong></p>
 <pre class="r"><code>ggplot(dvpw_counts, aes(x = Favs, y = RT)) +
   geom_point(aes(size = Tweets, color = screen_name)) +
   ggrepel::geom_text_repel(data = dvpw_counts[1:2,], aes(label = screen_name)) +
@@ -238,10 +238,13 @@ dvpw_collection %&gt;%
        caption = &quot;@fubits&quot;)</code></pre>
 <p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-14-1.png" width="1152" /></p>
 <p>The official society accounts have been quite busy! Well done, <a href="https://twitter.com/dvpwkongress/status/1040501085067247616" target="_blank">@dvpw/@dvpwkongress</a>, the idea of a Twitter <code>#TeamTakeOver</code> worked out rather well! &lt;- <strong>Note to my future self.</strong>)</p>
+<blockquote>
+<p>To be precise, the collective action of <code>@dvpw</code> has produced n = 368 individual Tweets!</p>
+</blockquote>
 </div>
 <div id="scatterplot-without-dvpw-and-with-labels-for-the-top-20" class="section level3">
 <h3><span class="header-section-number">2.1.5</span> Scatterplot without <span class="citation">@dvpw</span> and with labels for the top 20</h3>
-<p>Here we’ll need <code>ggrepel</code> for non-overlapping labeling. Since the official <span class="citation">@dvpw</span> account has been quite an “outlier”, let’s have an undisturbed look at the rest of the field without <span class="citation">@dvpw</span>.</p>
+<p>Here we’ll need <code>ggrepel</code> for non-overlapping labelling. As the official <span class="citation">@dvpw</span> account has been quite an “outlier”, let’s have an undisturbed look at the rest of the field without <span class="citation">@dvpw</span>.</p>
 <pre class="r"><code>dvpw_counts %&gt;% filter(screen_name != &quot;dvpw&quot;) %&gt;%
   ggplot(aes(x = Favs, y = RT)) +
     geom_point(aes(size = Tweets, color = screen_name), alpha = 0.5) +
@@ -254,8 +257,9 @@ dvpw_collection %&gt;%
     theme_minimal() +
     labs(size = &quot;Anzahl Tweets&quot;,
          title = &quot;Twitter-Aktivität zu #dvpw / #dvpw18 / #dvpw2018: Top 20 Accounts (ohne @dvpw)&quot;,
-         subtitle = paste0(&quot;(n = &quot;, sum(filter(dvpw_counts,
-                                               screen_name != &quot;dvpw&quot;)$Tweets),
+         subtitle = paste0(&quot;(n = &quot;,
+                           sum(filter(dvpw_counts,
+                                      screen_name != &quot;dvpw&quot;)$Tweets),
                            &quot; Tweets von m = &quot;, dvpw_n_accounts - 1,
                          &quot; Accounts, ohne @dvpw; Top 20 Label, Stand: 29.09.18, &quot;,
                          &quot;23:59&quot;,&quot; Uhr)&quot;),
@@ -291,7 +295,7 @@ post_list(dvpw_nicks[200:length(dvpw_nicks)], slug = &quot;dvpw2018&quot;, priva
       n = 5000,
       verbose = TRUE,
       retryonratelimit = TRUE,
-      type = &quot;mixed&quot;) # mixed recent (popular)
+      type = &quot;recent&quot;) # mixed recent (popular)
 
 saveRDS(dgs_tweets,
         file =  str_c(data_path,&quot;dgs_tweets_&quot;, getTimeString(),&quot;.rds&quot;)) </code></pre>
@@ -350,7 +354,8 @@ dgs_collection %&gt;%
        x = &quot;Anzahl Favourites&quot;,
        y = &quot;Anzahl Retweets&quot;,
        caption = &quot;@fubits&quot;)</code></pre>
-<p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-21-1.png" width="1152" /> Wow, that is quite different, right? Less individual tweets per user, less retweets, but a significantly higher Fav rate. Interesting. Shall we assume that Sociologist are more introvert and maybe have more empathy for others? :)</p>
+<p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-21-1.png" width="1152" /></p>
+<p>Wow, that is quite different, right? Less individual tweets per user, less retweets, but a significantly higher Fav rate. Interesting. Shall we assume that Sociologist are more introvert and maybe have more empathy for others? :)</p>
 <p><strong>Sociology: Top 20 labelled</strong></p>
 <pre class="r"><code>ggplot(dgs_counts, aes(x = Favs, y = RT)) +
     geom_point(aes(size = Tweets, color = screen_name), alpha = 0.5) +
@@ -506,7 +511,8 @@ inf_collection %&gt;%
                          &quot;23:59&quot; , &quot; Uhr;&quot;,
                          &quot; by @fubits)&quot;)) +
   guides(fill = FALSE)</code></pre>
-<p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-31-1.png" width="672" /> Hm, that’s quite a few Tweets for a presumably Tech-savie community…</p>
+<p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-31-1.png" width="672" /></p>
+<p>Hm, that’s quite a few Tweets for a presumably Tech-savie community…</p>
 <p><strong>Scatterplot with per-user activity</strong></p>
 <pre class="r"><code>inf_counts &lt;- inf_collection %&gt;%
   group_by(screen_name) %&gt;%
@@ -563,7 +569,7 @@ inf_collection %&gt;%
 <blockquote>
 <p>As I have <a href="https://twitter.com/__evamaria__/status/1046389871001128960" target="_blank">just been informed</a> on Twitter, the German Society for Media Studies also had their annual meeting this week. That’s like some weird multidisciplinary but still strictly unidisciplinary academic conspiracy…</p>
 </blockquote>
-<p>However, let’s have a look at #gfm2018, too!</p>
+<p>Nevertheless, let’s have a look at #gfm2018, too!</p>
 <p><strong>Mine</strong></p>
 <pre class="r"><code>gfm_tweets &lt;- search_tweets(q = &quot;#gfm2018&quot;, # explicit QUERY
       include_rts = FALSE,
@@ -571,7 +577,7 @@ inf_collection %&gt;%
       n = 5000,
       verbose = TRUE,
       retryonratelimit = TRUE,
-      type = &quot;recent&quot;) # mixed recent popular
+      type = &quot;mixed&quot;) # mixed recent popular
 
 saveRDS(gfm_tweets, file =
           str_c(data_path,&quot;gfm_tweets_&quot;,getTimeString(),&quot;.rds&quot;))</code></pre>
@@ -643,7 +649,7 @@ gfm_collection %&gt;%
 </div>
 <div id="some-comparisons" class="section level1">
 <h1><span class="header-section-number">3</span> Some Comparisons</h1>
-<p>First, we will need to bind the four tibbles together. First, let’s get the total numbers of unique Tweets and unique users:</p>
+<p>Now, we will need to bind the four tibbles together. First, let’s get the total numbers of unique Tweets and unique users:</p>
 <pre class="r"><code>all_cons &lt;- bind_rows(dvpw_collection, dgs_collection, hist_collection, inf_collection, gfm_collection)
 all_n_accounts &lt;- all_cons %&gt;% distinct(screen_name) %&gt;% nrow()
 all_n_tweets &lt;- all_cons %&gt;% distinct(status_id) %&gt;% nrow()</code></pre>
@@ -720,13 +726,16 @@ all_cons_per_user %&gt;% head(20)</code></pre>
     labs(size = &quot;Anzahl Tweets&quot;,
          color = &quot;Disziplin&quot;,
          title = &quot;Twitter-Aktivität zu #dvpw*18, #dgs*18, #hist*18, #informatik2018 und #gfm2018: Top 20 Accounts&quot;,
-         subtitle = paste0(&quot;(n = &quot;, all_n_tweets,
+         subtitle = paste0(&quot;(n = &quot;,
+                           sum(filter(all_cons_per_user,
+                                      screen_name != &quot;dvpw&quot;)$Tweets),
                          &quot; Tweets von m = &quot;, all_n_accounts-1,
                          &quot; Accounts (ohne @dvpw); Top 20 Label, Stand: 29.09.18, &quot;,&quot;23:59&quot;, &quot; Uhr)&quot;),
          x = &quot;Anzahl Favourites&quot;,
          y = &quot;Anzahl Retweets&quot;,
          caption = &quot;@fubits&quot;)</code></pre>
-<p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-43-1.png" width="1152" /> That’s what one week of academic twitter activity in Germany looks like, Duh!</p>
+<p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-43-1.png" width="1152" /></p>
+<p>That’s what one week of academic twitter activity in Germany looks like, Duh!</p>
 </div>
 <div id="boxplots-overall-distribution-of-activities-by-discipline" class="section level2">
 <h2><span class="header-section-number">3.3</span> Boxplots: Overall Distribution of Activities by Discipline</h2>
@@ -743,14 +752,17 @@ dvpw_box %&gt;% filter(screen_name == &quot;dvpw&quot;)</code></pre>
 ## 3 dvpw        PolSci     Favs     522</code></pre>
 <pre class="r"><code>dgs_box &lt;- dgs_counts %&gt;% 
   gather(&quot;Metric&quot;, &quot;Total&quot;, 2:4) # %&gt;%
-  # mutate(Discipline = &quot;Socio&quot;)</code></pre>
-<pre class="r"><code>hist_box &lt;- hist_counts %&gt;% 
+  # mutate(Discipline = &quot;Socio&quot;)
+
+hist_box &lt;- hist_counts %&gt;% 
   gather(&quot;Metric&quot;, &quot;Total&quot;, 2:4) # %&gt;%
-  # mutate(Discipline = &quot;History&quot;)</code></pre>
-<pre class="r"><code>inf_box &lt;- inf_counts %&gt;% 
+  # mutate(Discipline = &quot;History&quot;)
+
+inf_box &lt;- inf_counts %&gt;% 
   gather(&quot;Metric&quot;, &quot;Total&quot;, 2:4) # %&gt;%
-  # mutate(Discipline = &quot;CS&quot;)</code></pre>
-<pre class="r"><code>gfm_box &lt;- gfm_counts %&gt;% 
+  # mutate(Discipline = &quot;CS&quot;)
+
+gfm_box &lt;- gfm_counts %&gt;% 
   gather(&quot;Metric&quot;, &quot;Total&quot;, 2:4) # %&gt;%
   # mutate(Discipline = &quot;CS&quot;)</code></pre>
 <pre class="r"><code>bind_rows(dvpw_box, dgs_box, hist_box, inf_box, gfm_box) %&gt;% 
@@ -759,7 +771,8 @@ dvpw_box %&gt;% filter(screen_name == &quot;dvpw&quot;)</code></pre>
   scale_x_discrete() +
   scale_fill_viridis_d() +
   facet_wrap(vars(discipline))</code></pre>
-<p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-49-1.png" width="672" /></p>
+<p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-46-1.png" width="672" /></p>
+<p>Hm, maybe Violin Plots can reveal more?</p>
 <pre class="r"><code>bind_rows(dvpw_box, dgs_box, hist_box, inf_box, gfm_box) %&gt;% 
   ggplot() +
   geom_violin(aes(fct_inorder(Metric), Total, fill = Metric)) +
@@ -769,12 +782,13 @@ dvpw_box %&gt;% filter(screen_name == &quot;dvpw&quot;)</code></pre>
   labs(x = &quot;Distribution of Tweets / RT / Favs per User&quot;,
        legend = NULL) +
   theme_light()</code></pre>
-<p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-50-1.png" width="672" /> Mmmh, I think I should try those <a href="https://github.com/eclarke/ggbeeswarm" target="_blank">beeswarm-plots</a> soon-ish here…</p>
+<p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-47-1.png" width="672" /></p>
+<p>Mmmh, ok, I think I should try those <a href="https://github.com/eclarke/ggbeeswarm" target="_blank">beeswarm-plots</a> soon-ish here…</p>
 </div>
 </div>
-<div id="one-final-table-the-overall-activity-compared-by-numbers" class="section level1">
-<h1><span class="header-section-number">4</span> One final table: The overall activity compared by numbers</h1>
-<p>What, if we simply compare the disciplines’ Twitter performance by simple totals?</p>
+<div id="final-scores-the-overall-activity-compared-by-numbers" class="section level1">
+<h1><span class="header-section-number">4</span> Final scores: The overall activity compared by numbers</h1>
+<p>What if we simply compare the five disciplines’ Twitter performance in totals?</p>
 <pre class="r"><code>bind_rows(dvpw_counts, dgs_counts, hist_counts, inf_counts, gfm_counts) %&gt;%
   group_by(discipline) %&gt;% 
   summarise(Users = n(), Tweets = sum(Tweets),
@@ -788,12 +802,13 @@ dvpw_box %&gt;% filter(screen_name == &quot;dvpw&quot;)</code></pre>
 ## 3 PolSci         238   1691  1680  5341
 ## 4 CS              97    302   397  1039
 ## 5 MediaStudies    43    130   157   621</code></pre>
-<p>And we if we average out Tweets+RTs+Favs per User?</p>
+<p>Sociology has the highest number of active users and Favs (wow!), while PolSci has a lead with the total number of Tweets.</p>
+<p>And what if we average out Tweets+RTs+Favs per User?</p>
 <pre class="r"><code>bind_rows(dvpw_counts, dgs_counts, hist_counts, inf_counts, gfm_counts) %&gt;%
   group_by(discipline) %&gt;% 
   summarise(Users = n(), Tweets = sum(Tweets),
             RT = sum(RT), Fav = sum(Favs)) %&gt;% 
-  mutate(avg_output = (Tweets + RT + Fav)/Users) %&gt;% 
+  mutate(avg_output = (Tweets + RT + Fav) / Users) %&gt;% 
   arrange(desc(avg_output))</code></pre>
 <pre><code>## # A tibble: 5 x 6
 ##   discipline   Users Tweets    RT   Fav avg_output
@@ -803,13 +818,14 @@ dvpw_box %&gt;% filter(screen_name == &quot;dvpw&quot;)</code></pre>
 ## 3 MediaStudies    43    130   157   621       21.1
 ## 4 CS              97    302   397  1039       17.9
 ## 5 Sociology      704   1658   615  8477       15.3</code></pre>
-<p>And now let’s have look without the <code>#TeamTakeOver</code> coup by <code>@dvpw</code>:</p>
+<p>Here, the PolSci crowd has been the busiest (and Sociology was rather lazy ;). But…</p>
+<p>... let’s have look without the <code>#TeamTakeOver</code> coup by <code>@dvpw</code>:</p>
 <pre class="r"><code>bind_rows(dvpw_counts, dgs_counts, hist_counts, inf_counts, gfm_counts) %&gt;%
   filter(screen_name != &quot;dvpw&quot;) %&gt;% 
   group_by(discipline) %&gt;% 
   summarise(Users = n(), Tweets = sum(Tweets),
             RT = sum(RT), Fav = sum(Favs)) %&gt;% 
-  mutate(avg_output = (Tweets + RT + Fav)/Users) %&gt;% 
+  mutate(avg_output = (Tweets + RT + Fav) / Users) %&gt;% 
   arrange(desc(avg_output))</code></pre>
 <pre><code>## # A tibble: 5 x 6
 ##   discipline   Users Tweets    RT   Fav avg_output
@@ -819,11 +835,14 @@ dvpw_box %&gt;% filter(screen_name == &quot;dvpw&quot;)</code></pre>
 ## 3 MediaStudies    43    130   157   621       21.1
 ## 4 CS              97    302   397  1039       17.9
 ## 5 Sociology      704   1658   615  8477       15.3</code></pre>
-<p>I guess it is fair to conclude that well organised Twitter takeovers by conference participants have quite an effect on the visibility of a conference.</p>
+<p>Well done, Historians! If we ignore <span class="citation">@dvpw</span>’s Twitter takeover, you actually performed best (in terms of numbers, at least)!</p>
+<blockquote>
+<p>I guess it is fair to conclude that a well organised Twitter takeover by conference participants can have quite an effect on the visibility of a conference.</p>
+</blockquote>
 <p>Further interpretation is up to you :)</p>
 </div>
 <div id="whats-next" class="section level1">
-<h1><span class="header-section-number">5</span> What’s next</h1>
+<h1><span class="header-section-number">5</span> What’s next?</h1>
 <p>One hint:</p>
 <pre class="r"><code>library(quanteda)
 library(tidygraph)</code></pre>
