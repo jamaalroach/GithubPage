@@ -127,7 +127,7 @@ twitter_token &lt;- readRDS(str_c(home_directory,&quot;/twitter_token.rds&quot;)
     unlist() %&gt;% glue::glue_collapse()
   }
 getTimeString()</code></pre>
-<pre><code>## 20180930195545</code></pre>
+<pre><code>## 20180930201122</code></pre>
 </div>
 <div id="prepare-filepath-for-.rds-with-here" class="section level2">
 <h2><span class="header-section-number">1.3</span> (Prepare filepath for .rds with <code>here()</code>)</h2>
@@ -239,7 +239,7 @@ dvpw_collection %&gt;%
 <p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-14-1.png" width="1152" /></p>
 <p>The official society accounts have been quite busy! Well done, <a href="https://twitter.com/dvpwkongress/status/1040501085067247616" target="_blank">@dvpw/@dvpwkongress</a>, the idea of a Twitter <code>#TeamTakeOver</code> worked out rather well! &lt;- <strong>Note to my future self.</strong>)</p>
 <blockquote>
-<p>To be precise, the collective action of <code>@dvpw</code> has produced n = 368 individual Tweets!</p>
+<p>To be precise, the collective action of <code>@dvpw</code> has produced n = 461 individual Tweets!</p>
 </blockquote>
 </div>
 <div id="scatterplot-without-dvpw-and-with-labels-for-the-top-20" class="section level3">
@@ -653,7 +653,7 @@ gfm_collection %&gt;%
 <pre class="r"><code>all_cons &lt;- bind_rows(dvpw_collection, dgs_collection, hist_collection, inf_collection, gfm_collection)
 all_n_accounts &lt;- all_cons %&gt;% distinct(screen_name) %&gt;% nrow()
 all_n_tweets &lt;- all_cons %&gt;% distinct(status_id) %&gt;% nrow()</code></pre>
-<p>So, this week, 1320 German academic Twitter accounts have been active at four conferences in total, producing 4943 individual Tweets. Actually, that’s quite impressive!</p>
+<p>So, this week, 1320 German academic Twitter accounts have been active at <del>four</del> five conferences in total, producing 4943 individual Tweets. Actually, that’s quite impressive!</p>
 <p>Now we can bind the aggregated *_counts.</p>
 <pre class="r"><code>all_cons_per_user &lt;- bind_rows(dvpw_counts, dgs_counts, hist_counts, inf_counts, gfm_counts) %&gt;%
   group_by(screen_name) %&gt;% 
@@ -666,7 +666,7 @@ all_cons_per_user %&gt;% head(20)</code></pre>
 ## # Groups:   screen_name [20]
 ##    screen_name     Tweets    RT  Favs discipline avg_output
 ##    &lt;chr&gt;            &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;chr&gt;           &lt;dbl&gt;
-##  1 dvpw               368   423   522 PolSci          438. 
+##  1 dvpw               461   511   613 PolSci          528. 
 ##  2 dvpwkongress       135   173   368 PolSci          225. 
 ##  3 thothiel            44    98   272 PolSci          138  
 ##  4 digigw              34   121   225 History         127. 
@@ -679,9 +679,9 @@ all_cons_per_user %&gt;% head(20)</code></pre>
 ## 11 SassanGholiagha     86    31   138 PolSci           85  
 ## 12 janinefunke         12    29   213 History          84.7
 ## 13 LordElend           26    32   184 Sociology        80.7
-## 14 jakobfrohmann       41    60   129 History          76.7
-## 15 juergenzimmerer      7    51   171 History          76.3
-## 16 DrMichaelHein       21    30   176 PolSci           75.7
+## 14 DrMichaelHein       22    30   178 PolSci           76.7
+## 15 jakobfrohmann       41    60   129 History          76.7
+## 16 juergenzimmerer      7    51   171 History          76.3
 ## 17 RichterHedwig        7     8   203 History          72.7
 ## 18 wahlforschung       35    35   144 PolSci           71.3
 ## 19 PetraGuasti         84    28    92 PolSci           68  
@@ -747,9 +747,9 @@ dvpw_box %&gt;% filter(screen_name == &quot;dvpw&quot;)</code></pre>
 <pre><code>## # A tibble: 3 x 4
 ##   screen_name discipline Metric Total
 ##   &lt;chr&gt;       &lt;chr&gt;      &lt;chr&gt;  &lt;int&gt;
-## 1 dvpw        PolSci     Tweets   368
-## 2 dvpw        PolSci     RT       423
-## 3 dvpw        PolSci     Favs     522</code></pre>
+## 1 dvpw        PolSci     Tweets   461
+## 2 dvpw        PolSci     RT       511
+## 3 dvpw        PolSci     Favs     613</code></pre>
 <pre class="r"><code>dgs_box &lt;- dgs_counts %&gt;% 
   gather(&quot;Metric&quot;, &quot;Total&quot;, 2:4) # %&gt;%
   # mutate(Discipline = &quot;Socio&quot;)
@@ -788,7 +788,7 @@ gfm_box &lt;- gfm_counts %&gt;%
 </div>
 <div id="final-scores-the-overall-activity-compared-by-numbers" class="section level1">
 <h1><span class="header-section-number">4</span> Final scores: The overall activity compared by numbers</h1>
-<p>What if we simply compare the five disciplines’ Twitter performance in totals?</p>
+<p>What if we simply compare the five disciplines’ Twitter performance in terms of totals?</p>
 <pre class="r"><code>bind_rows(dvpw_counts, dgs_counts, hist_counts, inf_counts, gfm_counts) %&gt;%
   group_by(discipline) %&gt;% 
   summarise(Users = n(), Tweets = sum(Tweets),
@@ -797,10 +797,10 @@ gfm_box &lt;- gfm_counts %&gt;%
 <pre><code>## # A tibble: 5 x 5
 ##   discipline   Users Tweets    RT   Fav
 ##   &lt;chr&gt;        &lt;int&gt;  &lt;int&gt; &lt;int&gt; &lt;int&gt;
-## 1 Sociology      704   1658   615  8477
+## 1 Sociology      710   1674   617  8534
 ## 2 History        302   1086  1679  6750
-## 3 PolSci         238   1691  1680  5341
-## 4 CS              97    302   397  1039
+## 3 PolSci         242   1794  1775  5460
+## 4 CS              98    320   425  1065
 ## 5 MediaStudies    43    130   157   621</code></pre>
 <p>Sociology has the highest number of active users and Favs (wow!), while PolSci has a lead with the total number of Tweets.</p>
 <p>And what if we average out Tweets+RTs+Favs per User?</p>
@@ -813,11 +813,11 @@ gfm_box &lt;- gfm_counts %&gt;%
 <pre><code>## # A tibble: 5 x 6
 ##   discipline   Users Tweets    RT   Fav avg_output
 ##   &lt;chr&gt;        &lt;int&gt;  &lt;int&gt; &lt;int&gt; &lt;int&gt;      &lt;dbl&gt;
-## 1 PolSci         238   1691  1680  5341       36.6
+## 1 PolSci         242   1794  1775  5460       37.3
 ## 2 History        302   1086  1679  6750       31.5
 ## 3 MediaStudies    43    130   157   621       21.1
-## 4 CS              97    302   397  1039       17.9
-## 5 Sociology      704   1658   615  8477       15.3</code></pre>
+## 4 CS              98    320   425  1065       18.5
+## 5 Sociology      710   1674   617  8534       15.2</code></pre>
 <p>Here, the PolSci crowd has been the busiest (and Sociology was rather lazy ;). But…</p>
 <p>... let’s have look without the <code>#TeamTakeOver</code> coup by <code>@dvpw</code>:</p>
 <pre class="r"><code>bind_rows(dvpw_counts, dgs_counts, hist_counts, inf_counts, gfm_counts) %&gt;%
@@ -831,10 +831,10 @@ gfm_box &lt;- gfm_counts %&gt;%
 ##   discipline   Users Tweets    RT   Fav avg_output
 ##   &lt;chr&gt;        &lt;int&gt;  &lt;int&gt; &lt;int&gt; &lt;int&gt;      &lt;dbl&gt;
 ## 1 History        302   1086  1679  6750       31.5
-## 2 PolSci         237   1323  1257  4819       31.2
+## 2 PolSci         241   1333  1264  4847       30.9
 ## 3 MediaStudies    43    130   157   621       21.1
-## 4 CS              97    302   397  1039       17.9
-## 5 Sociology      704   1658   615  8477       15.3</code></pre>
+## 4 CS              98    320   425  1065       18.5
+## 5 Sociology      710   1674   617  8534       15.2</code></pre>
 <p>Well done, Historians! If we ignore <span class="citation">@dvpw</span>’s Twitter takeover, you actually performed best (in terms of numbers, at least)!</p>
 <blockquote>
 <p>I guess it is fair to conclude that a well organised Twitter takeover by conference participants can have quite an effect on the visibility of a conference.</p>

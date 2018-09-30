@@ -160,7 +160,7 @@ saveRDS(dvpw_tweets, file =
 
 Here we'll get a file list of all `dvpw_*.rds` files, then `map_dfr()` them to a `data_frame` and finally extract unique Tweets with `distinct()`
 
-```{r cache=TRUE}
+```{r}
 ## this is just a bit complicated because I'm using an external data folder for blogdown. If you work locally, you can just use:
 # map_dfr(dir(path = ".", "dvpw_"), readRDS)
 
@@ -192,7 +192,7 @@ timeString <- str_c(lubridate::hour(Sys.time()), ":", lubridate::minute(Sys.time
 
 We'll need the `treemapify` [package](https://github.com/wilkox/treemapify){target="_blank"} for this.
 
-```{r cache=TRUE}
+```{r}
 dvpw_n_tweets <- nrow(dvpw_collection)
 dvpw_n_accounts <- length(unique(dvpw_collection$screen_name))
 # tidy/dplyr: distinct(screen_name) %>% count()
@@ -221,7 +221,7 @@ dvpw_collection %>%
 
 For the scatterplot we'll have to group the single Tweets by user (`$screen_name`), summarise the counts for Tweets, RTs, and Favs, and assign a "discipline" category for later use.
 
-```{r cache=TRUE}
+```{r}
 dvpw_counts <- dvpw_collection %>%
   group_by(screen_name) %>%
   summarise(Tweets = n(),
@@ -234,7 +234,7 @@ dvpw_counts <- dvpw_collection %>%
 
 **Scatterplot**
 
-```{r cache=TRUE, fig.width=12}
+```{r fig.width=12}
 ggplot(dvpw_counts, aes(x = Favs, y = RT)) +
   geom_point(aes(size = Tweets, color = screen_name)) +
   ggrepel::geom_text_repel(data = dvpw_counts[1:2,], aes(label = screen_name)) +
@@ -261,7 +261,7 @@ The official society accounts have been quite busy! Well done, [\@dvpw/\@dvpwkon
 
 Here we'll need `ggrepel` for non-overlapping labelling. As the official @dvpw account has been quite an "outlier", let's have an undisturbed look at the rest of the field without @dvpw.
 
-```{r cache=TRUE, fig.width=12}
+```{r fig.width=12}
 dvpw_counts %>% filter(screen_name != "dvpw") %>%
   ggplot(aes(x = Favs, y = RT)) +
     geom_point(aes(size = Tweets, color = screen_name), alpha = 0.5) +
@@ -324,7 +324,7 @@ saveRDS(dgs_tweets,
 
 **Wrangle**
 
-```{r cache=TRUE}
+```{r}
 dgs_rds <- dir(path = data_path, pattern = "dgs_") %>%
   str_c(data_path, .) %>%
   map_dfr(readRDS)
@@ -335,7 +335,7 @@ dgs_collection <- dgs_rds %>% distinct(status_id, .keep_all = TRUE) %>%
 
 **Sociology: Treemap**
 
-```{r cache=TRUE}
+```{r}
 dgs_n_tweets <- nrow(dgs_collection)
 dgs_n_accounts <- length(unique(dgs_collection$screen_name))
 
@@ -361,7 +361,7 @@ That looks rather different from the #dvpw2018 community. Less institutional dom
 
 **Sociology: per-User**
 
-```{r cache=TRUE}
+```{r}
 dgs_counts <- dgs_collection %>%
   group_by(screen_name) %>%
   # filter(screen_name != "fubits") %>% 
@@ -373,7 +373,7 @@ dgs_counts <- dgs_collection %>%
   # top_n(n = 50, wt = tweets) 
 ```
 
-```{r cache=TRUE, fig.width=12}
+```{r fig.width=12}
 ggplot(dgs_counts, aes(x = Favs, y = RT)) +
   geom_point(aes(size = Tweets, color = screen_name)) +
   # ggrepel::geom_text_repel(data = counts[1:10,], aes(label = screen_name)) +
@@ -395,7 +395,7 @@ ggplot(dgs_counts, aes(x = Favs, y = RT)) +
 Wow, that is quite different, right? Less individual tweets per user, less retweets, but a significantly higher Fav rate. Interesting. Shall we assume that Sociologist are more introvert and maybe have more empathy for others? :)
 
 **Sociology: Top 20 labelled**
-```{r cache=TRUE, fig.width=12}
+```{r fig.width=12}
 ggplot(dgs_counts, aes(x = Favs, y = RT)) +
     geom_point(aes(size = Tweets, color = screen_name), alpha = 0.5) +
     ggrepel::geom_text_repel(data = dgs_counts[1:20,],
@@ -436,7 +436,7 @@ saveRDS(hist_tweets, file =
 
 **Wrangle**
 
-```{r cache=TRUE}
+```{r}
 hist_rds <- dir(path = data_path, pattern = "hist_") %>%
   str_c(data_path, .) %>%
   map_dfr(readRDS)
@@ -447,7 +447,7 @@ hist_collection <- hist_rds %>% distinct(status_id, .keep_all = TRUE) %>%
 
 **Historians: Treemap**
 
-```{r cache=TRUE}
+```{r}
 hist_n_tweets <- nrow(hist_collection)
 hist_n_accounts <- length(unique(hist_collection$screen_name))
 
@@ -484,7 +484,7 @@ hist_counts <- hist_collection %>%
   # top_n(n = 50, wt = tweets)  
 ```
 
-```{r cache=TRUE, fig.width=12}
+```{r fig.width=12}
 ggplot(hist_counts, aes(x = Favs, y = RT)) +
   geom_point(aes(size = Tweets, color = screen_name)) +
   # ggrepel::geom_text_repel(data = counts[1:10,], aes(label = screen_name)) +
@@ -505,7 +505,7 @@ ggplot(hist_counts, aes(x = Favs, y = RT)) +
 
 **Historians: Top 20 labelled**
 
-```{r cache=TRUE, fig.width=12}
+```{r fig.width=12}
 ggplot(hist_counts, aes(x = Favs, y = RT)) +
     geom_point(aes(size = Tweets, color = screen_name), alpha = 0.5) +
     ggrepel::geom_text_repel(data = hist_counts[1:20,],
@@ -548,7 +548,7 @@ saveRDS(inf_tweets, file =
 
 **Wrangle**
 
-```{r cache=TRUE}
+```{r}
 inf_rds <- dir(path = data_path, pattern = "inf_") %>%
   str_c(data_path, .) %>%
   map_dfr(readRDS)
@@ -559,7 +559,7 @@ inf_collection <- inf_rds %>% distinct(status_id, .keep_all = TRUE) %>%
 
 **Treemap**
 
-```{r cache=TRUE}
+```{r}
 inf_n_tweets <- nrow(inf_collection)
 inf_n_accounts <- length(unique(inf_collection$screen_name))
 
@@ -587,7 +587,7 @@ Hm, that's quite a few Tweets for a presumably Tech-savie community...
 
 **Scatterplot with per-user activity**
 
-```{r cache=TRUE}
+```{r}
 inf_counts <- inf_collection %>%
   group_by(screen_name) %>%
   # filter(screen_name != "fubits") %>% 
@@ -599,7 +599,7 @@ inf_counts <- inf_collection %>%
   # top_n(n = 50, wt = tweets) %>% 
 ```
 
-```{r cache=TRUE, fig.width=12}
+```{r fig.width=12}
 ggplot(inf_counts, aes(x = Favs, y = RT)) +
   geom_point(aes(size = Tweets, color = screen_name)) +
   # ggrepel::geom_text_repel(data = counts[1:10,], aes(label = screen_name)) +
@@ -622,7 +622,7 @@ ggplot(inf_counts, aes(x = Favs, y = RT)) +
 
 **Scatterplot: Top 20 labelled**
 
-```{r cache=TRUE, fig.width=12}
+```{r fig.width=12}
 ggplot(inf_counts, aes(x = Favs, y = RT)) +
     geom_point(aes(size = Tweets, color = screen_name), alpha = 0.5) +
     ggrepel::geom_text_repel(data = inf_counts[1:20,],
@@ -666,7 +666,7 @@ saveRDS(gfm_tweets, file =
 
 **Wrangle**
 
-```{r cache=TRUE}
+```{r}
 gfm_rds <- dir(path = data_path, pattern = "gfm_") %>%
   str_c(data_path, .) %>%
   map_dfr(readRDS)
@@ -677,7 +677,7 @@ gfm_collection <- gfm_rds %>% distinct(status_id, .keep_all = TRUE) %>%
 
 **Treemap**
 
-```{r cache=TRUE}
+```{r}
 gfm_n_tweets <- nrow(gfm_collection)
 gfm_n_accounts <- length(unique(gfm_collection$screen_name))
 
@@ -705,7 +705,7 @@ gfm_collection %>%
 
 **Scatterplot with per-user activity**
 
-```{r cache=TRUE}
+```{r}
 gfm_counts <- gfm_collection %>%
   group_by(screen_name) %>%
   # filter(screen_name != "fubits") %>% 
@@ -721,7 +721,7 @@ Since there's not too much activity for \#gfm2018, we can jump to the labelled s
 
 **Scatterplot: Top 20 labelled**
 
-```{r cache=TRUE, fig.width=12}
+```{r fig.width=12}
 ggplot(gfm_counts, aes(x = Favs, y = RT)) +
     geom_point(aes(size = Tweets, color = screen_name), alpha = 0.5) +
     ggrepel::geom_text_repel(data = gfm_counts[1:20,],
@@ -752,7 +752,7 @@ all_n_accounts <- all_cons %>% distinct(screen_name) %>% nrow()
 all_n_tweets <- all_cons %>% distinct(status_id) %>% nrow()
 ```
 
-So, this week, `r all_n_accounts` German academic Twitter accounts have been active at four conferences in total, producing `r all_n_tweets` individual Tweets. Actually, that's quite impressive!
+So, this week, `r all_n_accounts` German academic Twitter accounts have been active at ~~four~~ five conferences in total, producing `r all_n_tweets` individual Tweets. Actually, that's quite impressive!
 
 Now we can bind the aggregated *_counts.
 
@@ -770,7 +770,7 @@ all_cons_per_user %>% head(20)
 
 Let's have a look at this week's German academic Twitter crowd as a whole:
 
-```{r cache=TRUE, fig.width=12}
+```{r fig.width=12}
 ggplot(all_cons_per_user, aes(x = Favs, y = RT, color = discipline)) +
     geom_point(aes(size = Tweets), alpha = 0.5) +
     ggrepel::geom_text_repel(data = all_cons_per_user[1,],
@@ -794,7 +794,7 @@ ggplot(all_cons_per_user, aes(x = Favs, y = RT, color = discipline)) +
 
 ## Joint Scatterplot: Top 20 labelled (w/o @dvpw)
 
-```{r cache=TRUE, fig.width=12}
+```{r fig.width=12}
 all_cons_per_user %>% 
   filter(screen_name != "dvpw") %>%
   ggplot(aes(x = Favs, y = RT, color = discipline)) +
@@ -877,7 +877,7 @@ Mmmh, ok, I think I should try those [beeswarm-plots](https://github.com/eclarke
 
 # Final scores: The overall activity compared by numbers
 
-What if we simply compare the five disciplines' Twitter performance in totals?
+What if we simply compare the five disciplines' Twitter performance in terms of totals?
 
 ```{r}
 bind_rows(dvpw_counts, dgs_counts, hist_counts, inf_counts, gfm_counts) %>%
