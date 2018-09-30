@@ -59,7 +59,7 @@ sequenceDiagrams:
 </ul></li>
 <li><a href="#some-comparisons"><span class="toc-section-number">3</span> Some Comparisons</a><ul>
 <li><a href="#joint-scatterplot-per-user"><span class="toc-section-number">3.1</span> Joint Scatterplot: per-User</a></li>
-<li><a href="#joint-scatterplot-top-20-labelled"><span class="toc-section-number">3.2</span> Joint Scatterplot: Top 20 labelled</a></li>
+<li><a href="#joint-scatterplot-top-20-labelled-wo-dvpw"><span class="toc-section-number">3.2</span> Joint Scatterplot: Top 20 labelled (w/o <span class="citation">@dvpw</span>)</a></li>
 <li><a href="#boxplots-overall-distribution-of-activities-by-discipline"><span class="toc-section-number">3.3</span> Boxplots: Overall Distribution of Activities by Discipline</a></li>
 </ul></li>
 <li><a href="#one-final-table-the-overall-activity-compared-by-numbers"><span class="toc-section-number">4</span> One final table: The overall activity compared by numbers</a></li>
@@ -120,7 +120,7 @@ twitter_token &lt;- readRDS(str_c(home_directory,&quot;/twitter_token.rds&quot;)
     unlist() %&gt;% glue::glue_collapse()
   }
 getTimeString()</code></pre>
-<pre><code>## 20180930120507</code></pre>
+<pre><code>## 20180930155219</code></pre>
 </div>
 <div id="prepare-filepath-for-.rds-with-here" class="section level2">
 <h2><span class="header-section-number">1.3</span> (Prepare filepath for .rds with <code>here()</code>)</h2>
@@ -161,7 +161,12 @@ saveRDS(dvpw_tweets, file =
 dvpw_rds &lt;- dir(path = data_path, pattern = &quot;dvpw_&quot;) %&gt;% 
   str_c(data_path, .) %&gt;% 
   map_dfr(readRDS)
-dvpw_collection &lt;- dvpw_rds %&gt;% distinct(status_id, .keep_all = TRUE)</code></pre>
+dvpw_collection &lt;- dvpw_rds %&gt;% distinct(status_id, .keep_all = TRUE) %&gt;%
+  filter(created_at &lt; &quot;2018-09-30&quot;) %&gt;%
+  arrange(created_at)</code></pre>
+<blockquote>
+<p>As you can see from <code>filter(created_at &lt; &quot;2018-09-30&quot;)</code> we will only consider tweets posted before Sunday, 30.09.2018 (for the sake of comparison)</p>
+</blockquote>
 <p>(How to check the latest/earliest Tweet)</p>
 <pre class="r"><code>min(dvpw_collection$status_id) # https://twitter.com/statuses/1041748634486931465
 Tweet &lt;- max(dvpw_collection$status_id) 
@@ -176,7 +181,7 @@ browseURL(str_c(&quot;https://twitter.com/statuses/&quot;, Tweet))</code></pre>
 dvpw_n_accounts &lt;- length(unique(dvpw_collection$screen_name))
 # tidy/dplyr: distinct(screen_name) %&gt;% count()
 
-dvpw_collection %&gt;%
+dvpw_collection %&gt;% 
   group_by(screen_name) %&gt;%
   summarise(n = n()) %&gt;%
   mutate(share = n / sum(n)) %&gt;%
@@ -272,20 +277,24 @@ post_list(dvpw_nicks[200:length(dvpw_nicks)], slug = &quot;dvpw2018&quot;, priva
 <div id="sociology-dgs18-dgs2018" class="section level2">
 <h2><span class="header-section-number">2.2</span> Sociology: #dgs18 / #dgs2018</h2>
 <p>Let’s have a look at how German Sociologists performed on Twitter. Like above, I’ve mined the Tweets multiple times in order to get a good sample.</p>
+<p><strong>Mine</strong></p>
 <pre class="r"><code>dgs_tweets &lt;- search_tweets(q = &quot;#dgs18 OR #dgs2018&quot;, # explicit QUERY
       include_rts = FALSE,
       # max_id = ,
       n = 5000,
       verbose = TRUE,
       retryonratelimit = TRUE,
-      type = &quot;recent&quot;) # mixed recent (popular)
+      type = &quot;mixed&quot;) # mixed recent (popular)
 
 saveRDS(dgs_tweets,
         file =  str_c(data_path,&quot;dgs_tweets_&quot;, getTimeString(),&quot;.rds&quot;)) </code></pre>
+<p><strong>Wrangle</strong></p>
 <pre class="r"><code>dgs_rds &lt;- dir(path = data_path, pattern = &quot;dgs_&quot;) %&gt;%
   str_c(data_path, .) %&gt;%
   map_dfr(readRDS)
-dgs_collection &lt;- dgs_rds %&gt;% distinct(status_id, .keep_all = TRUE)</code></pre>
+dgs_collection &lt;- dgs_rds %&gt;% distinct(status_id, .keep_all = TRUE) %&gt;%
+  filter(created_at &lt; &quot;2018-09-30&quot;) %&gt;%
+  arrange(created_at)</code></pre>
 <p><strong>Sociology: Treemap</strong></p>
 <pre class="r"><code>dgs_n_tweets &lt;- nrow(dgs_collection)
 dgs_n_accounts &lt;- length(unique(dgs_collection$screen_name))
@@ -307,7 +316,7 @@ dgs_collection %&gt;%
                          &quot; Accounts; Stand: 29.09.18, &quot;, timeString , &quot; Uhr;&quot;,
                          &quot; by @fubits)&quot;)) +
   guides(fill = FALSE)</code></pre>
-<p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-19-1.png" width="672" /> That looks rather different from the #dvpw2018 community. Less institutional dominance and actually, many more individual Twitter users (704 active users vs 238 in team PolSci).</p>
+<p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-19-1.png" width="672" /> That looks rather different from the #dvpw2018 community. Less institutional dominance and actually, many more individual Twitter users (704 active users vs 242 in team PolSci).</p>
 <p><strong>Sociology: per-User</strong></p>
 <pre class="r"><code>dgs_counts &lt;- dgs_collection %&gt;%
   group_by(screen_name) %&gt;%
@@ -359,20 +368,24 @@ dgs_collection %&gt;%
 <div id="historians-histag18-histag2018-historikertag2018" class="section level2">
 <h2><span class="header-section-number">2.3</span> Historians: #histag18 / #histag2018 / #historikertag2018</h2>
 <p>Next, let’s look have at the Twitter activity of German History scholars.</p>
+<p><strong>Mine</strong></p>
 <pre class="r"><code>hist_tweets &lt;- search_tweets(q = &quot;#histag18 OR #histag2018 OR #historikertag2018&quot;, # explicit QUERY
       include_rts = FALSE,
       # max_id = ,
       n = 5000,
       verbose = TRUE,
       retryonratelimit = TRUE,
-      type = &quot;recent&quot;) # mixed recent popular
+      type = &quot;mixed&quot;) # mixed recent popular
 
 saveRDS(hist_tweets, file =
           str_c(data_path,&quot;hist_tweets_&quot;,getTimeString(),&quot;.rds&quot;))</code></pre>
+<p><strong>Wrangle</strong></p>
 <pre class="r"><code>hist_rds &lt;- dir(path = data_path, pattern = &quot;hist_&quot;) %&gt;%
   str_c(data_path, .) %&gt;%
   map_dfr(readRDS)
-hist_collection &lt;- hist_rds %&gt;% distinct(status_id, .keep_all = TRUE)</code></pre>
+hist_collection &lt;- hist_rds %&gt;% distinct(status_id, .keep_all = TRUE) %&gt;%
+  filter(created_at &lt; &quot;2018-09-30&quot;) %&gt;%
+  arrange(created_at)</code></pre>
 <p><strong>Historians: Treemap</strong></p>
 <pre class="r"><code>hist_n_tweets &lt;- nrow(hist_collection)
 hist_n_accounts &lt;- length(unique(hist_collection$screen_name))
@@ -446,21 +459,24 @@ hist_collection %&gt;%
 <div id="computer-science-informatik2018" class="section level2">
 <h2><span class="header-section-number">2.4</span> Computer Science: #informatik2018</h2>
 <p>(Of course, CS scholars are rather disciplined and stick to one hashtag :) #informatik18 has only 3 Tweets so far, and #informatiktage only 2 users…)</p>
-<p><strong>Mining</strong></p>
+<p><strong>Mine</strong></p>
 <pre class="r"><code>inf_tweets &lt;- search_tweets(q = &quot;#informatik2018&quot;, # explicit QUERY
       include_rts = FALSE,
       # max_id = ,
       n = 5000,
       verbose = TRUE,
       retryonratelimit = TRUE,
-      type = &quot;mixed&quot;) # mixed recent popular
+      type = &quot;recent&quot;) # mixed recent popular
 
 saveRDS(inf_tweets, file =
           str_c(data_path,&quot;inf_tweets_&quot;,getTimeString(),&quot;.rds&quot;))</code></pre>
+<p><strong>Wrangle</strong></p>
 <pre class="r"><code>inf_rds &lt;- dir(path = data_path, pattern = &quot;inf_&quot;) %&gt;%
   str_c(data_path, .) %&gt;%
   map_dfr(readRDS)
-inf_collection &lt;- inf_rds %&gt;% distinct(status_id, .keep_all = TRUE)</code></pre>
+inf_collection &lt;- inf_rds %&gt;% distinct(status_id, .keep_all = TRUE) %&gt;%
+  filter(created_at &lt; &quot;2018-09-30&quot;) %&gt;%
+  arrange(created_at)</code></pre>
 <p><strong>Treemap</strong></p>
 <pre class="r"><code>inf_n_tweets &lt;- nrow(inf_collection)
 inf_n_accounts &lt;- length(unique(inf_collection$screen_name))
@@ -541,13 +557,8 @@ inf_collection %&gt;%
 <p>First, we will need to bind the four tibbles together. First, let’s get the total numbers of unique Tweets and unique users:</p>
 <pre class="r"><code>all_cons &lt;- bind_rows(dvpw_collection, dgs_collection, hist_collection, inf_collection)
 all_n_accounts &lt;- all_cons %&gt;% distinct(screen_name) %&gt;% nrow()
-all_n_tweets &lt;- all_cons %&gt;% distinct(status_id) %&gt;% nrow()
-
-all_n_accounts</code></pre>
-<pre><code>## [1] 1268</code></pre>
-<pre class="r"><code>all_n_tweets</code></pre>
-<pre><code>## [1] 4658</code></pre>
-<p>So, this week, 1268 German academic Twitter accounts have been active at four conferences in total, producing 4658 individual Tweets. Actually, that’s quite impressive!</p>
+all_n_tweets &lt;- all_cons %&gt;% distinct(status_id) %&gt;% nrow()</code></pre>
+<p>So, this week, 1284 German academic Twitter accounts have been active at four conferences in total, producing 4817 individual Tweets. Actually, that’s quite impressive!</p>
 <p>Now we can bind the aggregated *_counts.</p>
 <pre class="r"><code>all_cons_per_user &lt;- bind_rows(dvpw_counts, dgs_counts, hist_counts, inf_counts) %&gt;%
   group_by(screen_name) %&gt;% 
@@ -555,9 +566,9 @@ all_n_accounts</code></pre>
   mutate(avg_output = (Tweets + RT + Favs)/3) %&gt;% 
   arrange(desc(avg_output)) #&gt; 1262
 # all_cons_per_user %&gt;% distinct(screen_name) %&gt;% count() #&gt; 1262
-all_cons_per_user %&gt;% head(10)</code></pre>
-<pre><code>## # A tibble: 10 x 6
-## # Groups:   screen_name [10]
+all_cons_per_user %&gt;% head(20)</code></pre>
+<pre><code>## # A tibble: 20 x 6
+## # Groups:   screen_name [20]
 ##    screen_name     Tweets    RT  Favs discipline avg_output
 ##    &lt;chr&gt;            &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;chr&gt;           &lt;dbl&gt;
 ##  1 dvpw               368   423   522 PolSci          438. 
@@ -569,7 +580,17 @@ all_cons_per_user %&gt;% head(10)</code></pre>
 ##  7 elvira_rosert       41    41   179 PolSci           87  
 ##  8 PortalLISA          20    78   163 History          87  
 ##  9 moritz_hoffmann      9    24   226 History          86.3
-## 10 SassanGholiagha     86    31   138 PolSci           85</code></pre>
+## 10 historikertag       13    43   201 History          85.7
+## 11 SassanGholiagha     86    31   138 PolSci           85  
+## 12 janinefunke         12    29   213 History          84.7
+## 13 LordElend           26    32   184 Sociology        80.7
+## 14 jakobfrohmann       41    60   129 History          76.7
+## 15 juergenzimmerer      7    51   171 History          76.3
+## 16 DrMichaelHein       21    30   176 PolSci           75.7
+## 17 RichterHedwig        7     8   203 History          72.7
+## 18 wahlforschung       35    35   144 PolSci           71.3
+## 19 PetraGuasti         84    28    92 PolSci           68  
+## 20 daniellambach       33    38   133 PolSci           68</code></pre>
 <div id="joint-scatterplot-per-user" class="section level2">
 <h2><span class="header-section-number">3.1</span> Joint Scatterplot: per-User</h2>
 <p>Let’s have a look at the German academic Twitter crowd:</p>
@@ -594,8 +615,8 @@ all_cons_per_user %&gt;% head(10)</code></pre>
          caption = &quot;@fubits&quot;)</code></pre>
 <p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-37-1.png" width="1152" /></p>
 </div>
-<div id="joint-scatterplot-top-20-labelled" class="section level2">
-<h2><span class="header-section-number">3.2</span> Joint Scatterplot: Top 20 labelled</h2>
+<div id="joint-scatterplot-top-20-labelled-wo-dvpw" class="section level2">
+<h2><span class="header-section-number">3.2</span> Joint Scatterplot: Top 20 labelled (w/o <span class="citation">@dvpw</span>)</h2>
 <pre class="r"><code>all_cons_per_user %&gt;% 
   filter(screen_name != &quot;dvpw&quot;) %&gt;%
   ggplot(aes(x = Favs, y = RT, color = discipline)) +
@@ -611,7 +632,7 @@ all_cons_per_user %&gt;% head(10)</code></pre>
          color = &quot;Disziplin&quot;,
          title = &quot;Twitter-Aktivität zu #dvpw*18, #dgs*18, #hist*18, #informatik2018: Top 20 Accounts&quot;,
          subtitle = paste0(&quot;(n = &quot;, all_n_tweets,
-                         &quot; Tweets von m = &quot;, all_n_accounts,
+                         &quot; Tweets von m = &quot;, all_n_accounts-1,
                          &quot; Accounts (ohne @dvpw); Top 20 Label, Stand: 29.09.18, &quot;,
                          timeString, &quot; Uhr)&quot;),
          x = &quot;Anzahl Favourites&quot;,
@@ -625,75 +646,22 @@ all_cons_per_user %&gt;% head(10)</code></pre>
 <pre class="r"><code>dvpw_box &lt;- dvpw_counts %&gt;% 
   gather(&quot;Metric&quot;, &quot;Total&quot;, 2:4) #%&gt;%
   # mutate(Discipline = &quot;PolSci&quot;)
-dvpw_box</code></pre>
-<pre><code>## # A tibble: 714 x 4
-##    screen_name     discipline Metric Total
-##    &lt;chr&gt;           &lt;chr&gt;      &lt;chr&gt;  &lt;int&gt;
-##  1 dvpw            PolSci     Tweets   368
-##  2 dvpwkongress    PolSci     Tweets   135
-##  3 SassanGholiagha PolSci     Tweets    86
-##  4 PetraGuasti     PolSci     Tweets    84
-##  5 ronpatz         PolSci     Tweets    58
-##  6 thothiel        PolSci     Tweets    44
-##  7 elvira_rosert   PolSci     Tweets    41
-##  8 wahlforschung   PolSci     Tweets    35
-##  9 daniellambach   PolSci     Tweets    33
-## 10 VanHuellen      PolSci     Tweets    33
-## # ... with 704 more rows</code></pre>
+dvpw_box %&gt;% filter(screen_name == &quot;dvpw&quot;)</code></pre>
+<pre><code>## # A tibble: 3 x 4
+##   screen_name discipline Metric Total
+##   &lt;chr&gt;       &lt;chr&gt;      &lt;chr&gt;  &lt;int&gt;
+## 1 dvpw        PolSci     Tweets   368
+## 2 dvpw        PolSci     RT       423
+## 3 dvpw        PolSci     Favs     522</code></pre>
 <pre class="r"><code>dgs_box &lt;- dgs_counts %&gt;% 
   gather(&quot;Metric&quot;, &quot;Total&quot;, 2:4) # %&gt;%
-  # mutate(Discipline = &quot;Socio&quot;)
-dgs_box</code></pre>
-<pre><code>## # A tibble: 2,112 x 4
-##    screen_name     discipline Metric Total
-##    &lt;chr&gt;           &lt;chr&gt;      &lt;chr&gt;  &lt;int&gt;
-##  1 sozmethode      Sociology  Tweets    82
-##  2 outputin22      Sociology  Tweets    28
-##  3 LordElend       Sociology  Tweets    26
-##  4 papatyaizii_    Sociology  Tweets    25
-##  5 dlindner79      Sociology  Tweets    24
-##  6 Hakanuluocak1   Sociology  Tweets    23
-##  7 annalytika      Sociology  Tweets    22
-##  8 katharinahppe   Sociology  Tweets    17
-##  9 ToBeAsBold      Sociology  Tweets    16
-## 10 AndreArmbruster Sociology  Tweets    14
-## # ... with 2,102 more rows</code></pre>
+  # mutate(Discipline = &quot;Socio&quot;)</code></pre>
 <pre class="r"><code>hist_box &lt;- hist_counts %&gt;% 
   gather(&quot;Metric&quot;, &quot;Total&quot;, 2:4) # %&gt;%
-  # mutate(Discipline = &quot;History&quot;)
-hist_box</code></pre>
-<pre><code>## # A tibble: 891 x 4
-##    screen_name     discipline Metric Total
-##    &lt;chr&gt;           &lt;chr&gt;      &lt;chr&gt;  &lt;int&gt;
-##  1 Kasutaja_n      History    Tweets    74
-##  2 jakobfrohmann   History    Tweets    41
-##  3 aberehrlich     History    Tweets    39
-##  4 digigw          History    Tweets    34
-##  5 MaxGrund4       History    Tweets    26
-##  6 Mareike2405     History    Tweets    24
-##  7 PortalLISA      History    Tweets    20
-##  8 schuleschilling History    Tweets    20
-##  9 DenkBrei        History    Tweets    19
-## 10 esciencestrier  History    Tweets    17
-## # ... with 881 more rows</code></pre>
+  # mutate(Discipline = &quot;History&quot;)</code></pre>
 <pre class="r"><code>inf_box &lt;- inf_counts %&gt;% 
   gather(&quot;Metric&quot;, &quot;Total&quot;, 2:4) # %&gt;%
-  # mutate(Discipline = &quot;CS&quot;)
-inf_box</code></pre>
-<pre><code>## # A tibble: 291 x 4
-##    screen_name     discipline Metric Total
-##    &lt;chr&gt;           &lt;chr&gt;      &lt;chr&gt;  &lt;int&gt;
-##  1 SilSte          CS         Tweets    27
-##  2 hiig_berlin     CS         Tweets    26
-##  3 stillinsky      CS         Tweets    26
-##  4 Jessieevaline   CS         Tweets    22
-##  5 TommyBlfd       CS         Tweets    17
-##  6 gross_dc        CS         Tweets    11
-##  7 informatikradar CS         Tweets    11
-##  8 Fraunhofer_IUK  CS         Tweets    10
-##  9 herdom          CS         Tweets     8
-## 10 kryptomania84   CS         Tweets     7
-## # ... with 281 more rows</code></pre>
+  # mutate(Discipline = &quot;CS&quot;)</code></pre>
 <pre class="r"><code>bind_rows(dvpw_box, dgs_box, hist_box, inf_box) %&gt;% 
   ggplot() +
   geom_boxplot(aes(fct_inorder(Metric), Total)) +
@@ -715,6 +683,7 @@ inf_box</code></pre>
 </div>
 <div id="one-final-table-the-overall-activity-compared-by-numbers" class="section level1">
 <h1><span class="header-section-number">4</span> One final table: The overall activity compared by numbers</h1>
+<p>What, if we simply compare the disciplines’ Twitter performance by simple totals?</p>
 <pre class="r"><code>bind_rows(dvpw_counts, dgs_counts, hist_counts, inf_counts) %&gt;%
   group_by(discipline) %&gt;% 
   summarise(Users = n(), Tweets = sum(Tweets),
@@ -724,9 +693,24 @@ inf_box</code></pre>
 ##   discipline Users Tweets    RT   Fav
 ##   &lt;chr&gt;      &lt;int&gt;  &lt;int&gt; &lt;int&gt; &lt;int&gt;
 ## 1 Sociology    704   1658   615  8477
-## 2 History      297   1064  1660  6619
+## 2 History      302   1086  1679  6750
 ## 3 PolSci       238   1691  1680  5341
 ## 4 CS            97    302   397  1039</code></pre>
+<p>And we if we average out Tweets+RTs+Favs per User?</p>
+<pre class="r"><code>bind_rows(dvpw_counts, dgs_counts, hist_counts, inf_counts) %&gt;%
+  group_by(discipline) %&gt;% 
+  summarise(Users = n(), Tweets = sum(Tweets),
+            RT = sum(RT), Fav = sum(Favs)) %&gt;% 
+  mutate(avg_output = (Tweets + RT + Fav)/Users) %&gt;% 
+  arrange(desc(avg_output))</code></pre>
+<pre><code>## # A tibble: 4 x 6
+##   discipline Users Tweets    RT   Fav avg_output
+##   &lt;chr&gt;      &lt;int&gt;  &lt;int&gt; &lt;int&gt; &lt;int&gt;      &lt;dbl&gt;
+## 1 PolSci       238   1691  1680  5341       36.6
+## 2 History      302   1086  1679  6750       31.5
+## 3 CS            97    302   397  1039       17.9
+## 4 Sociology    704   1658   615  8477       15.3</code></pre>
+<p>The interpretation is up to you.</p>
 </div>
 <div id="whats-next" class="section level1">
 <h1><span class="header-section-number">5</span> What’s next</h1>

@@ -396,3 +396,16 @@ h1, h2, h3, h4, h5, h6 {
 	background: #f8f5ec;
 	font-size: 1em;
 }
+
+/* table,
+th,
+td
+ {
+    border: 1px solid black;
+    padding: 3px;
+}
+th {
+    font-weight: bold;
+    text-align: center;
+} */
+

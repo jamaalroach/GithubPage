@@ -155,8 +155,12 @@ Here we'll get a file list of all `dvpw_*.rds` files, then `map_dfr()` them to a
 dvpw_rds <- dir(path = data_path, pattern = "dvpw_") %>% 
   str_c(data_path, .) %>% 
   map_dfr(readRDS)
-dvpw_collection <- dvpw_rds %>% distinct(status_id, .keep_all = TRUE)
+dvpw_collection <- dvpw_rds %>% distinct(status_id, .keep_all = TRUE) %>%
+  filter(created_at < "2018-09-30") %>%
+  arrange(created_at)
 ```
+
+> As you can see from `filter(created_at < "2018-09-30")` we will only consider tweets posted before Sunday, 30.09.2018 (for the sake of comparison)
 
 (How to check the latest/earliest Tweet)
 ```{r eval=FALSE}
@@ -178,7 +182,7 @@ dvpw_n_tweets <- nrow(dvpw_collection)
 dvpw_n_accounts <- length(unique(dvpw_collection$screen_name))
 # tidy/dplyr: distinct(screen_name) %>% count()
 
-dvpw_collection %>%
+dvpw_collection %>% 
   group_by(screen_name) %>%
   summarise(n = n()) %>%
   mutate(share = n / sum(n)) %>%
@@ -280,6 +284,7 @@ post_list(dvpw_nicks[200:length(dvpw_nicks)], slug = "dvpw2018", private = TRUE,
 
 Let's have a look at how German Sociologists performed on Twitter. Like above, I've mined the Tweets multiple times in order to get a good sample.
 
+**Mine**
 ```{r cache=TRUE, eval=FALSE}
 dgs_tweets <- search_tweets(q = "#dgs18 OR #dgs2018", # explicit QUERY
       include_rts = FALSE,
@@ -287,17 +292,20 @@ dgs_tweets <- search_tweets(q = "#dgs18 OR #dgs2018", # explicit QUERY
       n = 5000,
       verbose = TRUE,
       retryonratelimit = TRUE,
-      type = "recent") # mixed recent (popular)
+      type = "mixed") # mixed recent (popular)
 
 saveRDS(dgs_tweets,
         file =  str_c(data_path,"dgs_tweets_", getTimeString(),".rds")) 
 ```
 
+**Wrangle**
 ```{r cache=TRUE}
 dgs_rds <- dir(path = data_path, pattern = "dgs_") %>%
   str_c(data_path, .) %>%
   map_dfr(readRDS)
-dgs_collection <- dgs_rds %>% distinct(status_id, .keep_all = TRUE)
+dgs_collection <- dgs_rds %>% distinct(status_id, .keep_all = TRUE) %>%
+  filter(created_at < "2018-09-30") %>%
+  arrange(created_at)
 ```
 
 **Sociology: Treemap**
@@ -323,7 +331,7 @@ dgs_collection %>%
                          " by @fubits)")) +
   guides(fill = FALSE)
 ```
-That looks rather different from the #dvpw2018 community. Less institutional dominance and actually, many more individual Twitter users (704 active users vs 238 in team PolSci).
+That looks rather different from the #dvpw2018 community. Less institutional dominance and actually, many more individual Twitter users (`r dgs_n_accounts` active users vs `r dvpw_n_accounts` in team PolSci).
 
 **Sociology: per-User**
 ```{r cache=TRUE}
@@ -383,6 +391,7 @@ ggplot(dgs_counts, aes(x = Favs, y = RT)) +
 ## Historians: #histag18 / #histag2018 / #historikertag2018
 Next, let's look have at the Twitter activity of German History scholars.
 
+**Mine**
 ```{r cache=TRUE, eval=FALSE}
 hist_tweets <- search_tweets(q = "#histag18 OR #histag2018 OR #historikertag2018", # explicit QUERY
       include_rts = FALSE,
@@ -390,17 +399,20 @@ hist_tweets <- search_tweets(q = "#histag18 OR #histag2018 OR #historikertag2018
       n = 5000,
       verbose = TRUE,
       retryonratelimit = TRUE,
-      type = "recent") # mixed recent popular
+      type = "mixed") # mixed recent popular
 
 saveRDS(hist_tweets, file =
           str_c(data_path,"hist_tweets_",getTimeString(),".rds"))
 ```
 
+**Wrangle**
 ```{r cache=TRUE}
 hist_rds <- dir(path = data_path, pattern = "hist_") %>%
   str_c(data_path, .) %>%
   map_dfr(readRDS)
-hist_collection <- hist_rds %>% distinct(status_id, .keep_all = TRUE)
+hist_collection <- hist_rds %>% distinct(status_id, .keep_all = TRUE) %>%
+  filter(created_at < "2018-09-30") %>%
+  arrange(created_at)
 ```
 
 **Historians: Treemap**
@@ -486,7 +498,7 @@ ggplot(hist_counts, aes(x = Favs, y = RT)) +
 (Of course, CS scholars are rather disciplined and stick to one hashtag :)
 \#informatik18 has only 3 Tweets so far, and \#informatiktage only 2 users...)
 
-**Mining**
+**Mine**
 ```{r cache=TRUE, eval=FALSE}
 inf_tweets <- search_tweets(q = "#informatik2018", # explicit QUERY
       include_rts = FALSE,
@@ -494,17 +506,20 @@ inf_tweets <- search_tweets(q = "#informatik2018", # explicit QUERY
       n = 5000,
       verbose = TRUE,
       retryonratelimit = TRUE,
-      type = "mixed") # mixed recent popular
+      type = "recent") # mixed recent popular
 
 saveRDS(inf_tweets, file =
           str_c(data_path,"inf_tweets_",getTimeString(),".rds"))
 ```
-  
+
+**Wrangle**
 ```{r cache=TRUE}
 inf_rds <- dir(path = data_path, pattern = "inf_") %>%
   str_c(data_path, .) %>%
   map_dfr(readRDS)
-inf_collection <- inf_rds %>% distinct(status_id, .keep_all = TRUE)
+inf_collection <- inf_rds %>% distinct(status_id, .keep_all = TRUE) %>%
+  filter(created_at < "2018-09-30") %>%
+  arrange(created_at)
 ```
 
 **Treemap**
@@ -595,9 +610,6 @@ First, we will need to bind the four tibbles together. First, let's get the tota
 all_cons <- bind_rows(dvpw_collection, dgs_collection, hist_collection, inf_collection)
 all_n_accounts <- all_cons %>% distinct(screen_name) %>% nrow()
 all_n_tweets <- all_cons %>% distinct(status_id) %>% nrow()
-
-all_n_accounts
-all_n_tweets
 ```
 So, this week, `r all_n_accounts` German academic Twitter accounts have been active at four conferences in total, producing `r all_n_tweets` individual Tweets. Actually, that's quite impressive!
 
@@ -609,7 +621,7 @@ all_cons_per_user <- bind_rows(dvpw_counts, dgs_counts, hist_counts, inf_counts)
   mutate(avg_output = (Tweets + RT + Favs)/3) %>% 
   arrange(desc(avg_output)) #> 1262
 # all_cons_per_user %>% distinct(screen_name) %>% count() #> 1262
-all_cons_per_user %>% head(10)
+all_cons_per_user %>% head(20)
 ```
 
 ## Joint Scatterplot: per-User
@@ -636,7 +648,7 @@ ggplot(all_cons_per_user, aes(x = Favs, y = RT, color = discipline)) +
          caption = "@fubits")
 ```
 
-## Joint Scatterplot: Top 20 labelled
+## Joint Scatterplot: Top 20 labelled (w/o @dvpw)
 ```{r cache=TRUE, fig.width=12}
 all_cons_per_user %>% 
   filter(screen_name != "dvpw") %>%
@@ -653,7 +665,7 @@ all_cons_per_user %>%
          color = "Disziplin",
          title = "Twitter-Aktivität zu #dvpw*18, #dgs*18, #hist*18, #informatik2018: Top 20 Accounts",
          subtitle = paste0("(n = ", all_n_tweets,
-                         " Tweets von m = ", all_n_accounts,
+                         " Tweets von m = ", all_n_accounts-1,
                          " Accounts (ohne @dvpw); Top 20 Label, Stand: 29.09.18, ",
                          timeString, " Uhr)"),
          x = "Anzahl Favourites",
@@ -668,21 +680,19 @@ For Boxplot, we need to wrangle the data into long (~tidy) form:
 dvpw_box <- dvpw_counts %>% 
   gather("Metric", "Total", 2:4) #%>%
   # mutate(Discipline = "PolSci")
-dvpw_box
+dvpw_box %>% filter(screen_name == "dvpw")
 ```
 
 ```{r}
 dgs_box <- dgs_counts %>% 
   gather("Metric", "Total", 2:4) # %>%
   # mutate(Discipline = "Socio")
-dgs_box
 ```
 
 ```{r}
 hist_box <- hist_counts %>% 
   gather("Metric", "Total", 2:4) # %>%
   # mutate(Discipline = "History")
-hist_box
 ```
 
 
@@ -690,7 +700,6 @@ hist_box
 inf_box <- inf_counts %>% 
   gather("Metric", "Total", 2:4) # %>%
   # mutate(Discipline = "CS")
-inf_box
 ```
 
 
@@ -717,6 +726,7 @@ bind_rows(dvpw_box, dgs_box, hist_box, inf_box) %>%
 Mmmh, I think I should try those [beeswarm-plots](https://github.com/eclarke/ggbeeswarm){target="_blank"} soon-ish here...
 
 # One final table: The overall activity compared by numbers
+What, if we simply compare the disciplines' Twitter performance by simple totals?
 ```{r}
 bind_rows(dvpw_counts, dgs_counts, hist_counts, inf_counts) %>%
   group_by(discipline) %>% 
@@ -725,6 +735,18 @@ bind_rows(dvpw_counts, dgs_counts, hist_counts, inf_counts) %>%
   arrange(desc(Users))
 ```
 
+And we if we average out Tweets+RTs+Favs per User?
+```{r}
+bind_rows(dvpw_counts, dgs_counts, hist_counts, inf_counts) %>%
+  group_by(discipline) %>% 
+  summarise(Users = n(), Tweets = sum(Tweets),
+            RT = sum(RT), Fav = sum(Favs)) %>% 
+  mutate(avg_output = (Tweets + RT + Fav)/Users) %>% 
+  arrange(desc(avg_output))
+```
+
+The interpretation is up to you.
+  
 # What's next
 
 One hint:
@@ -734,5 +756,3 @@ library(tidygraph)
 ```
 
 But that is for another post...
-
-
