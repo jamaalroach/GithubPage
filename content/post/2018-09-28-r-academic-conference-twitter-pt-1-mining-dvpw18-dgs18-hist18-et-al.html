@@ -120,7 +120,7 @@ twitter_token &lt;- readRDS(str_c(home_directory,&quot;/twitter_token.rds&quot;)
     unlist() %&gt;% glue::glue_collapse()
   }
 getTimeString()</code></pre>
-<pre><code>## 20180930103756</code></pre>
+<pre><code>## 20180930120507</code></pre>
 </div>
 <div id="prepare-filepath-for-.rds-with-here" class="section level2">
 <h2><span class="header-section-number">1.3</span> (Prepare filepath for .rds with <code>here()</code>)</h2>
@@ -346,7 +346,7 @@ dgs_collection %&gt;%
     guides(color = FALSE) +
     theme_minimal() +
     labs(size = &quot;Anzahl Tweets&quot;,
-         title = &quot;Twitter-Aktivität zu #dvpw18 / #dvpw2018: Top 20 Accounts&quot;,
+         title = &quot;Twitter-Aktivität zu #dgs18 / #dgs2018: Top 20 Accounts&quot;,
          subtitle = paste0(&quot;(n = &quot;, dgs_n_tweets,
                          &quot; Tweets von m = &quot;, dgs_n_accounts,
                          &quot; Accounts; Top 20 Label, Stand: 29.09.18, &quot;, 
@@ -414,7 +414,7 @@ hist_collection %&gt;%
   guides(color = FALSE) +
   theme_minimal() +
   labs(size = &quot;Anzahl Tweets&quot;,
-       title = &quot;Twitter-Aktivität zu #dgs18 / #dgs2018: Retweets &amp; Favs&quot;,
+       title = &quot;Twitter-Aktivität zu #histag18 / #histag2018 / #historikertag2018: Retweets &amp; Favs&quot;,
        subtitle = paste0(&quot;(n = &quot;, hist_n_tweets,
                        &quot; Tweets von m = &quot;, hist_n_accounts,
                        &quot; Accounts; Stand: 29.09.18, &quot;, timeString , &quot; Uhr;&quot;),

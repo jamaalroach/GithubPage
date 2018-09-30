@@ -370,7 +370,7 @@ ggplot(dgs_counts, aes(x = Favs, y = RT)) +
     guides(color = FALSE) +
     theme_minimal() +
     labs(size = "Anzahl Tweets",
-         title = "Twitter-Aktivität zu #dvpw18 / #dvpw2018: Top 20 Accounts",
+         title = "Twitter-Aktivität zu #dgs18 / #dgs2018: Top 20 Accounts",
          subtitle = paste0("(n = ", dgs_n_tweets,
                          " Tweets von m = ", dgs_n_accounts,
                          " Accounts; Top 20 Label, Stand: 29.09.18, ", 
@@ -450,7 +450,7 @@ ggplot(hist_counts, aes(x = Favs, y = RT)) +
   guides(color = FALSE) +
   theme_minimal() +
   labs(size = "Anzahl Tweets",
-       title = "Twitter-Aktivität zu #dgs18 / #dgs2018: Retweets & Favs",
+       title = "Twitter-Aktivität zu #histag18 / #histag2018 / #historikertag2018: Retweets & Favs",
        subtitle = paste0("(n = ", hist_n_tweets,
                        " Tweets von m = ", hist_n_accounts,
                        " Accounts; Stand: 29.09.18, ", timeString , " Uhr;"),
