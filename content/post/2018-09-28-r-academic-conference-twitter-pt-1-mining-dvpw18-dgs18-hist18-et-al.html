@@ -14,7 +14,8 @@ output:
     number_sections: yes
     toc: yes
 lastmod: '2018-09-28T20:17:07+02:00'
-description: In September, four (update! - five) big academic societies in Germany had their annual meeting - all at the same time! You can **not not** harvest their tweets...
+description: In September, four (update! - five) big academic societies in Germany had their annual meetings - all at the same time! You can **not not** harvest their tweets. I'll explain step-by-step how to mine them with rtweet and how to wrangle the Tweets for a tidy analysis.
+abstract: In September, four (update! - five) big academic societies in Germany had their annual meetings - all at the same time! You can **not not** harvest their tweets. I'll explain step-by-step how to mine them with rtweet and how to wrangle the Tweets for a tidy analysis.
 thumbnail: /img/thumbs/conference_tweets.jpg
 rmdlink: TRUE # Optional
 comment: no
@@ -38,35 +39,38 @@ sequenceDiagrams:
 
 <div id="TOC">
 <ul>
-<li><a href="#preparation"><span class="toc-section-number">1</span> Preparation</a><ul>
-<li><a href="#setting-up-rtweet"><span class="toc-section-number">1.1</span> Setting up <code>rtweet</code></a></li>
-<li><a href="#gettimestring-helper-function"><span class="toc-section-number">1.2</span> <code>getTimeString()</code> Helper Function</a></li>
-<li><a href="#prepare-filepath-for-.rds-with-here"><span class="toc-section-number">1.3</span> (Prepare filepath for .rds with <code>here()</code>)</a></li>
+<li><a href="#the-setting-the-big-5-on-twitter"><span class="toc-section-number">1</span> The Setting: The Big 5 on Twitter</a></li>
+<li><a href="#preparation"><span class="toc-section-number">2</span> Preparation</a><ul>
+<li><a href="#setting-up-rtweet"><span class="toc-section-number">2.1</span> Setting up <code>rtweet</code></a></li>
+<li><a href="#gettimestring-helper-function"><span class="toc-section-number">2.2</span> <code>getTimeString()</code> Helper Function</a></li>
+<li><a href="#prepare-filepath-for-.rds-with-here"><span class="toc-section-number">2.3</span> (Prepare filepath for .rds with <code>here()</code>)</a></li>
 </ul></li>
-<li><a href="#mining-tweets-with-search_tweets"><span class="toc-section-number">2</span> Mining Tweets with <code>search_tweets()</code></a><ul>
-<li><a href="#political-science-dvpw18-dvpw2018-and-dvpw"><span class="toc-section-number">2.1</span> Political Science: #dvpw18 / #dvpw2018 (and #dvpw)</a><ul>
-<li><a href="#mining"><span class="toc-section-number">2.1.1</span> Mining</a></li>
-<li><a href="#wrangling"><span class="toc-section-number">2.1.2</span> Wrangling</a></li>
-<li><a href="#treemap-dvpw-dvpw18-dvpw2018"><span class="toc-section-number">2.1.3</span> Treemap: #dvpw / #dvpw18 / #dvpw2018</a></li>
-<li><a href="#scatterplot-of-tweets-rts-favs-per-user"><span class="toc-section-number">2.1.4</span> Scatterplot: # of Tweets / RTs / Favs per User</a></li>
-<li><a href="#scatterplot-without-dvpw-and-with-labels-for-the-top-20"><span class="toc-section-number">2.1.5</span> Scatterplot without <span class="citation">@dvpw</span> and with labels for the top 20</a></li>
-<li><a href="#todo-creating-twitter-lists"><span class="toc-section-number">2.1.6</span> (TODO: Creating Twitter Lists)</a></li>
+<li><a href="#mining-tweets-with-search_tweets"><span class="toc-section-number">3</span> Mining Tweets with <code>search_tweets()</code></a><ul>
+<li><a href="#political-science-dvpw18-dvpw2018-and-dvpw"><span class="toc-section-number">3.1</span> Political Science: #dvpw18 / #dvpw2018 (and #dvpw)</a><ul>
+<li><a href="#mining"><span class="toc-section-number">3.1.1</span> Mining</a></li>
+<li><a href="#wrangling"><span class="toc-section-number">3.1.2</span> Wrangling</a></li>
+<li><a href="#treemap-dvpw-dvpw18-dvpw2018"><span class="toc-section-number">3.1.3</span> Treemap: #dvpw / #dvpw18 / #dvpw2018</a></li>
+<li><a href="#scatterplot-of-tweets-rts-favs-per-user"><span class="toc-section-number">3.1.4</span> Scatterplot: # of Tweets / RTs / Favs per User</a></li>
+<li><a href="#scatterplot-without-dvpw-and-with-labels-for-the-top-20"><span class="toc-section-number">3.1.5</span> Scatterplot without <span class="citation">@dvpw</span> and with labels for the top 20</a></li>
+<li><a href="#todo-creating-twitter-lists"><span class="toc-section-number">3.1.6</span> (TODO: Creating Twitter Lists)</a></li>
 </ul></li>
-<li><a href="#sociology-dgs18-dgs2018"><span class="toc-section-number">2.2</span> Sociology: #dgs18 / #dgs2018</a></li>
-<li><a href="#historians-histag18-histag2018-historikertag2018"><span class="toc-section-number">2.3</span> Historians: #histag18 / #histag2018 / #historikertag2018</a></li>
-<li><a href="#computer-science-informatik2018"><span class="toc-section-number">2.4</span> Computer Science: #informatik2018</a></li>
-<li><a href="#media-studies-gfm2018"><span class="toc-section-number">2.5</span> Media Studies: #gfm2018</a></li>
+<li><a href="#sociology-dgs18-dgs2018"><span class="toc-section-number">3.2</span> Sociology: #dgs18 / #dgs2018</a></li>
+<li><a href="#historians-histag18-histag2018-historikertag2018"><span class="toc-section-number">3.3</span> Historians: #histag18 / #histag2018 / #historikertag2018</a></li>
+<li><a href="#computer-science-informatik2018"><span class="toc-section-number">3.4</span> Computer Science: #informatik2018</a></li>
+<li><a href="#media-studies-gfm2018"><span class="toc-section-number">3.5</span> Media Studies: #gfm2018</a></li>
 </ul></li>
-<li><a href="#some-comparisons"><span class="toc-section-number">3</span> Some Comparisons</a><ul>
-<li><a href="#joint-scatterplot-per-user"><span class="toc-section-number">3.1</span> Joint Scatterplot: per-User</a></li>
-<li><a href="#joint-scatterplot-top-20-labelled-wo-dvpw"><span class="toc-section-number">3.2</span> Joint Scatterplot: Top 20 labelled (w/o <span class="citation">@dvpw</span>)</a></li>
-<li><a href="#boxplots-overall-distribution-of-activities-by-discipline"><span class="toc-section-number">3.3</span> Boxplots: Overall Distribution of Activities by Discipline</a></li>
+<li><a href="#some-comparisons"><span class="toc-section-number">4</span> Some Comparisons</a><ul>
+<li><a href="#joint-scatterplot-per-user"><span class="toc-section-number">4.1</span> Joint Scatterplot: per-User</a></li>
+<li><a href="#joint-scatterplot-top-20-labelled-wo-dvpw"><span class="toc-section-number">4.2</span> Joint Scatterplot: Top 20 labelled (w/o <span class="citation">@dvpw</span>)</a></li>
+<li><a href="#boxplots-overall-distribution-of-activities-by-discipline"><span class="toc-section-number">4.3</span> Boxplots: Overall Distribution of Activities by Discipline</a></li>
 </ul></li>
-<li><a href="#final-scores-the-overall-activity-compared-by-numbers"><span class="toc-section-number">4</span> Final scores: The overall activity compared by numbers</a></li>
-<li><a href="#whats-next"><span class="toc-section-number">5</span> What’s next?</a></li>
+<li><a href="#final-scores-the-overall-activity-compared-by-numbers"><span class="toc-section-number">5</span> Final scores: The overall activity compared by numbers</a></li>
+<li><a href="#whats-next"><span class="toc-section-number">6</span> What’s next?</a></li>
 </ul>
 </div>
 
+<div id="the-setting-the-big-5-on-twitter" class="section level1">
+<h1><span class="header-section-number">1</span> The Setting: The Big 5 on Twitter</h1>
 <div class="figure">
 <img src="/img/Twitter_conf/Twitter_conf.png" title="This is what ~~4~~ 5 German academic conferences look like on Twitter" style="width:100.0%" />
 
@@ -90,10 +94,11 @@ sequenceDiagrams:
 <pre class="r"><code>library(tidyverse)
 library(here)
 library(rtweet)</code></pre>
+</div>
 <div id="preparation" class="section level1">
-<h1><span class="header-section-number">1</span> Preparation</h1>
+<h1><span class="header-section-number">2</span> Preparation</h1>
 <div id="setting-up-rtweet" class="section level2">
-<h2><span class="header-section-number">1.1</span> Setting up <code>rtweet</code></h2>
+<h2><span class="header-section-number">2.1</span> Setting up <code>rtweet</code></h2>
 <p><strong>Get the Token</strong></p>
 <p>Follow the instructions <a href="https://rtweet.info/#api-authorization" target="_blank">here</a>, set up your Twitter app and save your token.</p>
 <p>You’ll get something like this (caution: fake credentials)</p>
@@ -120,17 +125,17 @@ twitter_token &lt;- readRDS(str_c(home_directory,&quot;/twitter_token.rds&quot;)
 #&gt; TRUE</code></pre>
 </div>
 <div id="gettimestring-helper-function" class="section level2">
-<h2><span class="header-section-number">1.2</span> <code>getTimeString()</code> Helper Function</h2>
+<h2><span class="header-section-number">2.2</span> <code>getTimeString()</code> Helper Function</h2>
 <p>I will use this function for saving time-stamped samples of Tweets</p>
 <pre class="r"><code>getTimeString &lt;- function() {
   Sys.time() %&gt;% str_extract_all(regex(&quot;[0-9]&quot;)) %&gt;%
     unlist() %&gt;% glue::glue_collapse()
   }
 getTimeString()</code></pre>
-<pre><code>## 20180930201122</code></pre>
+<pre><code>## 20180930224416</code></pre>
 </div>
 <div id="prepare-filepath-for-.rds-with-here" class="section level2">
-<h2><span class="header-section-number">1.3</span> (Prepare filepath for .rds with <code>here()</code>)</h2>
+<h2><span class="header-section-number">2.3</span> (Prepare filepath for .rds with <code>here()</code>)</h2>
 <pre class="r"><code># library(here) # https://blogdown-demo.rbind.io/2018/02/27/r-file-paths/
 # blogdown-specific work-around for the `data`-folder
 data_path &lt;- here(&quot;static&quot;, &quot;data&quot;, &quot;ConferenceTweets&quot;, &quot;/&quot;)
@@ -140,13 +145,13 @@ if (!dir.exists(data_path)) dir.create(data_path)
 </div>
 </div>
 <div id="mining-tweets-with-search_tweets" class="section level1">
-<h1><span class="header-section-number">2</span> Mining Tweets with <code>search_tweets()</code></h1>
+<h1><span class="header-section-number">3</span> Mining Tweets with <code>search_tweets()</code></h1>
 <p>We probably won’t get all the tweets with a single request, so what we are going to do is, to request the Tweets multiple times, consolidate the requests, and finally extract unique Tweets with <code>dplyr::distinct()</code> to get a pretty good sample.</p>
 <p>Notice, that we can request <code>recent</code> and <code>mixed</code> samples (However, <code>popular</code> doesn’t seem to work for me, atm.)</p>
 <div id="political-science-dvpw18-dvpw2018-and-dvpw" class="section level2">
-<h2><span class="header-section-number">2.1</span> Political Science: #dvpw18 / #dvpw2018 (and #dvpw)</h2>
+<h2><span class="header-section-number">3.1</span> Political Science: #dvpw18 / #dvpw2018 (and #dvpw)</h2>
 <div id="mining" class="section level3">
-<h3><span class="header-section-number">2.1.1</span> Mining</h3>
+<h3><span class="header-section-number">3.1.1</span> Mining</h3>
 <p>The workflow suggested here is that you mine a couple of samples (or mine new samples hours or days later), save these samples with time-stamped and therefore unique file names (as <code>group_timestamp.rds</code>), and than consolidate and extract unique tweets with <code>dplyr::distinct()</code></p>
 <pre class="r"><code>dvpw_tweets &lt;- search_tweets(q = &quot;#dvpw18 OR #dvpw2018 OR #dvpw&quot;, # explicit QUERY
       include_rts = FALSE,
@@ -160,7 +165,7 @@ saveRDS(dvpw_tweets, file =
           str_c(data_path,&quot;dvpw_tweets_&quot;, getTimeString(),&quot;.rds&quot;))</code></pre>
 </div>
 <div id="wrangling" class="section level3">
-<h3><span class="header-section-number">2.1.2</span> Wrangling</h3>
+<h3><span class="header-section-number">3.1.2</span> Wrangling</h3>
 <p>Here we’ll get a file list of all <code>dvpw_*.rds</code> files, then <code>map_dfr()</code> them to a <code>data_frame</code> and finally extract unique Tweets with <code>distinct()</code></p>
 <pre class="r"><code>## this is just a bit complicated because I&#39;m using an external data folder for blogdown. If you work locally, you can just use:
 # map_dfr(dir(path = &quot;.&quot;, &quot;dvpw_&quot;), readRDS)
@@ -182,7 +187,7 @@ browseURL(str_c(&quot;https://twitter.com/statuses/&quot;, Tweet))</code></pre>
 <pre class="r"><code>timeString &lt;- str_c(lubridate::hour(Sys.time()), &quot;:&quot;, lubridate::minute(Sys.time()))</code></pre>
 </div>
 <div id="treemap-dvpw-dvpw18-dvpw2018" class="section level3">
-<h3><span class="header-section-number">2.1.3</span> Treemap: #dvpw / #dvpw18 / #dvpw2018</h3>
+<h3><span class="header-section-number">3.1.3</span> Treemap: #dvpw / #dvpw18 / #dvpw2018</h3>
 <p>We’ll need the <code>treemapify</code> <a href="https://github.com/wilkox/treemapify" target="_blank">package</a> for this.</p>
 <pre class="r"><code>dvpw_n_tweets &lt;- nrow(dvpw_collection)
 dvpw_n_accounts &lt;- length(unique(dvpw_collection$screen_name))
@@ -209,7 +214,7 @@ dvpw_collection %&gt;%
 <p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
 </div>
 <div id="scatterplot-of-tweets-rts-favs-per-user" class="section level3">
-<h3><span class="header-section-number">2.1.4</span> Scatterplot: # of Tweets / RTs / Favs per User</h3>
+<h3><span class="header-section-number">3.1.4</span> Scatterplot: # of Tweets / RTs / Favs per User</h3>
 <p>For the scatterplot we’ll have to group the single Tweets by user (<code>$screen_name</code>), summarise the counts for Tweets, RTs, and Favs, and assign a “discipline” category for later use.</p>
 <pre class="r"><code>dvpw_counts &lt;- dvpw_collection %&gt;%
   group_by(screen_name) %&gt;%
@@ -243,7 +248,7 @@ dvpw_collection %&gt;%
 </blockquote>
 </div>
 <div id="scatterplot-without-dvpw-and-with-labels-for-the-top-20" class="section level3">
-<h3><span class="header-section-number">2.1.5</span> Scatterplot without <span class="citation">@dvpw</span> and with labels for the top 20</h3>
+<h3><span class="header-section-number">3.1.5</span> Scatterplot without <span class="citation">@dvpw</span> and with labels for the top 20</h3>
 <p>Here we’ll need <code>ggrepel</code> for non-overlapping labelling. As the official <span class="citation">@dvpw</span> account has been quite an “outlier”, let’s have an undisturbed look at the rest of the field without <span class="citation">@dvpw</span>.</p>
 <pre class="r"><code>dvpw_counts %&gt;% filter(screen_name != &quot;dvpw&quot;) %&gt;%
   ggplot(aes(x = Favs, y = RT)) +
@@ -269,7 +274,7 @@ dvpw_collection %&gt;%
 <p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-15-1.png" width="1152" /></p>
 </div>
 <div id="todo-creating-twitter-lists" class="section level3">
-<h3><span class="header-section-number">2.1.6</span> (TODO: Creating Twitter Lists)</h3>
+<h3><span class="header-section-number">3.1.6</span> (TODO: Creating Twitter Lists)</h3>
 <blockquote>
 <p>tba, but we could automate creating of user lists from hashtags for conferences… This might be useful for live-curating Twitter handles for better credits to speakers.</p>
 </blockquote>
@@ -286,7 +291,7 @@ post_list(dvpw_nicks[200:length(dvpw_nicks)], slug = &quot;dvpw2018&quot;, priva
 </div>
 </div>
 <div id="sociology-dgs18-dgs2018" class="section level2">
-<h2><span class="header-section-number">2.2</span> Sociology: #dgs18 / #dgs2018</h2>
+<h2><span class="header-section-number">3.2</span> Sociology: #dgs18 / #dgs2018</h2>
 <p>Let’s have a look at how German Sociologists performed on Twitter. Like above, I’ve mined the Tweets multiple times in order to get a good sample.</p>
 <p><strong>Mine</strong></p>
 <pre class="r"><code>dgs_tweets &lt;- search_tweets(q = &quot;#dgs18 OR #dgs2018&quot;, # explicit QUERY
@@ -378,7 +383,7 @@ dgs_collection %&gt;%
 <p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-22-1.png" width="1152" /></p>
 </div>
 <div id="historians-histag18-histag2018-historikertag2018" class="section level2">
-<h2><span class="header-section-number">2.3</span> Historians: #histag18 / #histag2018 / #historikertag2018</h2>
+<h2><span class="header-section-number">3.3</span> Historians: #histag18 / #histag2018 / #historikertag2018</h2>
 <p>Next, let’s look have at the Twitter activity of German History scholars.</p>
 <p><strong>Mine</strong></p>
 <pre class="r"><code>hist_tweets &lt;- search_tweets(q = &quot;#histag18 OR #histag2018 OR #historikertag2018&quot;, # explicit QUERY
@@ -469,7 +474,7 @@ hist_collection %&gt;%
 <p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-28-1.png" width="1152" /></p>
 </div>
 <div id="computer-science-informatik2018" class="section level2">
-<h2><span class="header-section-number">2.4</span> Computer Science: #informatik2018</h2>
+<h2><span class="header-section-number">3.4</span> Computer Science: #informatik2018</h2>
 <p>(Of course, CS scholars are rather disciplined and stick to one hashtag :) #informatik18 has only 3 Tweets so far, and #informatiktage only 2 users…)</p>
 <p><strong>Mine</strong></p>
 <pre class="r"><code>inf_tweets &lt;- search_tweets(q = &quot;#informatik2018&quot;, # explicit QUERY
@@ -565,7 +570,7 @@ inf_collection %&gt;%
 <p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-34-1.png" width="1152" /></p>
 </div>
 <div id="media-studies-gfm2018" class="section level2">
-<h2><span class="header-section-number">2.5</span> Media Studies: #gfm2018</h2>
+<h2><span class="header-section-number">3.5</span> Media Studies: #gfm2018</h2>
 <blockquote>
 <p>As I have <a href="https://twitter.com/__evamaria__/status/1046389871001128960" target="_blank">just been informed</a> on Twitter, the German Society for Media Studies also had their annual meeting this week. That’s like some weird multidisciplinary but still strictly unidisciplinary academic conspiracy…</p>
 </blockquote>
@@ -648,7 +653,7 @@ gfm_collection %&gt;%
 </div>
 </div>
 <div id="some-comparisons" class="section level1">
-<h1><span class="header-section-number">3</span> Some Comparisons</h1>
+<h1><span class="header-section-number">4</span> Some Comparisons</h1>
 <p>Now, we will need to bind the four tibbles together. First, let’s get the total numbers of unique Tweets and unique users:</p>
 <pre class="r"><code>all_cons &lt;- bind_rows(dvpw_collection, dgs_collection, hist_collection, inf_collection, gfm_collection)
 all_n_accounts &lt;- all_cons %&gt;% distinct(screen_name) %&gt;% nrow()
@@ -687,7 +692,7 @@ all_cons_per_user %&gt;% head(20)</code></pre>
 ## 19 PetraGuasti         84    28    92 PolSci           68  
 ## 20 daniellambach       33    38   133 PolSci           68</code></pre>
 <div id="joint-scatterplot-per-user" class="section level2">
-<h2><span class="header-section-number">3.1</span> Joint Scatterplot: per-User</h2>
+<h2><span class="header-section-number">4.1</span> Joint Scatterplot: per-User</h2>
 <p>Let’s have a look at this week’s German academic Twitter crowd as a whole:</p>
 <pre class="r"><code>ggplot(all_cons_per_user, aes(x = Favs, y = RT, color = discipline)) +
     geom_point(aes(size = Tweets), alpha = 0.5) +
@@ -711,7 +716,7 @@ all_cons_per_user %&gt;% head(20)</code></pre>
 <p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-42-1.png" width="1152" /></p>
 </div>
 <div id="joint-scatterplot-top-20-labelled-wo-dvpw" class="section level2">
-<h2><span class="header-section-number">3.2</span> Joint Scatterplot: Top 20 labelled (w/o <span class="citation">@dvpw</span>)</h2>
+<h2><span class="header-section-number">4.2</span> Joint Scatterplot: Top 20 labelled (w/o <span class="citation">@dvpw</span>)</h2>
 <pre class="r"><code>all_cons_per_user %&gt;% 
   filter(screen_name != &quot;dvpw&quot;) %&gt;%
   ggplot(aes(x = Favs, y = RT, color = discipline)) +
@@ -738,7 +743,7 @@ all_cons_per_user %&gt;% head(20)</code></pre>
 <p>That’s what one week of academic twitter activity in Germany looks like, Duh!</p>
 </div>
 <div id="boxplots-overall-distribution-of-activities-by-discipline" class="section level2">
-<h2><span class="header-section-number">3.3</span> Boxplots: Overall Distribution of Activities by Discipline</h2>
+<h2><span class="header-section-number">4.3</span> Boxplots: Overall Distribution of Activities by Discipline</h2>
 <p>For Boxplot, we need to wrangle the data into long (~tidy) form:</p>
 <pre class="r"><code>dvpw_box &lt;- dvpw_counts %&gt;% 
   gather(&quot;Metric&quot;, &quot;Total&quot;, 2:4) #%&gt;%
@@ -787,7 +792,7 @@ gfm_box &lt;- gfm_counts %&gt;%
 </div>
 </div>
 <div id="final-scores-the-overall-activity-compared-by-numbers" class="section level1">
-<h1><span class="header-section-number">4</span> Final scores: The overall activity compared by numbers</h1>
+<h1><span class="header-section-number">5</span> Final scores: The overall activity compared by numbers</h1>
 <p>What if we simply compare the five disciplines’ Twitter performance in terms of totals?</p>
 <pre class="r"><code>bind_rows(dvpw_counts, dgs_counts, hist_counts, inf_counts, gfm_counts) %&gt;%
   group_by(discipline) %&gt;% 
@@ -842,7 +847,7 @@ gfm_box &lt;- gfm_counts %&gt;%
 <p>Further interpretation is up to you :)</p>
 </div>
 <div id="whats-next" class="section level1">
-<h1><span class="header-section-number">5</span> What’s next?</h1>
+<h1><span class="header-section-number">6</span> What’s next?</h1>
 <p>One hint:</p>
 <pre class="r"><code>library(quanteda)
 library(tidygraph)</code></pre>

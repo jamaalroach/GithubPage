@@ -23,6 +23,14 @@
       </div>
     </header>
 
+    <!-- Abstract -->
+    {{ if .Params.abstract -}}
+    <div class="abstract">
+      <h1>Abstract / TL;DR </h1>
+      <blockquote>{{ .Params.abstract }}</blockquote>
+    </div>
+    {{- end }}
+
     <!-- TOC -->
     {{ partial "post/toc.html" . }}
 

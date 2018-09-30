@@ -14,7 +14,8 @@ output:
     number_sections: yes
     toc: yes
 lastmod: '2018-09-28T20:17:07+02:00'
-description: In September, four (update! - five) big academic societies in Germany had their annual meeting - all at the same time! You can **not not** harvest their tweets...
+description: In September, four (update! - five) big academic societies in Germany had their annual meetings - all at the same time! You can **not not** harvest their tweets. I'll explain step-by-step how to mine them with rtweet and how to wrangle the Tweets for a tidy analysis.
+abstract: In September, four (update! - five) big academic societies in Germany had their annual meetings - all at the same time! You can **not not** harvest their tweets. I'll explain step-by-step how to mine them with rtweet and how to wrangle the Tweets for a tidy analysis.
 thumbnail: /img/thumbs/conference_tweets.jpg
 rmdlink: TRUE # Optional
 comment: no
@@ -34,6 +35,8 @@ sequenceDiagrams:
   enable: no
   options: ''
 ---
+# The Setting: The Big 5 on Twitter
+
 ![](/img/Twitter_conf/Twitter_conf.png "This is what ~~4~~ 5 German academic conferences look like on Twitter"){width=100%}
 
 > Update: Since the conferences are over but there's still some Twitter activity, Tweets posted after 29.09.2018 have been filtered out from the samples.
