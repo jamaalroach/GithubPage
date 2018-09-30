@@ -608,9 +608,9 @@ ggplot(inf_counts, aes(x = Favs, y = RT)) +
 ```
 
 ## Media Studies: #gfm2018
-> As I have just been informed, the German Society for Media Studies als had their annual meeting this week. That's like some weird multidisciplinary but still strictly unidisciplinary academic conspiracy...
+> As I have [just been informed](https://twitter.com/__evamaria__/status/1046389871001128960){target="_blank"} on Twitter, the German Society for Media Studies also had their annual meeting this week. That's like some weird multidisciplinary but still strictly unidisciplinary academic conspiracy...
 
-Let's have a look at \#gfm2018
+However, let's have a look at \#gfm2018, too!
 
 **Mine**
 ```{r cache=TRUE, eval=FALSE}
@@ -660,7 +660,8 @@ gfm_collection %>%
                          " by @fubits)")) +
   guides(fill = FALSE)
 ```
-> Let's treat this as preliminary. I've just mined the Tweets for the first time, so a couple more samples might another couple of Tweets.
+
+> Let's treat this as preliminary. I've just mined the Tweets for the first time, so a couple more samples might another couple of Tweets. Don't expect the numbers to double, though!
 
 **Scatterplot with per-user activity**
 ```{r cache=TRUE}

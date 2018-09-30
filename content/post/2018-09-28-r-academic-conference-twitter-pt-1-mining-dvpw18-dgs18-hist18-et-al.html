@@ -127,7 +127,7 @@ twitter_token &lt;- readRDS(str_c(home_directory,&quot;/twitter_token.rds&quot;)
     unlist() %&gt;% glue::glue_collapse()
   }
 getTimeString()</code></pre>
-<pre><code>## 20180930171942</code></pre>
+<pre><code>## 20180930172836</code></pre>
 </div>
 <div id="prepare-filepath-for-.rds-with-here" class="section level2">
 <h2><span class="header-section-number">1.3</span> (Prepare filepath for .rds with <code>here()</code>)</h2>
@@ -561,9 +561,9 @@ inf_collection %&gt;%
 <div id="media-studies-gfm2018" class="section level2">
 <h2><span class="header-section-number">2.5</span> Media Studies: #gfm2018</h2>
 <blockquote>
-<p>As I have just been informed, the German Society for Media Studies als had their annual meeting this week. That’s like some weird multidisciplinary but still strictly unidisciplinary academic conspiracy…</p>
+<p>As I have <a href="https://twitter.com/__evamaria__/status/1046389871001128960" target="_blank">just been informed</a> on Twitter, the German Society for Media Studies also had their annual meeting this week. That’s like some weird multidisciplinary but still strictly unidisciplinary academic conspiracy…</p>
 </blockquote>
-<p>Let’s have a look at #gfm2018</p>
+<p>However, let’s have a look at #gfm2018, too!</p>
 <p><strong>Mine</strong></p>
 <pre class="r"><code>gfm_tweets &lt;- search_tweets(q = &quot;#gfm2018&quot;, # explicit QUERY
       include_rts = FALSE,
@@ -604,7 +604,10 @@ gfm_collection %&gt;%
                          &quot;23:59&quot; , &quot; Uhr;&quot;,
                          &quot; by @fubits)&quot;)) +
   guides(fill = FALSE)</code></pre>
-<p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-37-1.png" width="672" /> &gt; Let’s treat this as preliminary. I’ve just mined the Tweets for the first time, so a couple more samples might another couple of Tweets.</p>
+<p><img src="/post/2018-09-28-r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al_files/figure-html/unnamed-chunk-37-1.png" width="672" /></p>
+<blockquote>
+<p>Let’s treat this as preliminary. I’ve just mined the Tweets for the first time, so a couple more samples might another couple of Tweets. Don’t expect the numbers to double, though!</p>
+</blockquote>
 <p><strong>Scatterplot with per-user activity</strong></p>
 <pre class="r"><code>gfm_counts &lt;- gfm_collection %&gt;%
   group_by(screen_name) %&gt;%
