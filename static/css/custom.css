@@ -415,12 +415,12 @@ th {
 	margin-bottom: 1em;
 }
 
-.abstract > h1 {
+.abstract h1 {
 	font-style: italic;
 }
 
 /* Blockquote Abstract*/
-.abstract>blockquote {
+.abstract blockquote {
 	margin-left: 0;
 	margin-right: 0;
 	margin-bottom: 2em;
