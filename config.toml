@@ -69,7 +69,7 @@ copyright = ""            # default: author.name ↓
   # site info (optional)
   logoTitle = ""        # default: the title value
   keywords = ["Computational Social Science", "DataViz", "Rstats", "SciComm"]
-  description = "GitHub Page made with R, Blogdown, and Hugo theme even"
+  description = "@fubits GitHub Page made with R, Blogdown, and Hugo theme even"
 
   # paginate of archives, tags and categories
   archivePaginate = 5
