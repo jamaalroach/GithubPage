@@ -72,7 +72,7 @@ copyright = ""            # default: author.name ↓
   description = "@fubits GitHub Page made with R, Blogdown, and Hugo theme even"
 
   # paginate of archives, tags and categories
-  archivePaginate = 5
+  archivePaginate = 10
 
   # The date format to use; for a list of valid formats, see https://gohugo.io/functions/format/
   dateFormatToUse = "2006-01-02"
