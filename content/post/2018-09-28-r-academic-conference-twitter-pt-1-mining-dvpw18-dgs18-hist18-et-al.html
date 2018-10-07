@@ -54,7 +54,7 @@ sequenceDiagrams:
 <li><a href="#scatterplot-without-dvpw-and-with-labels-for-the-top-20"><span class="toc-section-number">3.1.5</span> Scatterplot without <span class="citation">@dvpw</span> and with labels for the top 20</a></li>
 <li><a href="#todo-creating-twitter-lists"><span class="toc-section-number">3.1.6</span> (TODO: Creating Twitter Lists)</a></li>
 </ul></li>
-<li><a href="#sociology-dgs18-dgs2018"><span class="toc-section-number">3.2</span> Sociology: #dgs18 / #dgs2018</a></li>
+<li><a href="#sociology-dgs18-dgs2018"><span class="toc-section-number">3.2</span> <del>Sociology: #dgs18 / #dgs2018</del></a></li>
 <li><a href="#historians-histag18-histag2018-historikertag2018"><span class="toc-section-number">3.3</span> Historians: #histag18 / #histag2018 / #historikertag2018</a></li>
 <li><a href="#computer-science-informatik2018"><span class="toc-section-number">3.4</span> Computer Science: #informatik2018</a></li>
 <li><a href="#media-studies-gfm2018"><span class="toc-section-number">3.5</span> Media Studies: #gfm2018</a></li>
@@ -80,6 +80,9 @@ sequenceDiagrams:
 </blockquote>
 <blockquote>
 <p>Update 2: The Media Studies conference (#gfm2018) has been included</p>
+</blockquote>
+<blockquote>
+<p>Update 3: As I’ve stumbled upon some irregularities in my <a href="https://ellocke.github.io/post/r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist/#the-turkish-plot-twist">follow-up post</a>, it turns out the Twitter sample for the Sociology conference (esp. <code>#dgs2018</code>) has been heavily cross-poluted by some other event using the same Hashtag, but in Turkey… This has been reflected in the <a href="https://ellocke.github.io/post/r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist/#the-turkish-plot-twist">follow-up post</a>, but has yet to be implemented here.</p>
 </blockquote>
 <p>As (bad) luck has it, <del>four</del> five big academic societies in Germany somehow decided to hold their respective annual meetings within the same week:</p>
 <ul>
@@ -132,7 +135,7 @@ twitter_token &lt;- readRDS(str_c(home_directory,&quot;/twitter_token.rds&quot;)
     unlist() %&gt;% glue::glue_collapse()
   }
 getTimeString()</code></pre>
-<pre><code>## 20180930224416</code></pre>
+<pre><code>## 20181007232623</code></pre>
 </div>
 <div id="prepare-filepath-for-.rds-with-here" class="section level2">
 <h2><span class="header-section-number">2.3</span> (Prepare filepath for .rds with <code>here()</code>)</h2>
@@ -291,7 +294,10 @@ post_list(dvpw_nicks[200:length(dvpw_nicks)], slug = &quot;dvpw2018&quot;, priva
 </div>
 </div>
 <div id="sociology-dgs18-dgs2018" class="section level2">
-<h2><span class="header-section-number">3.2</span> Sociology: #dgs18 / #dgs2018</h2>
+<h2><span class="header-section-number">3.2</span> <del>Sociology: #dgs18 / #dgs2018</del></h2>
+<blockquote>
+<p>Please, see <code>Update 3</code> further above. This analysis and interpretation is not valid, at the moment. See the <a href="https://ellocke.github.io/post/r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist/#the-turkish-plot-twist">follow-up post</a> for proper numbers.</p>
+</blockquote>
 <p>Let’s have a look at how German Sociologists performed on Twitter. Like above, I’ve mined the Tweets multiple times in order to get a good sample.</p>
 <p><strong>Mine</strong></p>
 <pre class="r"><code>dgs_tweets &lt;- search_tweets(q = &quot;#dgs18 OR #dgs2018&quot;, # explicit QUERY

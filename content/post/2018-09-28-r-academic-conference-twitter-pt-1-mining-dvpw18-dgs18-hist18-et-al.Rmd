@@ -43,6 +43,8 @@ sequenceDiagrams:
 
 >Update 2: The Media Studies conference (\#gfm2018) has been included
 
+>Update 3: As I've stumbled upon some irregularities in my [follow-up post](https://ellocke.github.io/post/r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist/#the-turkish-plot-twist), it turns out the Twitter sample for the Sociology conference (esp. `#dgs2018`) has been heavily cross-poluted by some other event using the same Hashtag, but in Turkey... This has been reflected in the [follow-up post](https://ellocke.github.io/post/r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist/#the-turkish-plot-twist), but has yet to be implemented here.
+
 As (bad) luck has it, ~~four~~ five big academic societies in Germany somehow decided to hold their respective annual meetings within the same week:
 
   * [Deutsche Vereinigung für Politikwissenschaft / Political Science](https://www.dvpw.de/kongresse/dvpw-kongresse/dvpw2018/){target="_blank"} (\#dvpw18, \#dvpw2018, \#dvpw)
@@ -306,7 +308,9 @@ post_list(dvpw_nicks[200:length(dvpw_nicks)], slug = "dvpw2018", private = TRUE,
 ```
 
 
-## Sociology: #dgs18 / #dgs2018
+## ~~Sociology: #dgs18 / #dgs2018~~
+
+> Please, see `Update 3` further above. This analysis and interpretation is not valid, at the moment. See the [follow-up post](https://ellocke.github.io/post/r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist/#the-turkish-plot-twist) for proper numbers.
 
 Let's have a look at how German Sociologists performed on Twitter. Like above, I've mined the Tweets multiple times in order to get a good sample.
 
