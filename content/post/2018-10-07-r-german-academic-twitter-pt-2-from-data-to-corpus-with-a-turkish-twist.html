@@ -1,0 +1,1246 @@
+---
+title: '[R] German Academic Twitter, Pt. 2: From Data to Corpus with a Turkish Twist'
+author: Ilja / fubits
+date: '2018-10-07'
+categories:
+  - Rstats
+  - Data Mining
+  - Natural Language Processing / NLP
+tags:
+  - Quanteda
+  - Twitter
+slug: r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist
+output:
+  blogdown::html_page:
+    number_sections: yes
+    toc: yes
+lastmod: '2018-10-07T21:58:18+02:00'
+description: "Last week, I mined almost 5K Tweets from the annual meetings of five German academic societies. Now it's about time that we dive into the contents with Kenneth Benoit's powerful `quanteda` Package. Come for the corpus approaches to text as data, stay for the Turkish Plot-Twist..."
+abstract: We'll learn about constructing a document-feature matrix (dfm), applying exhaustive stopword-lists, the pitfalls of working with text as data, and most importantly acknowledge and learn from mistakes...
+thumbnail: "/img/thumbs/conference_tweets_pt2.jpg"
+rmdlink: TRUE # Optional
+keywords: []
+comment: no
+# toc: no
+autoCollapseToc: no
+postMetaInFooter: no
+hiddenFromHomePage: no
+contentCopyright: no
+reward: no
+mathjax: no
+mathjaxEnableSingleDollar: no
+mathjaxEnableAutoNumber: no
+hideHeaderAndFooter: no
+flowchartDiagrams:
+  enable: no
+  options: ''
+sequenceDiagrams:
+  enable: no
+  options: ''
+---
+
+
+<div id="TOC">
+<ul>
+<li><a href="#import-tweets-from-.rds"><span class="toc-section-number">1</span> Import Tweets from <code>.rds</code></a><ul>
+<li><a href="#subset-interdisciplinary-tweets"><span class="toc-section-number">1.1</span> Subset “Interdisciplinary” Tweets</a></li>
+<li><a href="#inspect-interdisciplinary-tweets"><span class="toc-section-number">1.2</span> Inspect “Interdisciplinary” Tweets</a></li>
+</ul></li>
+<li><a href="#create-corpus"><span class="toc-section-number">2</span> Create Corpus</a><ul>
+<li><a href="#build-individual-corpora"><span class="toc-section-number">2.1</span> Build individual corpora</a></li>
+<li><a href="#create-joint-corpus"><span class="toc-section-number">2.2</span> Create Joint Corpus</a></li>
+</ul></li>
+<li><a href="#create-dfm"><span class="toc-section-number">3</span> Create DFM</a><ul>
+<li><a href="#naive"><span class="toc-section-number">3.1</span> Naive</a></li>
+<li><a href="#nd-attempt-remove-stopwordsgerman"><span class="toc-section-number">3.2</span> 2nd attempt: remove <code>stopwords(&quot;german&quot;)</code></a><ul>
+<li><a href="#inspect-quantedas-built-in-stop-words"><span class="toc-section-number">3.2.1</span> Inspect <code>quanteda's</code> built-in Stop Words</a></li>
+<li><a href="#include-custom-stopwords-and-remove-english-stopwords"><span class="toc-section-number">3.2.2</span> Include custom stopwords and remove English stopwords</a></li>
+<li><a href="#inspect-keyword-in-context-kwic-for-amp"><span class="toc-section-number">3.2.3</span> Inspect “Keyword in Context” <code>kwic()</code> for “amp”</a></li>
+<li><a href="#inspect-the-tokens-innen-and-bu-kwic."><span class="toc-section-number">3.2.4</span> Inspect the Tokens <code>&quot;innen&quot;</code> and <code>&quot;bu&quot;</code> <code>kwic()</code>.</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#the-turkish-plot-twist"><span class="toc-section-number">4</span> The Turkish Plot-Twist</a><ul>
+<li><a href="#one-last-mystery-remains"><span class="toc-section-number">4.1</span> One last Mystery remains…</a></li>
+<li><a href="#removing-turkish-accounts"><span class="toc-section-number">4.2</span> Removing Turkish accounts</a></li>
+</ul></li>
+<li><a href="#rebuild-the-corpus-without-tweets-with-langtr"><span class="toc-section-number">5</span> Rebuild the Corpus without Tweets with <code>lang==&quot;tr&quot;</code></a><ul>
+<li><a href="#re-build-individual-corpora-from-scratch"><span class="toc-section-number">5.1</span> Re-Build individual corpora from scratch</a></li>
+<li><a href="#create-joint-corpus-1"><span class="toc-section-number">5.2</span> Create Joint Corpus</a></li>
+</ul></li>
+<li><a href="#rd-attempt-dfm-building"><span class="toc-section-number">6</span> 3rd attempt @ <code>dfm()</code> building</a><ul>
+<li><a href="#top-features-per-discipline"><span class="toc-section-number">6.1</span> Top Features per Discipline</a></li>
+</ul></li>
+<li><a href="#some-quick-analyses"><span class="toc-section-number">7</span> Some quick Analyses</a><ul>
+<li><a href="#hashtags"><span class="toc-section-number">7.1</span> Hashtags</a></li>
+</ul></li>
+<li><a href="#network-of-feature-co-occurrences"><span class="toc-section-number">8</span> Network of feature co-occurrences</a><ul>
+<li><a href="#grouped-wordcloud-of-features"><span class="toc-section-number">8.1</span> Grouped wordcloud of features</a></li>
+</ul></li>
+<li><a href="#whats-next"><span class="toc-section-number">9</span> What’s next?</a></li>
+</ul>
+</div>
+
+<p>Last week, I <a href="https://ellocke.github.io/post/r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al/">mined almost 5K Tweets</a> from the annual meetings of five German academic societies. Now it’s about time that we dive into the contents with <a href="https://twitter.com/kenbenoit" target="_blank">Kenneth Benoit’s</a> powerful <code>quanteda</code> Package. Come for the corpus approaches to text as data, stay for the Turkish Plot-Twist…</p>
+<pre class="r"><code>library(tidyverse)
+library(here)
+library(rtweet) # just in case we want to look up something on Twitter
+library(quanteda)
+library(quanteda)
+quanteda_options(&quot;threads&quot; = 4)
+# quanteda_options(&quot;threads&quot;)</code></pre>
+<div id="import-tweets-from-.rds" class="section level1">
+<h1><span class="header-section-number">1</span> Import Tweets from <code>.rds</code></h1>
+<p>(cf. previous Post for Twitter Mining with <code>rtweet</code>)</p>
+<p>Cf. the details of this approach in the <a href="https://ellocke.github.io/post/r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al/">previous post</a>.</p>
+<blockquote>
+<p>Spoiler: Scroll down for a refined approach.</p>
+</blockquote>
+<p><strong>Prepare here()-path to the <code>.rds</code> data</strong></p>
+<pre class="r"><code>data_path &lt;- here(&quot;static&quot;, &quot;data&quot;, &quot;ConferenceTweets&quot;, &quot;/&quot;)</code></pre>
+<p><strong>Bulk-read the <code>.rds</code> files</strong></p>
+<pre class="r"><code>dvpw_collection &lt;- dir(path = data_path, pattern = &quot;dvpw_&quot;) %&gt;% 
+  str_c(data_path, .) %&gt;% 
+  map_dfr(readRDS)
+dvpw_collection &lt;- dvpw_collection %&gt;% distinct(status_id, .keep_all = TRUE) %&gt;%
+  filter(created_at &lt; &quot;2018-09-30&quot;) %&gt;%
+  mutate(Discipline = &quot;PolSci&quot;) %&gt;% 
+  arrange(created_at)
+
+dgs_collection &lt;- dir(path = data_path, pattern = &quot;dgs_&quot;) %&gt;% 
+  str_c(data_path, .) %&gt;% 
+  map_dfr(readRDS)
+dgs_collection &lt;- dgs_collection %&gt;% distinct(status_id, .keep_all = TRUE) %&gt;%
+  filter(created_at &lt; &quot;2018-09-30&quot;) %&gt;%
+  mutate(Discipline = &quot;Sociology&quot;) %&gt;% 
+  arrange(created_at)
+
+hist_collection &lt;- dir(path = data_path, pattern = &quot;hist_&quot;) %&gt;% 
+  str_c(data_path, .) %&gt;% 
+  map_dfr(readRDS)
+hist_collection &lt;- hist_collection %&gt;% distinct(status_id, .keep_all = TRUE) %&gt;%
+  filter(created_at &lt; &quot;2018-09-30&quot;) %&gt;%
+  mutate(Discipline = &quot;History&quot;) %&gt;% 
+  arrange(created_at)
+
+inf_collection &lt;- dir(path = data_path, pattern = &quot;inf_&quot;) %&gt;% 
+  str_c(data_path, .) %&gt;% 
+  map_dfr(readRDS)
+inf_collection &lt;- inf_collection %&gt;% distinct(status_id, .keep_all = TRUE) %&gt;%
+  filter(created_at &lt; &quot;2018-09-30&quot;) %&gt;%
+  mutate(Discipline = &quot;CS&quot;) %&gt;% 
+  arrange(created_at)</code></pre>
+<div id="subset-interdisciplinary-tweets" class="section level2">
+<h2><span class="header-section-number">1.1</span> Subset “Interdisciplinary” Tweets</h2>
+<p>Something I didn’t account for last time, was the possibility that some Twitter Users might have been mentioning / monitoring multiple conferences, esp. with regards to the interrelation between Political Science, Sociology, and History.</p>
+<p>Let’s single them out and assign a “Mixed” label.</p>
+<pre class="r"><code>joint_collection &lt;- bind_rows(dvpw_collection, dgs_collection,
+                              hist_collection, inf_collection)
+
+# build set of distinct 
+joint_distinct &lt;- joint_collection %&gt;% 
+  distinct(status_id, .keep_all = TRUE)
+
+#subset duplicated
+joint_mixed &lt;- subset(joint_collection,
+                      duplicated(joint_collection$status_id)) %&gt;% 
+  distinct(status_id, .keep_all = TRUE) # find duplicates
+
+joint_mixed$Discipline &lt;- &quot;Mixed&quot;
+joint_mixed %&gt;% count() # %&gt;% knitr::kable()</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##       n
+##   &lt;int&gt;
+## 1    42</code></pre>
+<blockquote>
+<p>Only 42 Tweets? Out of a sample of almost 5K? Twitter Silos, anyone?</p>
+</blockquote>
+</div>
+<div id="inspect-interdisciplinary-tweets" class="section level2">
+<h2><span class="header-section-number">1.2</span> Inspect “Interdisciplinary” Tweets</h2>
+<pre class="r"><code>joint_mixed %&gt;% arrange(created_at) %&gt;% select(text) %&gt;% head(10) # %&gt;%</code></pre>
+<pre><code>## # A tibble: 10 x 1
+##    text                                                                    
+##    &lt;chr&gt;                                                                   
+##  1 Gut, dass das Team des @fgf_nrw etwas größer ist: Wir sind diese Woche ~
+##  2 Hier noch eine wichtige Ansage: #dvpw18 muss unbedingt vor #dgs18 trend~
+##  3 &quot;@daniellambach Das wollen die von den Naturwissenschaften doch nur, da~
+##  4 Leider findet die #dvpw18 gleichzeitig mit dem #dgs2018 statt. Wäre seh~
+##  5 Paar Minuten im 1. Vortrag #infdh2018 reichen schon, um mal ganz deutli~
+##  6 &quot;Meine Wunsch an #ScienceTwitter jetzt wo #dvpw18\n&amp;amp; #HisTag18 &amp;amp~
+##  7 @DrMichaelHein @dvpwkongress #dgs18 #dvpw18 #histag18 ich fände es ja s~
+##  8 Kleine Pause gefällig? Unter den Hashtags #ddss18, #dgs18 und #HisTag18~
+##  9 &quot;Wie wäre es mit einem gemeinsamen Soziohistostaatsrechtspolitolog*inne~
+## 10 &quot;während die lieben kolleg(inn)en bei #dvpw18, #dgs18 &amp;amp; #HisTag18 u~</code></pre>
+<pre class="r"><code>  # knitr::kable(format = &quot;html&quot;)</code></pre>
+</div>
+</div>
+<div id="create-corpus" class="section level1">
+<h1><span class="header-section-number">2</span> Create Corpus</h1>
+<p>For further, “Corpus-based”&quot; analysis (and beyond) we’ll use the <code>quanteda</code> package.</p>
+<p>I aim to re-do as much as I can from this series with <a href="https://twitter.com/juliasilge" target="_blank">Julia Silge’s</a> <code>tidytext</code> package, soon, btw.</p>
+<div id="build-individual-corpora" class="section level2">
+<h2><span class="header-section-number">2.1</span> Build individual corpora</h2>
+<p>As we already have singled out “interdisciplinary” Tweets, we’ll just <code>anti_join()</code> every other tibble with the mixed Tweets.</p>
+<pre class="r"><code>dvpw_corpus &lt;- dvpw_collection %&gt;%
+  anti_join(joint_mixed, by = &quot;status_id&quot;) %&gt;% 
+  corpus(docid_field = &quot;status_id&quot;)
+docvars(dvpw_corpus, &quot;Discipline&quot;) &lt;- &quot;PolSci&quot;
+
+dgs_corpus &lt;- dgs_collection %&gt;% 
+  anti_join(joint_mixed, by = &quot;status_id&quot;) %&gt;% 
+  corpus(docid_field = &quot;status_id&quot;)
+docvars(dgs_corpus, &quot;Discipline&quot;) &lt;- &quot;Sociology&quot;
+
+hist_corpus &lt;- hist_collection %&gt;% 
+  anti_join(joint_mixed, by = &quot;status_id&quot;) %&gt;% 
+  corpus(docid_field = &quot;status_id&quot;)
+docvars(hist_corpus, &quot;Discipline&quot;) &lt;- &quot;History&quot;
+
+inf_corpus &lt;- inf_collection %&gt;% 
+  anti_join(joint_mixed, by = &quot;status_id&quot;) %&gt;% 
+  corpus(docid_field = &quot;status_id&quot;)
+docvars(inf_corpus, &quot;Discipline&quot;) &lt;- &quot;CS&quot;
+
+mixed_corpus &lt;- joint_mixed  %&gt;% 
+  corpus(docid_field = &quot;status_id&quot;)
+docvars(mixed_corpus, &quot;Discipline&quot;) &lt;- &quot;Mixed&quot;</code></pre>
+</div>
+<div id="create-joint-corpus" class="section level2">
+<h2><span class="header-section-number">2.2</span> Create Joint Corpus</h2>
+<p>That’s even easier thanks to Quanteda.</p>
+<pre class="r"><code>joint_corpus &lt;- dvpw_corpus + 
+                dgs_corpus + 
+                hist_corpus + 
+                inf_corpus + 
+                mixed_corpus</code></pre>
+</div>
+</div>
+<div id="create-dfm" class="section level1">
+<h1><span class="header-section-number">3</span> Create DFM</h1>
+<p>For most really usuful approaches to “text as data” we’ll need a sparse document-feature matrix (dfm). Doing this with quanteda is straight forward, but there are some less prominent Tweets.</p>
+<div id="naive" class="section level2">
+<h2><span class="header-section-number">3.1</span> Naive</h2>
+<pre class="r"><code>joint_dfm &lt;- dfm(joint_corpus,
+                # groups = &quot;Discipline&quot;,
+                 remove_punct = TRUE, 
+                 remove_url = TRUE, # it&#39;s a mess, without
+                 tolower = TRUE,
+                 verbose = FALSE) #for website readability</code></pre>
+<pre class="r"><code>topfeatures(joint_dfm, 20)</code></pre>
+<pre><code>##       der   #dvpw18       und       die        in  #dgs2018 #histag18 
+##      2001      1681      1661      1517      1214      1174      1037 
+##       auf       von       für        zu    #dgs18       das       mit 
+##       765       675       624       601       584       583       566 
+##       ist       the       den       des        im       dem 
+##       520       515       480       452       437       432</code></pre>
+<p>We get <code>nfeat(joint_dfm)</code> = 20832 features, but as we can see from the <code>topfeatures()</code> output, the top features are mostly (and unsurprisingly very common German words which are also know as <code>stopwords</code> in NLP).</p>
+</div>
+<div id="nd-attempt-remove-stopwordsgerman" class="section level2">
+<h2><span class="header-section-number">3.2</span> 2nd attempt: remove <code>stopwords(&quot;german&quot;)</code></h2>
+<pre class="r"><code>joint_dfm &lt;- dfm(joint_corpus,
+                 # groups = &quot;Discipline&quot;,
+                 remove = stopwords(&quot;german&quot;),
+                 remove_punct = TRUE,
+                 remove_url = TRUE,
+                 tolower = TRUE,
+                 verbose = FALSE) #for website readability
+topfeatures(joint_dfm, 20)</code></pre>
+<pre><code>##         #dvpw18        #dgs2018       #histag18          #dgs18 
+##            1681            1174            1037             584 
+##             the              of             and #informatik2018 
+##             515             357             337             321 
+##              to             amp               a           heute 
+##             314             224             223             200 
+##            beim              on           panel            dass 
+##             184             175             172             168 
+##   @dvpwkongress             for              is      demokratie 
+##             166             162             150             145</code></pre>
+<blockquote>
+<p>Apart from English tokens (to, on, is, for, of, a), common German words such as “beim” or “dass” are still included. The latter is rather weird…</p>
+</blockquote>
+<div id="inspect-quantedas-built-in-stop-words" class="section level3">
+<h3><span class="header-section-number">3.2.1</span> Inspect <code>quanteda's</code> built-in Stop Words</h3>
+<p>Since we’ve seen that “dass” is still included in our corpus, let’s i.e. look at all <code>quanteda::stopwords(&quot;german&quot;)</code> starting with a “d”:</p>
+<pre class="r"><code>stopwords(&quot;german&quot;) %&gt;%
+  as_tibble() %&gt;%
+  filter(str_detect(value, pattern = &quot;^da.*&quot;))</code></pre>
+<pre><code>## # A tibble: 7 x 1
+##   value   
+##   &lt;chr&gt;   
+## 1 da      
+## 2 damit   
+## 3 dann    
+## 4 das     
+## 5 daß     
+## 6 dasselbe
+## 7 dazu</code></pre>
+<pre class="r"><code># missing: beim</code></pre>
+<blockquote>
+<p>Ok, “daß” instead of “dass” suggests that <code>quanteda</code>’s stopword list for German terms might need an update… :)</p>
+</blockquote>
+<p>Also, note how <code>stopwords(&quot;german&quot;)</code> consists of 231 tokens. Just for comparison, <code>tidytext::stop_words</code> has a total of 1149 stopwords for English. So we probably will have to include custom stopword lists repeatedly.</p>
+<blockquote>
+<p>Of course, GitHub has you covered! Gene Diaz is maintaining a super-exhaustive list of stopwords for multiple languages: <a href="https://github.com/stopwords-iso" target="_blank">github.com/stopwords-iso</a></p>
+</blockquote>
+<blockquote>
+<p>We’ll use the text file with the German stopwords: <a href="https://raw.githubusercontent.com/stopwords-iso/stopwords-de/master/stopwords-de.txt" target="_blank">stopwords-de.txt</a></p>
+</blockquote>
+<pre class="r"><code>ger_stopwords &lt;- read_lines(&quot;https://raw.githubusercontent.com/stopwords-iso/stopwords-de/master/stopwords-de.txt&quot;)
+length(ger_stopwords) #&gt; 621 stopwords</code></pre>
+<pre><code>## [1] 621</code></pre>
+<pre class="r"><code>c(ger_stopwords, stopwords(&quot;german&quot;)) %&gt;% length() #&gt; 852</code></pre>
+<pre><code>## [1] 852</code></pre>
+<pre class="r"><code>c(ger_stopwords, stopwords(&quot;german&quot;)) %&gt;% unique() %&gt;% length() #&gt; 621</code></pre>
+<pre><code>## [1] 621</code></pre>
+</div>
+<div id="include-custom-stopwords-and-remove-english-stopwords" class="section level3">
+<h3><span class="header-section-number">3.2.2</span> Include custom stopwords and remove English stopwords</h3>
+<pre class="r"><code>c(&quot;dass&quot;, &quot;beim&quot;) %in% ger_stopwords #&gt; [1] TRUE TRUE</code></pre>
+<pre><code>## [1] TRUE TRUE</code></pre>
+<pre class="r"><code># custom_stopwords &lt;- c(&quot;dass&quot;, &quot;beim&quot;)
+custom_stopwords &lt;- setdiff(ger_stopwords, stopwords(&quot;german&quot;)) # only keep left set</code></pre>
+<pre class="r"><code>joint_dfm &lt;- dfm(joint_corpus,
+                 # groups = &quot;Discipline&quot;,
+                 remove = c(stopwords(&quot;german&quot;),
+                            stopwords(&quot;english&quot;), # ONE
+                            custom_stopwords, # TWO
+                            min_nchar = 2), # THREE
+                 remove_punct = TRUE,
+                 remove_url = TRUE,
+                 tolower = TRUE,
+                 verbose = FALSE) #for website readability
+topfeatures(joint_dfm, 20)</code></pre>
+<pre><code>##         #dvpw18        #dgs2018       #histag18          #dgs18 
+##            1681            1174            1037             584 
+## #informatik2018             amp           panel   @dvpwkongress 
+##             321             224             172             166 
+##      demokratie @osymbaskanligi             dgs           innen 
+##             145             123             121             114 
+##            #dgs           @dvpw       #dvpw2018  @historikertag 
+##             113             112             111             109 
+##              bu              de   @dgsoziologie              mi 
+##             106              97              95              94</code></pre>
+<blockquote>
+<p>Great. But … what is “amp”???</p>
+</blockquote>
+</div>
+<div id="inspect-keyword-in-context-kwic-for-amp" class="section level3">
+<h3><span class="header-section-number">3.2.3</span> Inspect “Keyword in Context” <code>kwic()</code> for “amp”</h3>
+<pre class="r"><code>kwic(joint_corpus, &quot;amp&quot;, window = 3)  %&gt;% 
+  as_tibble() %&gt;% # needed for kwic()
+  select(pre:post) %&gt;%
+  head(10) %&gt;%
+  knitr::kable(format = &quot;html&quot;)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+pre
+</th>
+<th style="text-align:left;">
+keyword
+</th>
+<th style="text-align:left;">
+post
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<span class="citation">@ifp_tuebingen</span> ) &amp;
+</td>
+<td style="text-align:left;">
+amp
+</td>
+<td style="text-align:left;">
+; I organise
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="citation">@goetheuni</span> ) &amp;
+</td>
+<td style="text-align:left;">
+amp
+</td>
+<td style="text-align:left;">
+; Jonas Wolff
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pu­blic goods &amp;
+</td>
+<td style="text-align:left;">
+amp
+</td>
+<td style="text-align:left;">
+; to pre­vent
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+die Vorträge &amp;
+</td>
+<td style="text-align:left;">
+amp
+</td>
+<td style="text-align:left;">
+; Panelleitungen von
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+von #InIIS &amp;
+</td>
+<td style="text-align:left;">
+amp
+</td>
+<td style="text-align:left;">
+; <span class="citation">@BIGSSS_Bremen</span> Kolleg
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Viel Erfolg &amp;
+</td>
+<td style="text-align:left;">
+amp
+</td>
+<td style="text-align:left;">
+; Spaß den
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+&quot; #PolComm &amp;
+</td>
+<td style="text-align:left;">
+amp
+</td>
+<td style="text-align:left;">
+; Digital Complexity
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+, <span class="citation">@SFB1342</span> &amp;
+</td>
+<td style="text-align:left;">
+amp
+</td>
+<td style="text-align:left;">
+; von überall
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+bestimmt spannende &amp;
+</td>
+<td style="text-align:left;">
+amp
+</td>
+<td style="text-align:left;">
+; inspirierende Tage
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+nach #Adorno &amp;
+</td>
+<td style="text-align:left;">
+amp
+</td>
+<td style="text-align:left;">
+; Co gehen
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code># vs. kwic(x, phrase(&quot;term1 term2&quot;))</code></pre>
+<blockquote>
+<p>“amp” == “&amp;amp” which is the <code>HTML</code> term for &amp; / ampersand (but “&amp;” is removed when we create the corpus with <code>remove_punct = TRUE</code>, so only “amp” remains. Cool.)</p>
+</blockquote>
+<p>Remove “amp”</p>
+<pre class="r"><code>custom_stopwords &lt;- c(custom_stopwords, &quot;amp&quot;)
+# This way, we&#39;ll keep our custom &quot;amp&quot; and &quot;innen&quot;
+joint_dfm &lt;- dfm(joint_corpus,
+                 # groups = &quot;Discipline&quot;,
+                 remove = c(stopwords(&quot;german&quot;),
+                            stopwords(&quot;english&quot;),
+                            custom_stopwords,
+                            min_nchar = 2),
+                 remove_punct = TRUE,
+                 remove_url = TRUE,
+                 tolower = TRUE,
+                 verbose = FALSE) #for website readability
+topfeatures(joint_dfm, 20)</code></pre>
+<pre><code>##         #dvpw18        #dgs2018       #histag18          #dgs18 
+##            1681            1174            1037             584 
+## #informatik2018           panel   @dvpwkongress      demokratie 
+##             321             172             166             145 
+## @osymbaskanligi             dgs           innen            #dgs 
+##             123             121             114             113 
+##           @dvpw       #dvpw2018  @historikertag              bu 
+##             112             111             109             106 
+##              de   @dgsoziologie              mi           thema 
+##              97              95              94              93</code></pre>
+<blockquote>
+<p>That’s better. But what’s up with “innen” and “bu”?</p>
+</blockquote>
+</div>
+<div id="inspect-the-tokens-innen-and-bu-kwic." class="section level3">
+<h3><span class="header-section-number">3.2.4</span> Inspect the Tokens <code>&quot;innen&quot;</code> and <code>&quot;bu&quot;</code> <code>kwic()</code>.</h3>
+<pre class="r"><code>kwic(joint_corpus, &quot;innen&quot;, window = 3)  %&gt;% 
+  as_tibble() %&gt;% # needed for kwic()
+  select(pre:post) %&gt;%
+  head(10) %&gt;%
+  knitr::kable(format = &quot;html&quot;)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+pre
+</th>
+<th style="text-align:left;">
+keyword
+</th>
+<th style="text-align:left;">
+post
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<span class="citation">@BIGSSS_Bremen</span> Kolleg *
+</td>
+<td style="text-align:left;">
+innen
+</td>
+<td style="text-align:left;">
+. Da ist
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+| ler *
+</td>
+<td style="text-align:left;">
+innen
+</td>
+<td style="text-align:left;">
+vor Ort #powi
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#powi Kolleg *
+</td>
+<td style="text-align:left;">
+innen
+</td>
+<td style="text-align:left;">
+von <span class="citation">@UniBremen</span> ,
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+. Kolleg /
+</td>
+<td style="text-align:left;">
+innen
+</td>
+<td style="text-align:left;">
+der <span class="citation">@unihh</span> im
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Kolleg /
+</td>
+<td style="text-align:left;">
+innen
+</td>
+<td style="text-align:left;">
+vom Institut für
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+die Kolleg /
+</td>
+<td style="text-align:left;">
+innen
+</td>
+<td style="text-align:left;">
+mit dem Peer
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+1000 Expert *
+</td>
+<td style="text-align:left;">
+innen
+</td>
+<td style="text-align:left;">
+sucht , die
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+loyale Bürger /
+</td>
+<td style="text-align:left;">
+innen
+</td>
+<td style="text-align:left;">
+oder auch bürgerliche
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+mit Rassist *
+</td>
+<td style="text-align:left;">
+innen
+</td>
+<td style="text-align:left;">
+, Antisemit *
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+, Antisemit *
+</td>
+<td style="text-align:left;">
+innen
+</td>
+<td style="text-align:left;">
+, und Nazis
+</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Ok, so <code>&quot;&lt; / | * &gt;innen&quot;</code> is part of the gendered forms of plurals of German terms such as Colleagues, Citizens, Rassists et al. We might want to think of a robust solution - which should not be stemming - here. Maybe <code>ngrams=2</code> or some clever <code>str_c(&lt;regex&gt; + (* | /) + &quot;innen&quot;&quot;)</code> might help. But for now we’ll just add <code>&quot;innen&quot;</code> as a stopword.</p>
+</blockquote>
+<pre class="r"><code>custom_stopwords &lt;- c(custom_stopwords, &quot;innen&quot;)
+joint_dfm &lt;- dfm(joint_corpus,
+                 # groups = &quot;Discipline&quot;,
+                 remove = c(stopwords(&quot;german&quot;),
+                            stopwords(&quot;english&quot;),
+                            custom_stopwords,
+                            min_nchar = 2),
+                 remove_punct = TRUE,
+                 remove_url = TRUE,
+                 tolower = TRUE,
+                 verbose = FALSE) #for website readability
+topfeatures(joint_dfm, 20)</code></pre>
+<pre><code>##         #dvpw18        #dgs2018       #histag18          #dgs18 
+##            1681            1174            1037             584 
+## #informatik2018           panel   @dvpwkongress      demokratie 
+##             321             172             166             145 
+## @osymbaskanligi             dgs            #dgs           @dvpw 
+##             123             121             113             112 
+##       #dvpw2018  @historikertag              bu              de 
+##             111             109             106              97 
+##   @dgsoziologie              mi           thema             bir 
+##              95              94              93              89</code></pre>
+</div>
+</div>
+</div>
+<div id="the-turkish-plot-twist" class="section level1">
+<h1><span class="header-section-number">4</span> The Turkish Plot-Twist</h1>
+<div id="one-last-mystery-remains" class="section level2">
+<h2><span class="header-section-number">4.1</span> One last Mystery remains…</h2>
+<p>So what about <code>&quot;bu&quot;</code>?</p>
+<blockquote>
+<p>(Spoiler: <a href="https://twitter.com/OSYMbaskanligi" target="_blank"><code>@osymbaskanligi</code></a> seems to be an offical governmental Turkish account… That already points at something bigger.)</p>
+</blockquote>
+<pre class="r"><code>kwic(joint_corpus, &quot;bu&quot;, window = 3) %&gt;% 
+  as_tibble() %&gt;% # needed for kwic()
+  select(pre:post) %&gt;%
+  head(10) %&gt;%
+  knitr::kable(format = &quot;html&quot;)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+pre
+</th>
+<th style="text-align:left;">
+keyword
+</th>
+<th style="text-align:left;">
+post
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+#dgs2018 keşke
+</td>
+<td style="text-align:left;">
+bu
+</td>
+<td style="text-align:left;">
+gece açıklansa 🙄
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dgs2018
+</td>
+<td style="text-align:left;">
+bu
+</td>
+<td style="text-align:left;">
+gecenin en büyük
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+otomatik olarak yapıyorsa
+</td>
+<td style="text-align:left;">
+bu
+</td>
+<td style="text-align:left;">
+bekleyiş neden ?
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+sonuçlarını açıklamak neden
+</td>
+<td style="text-align:left;">
+bu
+</td>
+<td style="text-align:left;">
+kadar uzun sürüyor
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+Bu
+</td>
+<td style="text-align:left;">
+yaşta bu kadar
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Bu yaşta
+</td>
+<td style="text-align:left;">
+bu
+</td>
+<td style="text-align:left;">
+kadar sıkıntı yeter
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="citation">@OSYMbaskanligi</span> ceza mı
+</td>
+<td style="text-align:left;">
+bu
+</td>
+<td style="text-align:left;">
+ne şimdi #dgs2018
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+, DGS neden
+</td>
+<td style="text-align:left;">
+bu
+</td>
+<td style="text-align:left;">
+kadar itibarsızlaştırılıyor ?
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+halde bekliyorum ve
+</td>
+<td style="text-align:left;">
+bu
+</td>
+<td style="text-align:left;">
+beni rahatsiz ediyo
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:left;">
+Bu
+</td>
+<td style="text-align:left;">
+#dgs2018 yüzünden internette
+</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Turkish? Huh? Seems like the Sociologists’ hashtag (#dgs18, #dgs2018) was heaviliy used by the Turkish Twitter community, too.</p>
+</blockquote>
+<pre class="r"><code>dgs_collection %&gt;% filter(lang == &quot;tr&quot;) %&gt;% count()</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##       n
+##   &lt;int&gt;
+## 1   957</code></pre>
+<blockquote>
+<p>Oopsie… From the Sociology Corpus, 957 Tweets out of 1674 are labelled as Turkish…</p>
+</blockquote>
+<blockquote>
+<p>WHAT ELSE DID I MISS?</p>
+</blockquote>
+<pre class="r"><code>dgs_collection %&gt;% group_by(lang) %&gt;% count() %&gt;% arrange(desc(n))</code></pre>
+<pre><code>## # A tibble: 8 x 2
+## # Groups:   lang [8]
+##   lang      n
+##   &lt;chr&gt; &lt;int&gt;
+## 1 tr      957
+## 2 de      570
+## 3 en       72
+## 4 und      68
+## 5 in        4
+## 6 es        1
+## 7 fr        1
+## 8 tl        1</code></pre>
+<blockquote>
+<p>Yikes! So my result from the previous post were totally biased in favour of the Sociology Conference. And what language is <code>&quot;und&quot;</code> and what about the joint collection?</p>
+</blockquote>
+<pre class="r"><code>joint_collection %&gt;% group_by(lang) %&gt;% count() %&gt;% 
+  filter(n &gt; 2) %&gt;% arrange(desc(n))</code></pre>
+<pre><code>## # A tibble: 10 x 2
+## # Groups:   lang [10]
+##    lang      n
+##    &lt;chr&gt; &lt;int&gt;
+##  1 de     3156
+##  2 tr      957
+##  3 en      540
+##  4 und     166
+##  5 nl       20
+##  6 sv        6
+##  7 es        5
+##  8 in        5
+##  9 fr        4
+## 10 no        3</code></pre>
+<blockquote>
+<p><code>lang == &quot;tr&quot;</code> and <code>lang == &quot;und&quot;</code> definitly need some closer inspection.</p>
+</blockquote>
+<blockquote>
+<p>But before we do that, let’s subset only the Tweets from the conferences’ week. Maybe the Turkish and the German Sociology #dgs2018 did not overlap temporally…</p>
+</blockquote>
+<p>Fortunatly, <code>rtweet</code> has a really convenient time-series plotting function…</p>
+<pre class="r"><code>dgs_collection %&gt;% filter(lang == &quot;tr&quot; | lang == &quot;de&quot;) %&gt;% 
+  group_by(lang) %&gt;% 
+  rtweet::ts_plot() +
+    theme_minimal()</code></pre>
+<p><img src="/post/2018-10-07-r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist_files/figure-html/unnamed-chunk-23-1.png" width="672" /></p>
+<p>… unfortunately, I didn’t use it last time…</p>
+<blockquote>
+<p>Key Learning: I could have avoided stepping into this trap if I had plotted the distribution of Tweets over time… Exploratory Data Analysis FTW.</p>
+</blockquote>
+<p>This is what I would’ve seen, if I had done it right:</p>
+<pre class="r"><code>joint_collection %&gt;%
+  group_by(Discipline) %&gt;% 
+  rtweet::ts_plot() +
+    theme_minimal()</code></pre>
+<p><img src="/post/2018-10-07-r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
+<blockquote>
+<p>See that left peak around the 20th? That’s it. That’s what I should have seen, had I done it right.</p>
+</blockquote>
+<p>Time to move on. As we have already set an upper time limit above (<code>filter(created_at &lt; &quot;2018-09-30&quot;)</code>), we now only have to include a lower time limit:</p>
+<pre class="r"><code>joint_collection_week &lt;- joint_collection %&gt;% 
+  filter(created_at &gt; &quot;2018-09-23&quot;)
+
+joint_collection_week %&gt;%
+  group_by(lang) %&gt;% 
+  count() %&gt;%
+  filter(n &gt; 2) %&gt;% 
+  arrange(desc(n))</code></pre>
+<pre><code>## # A tibble: 9 x 2
+## # Groups:   lang [9]
+##   lang      n
+##   &lt;chr&gt; &lt;int&gt;
+## 1 de     3068
+## 2 en      522
+## 3 und     120
+## 4 tr       92
+## 5 nl       19
+## 6 sv        6
+## 7 es        4
+## 8 fr        4
+## 9 no        3</code></pre>
+<p>Ok, that’s already better, but there are still 92 Turkish Tweets in the sample, and 120 Tweets for <code>lang == &quot;und&quot;</code>.</p>
+<blockquote>
+<p>It turns out, however, that <code>lang == &quot;und&quot;</code> (un)fortunatly means <code>language undefined</code> <a href="https://blog.twitter.com/developer/en_us/a/2013/introducing-new-metadata-for-tweets.html" target="_blank">cf. Twitter</a>…</p>
+</blockquote>
+<p>Let’s have a look at the remaining Turkish Tweets and then rebuild our corpora and the document-feature matrix.</p>
+<pre class="r"><code>joint_collection_week %&gt;%
+  filter(lang == &quot;tr&quot;) %&gt;%
+  select(text) %&gt;% 
+  head() # for website readability</code></pre>
+<pre><code>## # A tibble: 6 x 1
+##   text                                                                     
+##   &lt;chr&gt;                                                                    
+## 1 Çok sükür Allahim... #dgs2018 https://t.co/DAXRFoawzq                    
+## 2 &quot;Mimar sinan güzel sanatlarli olduk be \U0001f602 #Dgstercih #dgs2018&quot;   
+## 3 #dgs2018 derslerden muaf olmak için en çok 5 yil önce ilgili programdan ~
+## 4 #dgs2018 AÖF lisans dersleri DGS muafiyetinde kullaniyor mu??            
+## 5 &quot;Bilgi Üniversitesi&#39;nde 2000li arkadaslarimla hazirlik okuyacagim. Yasli~
+## 6 4 puan ile iktisat kaybettim sizce ek tercihlerde yazsam çikar mi?#dgs20~</code></pre>
+<p>So all the Tweets are exclusivly in Turkish, and it is more than appropriate to exclude them from our analysis here AND in my preceding blog post. (Update incoming!)</p>
+<blockquote>
+<p>But who’s going to tell the German Sociologists that my report from last week had to be corrected and that they didn’t perform that well, actually …!?</p>
+</blockquote>
+<blockquote>
+<p>Key learning: Never rely on blind/nummeric analysises only. Always do some qualitative exploration and check for plausibility - even when it’s “only” for a blog!!!</p>
+</blockquote>
+</div>
+<div id="removing-turkish-accounts" class="section level2">
+<h2><span class="header-section-number">4.2</span> Removing Turkish accounts</h2>
+<p>First, let’s get list of all the Users who where part of the Turkish #dgs2018 sample</p>
+<pre class="r"><code>tr_user &lt;- dgs_collection %&gt;% 
+  filter(lang == &quot;tr&quot;) %&gt;% 
+  select(user_id) %&gt;% 
+  distinct()
+tr_user %&gt;% count()</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##       n
+##   &lt;int&gt;
+## 1   525</code></pre>
+<p>Now, we’ll <code>anti_join()</code> the <code>dgs_collection</code> with this list</p>
+<pre class="r"><code>dgs_collection %&gt;% anti_join(tr_user, by = &quot;user_id&quot;) %&gt;% count()</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##       n
+##   &lt;int&gt;
+## 1   701</code></pre>
+<p>Let’s compare with the simpler <code>filter(lang!=&quot;tr&quot;)</code> approach</p>
+<pre class="r"><code>dgs_collection %&gt;% 
+  filter(lang != &quot;tr&quot;) %&gt;% 
+  count()</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##       n
+##   &lt;int&gt;
+## 1   717</code></pre>
+<p>That’s another 16 Tweets less. Nice. We’ll use that in a minute.</p>
+</div>
+</div>
+<div id="rebuild-the-corpus-without-tweets-with-langtr" class="section level1">
+<h1><span class="header-section-number">5</span> Rebuild the Corpus without Tweets with <code>lang==&quot;tr&quot;</code></h1>
+<blockquote>
+<p>There is two ways to do that. One is lazy and one is more replication-friendly. I’ll mention the lazy one, but will continue with the more robust approach</p>
+</blockquote>
+<p><strong>The Lazy Way</strong></p>
+<p>(Two, actually)</p>
+<p>As we know that the Turkish Tweets are exclusively in the Sociology Corpus, we could just rebuild the <code>dgs_corpus</code> and then rebuild the <code>joint_corpus</code> with:</p>
+<pre class="r"><code>joint_corpus &lt;- dvpw_corpus + 
+                dgs_corpus + 
+                hist_corpus + 
+                inf_corpus + 
+                mixed_corpus</code></pre>
+<p>An even easier way would be to filter out Turkish Tweets from the already existing <code>joint_corpus</code> with <code>quanteda::corpus_subset()</code>:</p>
+<pre class="r"><code>joint_corpus %&gt;% corpus_subset(joint_corpus$documents$lang != &quot;tr&quot;)</code></pre>
+<p>However, if you have been jumping back and forth within this post (or <code>.Rmd</code> Notebook), then you (=me) might have lost track of the various manipulations and state differences (i.e. think of <code>custom_stopwords</code>). Plus, your <code>dgs_corpus</code> would still need our attention, too, and as we’ve filtered out a lot of Tweets by setting a lower time limit, the common time period for the corpora would differ, too. BAD!</p>
+<blockquote>
+<p>So let’s rebuild the corpora from scratch.</p>
+</blockquote>
+<div id="re-build-individual-corpora-from-scratch" class="section level2">
+<h2><span class="header-section-number">5.1</span> Re-Build individual corpora from scratch</h2>
+<p>We’ll just add <code>filter(created_at &gt; &quot;2018-09-23&quot;)</code> and for the sake of robustness, we’ll filter all corpora for <code>lang != &quot;tr&quot;</code>, and <code>anti_join(tr_user)</code> with the <code>dgs_corpus</code></p>
+<pre class="r"><code>dvpw_corpus &lt;- dvpw_collection %&gt;% 
+  filter(created_at &gt; &quot;2018-09-23&quot; | lang != &quot;tr&quot;) %&gt;% # combined filter()
+  anti_join(joint_mixed, by = &quot;status_id&quot;) %&gt;% 
+  corpus(docid_field = &quot;status_id&quot;, text_field = &quot;text&quot;)
+  ## I&#39;m not sure about the effect of setting text_field = &quot;text&quot;
+docvars(dvpw_corpus, &quot;Discipline&quot;) &lt;- &quot;PolSci&quot;
+
+dgs_corpus &lt;- dgs_collection %&gt;% 
+  filter(created_at &gt; &quot;2018-09-23&quot; | lang != &quot;tr&quot;) %&gt;%
+  anti_join(joint_mixed, by = &quot;status_id&quot;, text_field = &quot;text&quot;) %&gt;%
+  anti_join(tr_user, by = &quot;user_id&quot;) %&gt;% 
+  corpus(docid_field = &quot;status_id&quot;)
+docvars(dgs_corpus, &quot;Discipline&quot;) &lt;- &quot;Sociology&quot;
+
+hist_corpus &lt;- hist_collection %&gt;% 
+  filter(created_at &gt; &quot;2018-09-23&quot; | lang != &quot;tr&quot;) %&gt;%
+  anti_join(joint_mixed, by = &quot;status_id&quot;, text_field = &quot;text&quot;) %&gt;% 
+  corpus(docid_field = &quot;status_id&quot;)
+docvars(hist_corpus, &quot;Discipline&quot;) &lt;- &quot;History&quot;
+
+inf_corpus &lt;- inf_collection %&gt;% 
+  filter(created_at &gt; &quot;2018-09-23&quot; | lang != &quot;tr&quot;) %&gt;%
+  anti_join(joint_mixed, by = &quot;status_id&quot;, text_field = &quot;text&quot;) %&gt;% 
+  corpus(docid_field = &quot;status_id&quot;)
+docvars(inf_corpus, &quot;Discipline&quot;) &lt;- &quot;CS&quot;
+
+mixed_corpus &lt;- joint_mixed %&gt;% 
+  filter(created_at &gt; &quot;2018-09-23&quot; | lang != &quot;tr&quot;) %&gt;%
+  corpus(docid_field = &quot;status_id&quot;, text_field = &quot;text&quot;)
+docvars(mixed_corpus, &quot;Discipline&quot;) &lt;- &quot;Mixed&quot;</code></pre>
+<blockquote>
+<p>Of course, eventually, we should change the *_collection objects or consolidate all the “valid” Tweets in a .rds file. However, I’m not so much into rewriting raw-ish / original data, so doing that is up to you.</p>
+</blockquote>
+</div>
+<div id="create-joint-corpus-1" class="section level2">
+<h2><span class="header-section-number">5.2</span> Create Joint Corpus</h2>
+<pre class="r"><code>joint_corpus &lt;- dvpw_corpus + 
+                dgs_corpus + 
+                hist_corpus + 
+                inf_corpus + 
+                mixed_corpus</code></pre>
+</div>
+</div>
+<div id="rd-attempt-dfm-building" class="section level1">
+<h1><span class="header-section-number">6</span> 3rd attempt @ <code>dfm()</code> building</h1>
+<pre class="r"><code>joint_dfm &lt;- dfm(joint_corpus,
+                # groups = &quot;Discipline&quot;,
+                 remove = c(stopwords(&quot;german&quot;),
+                            stopwords(&quot;english&quot;),
+                            custom_stopwords,
+                            min_nchar = 3),
+                 remove_punct = TRUE,
+                 remove_url = TRUE,
+                # remove_numbers = TRUE,
+                 tolower = TRUE,
+                 verbose = FALSE) #for website readability</code></pre>
+<p>We’re down to 16,781 features and were able to get rid of 609 features with this approach.</p>
+<p>And, since we might want to use a grouped dfm for group comparisons (and <code>dfm_group</code> doesn’t seem to work for me here), we’ll create a grouped one, too.</p>
+<pre class="r"><code>joint_dfm_grouped &lt;- dfm(joint_corpus,
+                 groups = &quot;Discipline&quot;,
+                 remove = c(stopwords(&quot;german&quot;),
+                            stopwords(&quot;english&quot;),
+                            custom_stopwords,
+                            min_nchar = 3),
+                 remove_punct = TRUE,
+                 remove_url = TRUE,
+                # remove_numbers = TRUE,
+                 tolower = TRUE,
+                 verbose = FALSE) #for website readability</code></pre>
+<div id="top-features-per-discipline" class="section level2">
+<h2><span class="header-section-number">6.1</span> Top Features per Discipline</h2>
+<pre class="r"><code>topfeatures(joint_dfm, 20, groups = &quot;Discipline&quot;)</code></pre>
+<pre><code>## $PolSci
+##             #dvpw18       @dvpwkongress          demokratie 
+##                1643                 160                 133 
+##               panel               @dvpw           #dvpw2018 
+##                 109                 109                 109 
+##           democracy          @goetheuni           frankfurt 
+##                  86                  74                  62 
+##           political             grenzen          steinmeier 
+##                  52                  51                  47 
+## politikwissenschaft         #demokratie          democratic 
+##                  45                  43                  41 
+##         #steinmeier #departmentstruktur            kongress 
+##                  41                  41                  40 
+##               #dvpw                rede 
+##                  37                  36 
+## 
+## $Sociology
+##         #dgs18       #dgs2018  @dgsoziologie     soziologie    #soziologie 
+##            551            188             90             55             38 
+##        vortrag      #sozkon18           #dgs       kongress      göttingen 
+##             31             27             26             25             23 
+##          panel      spannende     #göttingen   gesellschaft @unigoettingen 
+##             18             16             16             15             15 
+##         gruppe             et        session           raum         plenum 
+##             15             14             14             14             14 
+## 
+## $History
+##              #histag18         @historikertag     #historikertag2018 
+##                   1011                    105                     85 
+##                münster               #münster                sektion 
+##                     70                     58                     56 
+##             historiker             @vhdtweets               digitale 
+##                     50                     45                     43 
+##          historikertag             geschichte                     de 
+##                     40                     37                     34 
+##                  panel geschichtswissenschaft                @digigw 
+##                     33                     33                     33 
+##          #histocamptag                  stand                  thema 
+##                     33                     29                     29 
+##                 poster                    van 
+##                     29                     25 
+## 
+## $CS
+##  #informatik2018          #berlin         #zetsche       #frankfurt 
+##              318               42               33               32 
+##          #bremen            #jena        #dortmund @informatikradar 
+##               32               32               32               32 
+##       #kontrolle       #kanzlerin          #hessen      #nrwtag2018 
+##               32               32               32               32 
+##          #bayern   #niedersachsen     #brandenburg        #saarland 
+##               32               32               32               32 
+##           #baden     #württemberg           #koeln        #muenchen 
+##               32               32               32               32 
+## 
+## $Mixed
+##       #dvpw18        #dgs18     #histag18 @dvpwkongress        findet 
+##            38            30            25             4             3 
+##         woche        tweets       minuten         gibts     digitalen 
+##             3             3             3             3             3 
+##      #dgs2018    #infdh2018     frankfurt         @dvpw         sehen 
+##             3             3             2             2             2 
+##      deutlich     #dvpw2018        kolleg      wichtige          good 
+##             2             2             2             2             2</code></pre>
+<blockquote>
+<p>There are still plenty of features which would qualify for being removed (such as “unsere”, “mal”, “schon”), but we will take care of that with the super-useful <code>quanteda::dfm_trim(&lt;term_freq&gt;)</code> threshold-based feature selection.</p>
+</blockquote>
+</div>
+</div>
+<div id="some-quick-analyses" class="section level1">
+<h1><span class="header-section-number">7</span> Some quick Analyses</h1>
+<div id="hashtags" class="section level2">
+<h2><span class="header-section-number">7.1</span> Hashtags</h2>
+<p><strong>Most popular hashtags by absolute numbers:</strong></p>
+<pre class="r"><code>hashtags_dfm &lt;- dfm_select(joint_dfm, (&#39;#*&#39;))
+topfeatures(hashtags_dfm, 20, scheme = &quot;count&quot;)</code></pre>
+<pre><code>##             #dvpw18           #histag18              #dgs18 
+##                1681                1037                 581 
+##     #informatik2018            #dgs2018           #dvpw2018 
+##                 321                 191                 111 
+##  #historikertag2018            #münster          #frankfurt 
+##                  87                  60                  46 
+##         #demokratie             #berlin    #digitalisierung 
+##                  45                  45                  43 
+##         #steinmeier #departmentstruktur         #soziologie 
+##                  41                  41                  38 
+##               #dvpw            #zetsche               #jena 
+##                  37                  36                  34 
+##             #bremen       #histocamptag 
+##                  33                  33</code></pre>
+<p><strong>Most popular hashtags by absolute numbers per Discipline:</strong></p>
+<pre class="r"><code>topfeatures(hashtags_dfm, 20, group = &quot;Discipline&quot;, scheme = &quot;count&quot;)</code></pre>
+<pre><code>## $PolSci
+##              #dvpw18            #dvpw2018          #demokratie 
+##                 1643                  109                   43 
+##          #steinmeier  #departmentstruktur                #dvpw 
+##                   41                   41                   37 
+##                #powi #politikwissenschaft     #bundespräsident 
+##                   30                   28                   26 
+##           #democracy            #takeover           #powilehre 
+##                   25                   17                   15 
+##           #frankfurt        #energiewende        #servicetweet 
+##                   14                   12                    9 
+##            #populism     #twittertakeover      #janemansbridge 
+##                    9                    9                    9 
+##             #keynote        #teamtakeover 
+##                    9                    7 
+## 
+## $Sociology
+##      #dgs18    #dgs2018 #soziologie   #sozkon18        #dgs  #göttingen 
+##         551         188          38          27          26          16 
+## #üniversite     #turkey    #yks2019        #yks     #yksdil        #tyt 
+##          13          12          12          12          12          12 
+##     #tercih       #öysm      #sinav   #ektercih  #2019tayfa       #puan 
+##          12          12          12          12          12          12 
+##        #ayt #motivasyon 
+##          12          12 
+## 
+## $History
+##               #histag18      #historikertag2018                #münster 
+##                    1011                      85                      58 
+##           #histocamptag              #archivtag          #historikertag 
+##                      33                      24                      19 
+##       #doktorandenforum        #twitterstorians                #auxhist 
+##                      15                      13                      12 
+##      #digitalhumanities        #forschungsdaten             #geschichte 
+##                      12                      11                      11 
+##               #muenster                 #digigw             #histag2018 
+##                      10                      10                       9 
+##            #gtshistag18             #openaccess        #digitalisierung 
+##                       9                       8                       8 
+## #geschichtswissenschaft                     #dh 
+##                       7                       6 
+## 
+## $CS
+## #informatik2018         #berlin        #zetsche      #frankfurt 
+##             318              42              33              32 
+##         #bremen           #jena       #dortmund      #kontrolle 
+##              32              32              32              32 
+##      #kanzlerin         #hessen     #nrwtag2018         #bayern 
+##              32              32              32              32 
+##  #niedersachsen    #brandenburg       #saarland          #baden 
+##              32              32              32              32 
+##    #württemberg          #koeln       #muenchen        #dresden 
+##              32              32              32              32 
+## 
+## $Mixed
+##            #dvpw18             #dgs18          #histag18 
+##                 38                 30                 25 
+##           #dgs2018         #infdh2018          #dvpw2018 
+##                  3                  3                  2 
+##           #daimler    #informatik2018         #archivtag 
+##                  2                  2                  2 
+##           #gfm2018 #historikertag2018            #kauder 
+##                  2                  2                  2 
+##            #fcbfca              #powi               #gew 
+##                  2                  1                  1 
+##         #göttingen            #türkei           #twitter 
+##                  1                  1                  1 
+##       #hambibleibt    #hambacherforst 
+##                  1                  1</code></pre>
+<blockquote>
+<p>The Sociology Corpus has still some Turkish features. There are ways to adress this, but I have to post-pone this for another post.</p>
+</blockquote>
+<p><strong>Most popular Hashtags by shared <code>docfreq</code> / feature-document frequency:</strong></p>
+<pre class="r"><code>dfm_select(joint_dfm_grouped, (&#39;#*&#39;)) %&gt;% 
+  topfeatures(30, scheme = &quot;docfreq&quot;)</code></pre>
+<pre><code>##       #archivtag #digitalisierung             #afd    #servicetweet 
+##                4                4                4                3 
+##       #göttingen          #berlin        #histag18  #informatik2018 
+##                3                3                3                3 
+##         #twitter     #hambibleibt  #hambacherforst  #nachhaltigkeit 
+##                3                3                3                3 
+##      #openaccess       #migration         #bigdata             #spd 
+##                3                3                3                3 
+##              #ff         #münster           #daten     #algorithmen 
+##                3                3                3                3 
+##         #gfm2018            #jena          #dvpw18            #powi 
+##                3                3                2                2 
+##        #dvpw2018       #frankfurt          #bremen          #turkey 
+##                2                2                2                2 
+##      #demokratie     #openscience 
+##                2                2</code></pre>
+</div>
+</div>
+<div id="network-of-feature-co-occurrences" class="section level1">
+<h1><span class="header-section-number">8</span> Network of feature co-occurrences</h1>
+<pre class="r"><code>topfeats &lt;- names(topfeatures(joint_dfm, 60))
+textplot_network(dfm_select(joint_dfm, topfeats), min_freq = 0.8)</code></pre>
+<p><img src="/post/2018-10-07-r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist_files/figure-html/unnamed-chunk-40-1.png" width="672" /></p>
+<div id="grouped-wordcloud-of-features" class="section level2">
+<h2><span class="header-section-number">8.1</span> Grouped wordcloud of features</h2>
+<blockquote>
+<p>“wordcloud, where the feature labels are plotted with their sizes proportional to their numerical values in the dfm” (Vignette for <code>quanteda::textplot_wordcloud</code>)</p>
+</blockquote>
+<pre class="r"><code>textplot_wordcloud(joint_dfm_grouped,
+                   comparison = TRUE,
+                   min_size = 0.5,
+                   max_size = 3,
+                   max_words = 60)</code></pre>
+<p><img src="/post/2018-10-07-r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist_files/figure-html/unnamed-chunk-41-1.png" width="960" /></p>
+</div>
+</div>
+<div id="whats-next" class="section level1">
+<h1><span class="header-section-number">9</span> What’s next?</h1>
+<blockquote>
+<p>Topic Modelling!</p>
+</blockquote>
+<p>Now that I had to spend quite an amount of time on data processing, cleaning, and eventually building a usable <code>dfm</code>, the actual analysis of the contents remains a #TODO</p>
+<blockquote>
+<p>However, I learned a lot doing this today, and I hope that it became obvious that dealing with text as data is not to be underestimated.</p>
+</blockquote>
+</div>

@@ -1,0 +1,622 @@
+---
+title: '[R] German Academic Twitter, Pt. 2: From Data to Corpus with a Turkish Twist'
+author: Ilja / fubits
+date: '2018-10-07'
+categories:
+  - Rstats
+  - Data Mining
+  - Natural Language Processing / NLP
+tags:
+  - Quanteda
+  - Twitter
+slug: r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist
+output:
+  blogdown::html_page:
+    number_sections: yes
+    toc: yes
+lastmod: '2018-10-07T21:58:18+02:00'
+description: "Last week, I mined almost 5K Tweets from the annual meetings of five German academic societies. Now it's about time that we dive into the contents with Kenneth Benoit's powerful `quanteda` Package. Come for the corpus approaches to text as data, stay for the Turkish Plot-Twist..."
+abstract: We'll learn about constructing a document-feature matrix (dfm), applying exhaustive stopword-lists, the pitfalls of working with text as data, and most importantly acknowledge and learn from mistakes...
+thumbnail: "/img/thumbs/conference_tweets_pt2.jpg"
+rmdlink: TRUE # Optional
+keywords: []
+comment: no
+# toc: no
+autoCollapseToc: no
+postMetaInFooter: no
+hiddenFromHomePage: no
+contentCopyright: no
+reward: no
+mathjax: no
+mathjaxEnableSingleDollar: no
+mathjaxEnableAutoNumber: no
+hideHeaderAndFooter: no
+flowchartDiagrams:
+  enable: no
+  options: ''
+sequenceDiagrams:
+  enable: no
+  options: ''
+---
+
+Last week, I [mined almost 5K Tweets](https://ellocke.github.io/post/r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al/) from the annual meetings of five German academic societies. Now it's about time that we dive into the contents with [Kenneth Benoit's](https://twitter.com/kenbenoit){target="_blank"} powerful `quanteda` Package. Come for the corpus approaches to text as data, stay for the Turkish Plot-Twist...
+
+```{r message=FALSE}
+library(tidyverse)
+library(here)
+library(rtweet) # just in case we want to look up something on Twitter
+library(quanteda)
+library(quanteda)
+quanteda_options("threads" = 4)
+# quanteda_options("threads")
+```
+
+# Import Tweets from `.rds`
+(cf. previous Post for Twitter Mining with `rtweet`)
+
+Cf. the details of this approach in the [previous post](https://ellocke.github.io/post/r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al/).
+
+> Spoiler: Scroll down for a refined approach.
+
+**Prepare here()-path to the `.rds` data**
+
+```{r}
+data_path <- here("static", "data", "ConferenceTweets", "/")
+```
+
+**Bulk-read the `.rds` files**
+
+```{r}
+dvpw_collection <- dir(path = data_path, pattern = "dvpw_") %>% 
+  str_c(data_path, .) %>% 
+  map_dfr(readRDS)
+dvpw_collection <- dvpw_collection %>% distinct(status_id, .keep_all = TRUE) %>%
+  filter(created_at < "2018-09-30") %>%
+  mutate(Discipline = "PolSci") %>% 
+  arrange(created_at)
+
+dgs_collection <- dir(path = data_path, pattern = "dgs_") %>% 
+  str_c(data_path, .) %>% 
+  map_dfr(readRDS)
+dgs_collection <- dgs_collection %>% distinct(status_id, .keep_all = TRUE) %>%
+  filter(created_at < "2018-09-30") %>%
+  mutate(Discipline = "Sociology") %>% 
+  arrange(created_at)
+
+hist_collection <- dir(path = data_path, pattern = "hist_") %>% 
+  str_c(data_path, .) %>% 
+  map_dfr(readRDS)
+hist_collection <- hist_collection %>% distinct(status_id, .keep_all = TRUE) %>%
+  filter(created_at < "2018-09-30") %>%
+  mutate(Discipline = "History") %>% 
+  arrange(created_at)
+
+inf_collection <- dir(path = data_path, pattern = "inf_") %>% 
+  str_c(data_path, .) %>% 
+  map_dfr(readRDS)
+inf_collection <- inf_collection %>% distinct(status_id, .keep_all = TRUE) %>%
+  filter(created_at < "2018-09-30") %>%
+  mutate(Discipline = "CS") %>% 
+  arrange(created_at)
+```
+
+## Subset "Interdisciplinary" Tweets
+
+Something I didn't account for last time, was the possibility that some Twitter Users might have been mentioning / monitoring multiple conferences, esp. with regards to the interrelation between Political Science, Sociology, and History. 
+
+Let's single them out and assign a "Mixed" label.
+
+```{r}
+joint_collection <- bind_rows(dvpw_collection, dgs_collection,
+                              hist_collection, inf_collection)
+
+# build set of distinct 
+joint_distinct <- joint_collection %>% 
+  distinct(status_id, .keep_all = TRUE)
+
+#subset duplicated
+joint_mixed <- subset(joint_collection,
+                      duplicated(joint_collection$status_id)) %>% 
+  distinct(status_id, .keep_all = TRUE) # find duplicates
+
+joint_mixed$Discipline <- "Mixed"
+joint_mixed %>% count() # %>% knitr::kable()
+```
+
+> Only 42 Tweets? Out of a sample of almost 5K? Twitter Silos, anyone?
+
+## Inspect "Interdisciplinary" Tweets
+
+```{r echo=TRUE}
+joint_mixed %>% arrange(created_at) %>% select(text) %>% head(10) # %>%
+  # knitr::kable(format = "html")
+```
+
+
+# Create Corpus
+
+For further, "Corpus-based"" analysis (and beyond) we'll use the `quanteda` package.
+
+I aim to re-do as much as I can from this series with [Julia Silge's](https://twitter.com/juliasilge){target="_blank"} `tidytext` package, soon, btw.
+
+## Build individual corpora
+
+As we already have singled out "interdisciplinary" Tweets, we'll just `anti_join()` every other tibble with the mixed Tweets.
+
+```{r}
+dvpw_corpus <- dvpw_collection %>%
+  anti_join(joint_mixed, by = "status_id") %>% 
+  corpus(docid_field = "status_id")
+docvars(dvpw_corpus, "Discipline") <- "PolSci"
+
+dgs_corpus <- dgs_collection %>% 
+  anti_join(joint_mixed, by = "status_id") %>% 
+  corpus(docid_field = "status_id")
+docvars(dgs_corpus, "Discipline") <- "Sociology"
+
+hist_corpus <- hist_collection %>% 
+  anti_join(joint_mixed, by = "status_id") %>% 
+  corpus(docid_field = "status_id")
+docvars(hist_corpus, "Discipline") <- "History"
+
+inf_corpus <- inf_collection %>% 
+  anti_join(joint_mixed, by = "status_id") %>% 
+  corpus(docid_field = "status_id")
+docvars(inf_corpus, "Discipline") <- "CS"
+
+mixed_corpus <- joint_mixed  %>% 
+  corpus(docid_field = "status_id")
+docvars(mixed_corpus, "Discipline") <- "Mixed"
+```
+
+## Create Joint Corpus
+
+That's even easier thanks to Quanteda.
+
+```{r}
+joint_corpus <- dvpw_corpus + 
+                dgs_corpus + 
+                hist_corpus + 
+                inf_corpus + 
+                mixed_corpus
+```
+
+# Create DFM
+
+For most really usuful approaches to "text as data" we'll need a sparse document-feature matrix (dfm). Doing this with quanteda is straight forward, but there are some less prominent Tweets.
+
+## Naive
+
+```{r}
+joint_dfm <- dfm(joint_corpus,
+                # groups = "Discipline",
+                 remove_punct = TRUE, 
+                 remove_url = TRUE, # it's a mess, without
+                 tolower = TRUE,
+                 verbose = FALSE) #for website readability
+```
+
+```{r}
+topfeatures(joint_dfm, 20)
+```
+
+We get `nfeat(joint_dfm)` = `r nfeat(joint_dfm)` features, but as we can see from the `topfeatures()` output, the top features are mostly (and unsurprisingly very common German words which are also know as `stopwords` in NLP).
+
+## 2nd attempt: remove `stopwords("german")`
+```{r}
+joint_dfm <- dfm(joint_corpus,
+                 # groups = "Discipline",
+                 remove = stopwords("german"),
+                 remove_punct = TRUE,
+                 remove_url = TRUE,
+                 tolower = TRUE,
+                 verbose = FALSE) #for website readability
+topfeatures(joint_dfm, 20)
+```
+
+> Apart from English tokens (to, on, is, for, of, a), common German words such as "beim" or "dass" are still included. The latter is rather weird...
+
+### Inspect `quanteda's` built-in Stop Words
+
+Since we've seen that "dass" is still included in our corpus, let's i.e. look at all `quanteda::stopwords("german")` starting with a "d":
+
+```{r}
+stopwords("german") %>%
+  as_tibble() %>%
+  filter(str_detect(value, pattern = "^da.*"))
+# missing: beim
+```
+
+> Ok, "daß" instead of "dass" suggests that `quanteda`'s stopword list for German terms might need an update... :) 
+
+Also, note how `stopwords("german")` consists of `r stopwords("german") %>% length() ` tokens. Just for comparison, `tidytext::stop_words` has a total of `r  tidytext::stop_words %>% count()` stopwords for English. So we probably will have to include custom stopword lists repeatedly.
+
+> Of course, GitHub has you covered! Gene Diaz is maintaining a super-exhaustive list of stopwords for multiple languages:  [github.com/stopwords-iso](https://github.com/stopwords-iso){target="_blank"}
+
+> We'll use the text file with the German stopwords: [stopwords-de.txt](https://raw.githubusercontent.com/stopwords-iso/stopwords-de/master/stopwords-de.txt){target="_blank"}
+
+```{r message=FALSE}
+ger_stopwords <- read_lines("https://raw.githubusercontent.com/stopwords-iso/stopwords-de/master/stopwords-de.txt")
+length(ger_stopwords) #> 621 stopwords
+c(ger_stopwords, stopwords("german")) %>% length() #> 852
+c(ger_stopwords, stopwords("german")) %>% unique() %>% length() #> 621
+```
+
+
+### Include custom stopwords and remove English stopwords
+```{r}
+c("dass", "beim") %in% ger_stopwords #> [1] TRUE TRUE
+# custom_stopwords <- c("dass", "beim")
+custom_stopwords <- setdiff(ger_stopwords, stopwords("german")) # only keep left set
+```
+
+```{r}
+joint_dfm <- dfm(joint_corpus,
+                 # groups = "Discipline",
+                 remove = c(stopwords("german"),
+                            stopwords("english"), # ONE
+                            custom_stopwords, # TWO
+                            min_nchar = 2), # THREE
+                 remove_punct = TRUE,
+                 remove_url = TRUE,
+                 tolower = TRUE,
+                 verbose = FALSE) #for website readability
+topfeatures(joint_dfm, 20)
+```
+
+> Great. But ... what is "amp"???
+
+### Inspect "Keyword in Context" `kwic()` for "amp"
+
+```{r}
+kwic(joint_corpus, "amp", window = 3)  %>% 
+  as_tibble() %>% # needed for kwic()
+  select(pre:post) %>%
+  head(10) %>%
+  knitr::kable(format = "html")
+# vs. kwic(x, phrase("term1 term2"))
+```
+
+> "amp" == "\&amp" which is the `HTML` term for \& / ampersand (but "\&" is removed when we create the corpus with `remove_punct = TRUE`, so only "amp" remains. Cool.)
+
+Remove "amp"
+
+```{r}
+custom_stopwords <- c(custom_stopwords, "amp")
+# This way, we'll keep our custom "amp" and "innen"
+joint_dfm <- dfm(joint_corpus,
+                 # groups = "Discipline",
+                 remove = c(stopwords("german"),
+                            stopwords("english"),
+                            custom_stopwords,
+                            min_nchar = 2),
+                 remove_punct = TRUE,
+                 remove_url = TRUE,
+                 tolower = TRUE,
+                 verbose = FALSE) #for website readability
+topfeatures(joint_dfm, 20)
+```
+
+> That's better. But what's up with "innen" and "bu"?
+
+### Inspect the Tokens `"innen"` and `"bu"` `kwic()`.
+
+```{r}
+kwic(joint_corpus, "innen", window = 3)  %>% 
+  as_tibble() %>% # needed for kwic()
+  select(pre:post) %>%
+  head(10) %>%
+  knitr::kable(format = "html")
+```
+
+> Ok, so `"< / | * >innen"` is part of the gendered forms of plurals of German terms such as Colleagues, Citizens, Rassists et al. We might want to think of a robust solution - which should not be stemming - here. Maybe `ngrams=2` or some clever `str_c(<regex> + (* | /) + "innen"")` might help. But for now we'll just add `"innen"` as a stopword.
+
+```{r}
+custom_stopwords <- c(custom_stopwords, "innen")
+joint_dfm <- dfm(joint_corpus,
+                 # groups = "Discipline",
+                 remove = c(stopwords("german"),
+                            stopwords("english"),
+                            custom_stopwords,
+                            min_nchar = 2),
+                 remove_punct = TRUE,
+                 remove_url = TRUE,
+                 tolower = TRUE,
+                 verbose = FALSE) #for website readability
+topfeatures(joint_dfm, 20)
+```
+
+# The Turkish Plot-Twist
+
+## One last Mystery remains...
+
+So what about `"bu"`?
+
+> (Spoiler: [`@osymbaskanligi`](https://twitter.com/OSYMbaskanligi){target="_blank"} seems to be an offical governmental Turkish account... That already points at something bigger.)
+
+```{r}
+kwic(joint_corpus, "bu", window = 3) %>% 
+  as_tibble() %>% # needed for kwic()
+  select(pre:post) %>%
+  head(10) %>%
+  knitr::kable(format = "html")
+```
+
+> Turkish? Huh? Seems like the Sociologists' hashtag (\#dgs18, \#dgs2018) was heaviliy used by the Turkish Twitter community, too.
+
+```{r}
+dgs_collection %>% filter(lang == "tr") %>% count()
+```
+
+> Oopsie... From the Sociology Corpus, `r dgs_collection %>% filter(lang == "tr") %>% count()` Tweets out of `r dgs_collection %>% count()` are labelled as Turkish...
+
+> WHAT ELSE DID I MISS?
+
+```{r}
+dgs_collection %>% group_by(lang) %>% count() %>% arrange(desc(n))
+```
+
+> Yikes! So my result from the previous post were totally biased in favour of the Sociology Conference. And what language is `"und"` and what about the joint collection?
+
+```{r}
+joint_collection %>% group_by(lang) %>% count() %>% 
+  filter(n > 2) %>% arrange(desc(n))
+```
+
+> `lang == "tr"` and `lang == "und" ` definitly need some closer inspection.
+
+> But before we do that, let's subset only the Tweets from the conferences' week. Maybe the Turkish and the German Sociology #dgs2018 did not overlap temporally... 
+
+Fortunatly, `rtweet` has a really convenient time-series plotting function...
+
+```{r}
+dgs_collection %>% filter(lang == "tr" | lang == "de") %>% 
+  group_by(lang) %>% 
+  rtweet::ts_plot() +
+    theme_minimal()
+```
+
+... unfortunately, I didn't use it last time...
+
+> Key Learning: I could have avoided stepping into this trap if I had plotted the distribution of Tweets over time... Exploratory Data Analysis FTW.
+
+This is what I would've seen, if I had done it right:
+
+```{r}
+joint_collection %>%
+  group_by(Discipline) %>% 
+  rtweet::ts_plot() +
+    theme_minimal()
+```
+
+> See that left peak around the 20th? That's it. That's what I should have seen, had I done it right.
+
+Time to move on. As we have already set an upper time limit above (`filter(created_at < "2018-09-30")`), we now only have to include a lower time limit:
+
+```{r}
+joint_collection_week <- joint_collection %>% 
+  filter(created_at > "2018-09-23")
+
+joint_collection_week %>%
+  group_by(lang) %>% 
+  count() %>%
+  filter(n > 2) %>% 
+  arrange(desc(n))
+```
+
+Ok, that's already better, but there are still `r joint_collection_week %>% filter(lang=="tr") %>% count()` Turkish Tweets in the sample, and `r joint_collection_week %>% filter(lang=="und") %>% count()` Tweets for `lang == "und"`.
+
+> It turns out, however, that `lang == "und"` (un)fortunatly means `language undefined` [cf. Twitter](https://blog.twitter.com/developer/en_us/a/2013/introducing-new-metadata-for-tweets.html){target="_blank"}...
+
+Let's have a look at the remaining Turkish Tweets and then rebuild our corpora and the document-feature matrix.
+
+```{r}
+joint_collection_week %>%
+  filter(lang == "tr") %>%
+  select(text) %>% 
+  head() # for website readability
+```
+
+So all the Tweets are exclusivly in Turkish, and it is more than appropriate to exclude them from our analysis here AND in my preceding blog post. (Update incoming!)
+
+> But who's going to tell the German Sociologists that my report from last week had to be corrected and that they didn't perform that well, actually ...!?
+
+> Key learning: Never rely on blind/nummeric analysises only. Always do some qualitative exploration and check for plausibility - even when it's "only" for a blog!!!
+
+## Removing Turkish accounts
+
+First, let's get list of all the Users who where part of the Turkish #dgs2018 sample
+```{r}
+tr_user <- dgs_collection %>% 
+  filter(lang == "tr") %>% 
+  select(user_id) %>% 
+  distinct()
+tr_user %>% count()
+```
+
+Now, we'll `anti_join()` the `dgs_collection` with this list
+
+```{r}
+dgs_collection %>% anti_join(tr_user, by = "user_id") %>% count()
+```
+
+Let's compare with the simpler `filter(lang!="tr")` approach
+
+```{r}
+dgs_collection %>% 
+  filter(lang != "tr") %>% 
+  count()
+```
+
+That's another 16 Tweets less. Nice. We'll use that in a minute.
+
+
+# Rebuild the Corpus without Tweets with `lang=="tr"`
+
+> There is two ways to do that. One is lazy and one is more replication-friendly. I'll mention the lazy one, but will continue with the more robust approach
+
+**The Lazy Way**
+
+(Two, actually)
+
+As we know that the Turkish Tweets are exclusively in the Sociology Corpus, we could just rebuild the `dgs_corpus` and then rebuild the `joint_corpus` with:
+
+```{r eval=FALSE}
+joint_corpus <- dvpw_corpus + 
+                dgs_corpus + 
+                hist_corpus + 
+                inf_corpus + 
+                mixed_corpus
+```
+
+An even easier way would be to filter out Turkish Tweets from the already existing `joint_corpus` with `quanteda::corpus_subset()`:
+
+```{r eval=FALSE}
+joint_corpus %>% corpus_subset(joint_corpus$documents$lang != "tr")
+```
+
+However, if you have been jumping back and forth within this post (or `.Rmd` Notebook), then you (=me) might have lost track of the various manipulations and state differences (i.e. think of `custom_stopwords`). Plus, your `dgs_corpus` would still need our attention, too, and as we've filtered out a lot of Tweets by setting a lower time limit, the common time period for the corpora would differ, too. BAD!
+
+> So let's rebuild the corpora from scratch.
+
+## Re-Build individual corpora from scratch
+
+We'll just add `filter(created_at > "2018-09-23")` and for the sake of robustness, we'll filter all corpora for `lang != "tr"`, and `anti_join(tr_user)` with the `dgs_corpus`
+
+```{r}
+dvpw_corpus <- dvpw_collection %>% 
+  filter(created_at > "2018-09-23" | lang != "tr") %>% # combined filter()
+  anti_join(joint_mixed, by = "status_id") %>% 
+  corpus(docid_field = "status_id", text_field = "text")
+  ## I'm not sure about the effect of setting text_field = "text"
+docvars(dvpw_corpus, "Discipline") <- "PolSci"
+
+dgs_corpus <- dgs_collection %>% 
+  filter(created_at > "2018-09-23" | lang != "tr") %>%
+  anti_join(joint_mixed, by = "status_id", text_field = "text") %>%
+  anti_join(tr_user, by = "user_id") %>% 
+  corpus(docid_field = "status_id")
+docvars(dgs_corpus, "Discipline") <- "Sociology"
+
+hist_corpus <- hist_collection %>% 
+  filter(created_at > "2018-09-23" | lang != "tr") %>%
+  anti_join(joint_mixed, by = "status_id", text_field = "text") %>% 
+  corpus(docid_field = "status_id")
+docvars(hist_corpus, "Discipline") <- "History"
+
+inf_corpus <- inf_collection %>% 
+  filter(created_at > "2018-09-23" | lang != "tr") %>%
+  anti_join(joint_mixed, by = "status_id", text_field = "text") %>% 
+  corpus(docid_field = "status_id")
+docvars(inf_corpus, "Discipline") <- "CS"
+
+mixed_corpus <- joint_mixed %>% 
+  filter(created_at > "2018-09-23" | lang != "tr") %>%
+  corpus(docid_field = "status_id", text_field = "text")
+docvars(mixed_corpus, "Discipline") <- "Mixed"
+```
+
+> Of course, eventually, we should change the *_collection objects or consolidate all the "valid" Tweets in a .rds file. However, I'm not so much into rewriting raw-ish / original data, so doing that is up to you.
+
+## Create Joint Corpus
+```{r}
+joint_corpus <- dvpw_corpus + 
+                dgs_corpus + 
+                hist_corpus + 
+                inf_corpus + 
+                mixed_corpus
+```
+
+# 3rd attempt @ `dfm()` building
+```{r}
+joint_dfm <- dfm(joint_corpus,
+                # groups = "Discipline",
+                 remove = c(stopwords("german"),
+                            stopwords("english"),
+                            custom_stopwords,
+                            min_nchar = 3),
+                 remove_punct = TRUE,
+                 remove_url = TRUE,
+                # remove_numbers = TRUE,
+                 tolower = TRUE,
+                 verbose = FALSE) #for website readability
+```
+
+We're down to 16,781 features and were able to get rid of 609 features with this approach.
+
+And, since we might want to use a grouped dfm for group comparisons (and `dfm_group` doesn't seem to work for me here), we'll create a grouped one, too.
+
+```{r}
+joint_dfm_grouped <- dfm(joint_corpus,
+                 groups = "Discipline",
+                 remove = c(stopwords("german"),
+                            stopwords("english"),
+                            custom_stopwords,
+                            min_nchar = 3),
+                 remove_punct = TRUE,
+                 remove_url = TRUE,
+                # remove_numbers = TRUE,
+                 tolower = TRUE,
+                 verbose = FALSE) #for website readability
+```
+
+## Top Features per Discipline
+```{r}
+topfeatures(joint_dfm, 20, groups = "Discipline")
+```
+
+> There are still plenty of features which would qualify for being removed (such as "unsere", "mal", "schon"), but we will take care of that with the super-useful `quanteda::dfm_trim(<term_freq>)` threshold-based feature selection.
+
+# Some quick Analyses
+
+## Hashtags
+
+**Most popular hashtags by absolute numbers:**
+
+```{r}
+hashtags_dfm <- dfm_select(joint_dfm, ('#*'))
+topfeatures(hashtags_dfm, 20, scheme = "count")
+```
+
+**Most popular hashtags by absolute numbers per Discipline:**
+
+```{r}
+topfeatures(hashtags_dfm, 20, group = "Discipline", scheme = "count")
+```
+
+> The Sociology Corpus has still some Turkish features. There are ways to adress this, but I have to post-pone this for another post.
+
+**Most popular Hashtags by shared `docfreq` / feature-document frequency:**
+
+```{r}
+dfm_select(joint_dfm_grouped, ('#*')) %>% 
+  topfeatures(30, scheme = "docfreq")
+```
+
+# Network of feature co-occurrences
+```{r}
+topfeats <- names(topfeatures(joint_dfm, 60))
+textplot_network(dfm_select(joint_dfm, topfeats), min_freq = 0.8)
+```
+
+## Grouped wordcloud of features
+
+> "wordcloud, where the feature labels are plotted with their sizes proportional to their numerical values in the dfm" (Vignette for `quanteda::textplot_wordcloud`)
+
+
+```{r fig.width=10, fig.asp=1}
+textplot_wordcloud(joint_dfm_grouped,
+                   comparison = TRUE,
+                   min_size = 0.5,
+                   max_size = 3,
+                   max_words = 60)
+```
+
+# What's next?
+
+> Topic Modelling!
+
+Now that I had to spend quite an amount of time on data processing, cleaning, and eventually building a usable `dfm`, the actual analysis of the contents remains a \#TODO
+
+> However, I learned a lot doing this today, and I hope that it became obvious that dealing with text as data is not to be underestimated.
+
