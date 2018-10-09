@@ -5,7 +5,7 @@ date: '2018-10-07'
 categories:
   - Rstats
   - Data Mining
-  - Natural Language Processing / NLP
+  - Natural Language Processing NLP
 tags:
   - Quanteda
   - Twitter
