@@ -14,8 +14,8 @@ output:
     number_sections: yes
     toc: yes
 lastmod: '2018-09-28T20:17:07+02:00'
-description: In September, four (update! - five) big academic societies in Germany had their annual meetings - all at the same time! You can **not not** harvest their tweets. I'll explain step-by-step how to mine them with rtweet and how to wrangle the Tweets for a tidy analysis.
-abstract: In September, four (update! - five) big academic societies in Germany had their annual meetings - all at the same time! You can **not not** harvest their tweets. I'll explain step-by-step how to mine them with rtweet and how to wrangle the Tweets for a tidy analysis.
+description: "Updated: In September, five big academic societies in Germany had their annual meetings - all at the same time! You can **not not** harvest their tweets. I'll explain step-by-step how to mine them with rtweet and how to wrangle the Tweets for a tidy analysis."
+abstract: "Updated: In September, five big academic societies in Germany had their annual meetings - all at the same time! You can **not not** harvest their tweets. I'll explain step-by-step how to mine them with rtweet and how to wrangle the Tweets for a tidy analysis."
 thumbnail: /img/thumbs/conference_tweets.jpg
 rmdlink: TRUE # Optional
 comment: no
@@ -35,15 +35,15 @@ sequenceDiagrams:
   enable: no
   options: ''
 ---
-# The Setting: The Big 5 on Twitter
+# Setting: The Big 5 on Twitter
 
 ![](/img/Twitter_conf/Twitter_conf.png "This is what ~~4~~ 5 German academic conferences look like on Twitter"){width=100%}
 
+>**Update 3**: As I've stumbled upon some irregularities in my [follow-up post](https://ellocke.github.io/post/r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist/#the-turkish-plot-twist), it turned out that the Twitter sample for the Sociology conference (esp. `#dgs2018`) was heavily cross-poluted by another popular event using the same Hashtag in Turkey... This has been adressed in the [follow-up post](https://ellocke.github.io/post/r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist/#the-turkish-plot-twist), ~~but has yet to be implemented here~~ and now is also adjusted for in this [post](#sociology-dgs18-dgs2018-update).
+
+> Update 2: The Media Studies conference (\#gfm2018) has been included
+
 > Update: Since the conferences are over but there's still some Twitter activity, Tweets posted after 29.09.2018 have been filtered out from the samples.
-
->Update 2: The Media Studies conference (\#gfm2018) has been included
-
->Update 3: As I've stumbled upon some irregularities in my [follow-up post](https://ellocke.github.io/post/r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist/#the-turkish-plot-twist), it turns out the Twitter sample for the Sociology conference (esp. `#dgs2018`) has been heavily cross-poluted by some other event using the same Hashtag, but in Turkey... This has been reflected in the [follow-up post](https://ellocke.github.io/post/r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist/#the-turkish-plot-twist), but has yet to be implemented here.
 
 As (bad) luck has it, ~~four~~ five big academic societies in Germany somehow decided to hold their respective annual meetings within the same week:
 
@@ -172,8 +172,10 @@ Here we'll get a file list of all `dvpw_*.rds` files, then `map_dfr()` them to a
 dvpw_rds <- dir(path = data_path, pattern = "dvpw_") %>% 
   str_c(data_path, .) %>% 
   map_dfr(readRDS)
-dvpw_collection <- dvpw_rds %>% distinct(status_id, .keep_all = TRUE) %>%
-  filter(created_at < "2018-09-30") %>%
+dvpw_collection <- dvpw_rds %>% 
+  distinct(status_id, .keep_all = TRUE) %>%
+  filter(created_at > "2018-09-23" &
+         created_at < "2018-09-30") %>%
   arrange(created_at)
 ```
 
@@ -245,7 +247,7 @@ ggplot(dvpw_counts, aes(x = Favs, y = RT)) +
   ggrepel::geom_text_repel(data = dvpw_counts[1:2,], aes(label = screen_name)) +
   coord_fixed() +
   scale_color_viridis_d() +
-  # scale_size_continuous(breaks = c(50, 100, 150, 200, 250, 300)) +
+  scale_x_continuous(breaks = scales::pretty_breaks(6)) +
   guides(color = FALSE) +
   theme_minimal() +
   labs(size = "Anzahl Tweets",
@@ -274,7 +276,7 @@ dvpw_counts %>% filter(screen_name != "dvpw") %>%
                              aes(label = screen_name)) +
     coord_fixed() +
     scale_color_viridis_d() +
-    scale_x_continuous(breaks = c(0, 50, 100, 150, 200, 250)) +
+    scale_x_continuous(breaks = scales::pretty_breaks(6)) +
     guides(color = FALSE) +
     theme_minimal() +
     labs(size = "Anzahl Tweets",
@@ -308,7 +310,7 @@ post_list(dvpw_nicks[200:length(dvpw_nicks)], slug = "dvpw2018", private = TRUE,
 ```
 
 
-## ~~Sociology: #dgs18 / #dgs2018~~
+## Sociology: #dgs18 / #dgs2018 (UPDATE!)
 
 > Please, see `Update 3` further above. This analysis and interpretation is not valid, at the moment. See the [follow-up post](https://ellocke.github.io/post/r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist/#the-turkish-plot-twist) for proper numbers.
 
@@ -335,10 +337,61 @@ saveRDS(dgs_tweets,
 dgs_rds <- dir(path = data_path, pattern = "dgs_") %>%
   str_c(data_path, .) %>%
   map_dfr(readRDS)
-dgs_collection <- dgs_rds %>% distinct(status_id, .keep_all = TRUE) %>%
-  filter(created_at < "2018-09-30") %>%
-  arrange(created_at)
 ```
+
+> Update: As I have discovered some irregularities while pre-processing the Tweets for a corpus analysis (see the [follow-up post](https://ellocke.github.io/post/r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist/#the-turkish-plot-twist) for details), the Sociology Twitter sample needs extra-filtering.
+
+**As we can see from the following time-series plot, the `#dgs2018` hashtag has, first been used by the Turkish community before German Sociologists took over around the 23th:**
+
+```{r}
+dgs_rds %>% distinct(status_id, .keep_all = TRUE) %>%
+  filter(created_at < "2018-09-30") %>% 
+  filter(lang == "tr" | lang == "de") %>% 
+  group_by(lang) %>% 
+  rtweet::ts_plot() +
+    theme_minimal()
+```
+
+**Therefore, we have to do two things: narrow down the time period to 23.9.-29.9. and filter out as many Turkish accounts as possible.**
+
+> For the sake of comparability, 23.9. has been set as the lower limit for the other disciplines, too.
+
+```{r}
+# ID TR users
+tr_user <- dgs_rds %>% 
+  distinct(status_id, .keep_all = TRUE) %>%
+  filter(lang == "tr") %>%
+  select(user_id) %>% 
+  distinct()
+
+## Syntax for hand-picking suspicious hashtags
+# dgs_collection %>%
+#   filter(lang == "und") %>% 
+#   filter(!str_detect(text,"yks2018|yksdil|dgsankara|cumhuriyetüniversitesi|DanceKafe")) %>% 
+#   select(screen_name,text)
+
+# ID lang=="und" Tweets with certain hashtags ("yks2019", "yksdil", ...)
+und_user <- dgs_rds %>% 
+  distinct(status_id, .keep_all = TRUE) %>%
+  filter(str_detect(text,"yks2018|yksdil|dgsankara|
+                     cumhuriyetüniversitesi|DanceKafe")) %>% 
+  select(user_id) %>% 
+  distinct()
+
+# limit time period
+dgs_collection <- dgs_rds %>%
+  distinct(status_id, .keep_all = TRUE) %>%
+  filter(lang != "tr") %>% 
+  filter(created_at > "2018-09-23" &
+         created_at < "2018-09-30") %>%
+  arrange(created_at)
+         
+#remove TR users from collection
+dgs_collection <- dgs_collection %>%
+  anti_join(bind_rows(tr_user,und_user), by = "user_id")
+```
+
+
 
 **Sociology: Treemap**
 
@@ -357,14 +410,40 @@ dgs_collection %>%
       aes(label = paste0(screen_name, " (", round(share*100,1),"%)"))
       ) +
   scale_fill_viridis_c(direction = -1, option = "C", begin = 0.8) +
-  labs(title = "Twitter-Aktivität zu #dgs18 / #dgs2018",
+  labs(title = "Twitter-Aktivität zu #dgs18 / #dgs2018 (UPDATE)",
        subtitle = str_c("(n = ", dgs_n_tweets,
                          " Tweets von m = ", dgs_n_accounts,
                          " Accounts; Stand: 29.09.18, ", "23:59" , " Uhr;",
                          " by @fubits)")) +
   guides(fill = FALSE)
 ```
-That looks rather different from the #dvpw2018 community. Less institutional dominance and actually, many more individual Twitter users (`r dgs_n_accounts` active users vs `r dvpw_n_accounts` in team PolSci).
+That looks rather different from the #dvpw2018 community. Less institutional dominance and ~~actually, many more~~ **less** individual Twitter users (`r dgs_n_accounts` active users vs `r dvpw_n_accounts` in team PolSci).
+
+**just for comparison, here's what my first bad take looked like:**
+```{r echo=FALSE}
+dgs_rds %>% distinct(status_id, .keep_all = TRUE) %>%
+  filter(created_at < "2018-09-30") %>%
+  arrange(created_at) %>%
+  group_by(screen_name) %>%
+  summarise(n = n()) %>%
+  mutate(share = n / sum(n)) %>%
+  arrange(desc(n)) %>%
+  ggplot(aes(area = share)) +
+    treemapify::geom_treemap(aes(fill = log10(n))) +
+    treemapify::geom_treemap_text(
+      aes(label = paste0(screen_name, " (", round(share*100,1),"%)"))
+      ) +
+  scale_fill_viridis_c(direction = -1, option = "C", begin = 0.8) +
+  labs(title = "(INVALID)__Twitter-Aktivität zu #dgs18 / #dgs2018__ (INVALID)",
+       subtitle = str_c("(n = ", length(unique(dgs_rds$status_id)),
+                         " Tweets von m = ",
+                        length(unique(dgs_rds$user_id)),
+                         " Accounts; Stand: 29.09.18, ", "23:59" ,
+                        " Uhr;", " by @fubits)")) +
+  guides(fill = FALSE)
+```
+
+> So, unfortunately, after removing all the Turkish `#dgs2018` we're down from initially `r length(unique(dgs_rds$status_id))` to **`r dgs_n_tweets` unique Tweets** from **`r dgs_n_accounts` unique Users** (instead of `r length(unique(dgs_rds$user_id))`)... 
 
 **Sociology: per-User**
 
@@ -386,11 +465,11 @@ ggplot(dgs_counts, aes(x = Favs, y = RT)) +
   # ggrepel::geom_text_repel(data = counts[1:10,], aes(label = screen_name)) +
   coord_fixed() +
   scale_color_viridis_d() +
-  scale_x_continuous(breaks = c(10, 20, 30, 40, 50, 100, 150, 175)) +
+  scale_x_continuous(breaks = c(10,20,30,40,50,75,100,150,175)) +
   guides(color = FALSE) +
   theme_minimal() +
   labs(size = "Anzahl Tweets",
-       title = "Twitter-Aktivität zu #dgs18 / #dgs2018: Retweets & Favs",
+       title = "Twitter-Aktivität zu #dgs18 / #dgs2018: Retweets & Favs (UPDATE)",
        subtitle = paste0("(n = ", dgs_n_tweets,
                        " Tweets von m = ", dgs_n_accounts,
                        " Accounts; Stand: 29.09.18, ", "23:59" , " Uhr;"),
@@ -399,7 +478,7 @@ ggplot(dgs_counts, aes(x = Favs, y = RT)) +
        caption = "@fubits")
 ```
 
-Wow, that is quite different, right? Less individual tweets per user, less retweets, but a significantly higher Fav rate. Interesting. Shall we assume that Sociologist are more introvert and maybe have more empathy for others? :)
+So, that is quite different from PolSci, right? Less individual tweets per user, less retweets, but a significantly higher Fav rate. Interesting. Shall we assume that Sociologist are more introvert and maybe have more empathy for others? :)
 
 **Sociology: Top 20 labelled**
 ```{r fig.width=12}
@@ -409,11 +488,11 @@ ggplot(dgs_counts, aes(x = Favs, y = RT)) +
                              aes(label = screen_name)) +
     coord_fixed() +
     scale_color_viridis_d() +
-    scale_x_continuous(breaks = c(10, 20, 30, 40, 50, 100, 150, 175)) +
+    scale_x_continuous(breaks = c(10,20,30,40,50,75,100,150,175)) +
     guides(color = FALSE) +
     theme_minimal() +
     labs(size = "Anzahl Tweets",
-         title = "Twitter-Aktivität zu #dgs18 / #dgs2018: Top 20 Accounts",
+         title = "Twitter-Aktivität zu #dgs18 / #dgs2018: Top 20 Accounts (UPDATE)",
          subtitle = paste0("(n = ", dgs_n_tweets,
                          " Tweets von m = ", dgs_n_accounts,
                          " Accounts; Top 20 Label, Stand: 29.09.18, ", 
@@ -447,8 +526,10 @@ saveRDS(hist_tweets, file =
 hist_rds <- dir(path = data_path, pattern = "hist_") %>%
   str_c(data_path, .) %>%
   map_dfr(readRDS)
-hist_collection <- hist_rds %>% distinct(status_id, .keep_all = TRUE) %>%
-  filter(created_at < "2018-09-30") %>%
+hist_collection <- hist_rds %>% 
+  distinct(status_id, .keep_all = TRUE) %>%
+  filter(created_at > "2018-09-23" &
+         created_at < "2018-09-30") %>%
   arrange(created_at)
 ```
 
@@ -497,7 +578,7 @@ ggplot(hist_counts, aes(x = Favs, y = RT)) +
   # ggrepel::geom_text_repel(data = counts[1:10,], aes(label = screen_name)) +
   coord_fixed() +
   scale_color_viridis_d() +
-  # scale_size_continuous(breaks = c(50, 100, 150, 200, 250, 300)) +
+  scale_x_continuous(breaks = scales::pretty_breaks(6)) +
   guides(color = FALSE) +
   theme_minimal() +
   labs(size = "Anzahl Tweets",
@@ -519,7 +600,7 @@ ggplot(hist_counts, aes(x = Favs, y = RT)) +
                              aes(label = screen_name)) +
     coord_fixed() +
     scale_color_viridis_d() +
-    scale_x_continuous(breaks = c(0, 50, 100, 150, 200, 250)) +
+    scale_x_continuous(breaks = scales::pretty_breaks(6)) +
     guides(color = FALSE) +
     theme_minimal() +
     labs(size = "Anzahl Tweets",
@@ -559,8 +640,10 @@ saveRDS(inf_tweets, file =
 inf_rds <- dir(path = data_path, pattern = "inf_") %>%
   str_c(data_path, .) %>%
   map_dfr(readRDS)
-inf_collection <- inf_rds %>% distinct(status_id, .keep_all = TRUE) %>%
-  filter(created_at < "2018-09-30") %>%
+inf_collection <- inf_rds %>% 
+  distinct(status_id, .keep_all = TRUE) %>%
+  filter(created_at > "2018-09-23" &
+         created_at < "2018-09-30") %>%
   arrange(created_at)
 ```
 
@@ -665,7 +748,7 @@ gfm_tweets <- search_tweets(q = "#gfm2018", # explicit QUERY
       n = 5000,
       verbose = TRUE,
       retryonratelimit = TRUE,
-      type = "mixed") # mixed recent popular
+      type = "recent") # mixed recent popular
 
 saveRDS(gfm_tweets, file =
           str_c(data_path,"gfm_tweets_",getTimeString(),".rds"))
@@ -677,8 +760,10 @@ saveRDS(gfm_tweets, file =
 gfm_rds <- dir(path = data_path, pattern = "gfm_") %>%
   str_c(data_path, .) %>%
   map_dfr(readRDS)
-gfm_collection <- gfm_rds %>% distinct(status_id, .keep_all = TRUE) %>%
-  filter(created_at < "2018-09-30") %>%
+gfm_collection <- gfm_rds %>%
+  distinct(status_id, .keep_all = TRUE) %>%
+  filter(created_at > "2018-09-23" &
+         created_at < "2018-09-30") %>%
   arrange(created_at)
 ```
 
@@ -735,7 +820,7 @@ ggplot(gfm_counts, aes(x = Favs, y = RT)) +
                              aes(label = screen_name)) +
     coord_fixed() +
     scale_color_viridis_d() +
-    scale_x_continuous(breaks = c(0, 10, 20, 40, 60, 80, 100, 110)) +
+    scale_x_continuous(breaks = c(0, 10, 20, 40, 50, 110)) +
     guides(color = FALSE) +
     theme_minimal() +
     labs(size = "Anzahl Tweets",
@@ -778,7 +863,8 @@ all_cons_per_user %>% head(20)
 Let's have a look at this week's German academic Twitter crowd as a whole:
 
 ```{r fig.width=12}
-ggplot(all_cons_per_user, aes(x = Favs, y = RT, color = discipline)) +
+ggplot(all_cons_per_user,
+       aes(x = Favs, y = RT, color = fct_inorder(discipline))) +
     geom_point(aes(size = Tweets), alpha = 0.5) +
     ggrepel::geom_text_repel(data = all_cons_per_user[1,],
                              aes(label = screen_name)) +
@@ -786,7 +872,9 @@ ggplot(all_cons_per_user, aes(x = Favs, y = RT, color = discipline)) +
     scale_color_viridis_d(option = "D") +
     scale_x_continuous(breaks = c(0, 100, 200, 300, 400)) +
     theme_minimal() +
-    guides(colour = guide_legend(override.aes = list(size = 5, stroke = 1.5))) +
+    guides(color = guide_legend(override.aes = list(size = 5,
+                                                    stroke = 1.5)
+                                )) +
     labs(size = "Anzahl Tweets",
          color = "Disziplin",
          title = "Twitter-Aktivität zu Twitter-Aktivität zu #dvpw*18, #dgs*18, #hist*18, #informatik2018 und #gfm2018: Top 20 Accounts",
@@ -804,15 +892,17 @@ ggplot(all_cons_per_user, aes(x = Favs, y = RT, color = discipline)) +
 ```{r fig.width=12}
 all_cons_per_user %>% 
   filter(screen_name != "dvpw") %>%
-  ggplot(aes(x = Favs, y = RT, color = discipline)) +
+  ggplot(aes(x = Favs, y = RT, color = fct_inorder(discipline))) +
     geom_point(aes(size = Tweets), alpha = 0.5) +
     ggrepel::geom_text_repel(data = all_cons_per_user[2:21,],
                              aes(label = screen_name), alpha = 1) +
     coord_fixed() +
     scale_color_viridis_d(option = "D") +
-    scale_x_continuous(breaks = c(0, 50, 100, 150, 200, 250)) +
+    scale_x_continuous(breaks = scales::pretty_breaks()) +
     theme_minimal() +
-    guides(colour = guide_legend(override.aes = list(size = 5, stroke = 1.5))) +
+    guides(colour = guide_legend(override.aes = list(size = 5, 
+                                                     stroke = 1.5)
+                                 )) +
     labs(size = "Anzahl Tweets",
          color = "Disziplin",
          title = "Twitter-Aktivität zu #dvpw*18, #dgs*18, #hist*18, #informatik2018 und #gfm2018: Top 20 Accounts",
@@ -863,7 +953,8 @@ bind_rows(dvpw_box, dgs_box, hist_box, inf_box, gfm_box) %>%
   geom_boxplot(aes(fct_inorder(Metric), Total)) +
   scale_x_discrete() +
   scale_fill_viridis_d() +
-  facet_wrap(vars(discipline))
+  facet_wrap(vars(discipline)) +
+  theme_light()
 ```
 
 Hm, maybe Violin Plots can reveal more?
@@ -894,7 +985,7 @@ bind_rows(dvpw_counts, dgs_counts, hist_counts, inf_counts, gfm_counts) %>%
   arrange(desc(Users))
 ```
 
-Sociology has the highest number of active users and Favs (wow!), while PolSci has a lead with the total number of Tweets.
+~~Sociology~~ History has the highest number of active users and Favs (wow!), while PolSci has a lead with the total number of Tweets.
 
 And what if we average out Tweets+RTs+Favs per User?
 
@@ -907,7 +998,7 @@ bind_rows(dvpw_counts, dgs_counts, hist_counts, inf_counts, gfm_counts) %>%
   arrange(desc(avg_output))
 ```
 
-Here, the PolSci crowd has been the busiest (and Sociology was rather lazy ;). But...
+Here, the PolSci crowd has been the busiest ~~(and Sociology  was rather lazy)~~. But...
 
 \... let's have look without the `#TeamTakeOver` coup by `@dvpw`:
 

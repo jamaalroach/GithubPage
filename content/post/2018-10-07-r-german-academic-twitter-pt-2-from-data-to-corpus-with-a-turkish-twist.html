@@ -85,16 +85,12 @@ sequenceDiagrams:
 library(here)
 library(rtweet) # just in case we want to look up something on Twitter
 library(quanteda)
-library(quanteda)
 quanteda_options(&quot;threads&quot; = 4)
 # quanteda_options(&quot;threads&quot;)</code></pre>
 <div id="import-tweets-from-.rds" class="section level1">
 <h1><span class="header-section-number">1</span> Import Tweets from <code>.rds</code></h1>
 <p>(cf. previous Post for Twitter Mining with <code>rtweet</code>)</p>
 <p>Cf. the details of this approach in the <a href="https://ellocke.github.io/post/r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al/">previous post</a>.</p>
-<blockquote>
-<p>Spoiler: Scroll down for a refined approach.</p>
-</blockquote>
 <p><strong>Prepare here()-path to the <code>.rds</code> data</strong></p>
 <pre class="r"><code>data_path &lt;- here(&quot;static&quot;, &quot;data&quot;, &quot;ConferenceTweets&quot;, &quot;/&quot;)</code></pre>
 <p><strong>Bulk-read the <code>.rds</code> files</strong></p>
@@ -141,12 +137,12 @@ joint_distinct &lt;- joint_collection %&gt;%
   distinct(status_id, .keep_all = TRUE)
 
 #subset duplicated
-joint_mixed &lt;- subset(joint_collection,
+mixed_collection &lt;- subset(joint_collection,
                       duplicated(joint_collection$status_id)) %&gt;% 
   distinct(status_id, .keep_all = TRUE) # find duplicates
 
-joint_mixed$Discipline &lt;- &quot;Mixed&quot;
-joint_mixed %&gt;% count() # %&gt;% knitr::kable()</code></pre>
+mixed_collection$Discipline &lt;- &quot;Mixed&quot;
+mixed_collection %&gt;% count() # %&gt;% knitr::kable()</code></pre>
 <pre><code>## # A tibble: 1 x 1
 ##       n
 ##   &lt;int&gt;
@@ -157,7 +153,7 @@ joint_mixed %&gt;% count() # %&gt;% knitr::kable()</code></pre>
 </div>
 <div id="inspect-interdisciplinary-tweets" class="section level2">
 <h2><span class="header-section-number">1.2</span> Inspect “Interdisciplinary” Tweets</h2>
-<pre class="r"><code>joint_mixed %&gt;% arrange(created_at) %&gt;% select(text) %&gt;% head(10) # %&gt;%</code></pre>
+<pre class="r"><code>mixed_collection %&gt;% arrange(created_at) %&gt;% select(text) %&gt;% head(10) # %&gt;%</code></pre>
 <pre><code>## # A tibble: 10 x 1
 ##    text                                                                    
 ##    &lt;chr&gt;                                                                   
@@ -182,26 +178,26 @@ joint_mixed %&gt;% count() # %&gt;% knitr::kable()</code></pre>
 <h2><span class="header-section-number">2.1</span> Build individual corpora</h2>
 <p>As we already have singled out “interdisciplinary” Tweets, we’ll just <code>anti_join()</code> every other tibble with the mixed Tweets.</p>
 <pre class="r"><code>dvpw_corpus &lt;- dvpw_collection %&gt;%
-  anti_join(joint_mixed, by = &quot;status_id&quot;) %&gt;% 
+  anti_join(mixed_collection, by = &quot;status_id&quot;) %&gt;% 
   corpus(docid_field = &quot;status_id&quot;)
 docvars(dvpw_corpus, &quot;Discipline&quot;) &lt;- &quot;PolSci&quot;
 
 dgs_corpus &lt;- dgs_collection %&gt;% 
-  anti_join(joint_mixed, by = &quot;status_id&quot;) %&gt;% 
+  anti_join(mixed_collection, by = &quot;status_id&quot;) %&gt;% 
   corpus(docid_field = &quot;status_id&quot;)
 docvars(dgs_corpus, &quot;Discipline&quot;) &lt;- &quot;Sociology&quot;
 
 hist_corpus &lt;- hist_collection %&gt;% 
-  anti_join(joint_mixed, by = &quot;status_id&quot;) %&gt;% 
+  anti_join(mixed_collection, by = &quot;status_id&quot;) %&gt;% 
   corpus(docid_field = &quot;status_id&quot;)
 docvars(hist_corpus, &quot;Discipline&quot;) &lt;- &quot;History&quot;
 
 inf_corpus &lt;- inf_collection %&gt;% 
-  anti_join(joint_mixed, by = &quot;status_id&quot;) %&gt;% 
+  anti_join(mixed_collection, by = &quot;status_id&quot;) %&gt;% 
   corpus(docid_field = &quot;status_id&quot;)
 docvars(inf_corpus, &quot;Discipline&quot;) &lt;- &quot;CS&quot;
 
-mixed_corpus &lt;- joint_mixed  %&gt;% 
+mixed_corpus &lt;- mixed_collection  %&gt;% 
   corpus(docid_field = &quot;status_id&quot;)
 docvars(mixed_corpus, &quot;Discipline&quot;) &lt;- &quot;Mixed&quot;</code></pre>
 </div>
@@ -286,6 +282,7 @@ topfeatures(joint_dfm, 20)</code></pre>
 <p>We’ll use the text file with the German stopwords: <a href="https://raw.githubusercontent.com/stopwords-iso/stopwords-de/master/stopwords-de.txt" target="_blank">stopwords-de.txt</a></p>
 </blockquote>
 <pre class="r"><code>ger_stopwords &lt;- read_lines(&quot;https://raw.githubusercontent.com/stopwords-iso/stopwords-de/master/stopwords-de.txt&quot;)
+# saveRDS(ger_stopwords, &quot;ger_stopwords.rds&quot;)
 length(ger_stopwords) #&gt; 621 stopwords</code></pre>
 <pre><code>## [1] 621</code></pre>
 <pre class="r"><code>c(ger_stopwords, stopwords(&quot;german&quot;)) %&gt;% length() #&gt; 852</code></pre>
@@ -859,7 +856,7 @@ Bu
     theme_minimal()</code></pre>
 <p><img src="/post/2018-10-07-r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
 <blockquote>
-<p>See that left peak around the 20th? That’s it. That’s what I should have seen, had I done it right.</p>
+<p>See that left peak around the 20th? Arghhhh!</p>
 </blockquote>
 <p>Time to move on. As we have already set an upper time limit above (<code>filter(created_at &lt; &quot;2018-09-30&quot;)</code>), we now only have to include a lower time limit:</p>
 <pre class="r"><code>joint_collection_week &lt;- joint_collection %&gt;% 
@@ -911,22 +908,22 @@ joint_collection_week %&gt;%
 </div>
 <div id="removing-turkish-accounts" class="section level2">
 <h2><span class="header-section-number">4.2</span> Removing Turkish accounts</h2>
-<p>First, let’s get list of all the Users who where part of the Turkish #dgs2018 sample</p>
-<pre class="r"><code>tr_user &lt;- dgs_collection %&gt;% 
-  filter(lang == &quot;tr&quot;) %&gt;% 
+<p>First, let’s get list of all the Users who where part of the Turkish #dgs2018 sample (and since I’ve updated the previous post, I have collected some Turkish hashtags for <code>lang==&quot;und&quot;</code>, so we’ll just re-use this filter here.)</p>
+<pre class="r"><code>tr_user &lt;- dgs_collection %&gt;%
+  filter(str_detect(text,&quot;yks2018|yksdil|dgsankara|cumhuriyetüniversitesi|DanceKafe&quot;) | lang == &quot;tr&quot;) %&gt;% 
   select(user_id) %&gt;% 
   distinct()
 tr_user %&gt;% count()</code></pre>
 <pre><code>## # A tibble: 1 x 1
 ##       n
 ##   &lt;int&gt;
-## 1   525</code></pre>
+## 1   529</code></pre>
 <p>Now, we’ll <code>anti_join()</code> the <code>dgs_collection</code> with this list</p>
 <pre class="r"><code>dgs_collection %&gt;% anti_join(tr_user, by = &quot;user_id&quot;) %&gt;% count()</code></pre>
 <pre><code>## # A tibble: 1 x 1
 ##       n
 ##   &lt;int&gt;
-## 1   701</code></pre>
+## 1   686</code></pre>
 <p>Let’s compare with the simpler <code>filter(lang!=&quot;tr&quot;)</code> approach</p>
 <pre class="r"><code>dgs_collection %&gt;% 
   filter(lang != &quot;tr&quot;) %&gt;% 
@@ -935,7 +932,7 @@ tr_user %&gt;% count()</code></pre>
 ##       n
 ##   &lt;int&gt;
 ## 1   717</code></pre>
-<p>That’s another 16 Tweets less. Nice. We’ll use that in a minute.</p>
+<p>That’s a difference of another ~30 Tweets. Nice. We’ll use that in a minute.</p>
 </div>
 </div>
 <div id="rebuild-the-corpus-without-tweets-with-langtr" class="section level1">
@@ -944,7 +941,7 @@ tr_user %&gt;% count()</code></pre>
 <p>There is two ways to do that. One is lazy and one is more replication-friendly. I’ll mention the lazy one, but will continue with the more robust approach</p>
 </blockquote>
 <p><strong>The Lazy Way</strong></p>
-<p>(Two, actually)</p>
+<p>(Two lazy ways, actually)</p>
 <p>As we know that the Turkish Tweets are exclusively in the Sociology Corpus, we could just rebuild the <code>dgs_corpus</code> and then rebuild the <code>joint_corpus</code> with:</p>
 <pre class="r"><code>joint_corpus &lt;- dvpw_corpus + 
                 dgs_corpus + 
@@ -960,38 +957,39 @@ tr_user %&gt;% count()</code></pre>
 <div id="re-build-individual-corpora-from-scratch" class="section level2">
 <h2><span class="header-section-number">5.1</span> Re-Build individual corpora from scratch</h2>
 <p>We’ll just add <code>filter(created_at &gt; &quot;2018-09-23&quot;)</code> and for the sake of robustness, we’ll filter all corpora for <code>lang != &quot;tr&quot;</code>, and <code>anti_join(tr_user)</code> with the <code>dgs_corpus</code></p>
+<p><strong>As I want both, discipline-specific copora with “multidisciplinary Tweets” and a redundancy-free joint corpus, I’ll build the corpora in two steps.</strong></p>
 <pre class="r"><code>dvpw_corpus &lt;- dvpw_collection %&gt;% 
-  filter(created_at &gt; &quot;2018-09-23&quot; | lang != &quot;tr&quot;) %&gt;% # combined filter()
-  anti_join(joint_mixed, by = &quot;status_id&quot;) %&gt;% 
+  filter(created_at &gt; &quot;2018-09-23&quot; &amp; lang != &quot;tr&quot;) %&gt;% # combined filter()
+  # anti_join(mixed_collection, by = &quot;status_id&quot;) %&gt;% 
   corpus(docid_field = &quot;status_id&quot;, text_field = &quot;text&quot;)
-  ## I&#39;m not sure about the effect of setting text_field = &quot;text&quot;
+  ## not totally sure about the effect of setting text_field = &quot;text&quot;
 docvars(dvpw_corpus, &quot;Discipline&quot;) &lt;- &quot;PolSci&quot;
 
 dgs_corpus &lt;- dgs_collection %&gt;% 
-  filter(created_at &gt; &quot;2018-09-23&quot; | lang != &quot;tr&quot;) %&gt;%
-  anti_join(joint_mixed, by = &quot;status_id&quot;, text_field = &quot;text&quot;) %&gt;%
+  filter(created_at &gt; &quot;2018-09-23&quot; &amp; lang != &quot;tr&quot;) %&gt;%
+  # anti_join(mixed_collection, by = &quot;status_id&quot;) %&gt;%
   anti_join(tr_user, by = &quot;user_id&quot;) %&gt;% 
-  corpus(docid_field = &quot;status_id&quot;)
+  corpus(docid_field = &quot;status_id&quot;, text_field = &quot;text&quot;)
 docvars(dgs_corpus, &quot;Discipline&quot;) &lt;- &quot;Sociology&quot;
 
 hist_corpus &lt;- hist_collection %&gt;% 
-  filter(created_at &gt; &quot;2018-09-23&quot; | lang != &quot;tr&quot;) %&gt;%
-  anti_join(joint_mixed, by = &quot;status_id&quot;, text_field = &quot;text&quot;) %&gt;% 
-  corpus(docid_field = &quot;status_id&quot;)
+  filter(created_at &gt; &quot;2018-09-23&quot; &amp; lang != &quot;tr&quot;) %&gt;%
+  # anti_join(mixed_collection, by = &quot;status_id&quot;) %&gt;% 
+  corpus(docid_field = &quot;status_id&quot;, text_field = &quot;text&quot;)
 docvars(hist_corpus, &quot;Discipline&quot;) &lt;- &quot;History&quot;
 
 inf_corpus &lt;- inf_collection %&gt;% 
-  filter(created_at &gt; &quot;2018-09-23&quot; | lang != &quot;tr&quot;) %&gt;%
-  anti_join(joint_mixed, by = &quot;status_id&quot;, text_field = &quot;text&quot;) %&gt;% 
-  corpus(docid_field = &quot;status_id&quot;)
+  filter(created_at &gt; &quot;2018-09-23&quot; &amp; lang != &quot;tr&quot;) %&gt;%
+  # anti_join(mixed_collection, by = &quot;status_id&quot;) %&gt;% 
+  corpus(docid_field = &quot;status_id&quot;, text_field = &quot;text&quot;)
 docvars(inf_corpus, &quot;Discipline&quot;) &lt;- &quot;CS&quot;
 
-mixed_corpus &lt;- joint_mixed %&gt;% 
-  filter(created_at &gt; &quot;2018-09-23&quot; | lang != &quot;tr&quot;) %&gt;%
-  corpus(docid_field = &quot;status_id&quot;, text_field = &quot;text&quot;)
+mixed_corpus &lt;- mixed_collection %&gt;% 
+  filter(created_at &gt; &quot;2018-09-23&quot; &amp; lang != &quot;tr&quot;) %&gt;%
+  corpus(docid_field = &quot;status_id&quot;, text_field = &quot;text&quot;) # 42 docs!
 docvars(mixed_corpus, &quot;Discipline&quot;) &lt;- &quot;Mixed&quot;</code></pre>
 <blockquote>
-<p>Of course, eventually, we should change the *_collection objects or consolidate all the “valid” Tweets in a .rds file. However, I’m not so much into rewriting raw-ish / original data, so doing that is up to you.</p>
+<p>Of course, eventually, we should update and <code>rm()</code> all the obselete *_collection objects or simply consolidate all the “valid” Tweets in a .rds file. However, I’m not so much into editing raw-ish / original data, so doing that is up to you.</p>
 </blockquote>
 </div>
 <div id="create-joint-corpus-1" class="section level2">
@@ -999,8 +997,11 @@ docvars(mixed_corpus, &quot;Discipline&quot;) &lt;- &quot;Mixed&quot;</code></pr
 <pre class="r"><code>joint_corpus &lt;- dvpw_corpus + 
                 dgs_corpus + 
                 hist_corpus + 
-                inf_corpus + 
-                mixed_corpus</code></pre>
+                inf_corpus # 3,748 docs
+
+joint_corpus &lt;- joint_corpus %&gt;% corpus_subset(!(docnames(joint_corpus) %in% mixed_collection$status_id)) # 3,706 docs
+
+joint_corpus &lt;- joint_corpus + mixed_corpus #3,748 docs</code></pre>
 </div>
 </div>
 <div id="rd-attempt-dfm-building" class="section level1">
@@ -1015,10 +1016,26 @@ docvars(mixed_corpus, &quot;Discipline&quot;) &lt;- &quot;Mixed&quot;</code></pr
                  remove_url = TRUE,
                 # remove_numbers = TRUE,
                  tolower = TRUE,
-                 verbose = FALSE) #for website readability</code></pre>
-<p>We’re down to 16,781 features and were able to get rid of 609 features with this approach.</p>
-<p>And, since we might want to use a grouped dfm for group comparisons (and <code>dfm_group</code> doesn’t seem to work for me here), we’ll create a grouped one, too.</p>
-<pre class="r"><code>joint_dfm_grouped &lt;- dfm(joint_corpus,
+                 verbose = TRUE)</code></pre>
+<pre><code>## Creating a dfm from a corpus input...</code></pre>
+<pre><code>##    ... lowercasing</code></pre>
+<pre><code>##    ... found 3,748 documents, 16,371 features</code></pre>
+<pre><code>##    ... removed 608 features
+##    ... created a 3,748 x 15,763 sparse dfm
+##    ... complete. 
+## Elapsed time: 0.61 seconds.</code></pre>
+<p>We’re down to 15763 features from 3748 documents (Tweets) and were able to get rid of 608 features with the iteratively refined approach.</p>
+<p>And as we might want to use a grouped dfm for group comparisons (and <code>dfm_group</code> doesn’t seem to work for me here), we’ll create a custom grouped one, too.</p>
+<pre class="r"><code>## not working:
+# dfm_group(joint_dfm, groups = &quot;Discipline&quot;)
+# OR
+# dfm_group(joint_dfm, groups = c(&quot;Discipline&quot;))
+# OR
+# dfm_group(joint_dfm, groups = docvars(joint_dfm, &quot;Discipline&quot;))
+#&gt; Error in qatd_cpp_is_grouped_numeric(as.numeric(x), group) : 
+#&gt;  (list) object cannot be coerced to type &#39;double&#39;
+
+joint_dfm_grouped &lt;- dfm(joint_corpus,
                  groups = &quot;Discipline&quot;,
                  remove = c(stopwords(&quot;german&quot;),
                             stopwords(&quot;english&quot;),
@@ -1031,72 +1048,75 @@ docvars(mixed_corpus, &quot;Discipline&quot;) &lt;- &quot;Mixed&quot;</code></pr
                  verbose = FALSE) #for website readability</code></pre>
 <div id="top-features-per-discipline" class="section level2">
 <h2><span class="header-section-number">6.1</span> Top Features per Discipline</h2>
-<pre class="r"><code>topfeatures(joint_dfm, 20, groups = &quot;Discipline&quot;)</code></pre>
+<pre class="r"><code>topfeatures(joint_dfm, 20, groups = &quot;Discipline&quot;) # %&gt;% map(unlist) %&gt;% map(knitr::kable)</code></pre>
 <pre><code>## $PolSci
 ##             #dvpw18       @dvpwkongress          demokratie 
-##                1643                 160                 133 
-##               panel               @dvpw           #dvpw2018 
-##                 109                 109                 109 
+##                1604                 146                 130 
+##           #dvpw2018               @dvpw               panel 
+##                 108                 107                 105 
 ##           democracy          @goetheuni           frankfurt 
-##                  86                  74                  62 
+##                  84                  69                  60 
 ##           political             grenzen          steinmeier 
-##                  52                  51                  47 
+##                  51                  49                  47 
 ## politikwissenschaft         #demokratie          democratic 
 ##                  45                  43                  41 
 ##         #steinmeier #departmentstruktur            kongress 
-##                  41                  41                  40 
-##               #dvpw                rede 
-##                  37                  36 
+##                  41                  41                  38 
+##                rede               #dvpw 
+##                  36                  35 
 ## 
 ## $Sociology
-##         #dgs18       #dgs2018  @dgsoziologie     soziologie    #soziologie 
-##            551            188             90             55             38 
-##        vortrag      #sozkon18           #dgs       kongress      göttingen 
-##             31             27             26             25             23 
-##          panel      spannende     #göttingen   gesellschaft @unigoettingen 
-##             18             16             16             15             15 
-##         gruppe             et        session           raum         plenum 
-##             15             14             14             14             14 
+##        #dgs18      #dgs2018 @dgsoziologie    soziologie   #soziologie 
+##           576           131            86            55            38 
+##       vortrag       #dvpw18      kongress     #sozkon18     göttingen 
+##            32            29            26            26            23 
+##         panel     spannende    #göttingen  gesellschaft        gruppe 
+##            17            17            16            15            15 
+##            et       session          raum        plenum             2 
+##            14            14            14            14            13 
 ## 
 ## $History
 ##              #histag18         @historikertag     #historikertag2018 
-##                   1011                    105                     85 
-##                münster               #münster                sektion 
-##                     70                     58                     56 
-##             historiker             @vhdtweets               digitale 
-##                     50                     45                     43 
-##          historikertag             geschichte                     de 
-##                     40                     37                     34 
-##                  panel geschichtswissenschaft                @digigw 
-##                     33                     33                     33 
-##          #histocamptag                  stand                  thema 
-##                     33                     29                     29 
-##                 poster                    van 
-##                     29                     25 
+##                   1004                     98                     81 
+##                münster                sektion               #münster 
+##                     67                     56                     51 
+##             historiker             @vhdtweets          historikertag 
+##                     49                     43                     41 
+##               digitale             geschichte                  panel 
+##                     40                     36                     33 
+##                     de          #histocamptag                @digigw 
+##                     33                     33                     32 
+## geschichtswissenschaft                  stand                 poster 
+##                     30                     29                     29 
+##                  thema             #archivtag 
+##                     28                     26 
 ## 
 ## $CS
-##  #informatik2018          #berlin         #zetsche       #frankfurt 
-##              318               42               33               32 
-##          #bremen            #jena        #dortmund @informatikradar 
-##               32               32               32               32 
-##       #kontrolle       #kanzlerin          #hessen      #nrwtag2018 
-##               32               32               32               32 
-##          #bayern   #niedersachsen     #brandenburg        #saarland 
-##               32               32               32               32 
-##           #baden     #württemberg           #koeln        #muenchen 
-##               32               32               32               32 
+## #informatik2018         #berlin        #zetsche      #frankfurt 
+##             307              42              33              32 
+##         #bremen           #jena       #dortmund      #kontrolle 
+##              32              32              32              32 
+##      #kanzlerin         #hessen     #nrwtag2018         #bayern 
+##              32              32              32              32 
+##  #niedersachsen    #brandenburg       #saarland          #baden 
+##              32              32              32              32 
+##    #württemberg          #koeln       #muenchen        #dresden 
+##              32              32              32              32 
 ## 
 ## $Mixed
-##       #dvpw18        #dgs18     #histag18 @dvpwkongress        findet 
+##       #dvpw18        #dgs18     #histag18 @dvpwkongress         woche 
 ##            38            30            25             4             3 
-##         woche        tweets       minuten         gibts     digitalen 
+##        findet        tweets       minuten         gibts     digitalen 
 ##             3             3             3             3             3 
-##      #dgs2018    #infdh2018     frankfurt         @dvpw         sehen 
+##      #dgs2018    #infdh2018         @dvpw     frankfurt        kolleg 
 ##             3             3             2             2             2 
-##      deutlich     #dvpw2018        kolleg      wichtige          good 
+##     #dvpw2018         sehen kongresswoche             1          good 
 ##             2             2             2             2             2</code></pre>
 <blockquote>
-<p>There are still plenty of features which would qualify for being removed (such as “unsere”, “mal”, “schon”), but we will take care of that with the super-useful <code>quanteda::dfm_trim(&lt;term_freq&gt;)</code> threshold-based feature selection.</p>
+<p>There are still a couple features which would qualify for being removed (such as “unsere”, “mal”, “schon”), but we will take care of that with the super-useful <code>quanteda::dfm_trim(&lt;term_freq&gt;)</code> threshold-based feature selection.</p>
+</blockquote>
+<blockquote>
+<p>Plus, removing or parsing hashtags and applying <code>dfm(stem = TRUE)</code> would largely increase descriptive accuracy</p>
 </blockquote>
 </div>
 </div>
@@ -1108,66 +1128,72 @@ docvars(mixed_corpus, &quot;Discipline&quot;) &lt;- &quot;Mixed&quot;</code></pr
 <pre class="r"><code>hashtags_dfm &lt;- dfm_select(joint_dfm, (&#39;#*&#39;))
 topfeatures(hashtags_dfm, 20, scheme = &quot;count&quot;)</code></pre>
 <pre><code>##             #dvpw18           #histag18              #dgs18 
-##                1681                1037                 581 
+##                1694                1043                 622 
 ##     #informatik2018            #dgs2018           #dvpw2018 
-##                 321                 191                 111 
+##                 313                 136                 113 
 ##  #historikertag2018            #münster          #frankfurt 
-##                  87                  60                  46 
+##                  84                  53                  46 
 ##         #demokratie             #berlin    #digitalisierung 
 ##                  45                  45                  43 
 ##         #steinmeier #departmentstruktur         #soziologie 
 ##                  41                  41                  38 
-##               #dvpw            #zetsche               #jena 
-##                  37                  36                  34 
+##            #zetsche               #dvpw               #jena 
+##                  36                  35                  34 
 ##             #bremen       #histocamptag 
 ##                  33                  33</code></pre>
 <p><strong>Most popular hashtags by absolute numbers per Discipline:</strong></p>
 <pre class="r"><code>topfeatures(hashtags_dfm, 20, group = &quot;Discipline&quot;, scheme = &quot;count&quot;)</code></pre>
 <pre><code>## $PolSci
 ##              #dvpw18            #dvpw2018          #demokratie 
-##                 1643                  109                   43 
+##                 1604                  108                   43 
 ##          #steinmeier  #departmentstruktur                #dvpw 
-##                   41                   41                   37 
-##                #powi #politikwissenschaft     #bundespräsident 
-##                   30                   28                   26 
+##                   41                   41                   35 
+##                #powi     #bundespräsident #politikwissenschaft 
+##                   26                   26                   25 
 ##           #democracy            #takeover           #powilehre 
-##                   25                   17                   15 
+##                   23                   17                   15 
 ##           #frankfurt        #energiewende        #servicetweet 
 ##                   14                   12                    9 
 ##            #populism     #twittertakeover      #janemansbridge 
 ##                    9                    9                    9 
-##             #keynote        #teamtakeover 
+##             #keynote             #polisci 
 ##                    9                    7 
 ## 
 ## $Sociology
-##      #dgs18    #dgs2018 #soziologie   #sozkon18        #dgs  #göttingen 
-##         551         188          38          27          26          16 
-## #üniversite     #turkey    #yks2019        #yks     #yksdil        #tyt 
-##          13          12          12          12          12          12 
-##     #tercih       #öysm      #sinav   #ektercih  #2019tayfa       #puan 
-##          12          12          12          12          12          12 
-##        #ayt #motivasyon 
-##          12          12 
+##              #dgs18            #dgs2018         #soziologie 
+##                 576                 131                  38 
+##             #dvpw18           #sozkon18          #göttingen 
+##                  29                  26                  16 
+##           #histag18                #dgs        #dgskongress 
+##                  12                  11                  10 
+##        #integration #soziologiekongress       #mixedmethods 
+##                   9                   9                   8 
+##    #digitalisierung             #flucht          #migration 
+##                   7                   7                   6 
+##    #forschungsethik         #sozkon2018            #sfb1265 
+##                   6                   5                   4 
+##            #luhmann             #simmel 
+##                   4                   4 
 ## 
 ## $History
-##               #histag18      #historikertag2018                #münster 
-##                    1011                      85                      58 
-##           #histocamptag              #archivtag          #historikertag 
-##                      33                      24                      19 
-##       #doktorandenforum        #twitterstorians                #auxhist 
-##                      15                      13                      12 
-##      #digitalhumanities        #forschungsdaten             #geschichte 
-##                      12                      11                      11 
-##               #muenster                 #digigw             #histag2018 
-##                      10                      10                       9 
-##            #gtshistag18             #openaccess        #digitalisierung 
-##                       9                       8                       8 
-## #geschichtswissenschaft                     #dh 
-##                       7                       6 
+##          #histag18 #historikertag2018           #münster 
+##               1004                 81                 51 
+##      #histocamptag         #archivtag            #dvpw18 
+##                 33                 26                 21 
+##     #historikertag  #doktorandenforum             #dgs18 
+##                 19                 15                 14 
+##   #twitterstorians   #forschungsdaten        #geschichte 
+##                 13                 11                 11 
+## #digitalhumanities           #auxhist            #digigw 
+##                 11                 11                 10 
+##       #gtshistag18        #openaccess   #digitalisierung 
+##                  9                  8                  8 
+##          #muenster        #histag2018 
+##                  8                  8 
 ## 
 ## $CS
 ## #informatik2018         #berlin        #zetsche      #frankfurt 
-##             318              42              33              32 
+##             307              42              33              32 
 ##         #bremen           #jena       #dortmund      #kontrolle 
 ##              32              32              32              32 
 ##      #kanzlerin         #hessen     #nrwtag2018         #bayern 
@@ -1193,27 +1219,31 @@ topfeatures(hashtags_dfm, 20, scheme = &quot;count&quot;)</code></pre>
 ##       #hambibleibt    #hambacherforst 
 ##                  1                  1</code></pre>
 <blockquote>
-<p>The Sociology Corpus has still some Turkish features. There are ways to adress this, but I have to post-pone this for another post.</p>
+<p>~The Sociology Corpus has still some Turkish features. There are ways to adress this, but I have to post-pone this for another post.~</p>
 </blockquote>
 <p><strong>Most popular Hashtags by shared <code>docfreq</code> / feature-document frequency:</strong></p>
 <pre class="r"><code>dfm_select(joint_dfm_grouped, (&#39;#*&#39;)) %&gt;% 
   topfeatures(30, scheme = &quot;docfreq&quot;)</code></pre>
-<pre><code>##       #archivtag #digitalisierung             #afd    #servicetweet 
-##                4                4                4                3 
-##       #göttingen          #berlin        #histag18  #informatik2018 
-##                3                3                3                3 
-##         #twitter     #hambibleibt  #hambacherforst  #nachhaltigkeit 
-##                3                3                3                3 
-##      #openaccess       #migration         #bigdata             #spd 
-##                3                3                3                3 
-##              #ff         #münster           #daten     #algorithmen 
-##                3                3                3                3 
-##         #gfm2018            #jena          #dvpw18            #powi 
-##                3                3                2                2 
-##        #dvpw2018       #frankfurt          #bremen          #turkey 
-##                2                2                2                2 
-##      #demokratie     #openscience 
-##                2                2</code></pre>
+<pre><code>##               #dvpw18             #histag18       #informatik2018 
+##                     5                     5                     5 
+##                 #powi             #dvpw2018            #göttingen 
+##                     4                     4                     4 
+##            #archivtag              #twitter      #digitalisierung 
+##                     4                     4                     4 
+##                  #afd #sozialwissenschaften                #dgs18 
+##                     4                     4                     4 
+##            #infdh2018              #gfm2018         #servicetweet 
+##                     4                     4                     3 
+##                  #gew               #türkei              #daimler 
+##                     3                     3                     3 
+##               #berlin          #hambibleibt       #hambacherforst 
+##                     3                     3                     3 
+##       #nachhaltigkeit           #openaccess            #migration 
+##                     3                     3                     3 
+##          #darkphoenix         #facebookdown   #innsbrucktirol2018 
+##                     3                     3                     3 
+##              #bigdata                  #spd                   #ff 
+##                     3                     3                     3</code></pre>
 </div>
 </div>
 <div id="network-of-feature-co-occurrences" class="section level1">
