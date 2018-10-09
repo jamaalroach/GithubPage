@@ -16,7 +16,7 @@ output:
     toc: yes
 lastmod: '2018-10-07T21:58:18+02:00'
 description: "Last week, I mined almost 5K Tweets from the annual meetings of five German academic societies. Now it's about time that we dive into the contents with Kenneth Benoit's powerful `quanteda` Package. Come for the corpus approaches to text as data, stay for the Turkish Plot-Twist..."
-abstract: We'll learn about constructing a document-feature matrix (dfm), applying exhaustive stopword-lists, the pitfalls of working with text as data, and most importantly acknowledge and learn from mistakes...
+abstract: "We'll learn about constructing a document-feature matrix (dfm), applying exhaustive stopword-lists, the pitfalls of working with text as data, and most importantly acknowledge and learn from mistakes..."
 thumbnail: "/img/thumbs/conference_tweets_pt2.jpg"
 rmdlink: TRUE # Optional
 keywords: []
@@ -52,9 +52,7 @@ quanteda_options("threads" = 4)
 
 # Import Tweets from `.rds`
 
-(cf. previous Post for Twitter Mining with `rtweet`)
-
-Cf. the details of this approach in the [previous post](https://ellocke.github.io/post/r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al/).
+Please see [Twitter pt. 1](https://ellocke.github.io/post/r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al/) for Twitter Mining with `rtweet` and the details of the data handling approach.
 
 
 **Prepare here()-path to the `.rds` data**
@@ -138,7 +136,7 @@ For further, "Corpus-based"" analysis (and beyond) we'll use the `quanteda` pack
 
 I aim to re-do as much as I can from this series with [Julia Silge's](https://twitter.com/juliasilge){target="_blank"} `tidytext` package, soon, btw.
 
-## Build individual corpora
+## Build Individual Corpora
 
 As we already have singled out "interdisciplinary" Tweets, we'll just `anti_join()` every other tibble with the mixed Tweets.
 
@@ -201,7 +199,7 @@ topfeatures(joint_dfm, 20)
 
 We get `nfeat(joint_dfm)` = `r nfeat(joint_dfm)` features, but as we can see from the `topfeatures()` output, the top features are mostly (and unsurprisingly very common German words which are also know as `stopwords` in NLP).
 
-## 2nd attempt: remove `stopwords("german")`
+## 2nd Attempt: Remove `stopwords("german")`
 ```{r}
 joint_dfm <- dfm(joint_corpus,
                  # groups = "Discipline",
@@ -244,7 +242,7 @@ c(ger_stopwords, stopwords("german")) %>% unique() %>% length() #> 621
 ```
 
 
-### Include custom stopwords and remove English stopwords
+### Include Custom Stopwords and Remove English Stopwords
 ```{r}
 c("dass", "beim") %in% ger_stopwords #> [1] TRUE TRUE
 # custom_stopwords <- c("dass", "beim")
@@ -481,7 +479,7 @@ However, if you have been jumping back and forth within this post (or `.Rmd` Not
 
 > So let's rebuild the corpora from scratch.
 
-## Re-Build individual corpora from scratch
+## Re-Build individual Corpora from Scratch
 
 We'll just add `filter(created_at > "2018-09-23")` and for the sake of robustness, we'll filter all corpora for `lang != "tr"`, and `anti_join(tr_user)` with the `dgs_corpus`
 
@@ -534,7 +532,7 @@ joint_corpus <- joint_corpus %>% corpus_subset(!(docnames(joint_corpus) %in% mix
 joint_corpus <- joint_corpus + mixed_corpus #3,748 docs
 ```
 
-# 3rd attempt @ `dfm()` building
+# 3rd Attempt @ `dfm()` Building
 ```{r}
 joint_dfm <- dfm(joint_corpus,
                 # groups = "Discipline",
@@ -576,6 +574,8 @@ joint_dfm_grouped <- dfm(joint_corpus,
                  verbose = FALSE) #for website readability
 ```
 
+# Some quick Analyses
+
 ## Top Features per Discipline
 ```{r}
 topfeatures(joint_dfm, 20, groups = "Discipline") # %>% map(unlist) %>% map(knitr::kable)
@@ -585,7 +585,7 @@ topfeatures(joint_dfm, 20, groups = "Discipline") # %>% map(unlist) %>% map(knit
 
 > Plus, removing or parsing hashtags and applying `dfm(stem = TRUE)` would largely increase descriptive accuracy
 
-# Some quick Analyses
+
 
 ## Hashtags
 
@@ -611,7 +611,7 @@ dfm_select(joint_dfm_grouped, ('#*')) %>%
   topfeatures(30, scheme = "docfreq")
 ```
 
-# Network of feature co-occurrences
+## Network of feature co-occurrences
 ```{r}
 topfeats <- names(topfeatures(joint_dfm, 60))
 textplot_network(dfm_select(joint_dfm, topfeats), min_freq = 0.8)

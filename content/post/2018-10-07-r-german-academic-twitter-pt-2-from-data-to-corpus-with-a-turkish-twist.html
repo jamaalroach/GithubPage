@@ -16,7 +16,7 @@ output:
     toc: yes
 lastmod: '2018-10-07T21:58:18+02:00'
 description: "Last week, I mined almost 5K Tweets from the annual meetings of five German academic societies. Now it's about time that we dive into the contents with Kenneth Benoit's powerful `quanteda` Package. Come for the corpus approaches to text as data, stay for the Turkish Plot-Twist..."
-abstract: We'll learn about constructing a document-feature matrix (dfm), applying exhaustive stopword-lists, the pitfalls of working with text as data, and most importantly acknowledge and learn from mistakes...
+abstract: "We'll learn about constructing a document-feature matrix (dfm), applying exhaustive stopword-lists, the pitfalls of working with text as data, and most importantly acknowledge and learn from mistakes..."
 thumbnail: "/img/thumbs/conference_tweets_pt2.jpg"
 rmdlink: TRUE # Optional
 keywords: []
@@ -47,14 +47,14 @@ sequenceDiagrams:
 <li><a href="#inspect-interdisciplinary-tweets"><span class="toc-section-number">1.2</span> Inspect “Interdisciplinary” Tweets</a></li>
 </ul></li>
 <li><a href="#create-corpus"><span class="toc-section-number">2</span> Create Corpus</a><ul>
-<li><a href="#build-individual-corpora"><span class="toc-section-number">2.1</span> Build individual corpora</a></li>
+<li><a href="#build-individual-corpora"><span class="toc-section-number">2.1</span> Build Individual Corpora</a></li>
 <li><a href="#create-joint-corpus"><span class="toc-section-number">2.2</span> Create Joint Corpus</a></li>
 </ul></li>
 <li><a href="#create-dfm"><span class="toc-section-number">3</span> Create DFM</a><ul>
 <li><a href="#naive"><span class="toc-section-number">3.1</span> Naive</a></li>
-<li><a href="#nd-attempt-remove-stopwordsgerman"><span class="toc-section-number">3.2</span> 2nd attempt: remove <code>stopwords(&quot;german&quot;)</code></a><ul>
+<li><a href="#nd-attempt-remove-stopwordsgerman"><span class="toc-section-number">3.2</span> 2nd Attempt: Remove <code>stopwords(&quot;german&quot;)</code></a><ul>
 <li><a href="#inspect-quantedas-built-in-stop-words"><span class="toc-section-number">3.2.1</span> Inspect <code>quanteda's</code> built-in Stop Words</a></li>
-<li><a href="#include-custom-stopwords-and-remove-english-stopwords"><span class="toc-section-number">3.2.2</span> Include custom stopwords and remove English stopwords</a></li>
+<li><a href="#include-custom-stopwords-and-remove-english-stopwords"><span class="toc-section-number">3.2.2</span> Include Custom Stopwords and Remove English Stopwords</a></li>
 <li><a href="#inspect-keyword-in-context-kwic-for-amp"><span class="toc-section-number">3.2.3</span> Inspect “Keyword in Context” <code>kwic()</code> for “amp”</a></li>
 <li><a href="#inspect-the-tokens-innen-and-bu-kwic."><span class="toc-section-number">3.2.4</span> Inspect the Tokens <code>&quot;innen&quot;</code> and <code>&quot;bu&quot;</code> <code>kwic()</code>.</a></li>
 </ul></li>
@@ -64,19 +64,17 @@ sequenceDiagrams:
 <li><a href="#removing-turkish-accounts"><span class="toc-section-number">4.2</span> Removing Turkish accounts</a></li>
 </ul></li>
 <li><a href="#rebuild-the-corpus-without-tweets-with-langtr"><span class="toc-section-number">5</span> Rebuild the Corpus without Tweets with <code>lang==&quot;tr&quot;</code></a><ul>
-<li><a href="#re-build-individual-corpora-from-scratch"><span class="toc-section-number">5.1</span> Re-Build individual corpora from scratch</a></li>
+<li><a href="#re-build-individual-corpora-from-scratch"><span class="toc-section-number">5.1</span> Re-Build individual Corpora from Scratch</a></li>
 <li><a href="#create-joint-corpus-1"><span class="toc-section-number">5.2</span> Create Joint Corpus</a></li>
 </ul></li>
-<li><a href="#rd-attempt-dfm-building"><span class="toc-section-number">6</span> 3rd attempt @ <code>dfm()</code> building</a><ul>
-<li><a href="#top-features-per-discipline"><span class="toc-section-number">6.1</span> Top Features per Discipline</a></li>
-</ul></li>
+<li><a href="#rd-attempt-dfm-building"><span class="toc-section-number">6</span> 3rd Attempt @ <code>dfm()</code> Building</a></li>
 <li><a href="#some-quick-analyses"><span class="toc-section-number">7</span> Some quick Analyses</a><ul>
-<li><a href="#hashtags"><span class="toc-section-number">7.1</span> Hashtags</a></li>
+<li><a href="#top-features-per-discipline"><span class="toc-section-number">7.1</span> Top Features per Discipline</a></li>
+<li><a href="#hashtags"><span class="toc-section-number">7.2</span> Hashtags</a></li>
+<li><a href="#network-of-feature-co-occurrences"><span class="toc-section-number">7.3</span> Network of feature co-occurrences</a></li>
+<li><a href="#grouped-wordcloud-of-features"><span class="toc-section-number">7.4</span> Grouped wordcloud of features</a></li>
 </ul></li>
-<li><a href="#network-of-feature-co-occurrences"><span class="toc-section-number">8</span> Network of feature co-occurrences</a><ul>
-<li><a href="#grouped-wordcloud-of-features"><span class="toc-section-number">8.1</span> Grouped wordcloud of features</a></li>
-</ul></li>
-<li><a href="#whats-next"><span class="toc-section-number">9</span> What’s next?</a></li>
+<li><a href="#whats-next"><span class="toc-section-number">8</span> What’s next?</a></li>
 </ul>
 </div>
 
@@ -89,8 +87,7 @@ quanteda_options(&quot;threads&quot; = 4)
 # quanteda_options(&quot;threads&quot;)</code></pre>
 <div id="import-tweets-from-.rds" class="section level1">
 <h1><span class="header-section-number">1</span> Import Tweets from <code>.rds</code></h1>
-<p>(cf. previous Post for Twitter Mining with <code>rtweet</code>)</p>
-<p>Cf. the details of this approach in the <a href="https://ellocke.github.io/post/r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al/">previous post</a>.</p>
+<p>Please see <a href="https://ellocke.github.io/post/r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al/">Twitter pt. 1</a> for Twitter Mining with <code>rtweet</code> and the details of the data handling approach.</p>
 <p><strong>Prepare here()-path to the <code>.rds</code> data</strong></p>
 <pre class="r"><code>data_path &lt;- here(&quot;static&quot;, &quot;data&quot;, &quot;ConferenceTweets&quot;, &quot;/&quot;)</code></pre>
 <p><strong>Bulk-read the <code>.rds</code> files</strong></p>
@@ -175,7 +172,7 @@ mixed_collection %&gt;% count() # %&gt;% knitr::kable()</code></pre>
 <p>For further, “Corpus-based”&quot; analysis (and beyond) we’ll use the <code>quanteda</code> package.</p>
 <p>I aim to re-do as much as I can from this series with <a href="https://twitter.com/juliasilge" target="_blank">Julia Silge’s</a> <code>tidytext</code> package, soon, btw.</p>
 <div id="build-individual-corpora" class="section level2">
-<h2><span class="header-section-number">2.1</span> Build individual corpora</h2>
+<h2><span class="header-section-number">2.1</span> Build Individual Corpora</h2>
 <p>As we already have singled out “interdisciplinary” Tweets, we’ll just <code>anti_join()</code> every other tibble with the mixed Tweets.</p>
 <pre class="r"><code>dvpw_corpus &lt;- dvpw_collection %&gt;%
   anti_join(mixed_collection, by = &quot;status_id&quot;) %&gt;% 
@@ -232,7 +229,7 @@ docvars(mixed_corpus, &quot;Discipline&quot;) &lt;- &quot;Mixed&quot;</code></pr
 <p>We get <code>nfeat(joint_dfm)</code> = 20832 features, but as we can see from the <code>topfeatures()</code> output, the top features are mostly (and unsurprisingly very common German words which are also know as <code>stopwords</code> in NLP).</p>
 </div>
 <div id="nd-attempt-remove-stopwordsgerman" class="section level2">
-<h2><span class="header-section-number">3.2</span> 2nd attempt: remove <code>stopwords(&quot;german&quot;)</code></h2>
+<h2><span class="header-section-number">3.2</span> 2nd Attempt: Remove <code>stopwords(&quot;german&quot;)</code></h2>
 <pre class="r"><code>joint_dfm &lt;- dfm(joint_corpus,
                  # groups = &quot;Discipline&quot;,
                  remove = stopwords(&quot;german&quot;),
@@ -291,7 +288,7 @@ length(ger_stopwords) #&gt; 621 stopwords</code></pre>
 <pre><code>## [1] 621</code></pre>
 </div>
 <div id="include-custom-stopwords-and-remove-english-stopwords" class="section level3">
-<h3><span class="header-section-number">3.2.2</span> Include custom stopwords and remove English stopwords</h3>
+<h3><span class="header-section-number">3.2.2</span> Include Custom Stopwords and Remove English Stopwords</h3>
 <pre class="r"><code>c(&quot;dass&quot;, &quot;beim&quot;) %in% ger_stopwords #&gt; [1] TRUE TRUE</code></pre>
 <pre><code>## [1] TRUE TRUE</code></pre>
 <pre class="r"><code># custom_stopwords &lt;- c(&quot;dass&quot;, &quot;beim&quot;)
@@ -955,7 +952,7 @@ tr_user %&gt;% count()</code></pre>
 <p>So let’s rebuild the corpora from scratch.</p>
 </blockquote>
 <div id="re-build-individual-corpora-from-scratch" class="section level2">
-<h2><span class="header-section-number">5.1</span> Re-Build individual corpora from scratch</h2>
+<h2><span class="header-section-number">5.1</span> Re-Build individual Corpora from Scratch</h2>
 <p>We’ll just add <code>filter(created_at &gt; &quot;2018-09-23&quot;)</code> and for the sake of robustness, we’ll filter all corpora for <code>lang != &quot;tr&quot;</code>, and <code>anti_join(tr_user)</code> with the <code>dgs_corpus</code></p>
 <p><strong>As I want both, discipline-specific copora with “multidisciplinary Tweets” and a redundancy-free joint corpus, I’ll build the corpora in two steps.</strong></p>
 <pre class="r"><code>dvpw_corpus &lt;- dvpw_collection %&gt;% 
@@ -1005,7 +1002,7 @@ joint_corpus &lt;- joint_corpus + mixed_corpus #3,748 docs</code></pre>
 </div>
 </div>
 <div id="rd-attempt-dfm-building" class="section level1">
-<h1><span class="header-section-number">6</span> 3rd attempt @ <code>dfm()</code> building</h1>
+<h1><span class="header-section-number">6</span> 3rd Attempt @ <code>dfm()</code> Building</h1>
 <pre class="r"><code>joint_dfm &lt;- dfm(joint_corpus,
                 # groups = &quot;Discipline&quot;,
                  remove = c(stopwords(&quot;german&quot;),
@@ -1023,7 +1020,7 @@ joint_corpus &lt;- joint_corpus + mixed_corpus #3,748 docs</code></pre>
 <pre><code>##    ... removed 608 features
 ##    ... created a 3,748 x 15,763 sparse dfm
 ##    ... complete. 
-## Elapsed time: 0.44 seconds.</code></pre>
+## Elapsed time: 0.43 seconds.</code></pre>
 <p>We’re down to 15763 features from 3748 documents (Tweets) and were able to get rid of 608 features with the iteratively refined approach.</p>
 <p>And as we might want to use a grouped dfm for group comparisons (and <code>dfm_group</code> doesn’t seem to work for me here), we’ll create a custom grouped one, too.</p>
 <pre class="r"><code>## not working:
@@ -1046,8 +1043,11 @@ joint_dfm_grouped &lt;- dfm(joint_corpus,
                 # remove_numbers = TRUE,
                  tolower = TRUE,
                  verbose = FALSE) #for website readability</code></pre>
+</div>
+<div id="some-quick-analyses" class="section level1">
+<h1><span class="header-section-number">7</span> Some quick Analyses</h1>
 <div id="top-features-per-discipline" class="section level2">
-<h2><span class="header-section-number">6.1</span> Top Features per Discipline</h2>
+<h2><span class="header-section-number">7.1</span> Top Features per Discipline</h2>
 <pre class="r"><code>topfeatures(joint_dfm, 20, groups = &quot;Discipline&quot;) # %&gt;% map(unlist) %&gt;% map(knitr::kable)</code></pre>
 <pre><code>## $PolSci
 ##             #dvpw18       @dvpwkongress          demokratie 
@@ -1119,11 +1119,8 @@ joint_dfm_grouped &lt;- dfm(joint_corpus,
 <p>Plus, removing or parsing hashtags and applying <code>dfm(stem = TRUE)</code> would largely increase descriptive accuracy</p>
 </blockquote>
 </div>
-</div>
-<div id="some-quick-analyses" class="section level1">
-<h1><span class="header-section-number">7</span> Some quick Analyses</h1>
 <div id="hashtags" class="section level2">
-<h2><span class="header-section-number">7.1</span> Hashtags</h2>
+<h2><span class="header-section-number">7.2</span> Hashtags</h2>
 <p><strong>Most popular hashtags by absolute numbers:</strong></p>
 <pre class="r"><code>hashtags_dfm &lt;- dfm_select(joint_dfm, (&#39;#*&#39;))
 topfeatures(hashtags_dfm, 20, scheme = &quot;count&quot;)</code></pre>
@@ -1245,14 +1242,14 @@ topfeatures(hashtags_dfm, 20, scheme = &quot;count&quot;)</code></pre>
 ##              #bigdata                  #spd                   #ff 
 ##                     3                     3                     3</code></pre>
 </div>
-</div>
-<div id="network-of-feature-co-occurrences" class="section level1">
-<h1><span class="header-section-number">8</span> Network of feature co-occurrences</h1>
+<div id="network-of-feature-co-occurrences" class="section level2">
+<h2><span class="header-section-number">7.3</span> Network of feature co-occurrences</h2>
 <pre class="r"><code>topfeats &lt;- names(topfeatures(joint_dfm, 60))
 textplot_network(dfm_select(joint_dfm, topfeats), min_freq = 0.8)</code></pre>
 <p><img src="/post/2018-10-07-r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist_files/figure-html/unnamed-chunk-40-1.png" width="672" /></p>
+</div>
 <div id="grouped-wordcloud-of-features" class="section level2">
-<h2><span class="header-section-number">8.1</span> Grouped wordcloud of features</h2>
+<h2><span class="header-section-number">7.4</span> Grouped wordcloud of features</h2>
 <blockquote>
 <p>“wordcloud, where the feature labels are plotted with their sizes proportional to their numerical values in the dfm” (Vignette for <code>quanteda::textplot_wordcloud</code>)</p>
 </blockquote>
@@ -1265,7 +1262,7 @@ textplot_network(dfm_select(joint_dfm, topfeats), min_freq = 0.8)</code></pre>
 </div>
 </div>
 <div id="whats-next" class="section level1">
-<h1><span class="header-section-number">9</span> What’s next?</h1>
+<h1><span class="header-section-number">8</span> What’s next?</h1>
 <blockquote>
 <p>Topic Modelling!</p>
 </blockquote>
