@@ -312,8 +312,6 @@ post_list(dvpw_nicks[200:length(dvpw_nicks)], slug = "dvpw2018", private = TRUE,
 
 ## Sociology: #dgs18 / #dgs2018 (UPDATE!)
 
-> Please, see `Update 3` further above. This analysis and interpretation is not valid, at the moment. See the [follow-up post](https://ellocke.github.io/post/r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist/#the-turkish-plot-twist) for proper numbers.
-
 Let's have a look at how German Sociologists performed on Twitter. Like above, I've mined the Tweets multiple times in order to get a good sample.
 
 **Mine**
@@ -339,7 +337,7 @@ dgs_rds <- dir(path = data_path, pattern = "dgs_") %>%
   map_dfr(readRDS)
 ```
 
-> Update: As I have discovered some irregularities while pre-processing the Tweets for a corpus analysis (see the [follow-up post](https://ellocke.github.io/post/r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist/#the-turkish-plot-twist) for details), the Sociology Twitter sample needs extra-filtering.
+> As I have discovered some irregularities while pre-processing the Tweets for a corpus analysis (see the [follow-up post](https://ellocke.github.io/post/r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist/#the-turkish-plot-twist) for details), the Sociology Twitter sample needs extra-filtering. Consequently, all the following analyses and plots have been re-done and updated.
 
 **As we can see from the following time-series plot, the `#dgs2018` hashtag has, first been used by the Turkish community before German Sociologists took over around the 23th:**
 

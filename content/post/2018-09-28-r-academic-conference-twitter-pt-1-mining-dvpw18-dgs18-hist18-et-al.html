@@ -135,7 +135,7 @@ twitter_token &lt;- readRDS(str_c(home_directory,&quot;/twitter_token.rds&quot;)
     unlist() %&gt;% glue::glue_collapse()
   }
 getTimeString()</code></pre>
-<pre><code>## 20181009170045</code></pre>
+<pre><code>## 20181009194404</code></pre>
 </div>
 <div id="prepare-filepath-for-.rds-with-here" class="section level2">
 <h2><span class="header-section-number">2.3</span> (Prepare filepath for .rds with <code>here()</code>)</h2>
@@ -297,9 +297,6 @@ post_list(dvpw_nicks[200:length(dvpw_nicks)], slug = &quot;dvpw2018&quot;, priva
 </div>
 <div id="sociology-dgs18-dgs2018-update" class="section level2">
 <h2><span class="header-section-number">3.2</span> Sociology: #dgs18 / #dgs2018 (UPDATE!)</h2>
-<blockquote>
-<p>Please, see <code>Update 3</code> further above. This analysis and interpretation is not valid, at the moment. See the <a href="https://ellocke.github.io/post/r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist/#the-turkish-plot-twist">follow-up post</a> for proper numbers.</p>
-</blockquote>
 <p>Let’s have a look at how German Sociologists performed on Twitter. Like above, I’ve mined the Tweets multiple times in order to get a good sample.</p>
 <p><strong>Mine</strong></p>
 <pre class="r"><code>dgs_tweets &lt;- search_tweets(q = &quot;#dgs18 OR #dgs2018&quot;, # explicit QUERY
@@ -317,7 +314,7 @@ saveRDS(dgs_tweets,
   str_c(data_path, .) %&gt;%
   map_dfr(readRDS)</code></pre>
 <blockquote>
-<p>Update: As I have discovered some irregularities while pre-processing the Tweets for a corpus analysis (see the <a href="https://ellocke.github.io/post/r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist/#the-turkish-plot-twist">follow-up post</a> for details), the Sociology Twitter sample needs extra-filtering.</p>
+<p>As I have discovered some irregularities while pre-processing the Tweets for a corpus analysis (see the <a href="https://ellocke.github.io/post/r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist/#the-turkish-plot-twist">follow-up post</a> for details), the Sociology Twitter sample needs extra-filtering. Consequently, all the following analyses and plots have been re-done and updated.</p>
 </blockquote>
 <p><strong>As we can see from the following time-series plot, the <code>#dgs2018</code> hashtag has, first been used by the Turkish community before German Sociologists took over around the 23th:</strong></p>
 <pre class="r"><code>dgs_rds %&gt;% distinct(status_id, .keep_all = TRUE) %&gt;%
