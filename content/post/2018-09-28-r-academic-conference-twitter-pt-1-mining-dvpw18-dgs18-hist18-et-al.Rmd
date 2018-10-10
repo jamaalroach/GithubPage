@@ -853,7 +853,7 @@ all_cons_per_user <- bind_rows(dvpw_counts, dgs_counts, hist_counts, inf_counts,
   mutate(avg_output = (Tweets + RT + Favs)/3) %>% 
   arrange(desc(avg_output)) #> 1262
 # all_cons_per_user %>% distinct(screen_name) %>% count() #> 1262
-all_cons_per_user %>% head(20)
+all_cons_per_user %>% head(20) %>% knitr::kable()
 ```
 
 ## Joint Scatterplot: per-User
@@ -924,7 +924,7 @@ For Boxplot, we need to wrangle the data into long (~tidy) form:
 dvpw_box <- dvpw_counts %>% 
   gather("Metric", "Total", 2:4) #%>%
   # mutate(Discipline = "PolSci")
-dvpw_box %>% filter(screen_name == "dvpw")
+dvpw_box %>% filter(screen_name == "dvpw") %>% knitr::kable(format = "html")
 ```
 
 ```{r}

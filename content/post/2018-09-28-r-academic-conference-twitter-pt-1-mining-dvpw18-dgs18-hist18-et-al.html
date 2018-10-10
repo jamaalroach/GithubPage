@@ -135,7 +135,7 @@ twitter_token &lt;- readRDS(str_c(home_directory,&quot;/twitter_token.rds&quot;)
     unlist() %&gt;% glue::glue_collapse()
   }
 getTimeString()</code></pre>
-<pre><code>## 20181009194404</code></pre>
+<pre><code>## 20181010214845</code></pre>
 </div>
 <div id="prepare-filepath-for-.rds-with-here" class="section level2">
 <h2><span class="header-section-number">2.3</span> (Prepare filepath for .rds with <code>here()</code>)</h2>
@@ -725,31 +725,181 @@ all_n_tweets &lt;- all_cons %&gt;% distinct(status_id) %&gt;% nrow()</code></pre
   mutate(avg_output = (Tweets + RT + Favs)/3) %&gt;% 
   arrange(desc(avg_output)) #&gt; 1262
 # all_cons_per_user %&gt;% distinct(screen_name) %&gt;% count() #&gt; 1262
-all_cons_per_user %&gt;% head(20)</code></pre>
-<pre><code>## # A tibble: 20 x 6
-## # Groups:   screen_name [20]
-##    screen_name     Tweets    RT  Favs discipline avg_output
-##    &lt;chr&gt;            &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;chr&gt;           &lt;dbl&gt;
-##  1 dvpw               460   496   580 PolSci          512  
-##  2 dvpwkongress       123   160   311 PolSci          198  
-##  3 thothiel            43    81   249 PolSci          124. 
-##  4 Mareike2405         23    63   254 History         113. 
-##  5 ronpatz             56    59   204 PolSci          106. 
-##  6 PortalLISA          20    78   163 History          87  
-##  7 moritz_hoffmann      9    24   226 History          86.3
-##  8 janinefunke         12    29   213 History          84.7
-##  9 SassanGholiagha     85    30   131 PolSci           82  
-## 10 elvira_rosert       40    41   164 PolSci           81.7
-## 11 LordElend           26    32   184 Sociology        80.7
-## 12 juergenzimmerer      7    51   171 History          76.3
-## 13 RichterHedwig        7     8   203 History          72.7
-## 14 DrMichaelHein       20    29   168 PolSci           72.3
-## 15 jakobfrohmann       38    57   119 History          71.3
-## 16 wahlforschung       34    35   144 PolSci           71  
-## 17 PetraGuasti         84    28    92 PolSci           68  
-## 18 daniellambach       33    38   133 PolSci           68  
-## 19 aberehrlich         40    30   123 History          64.3
-## 20 MaxGrund4           26    42   123 History          63.7</code></pre>
+all_cons_per_user %&gt;% head(20) %&gt;% knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">screen_name</th>
+<th align="right">Tweets</th>
+<th align="right">RT</th>
+<th align="right">Favs</th>
+<th align="left">discipline</th>
+<th align="right">avg_output</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">dvpw</td>
+<td align="right">460</td>
+<td align="right">496</td>
+<td align="right">580</td>
+<td align="left">PolSci</td>
+<td align="right">512.00000</td>
+</tr>
+<tr class="even">
+<td align="left">dvpwkongress</td>
+<td align="right">123</td>
+<td align="right">160</td>
+<td align="right">311</td>
+<td align="left">PolSci</td>
+<td align="right">198.00000</td>
+</tr>
+<tr class="odd">
+<td align="left">thothiel</td>
+<td align="right">43</td>
+<td align="right">81</td>
+<td align="right">249</td>
+<td align="left">PolSci</td>
+<td align="right">124.33333</td>
+</tr>
+<tr class="even">
+<td align="left">Mareike2405</td>
+<td align="right">23</td>
+<td align="right">63</td>
+<td align="right">254</td>
+<td align="left">History</td>
+<td align="right">113.33333</td>
+</tr>
+<tr class="odd">
+<td align="left">ronpatz</td>
+<td align="right">56</td>
+<td align="right">59</td>
+<td align="right">204</td>
+<td align="left">PolSci</td>
+<td align="right">106.33333</td>
+</tr>
+<tr class="even">
+<td align="left">PortalLISA</td>
+<td align="right">20</td>
+<td align="right">78</td>
+<td align="right">163</td>
+<td align="left">History</td>
+<td align="right">87.00000</td>
+</tr>
+<tr class="odd">
+<td align="left">moritz_hoffmann</td>
+<td align="right">9</td>
+<td align="right">24</td>
+<td align="right">226</td>
+<td align="left">History</td>
+<td align="right">86.33333</td>
+</tr>
+<tr class="even">
+<td align="left">janinefunke</td>
+<td align="right">12</td>
+<td align="right">29</td>
+<td align="right">213</td>
+<td align="left">History</td>
+<td align="right">84.66667</td>
+</tr>
+<tr class="odd">
+<td align="left">SassanGholiagha</td>
+<td align="right">85</td>
+<td align="right">30</td>
+<td align="right">131</td>
+<td align="left">PolSci</td>
+<td align="right">82.00000</td>
+</tr>
+<tr class="even">
+<td align="left">elvira_rosert</td>
+<td align="right">40</td>
+<td align="right">41</td>
+<td align="right">164</td>
+<td align="left">PolSci</td>
+<td align="right">81.66667</td>
+</tr>
+<tr class="odd">
+<td align="left">LordElend</td>
+<td align="right">26</td>
+<td align="right">32</td>
+<td align="right">184</td>
+<td align="left">Sociology</td>
+<td align="right">80.66667</td>
+</tr>
+<tr class="even">
+<td align="left">juergenzimmerer</td>
+<td align="right">7</td>
+<td align="right">51</td>
+<td align="right">171</td>
+<td align="left">History</td>
+<td align="right">76.33333</td>
+</tr>
+<tr class="odd">
+<td align="left">RichterHedwig</td>
+<td align="right">7</td>
+<td align="right">8</td>
+<td align="right">203</td>
+<td align="left">History</td>
+<td align="right">72.66667</td>
+</tr>
+<tr class="even">
+<td align="left">DrMichaelHein</td>
+<td align="right">20</td>
+<td align="right">29</td>
+<td align="right">168</td>
+<td align="left">PolSci</td>
+<td align="right">72.33333</td>
+</tr>
+<tr class="odd">
+<td align="left">jakobfrohmann</td>
+<td align="right">38</td>
+<td align="right">57</td>
+<td align="right">119</td>
+<td align="left">History</td>
+<td align="right">71.33333</td>
+</tr>
+<tr class="even">
+<td align="left">wahlforschung</td>
+<td align="right">34</td>
+<td align="right">35</td>
+<td align="right">144</td>
+<td align="left">PolSci</td>
+<td align="right">71.00000</td>
+</tr>
+<tr class="odd">
+<td align="left">PetraGuasti</td>
+<td align="right">84</td>
+<td align="right">28</td>
+<td align="right">92</td>
+<td align="left">PolSci</td>
+<td align="right">68.00000</td>
+</tr>
+<tr class="even">
+<td align="left">daniellambach</td>
+<td align="right">33</td>
+<td align="right">38</td>
+<td align="right">133</td>
+<td align="left">PolSci</td>
+<td align="right">68.00000</td>
+</tr>
+<tr class="odd">
+<td align="left">aberehrlich</td>
+<td align="right">40</td>
+<td align="right">30</td>
+<td align="right">123</td>
+<td align="left">History</td>
+<td align="right">64.33333</td>
+</tr>
+<tr class="even">
+<td align="left">MaxGrund4</td>
+<td align="right">26</td>
+<td align="right">42</td>
+<td align="right">123</td>
+<td align="left">History</td>
+<td align="right">63.66667</td>
+</tr>
+</tbody>
+</table>
 <div id="joint-scatterplot-per-user" class="section level2">
 <h2><span class="header-section-number">4.1</span> Joint Scatterplot: per-User</h2>
 <p>Let’s have a look at this week’s German academic Twitter crowd as a whole:</p>
@@ -812,13 +962,69 @@ all_cons_per_user %&gt;% head(20)</code></pre>
 <pre class="r"><code>dvpw_box &lt;- dvpw_counts %&gt;% 
   gather(&quot;Metric&quot;, &quot;Total&quot;, 2:4) #%&gt;%
   # mutate(Discipline = &quot;PolSci&quot;)
-dvpw_box %&gt;% filter(screen_name == &quot;dvpw&quot;)</code></pre>
-<pre><code>## # A tibble: 3 x 4
-##   screen_name discipline Metric Total
-##   &lt;chr&gt;       &lt;chr&gt;      &lt;chr&gt;  &lt;int&gt;
-## 1 dvpw        PolSci     Tweets   460
-## 2 dvpw        PolSci     RT       496
-## 3 dvpw        PolSci     Favs     580</code></pre>
+dvpw_box %&gt;% filter(screen_name == &quot;dvpw&quot;) %&gt;% knitr::kable(format = &quot;html&quot;)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+screen_name
+</th>
+<th style="text-align:left;">
+discipline
+</th>
+<th style="text-align:left;">
+Metric
+</th>
+<th style="text-align:right;">
+Total
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+dvpw
+</td>
+<td style="text-align:left;">
+PolSci
+</td>
+<td style="text-align:left;">
+Tweets
+</td>
+<td style="text-align:right;">
+460
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+dvpw
+</td>
+<td style="text-align:left;">
+PolSci
+</td>
+<td style="text-align:left;">
+RT
+</td>
+<td style="text-align:right;">
+496
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+dvpw
+</td>
+<td style="text-align:left;">
+PolSci
+</td>
+<td style="text-align:left;">
+Favs
+</td>
+<td style="text-align:right;">
+580
+</td>
+</tr>
+</tbody>
+</table>
 <pre class="r"><code>dgs_box &lt;- dgs_counts %&gt;% 
   gather(&quot;Metric&quot;, &quot;Total&quot;, 2:4) # %&gt;%
   # mutate(Discipline = &quot;Socio&quot;)
