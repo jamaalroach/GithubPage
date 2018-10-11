@@ -460,6 +460,15 @@ div>table th td {
 	padding: 2px;
 }
 
+table > thead {
+	position: relative;
+	border-bottom: 1px dashed #c05b4d;
+	vertical-align: middle;
+	padding: 0 0;
+	margin: 0;
+	overflow-x: scroll;
+}
+
 div>table tbody {
 	width: inherit;
 	max-width: inherit;
@@ -467,28 +476,13 @@ div>table tbody {
 	margin-left: 2em;
 	margin-right: 1em;
 	font-size: 0.75em;
-	overflow: auto;
+	overflow-x: scroll;
 }
 
-table > thead {
-	position: relative;
-	border-bottom: 1px dashed #c05b4d;
-	vertical-align: middle;
-	padding: 0 0;
-	margin: 0;
-}
-
-table > thead tr.header {
-	margin-left: 0;
-	padding-left: 0;
-}
-
-table > thead tr.header th {
-	padding: 2px 5px;
-	text-align: left;
+table > thead tr th {
+	padding: 0 5px 5px 5px;
 }
 
 table > tbody td {
 	padding: 2px 5px;
 }
-

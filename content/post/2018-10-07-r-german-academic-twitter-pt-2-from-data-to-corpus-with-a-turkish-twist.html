@@ -324,7 +324,7 @@ topfeatures(joint_dfm, 20)</code></pre>
   as_tibble() %&gt;% # needed for kwic()
   select(pre:post) %&gt;%
   head(10) %&gt;%
-  knitr::kable(format = &quot;html&quot;)</code></pre>
+  knitr::kable(&quot;html&quot;)</code></pre>
 <table>
 <thead>
 <tr>
@@ -1020,7 +1020,7 @@ joint_corpus &lt;- joint_corpus + mixed_corpus #3,748 docs</code></pre>
 <pre><code>##    ... removed 608 features
 ##    ... created a 3,748 x 15,763 sparse dfm
 ##    ... complete. 
-## Elapsed time: 0.43 seconds.</code></pre>
+## Elapsed time: 0.77 seconds.</code></pre>
 <p>We’re down to 15763 features from 3748 documents (Tweets) and were able to get rid of 608 features with the iteratively refined approach.</p>
 <p>And as we might want to use a grouped dfm for group comparisons (and <code>dfm_group</code> doesn’t seem to work for me here), we’ll create a custom grouped one, too.</p>
 <pre class="r"><code>## not working:

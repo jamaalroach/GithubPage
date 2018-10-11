@@ -272,7 +272,7 @@ kwic(joint_corpus, "amp", window = 3)  %>%
   as_tibble() %>% # needed for kwic()
   select(pre:post) %>%
   head(10) %>%
-  knitr::kable(format = "html")
+  knitr::kable("html")
 # vs. kwic(x, phrase("term1 term2"))
 ```
 
