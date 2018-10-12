@@ -138,33 +138,78 @@ mixed_collection &lt;- subset(joint_collection,
                       duplicated(joint_collection$status_id)) %&gt;% 
   distinct(status_id, .keep_all = TRUE) # find duplicates
 
-mixed_collection$Discipline &lt;- &quot;Mixed&quot;
-mixed_collection %&gt;% count() # %&gt;% knitr::kable()</code></pre>
-<pre><code>## # A tibble: 1 x 1
-##       n
-##   &lt;int&gt;
-## 1    42</code></pre>
+mixed_collection$Discipline &lt;- &quot;Mixed&quot;</code></pre>
 <blockquote>
 <p>Only 42 Tweets? Out of a sample of almost 5K? Twitter Silos, anyone?</p>
 </blockquote>
 </div>
 <div id="inspect-interdisciplinary-tweets" class="section level2">
 <h2><span class="header-section-number">1.2</span> Inspect “Interdisciplinary” Tweets</h2>
-<pre class="r"><code>mixed_collection %&gt;% arrange(created_at) %&gt;% select(text) %&gt;% head(10) # %&gt;%</code></pre>
-<pre><code>## # A tibble: 10 x 1
-##    text                                                                    
-##    &lt;chr&gt;                                                                   
-##  1 Gut, dass das Team des @fgf_nrw etwas größer ist: Wir sind diese Woche ~
-##  2 Hier noch eine wichtige Ansage: #dvpw18 muss unbedingt vor #dgs18 trend~
-##  3 &quot;@daniellambach Das wollen die von den Naturwissenschaften doch nur, da~
-##  4 Leider findet die #dvpw18 gleichzeitig mit dem #dgs2018 statt. Wäre seh~
-##  5 Paar Minuten im 1. Vortrag #infdh2018 reichen schon, um mal ganz deutli~
-##  6 &quot;Meine Wunsch an #ScienceTwitter jetzt wo #dvpw18\n&amp;amp; #HisTag18 &amp;amp~
-##  7 @DrMichaelHein @dvpwkongress #dgs18 #dvpw18 #histag18 ich fände es ja s~
-##  8 Kleine Pause gefällig? Unter den Hashtags #ddss18, #dgs18 und #HisTag18~
-##  9 &quot;Wie wäre es mit einem gemeinsamen Soziohistostaatsrechtspolitolog*inne~
-## 10 &quot;während die lieben kolleg(inn)en bei #dvpw18, #dgs18 &amp;amp; #HisTag18 u~</code></pre>
-<pre class="r"><code>  # knitr::kable(format = &quot;html&quot;)</code></pre>
+<pre class="r"><code>mixed_collection %&gt;% 
+  arrange(created_at) %&gt;% 
+  select(text) %&gt;% head(10) %&gt;% 
+  knitr::kable(format = &quot;html&quot;, digits = 2)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+text
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Gut, dass das Team des <span class="citation">@fgf_nrw</span> etwas größer ist: Wir sind diese Woche vertreten: #dgs18, #dvpw18 und ab Mittwoch bei der KEG in Wien <a href="https://t.co/jiE6SyfKHe" class="uri">https://t.co/jiE6SyfKHe</a>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Hier noch eine wichtige Ansage: #dvpw18 muss unbedingt vor #dgs18 trenden
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="citation">@daniellambach</span> Das wollen die von den Naturwissenschaften doch nur, dass wir Sozial- und Geisteswissenschaftler*innen uns gegenseitig bekriegen. 😉 #dvpw18 #histag18 #dgs18
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Leider findet die #dvpw18 gleichzeitig mit dem #dgs2018 statt. Wäre sehr gern auch bei Euch, <span class="citation">@mlewandowsky</span>, <span class="citation">@wahlforschung</span> und <span class="citation">@thothiel</span> :/
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Paar Minuten im 1. Vortrag #infdh2018 reichen schon, um mal ganz deutlich zu sehen um wie viele Größenordnungen die digitalen Geisteswissenschaften den “digitalen” Sozialwissenschaften handwerklich und institutionell voraus sind. Grüße an #dvpw18 und #dgs18 <a href="https://t.co/TZU8E9PecT" class="uri">https://t.co/TZU8E9PecT</a>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Meine Wunsch an #ScienceTwitter jetzt wo #dvpw18 &amp;amp; #HisTag18 &amp;amp; #dgs18 parallel laufen: Kann jemand analysieren, wie viel Schnittmenge es zwischen den Programmen gibt?
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="citation">@DrMichaelHein</span> <span class="citation">@dvpwkongress</span> #dgs18 #dvpw18 #histag18 ich fände es ja schöner auf spannende Themen gemeinsam zu blicken, die wir gesellschaftlich gemeinsam diskutieren könnten/sollten, und nicht Trennungslinien und Wettbewerb aufzumachen…
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Kleine Pause gefällig? Unter den Hashtags #ddss18, #dgs18 und #HisTag18 kann man sehr interessanten Veranstaltungen aus der Ferne beiwohnen. #gswtud <a href="https://t.co/VlfzaYpjrb" class="uri">https://t.co/VlfzaYpjrb</a>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Wie wäre es mit einem gemeinsamen Soziohistostaatsrechtspolitolog*innentag 2021? <span class="citation">@dvpwkongress</span> <span class="citation">@dvpw</span> <span class="citation">@DGSoziologie</span> <span class="citation">@historikertag</span> <span class="citation">@vdstrl</span> #dvpw18 #histag18 #dgs18 #vdstrl18 <a href="https://t.co/EgZYmaikqY" class="uri">https://t.co/EgZYmaikqY</a>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+während die lieben kolleg(inn)en bei #dvpw18, #dgs18 &amp;amp; #HisTag18 um die besten tweets auf #twitter ringen, schauen wir von #GSA2018 aus pittsburgh zu. good luck, friends! 😇
+</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 <div id="create-corpus" class="section level1">
@@ -219,13 +264,181 @@ docvars(mixed_corpus, &quot;Discipline&quot;) &lt;- &quot;Mixed&quot;</code></pr
                  remove_url = TRUE, # it&#39;s a mess, without
                  tolower = TRUE,
                  verbose = FALSE) #for website readability</code></pre>
-<pre class="r"><code>topfeatures(joint_dfm, 20)</code></pre>
-<pre><code>##       der   #dvpw18       und       die        in  #dgs2018 #histag18 
-##      2001      1681      1661      1517      1214      1174      1037 
-##       auf       von       für        zu    #dgs18       das       mit 
-##       765       675       624       601       584       583       566 
-##       ist       the       den       des        im       dem 
-##       520       515       480       452       437       432</code></pre>
+<pre class="r"><code>topfeatures(joint_dfm, 20) %&gt;% 
+  knitr::kable(format = &quot;html&quot;, digits = 2)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+der
+</td>
+<td style="text-align:right;">
+2001
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dvpw18
+</td>
+<td style="text-align:right;">
+1681
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+und
+</td>
+<td style="text-align:right;">
+1661
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+die
+</td>
+<td style="text-align:right;">
+1517
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+in
+</td>
+<td style="text-align:right;">
+1214
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dgs2018
+</td>
+<td style="text-align:right;">
+1174
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#histag18
+</td>
+<td style="text-align:right;">
+1037
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+auf
+</td>
+<td style="text-align:right;">
+765
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+von
+</td>
+<td style="text-align:right;">
+675
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+für
+</td>
+<td style="text-align:right;">
+624
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+zu
+</td>
+<td style="text-align:right;">
+601
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dgs18
+</td>
+<td style="text-align:right;">
+584
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+das
+</td>
+<td style="text-align:right;">
+583
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+mit
+</td>
+<td style="text-align:right;">
+566
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ist
+</td>
+<td style="text-align:right;">
+520
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+the
+</td>
+<td style="text-align:right;">
+515
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+den
+</td>
+<td style="text-align:right;">
+480
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+des
+</td>
+<td style="text-align:right;">
+452
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+im
+</td>
+<td style="text-align:right;">
+437
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+dem
+</td>
+<td style="text-align:right;">
+432
+</td>
+</tr>
+</tbody>
+</table>
 <p>We get <code>nfeat(joint_dfm)</code> = 20832 features, but as we can see from the <code>topfeatures()</code> output, the top features are mostly (and unsurprisingly very common German words which are also know as <code>stopwords</code> in NLP).</p>
 </div>
 <div id="nd-attempt-remove-stopwordsgerman" class="section level2">
@@ -237,17 +450,181 @@ docvars(mixed_corpus, &quot;Discipline&quot;) &lt;- &quot;Mixed&quot;</code></pr
                  remove_url = TRUE,
                  tolower = TRUE,
                  verbose = FALSE) #for website readability
-topfeatures(joint_dfm, 20)</code></pre>
-<pre><code>##         #dvpw18        #dgs2018       #histag18          #dgs18 
-##            1681            1174            1037             584 
-##             the              of             and #informatik2018 
-##             515             357             337             321 
-##              to             amp               a           heute 
-##             314             224             223             200 
-##            beim              on           panel            dass 
-##             184             175             172             168 
-##   @dvpwkongress             for              is      demokratie 
-##             166             162             150             145</code></pre>
+topfeatures(joint_dfm, 20) %&gt;% 
+  knitr::kable(format = &quot;html&quot;, digits = 2)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+#dvpw18
+</td>
+<td style="text-align:right;">
+1681
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dgs2018
+</td>
+<td style="text-align:right;">
+1174
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#histag18
+</td>
+<td style="text-align:right;">
+1037
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dgs18
+</td>
+<td style="text-align:right;">
+584
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+the
+</td>
+<td style="text-align:right;">
+515
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+of
+</td>
+<td style="text-align:right;">
+357
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+and
+</td>
+<td style="text-align:right;">
+337
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#informatik2018
+</td>
+<td style="text-align:right;">
+321
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+to
+</td>
+<td style="text-align:right;">
+314
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+amp
+</td>
+<td style="text-align:right;">
+224
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+a
+</td>
+<td style="text-align:right;">
+223
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heute
+</td>
+<td style="text-align:right;">
+200
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+beim
+</td>
+<td style="text-align:right;">
+184
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+on
+</td>
+<td style="text-align:right;">
+175
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+panel
+</td>
+<td style="text-align:right;">
+172
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+dass
+</td>
+<td style="text-align:right;">
+168
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="citation">@dvpwkongress</span>
+</td>
+<td style="text-align:right;">
+166
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+for
+</td>
+<td style="text-align:right;">
+162
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+is
+</td>
+<td style="text-align:right;">
+150
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+demokratie
+</td>
+<td style="text-align:right;">
+145
+</td>
+</tr>
+</tbody>
+</table>
 <blockquote>
 <p>Apart from English tokens (to, on, is, for, of, a), common German words such as “beim” or “dass” are still included. The latter is rather weird…</p>
 </blockquote>
@@ -256,17 +633,54 @@ topfeatures(joint_dfm, 20)</code></pre>
 <p>Since we’ve seen that “dass” is still included in our corpus, let’s i.e. look at all <code>quanteda::stopwords(&quot;german&quot;)</code> starting with a “d”:</p>
 <pre class="r"><code>stopwords(&quot;german&quot;) %&gt;%
   as_tibble() %&gt;%
-  filter(str_detect(value, pattern = &quot;^da.*&quot;))</code></pre>
-<pre><code>## # A tibble: 7 x 1
-##   value   
-##   &lt;chr&gt;   
-## 1 da      
-## 2 damit   
-## 3 dann    
-## 4 das     
-## 5 daß     
-## 6 dasselbe
-## 7 dazu</code></pre>
+  filter(str_detect(value, pattern = &quot;^da.*&quot;)) %&gt;% 
+  knitr::kable(format = &quot;html&quot;, digits = 2)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+value
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+da
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+damit
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+dann
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+das
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+daß
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+dasselbe
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+dazu
+</td>
+</tr>
+</tbody>
+</table>
 <pre class="r"><code># missing: beim</code></pre>
 <blockquote>
 <p>Ok, “daß” instead of “dass” suggests that <code>quanteda</code>’s stopword list for German terms might need an update… :)</p>
@@ -303,28 +717,193 @@ custom_stopwords &lt;- setdiff(ger_stopwords, stopwords(&quot;german&quot;)) # o
                  remove_url = TRUE,
                  tolower = TRUE,
                  verbose = FALSE) #for website readability
-topfeatures(joint_dfm, 20)</code></pre>
-<pre><code>##         #dvpw18        #dgs2018       #histag18          #dgs18 
-##            1681            1174            1037             584 
-## #informatik2018             amp           panel   @dvpwkongress 
-##             321             224             172             166 
-##      demokratie @osymbaskanligi             dgs           innen 
-##             145             123             121             114 
-##            #dgs           @dvpw       #dvpw2018  @historikertag 
-##             113             112             111             109 
-##              bu              de   @dgsoziologie              mi 
-##             106              97              95              94</code></pre>
+topfeatures(joint_dfm, 20) %&gt;% 
+  knitr::kable(format = &quot;html&quot;, digits = 2)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+#dvpw18
+</td>
+<td style="text-align:right;">
+1681
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dgs2018
+</td>
+<td style="text-align:right;">
+1174
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#histag18
+</td>
+<td style="text-align:right;">
+1037
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dgs18
+</td>
+<td style="text-align:right;">
+584
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#informatik2018
+</td>
+<td style="text-align:right;">
+321
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+amp
+</td>
+<td style="text-align:right;">
+224
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+panel
+</td>
+<td style="text-align:right;">
+172
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="citation">@dvpwkongress</span>
+</td>
+<td style="text-align:right;">
+166
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+demokratie
+</td>
+<td style="text-align:right;">
+145
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="citation">@osymbaskanligi</span>
+</td>
+<td style="text-align:right;">
+123
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+dgs
+</td>
+<td style="text-align:right;">
+121
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+innen
+</td>
+<td style="text-align:right;">
+114
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dgs
+</td>
+<td style="text-align:right;">
+113
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="citation">@dvpw</span>
+</td>
+<td style="text-align:right;">
+112
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dvpw2018
+</td>
+<td style="text-align:right;">
+111
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="citation">@historikertag</span>
+</td>
+<td style="text-align:right;">
+109
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+bu
+</td>
+<td style="text-align:right;">
+106
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+de
+</td>
+<td style="text-align:right;">
+97
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="citation">@dgsoziologie</span>
+</td>
+<td style="text-align:right;">
+95
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+mı
+</td>
+<td style="text-align:right;">
+94
+</td>
+</tr>
+</tbody>
+</table>
 <blockquote>
 <p>Great. But … what is “amp”???</p>
 </blockquote>
 </div>
 <div id="inspect-keyword-in-context-kwic-for-amp" class="section level3">
 <h3><span class="header-section-number">3.2.3</span> Inspect “Keyword in Context” <code>kwic()</code> for “amp”</h3>
-<pre class="r"><code>kwic(joint_corpus, &quot;amp&quot;, window = 3)  %&gt;% 
+<pre class="r"><code>kwic(joint_corpus, &quot;amp&quot;, window = 3)  %&gt;%
+  # vs. kwic(x, phrase(&quot;term1 term2&quot;))
   as_tibble() %&gt;% # needed for kwic()
   select(pre:post) %&gt;%
-  head(10) %&gt;%
-  knitr::kable(&quot;html&quot;)</code></pre>
+  head(10) %&gt;% 
+  knitr::kable(format = &quot;html&quot;, digits = 2)</code></pre>
 <table>
 <thead>
 <tr>
@@ -452,7 +1031,6 @@ amp
 </tr>
 </tbody>
 </table>
-<pre class="r"><code># vs. kwic(x, phrase(&quot;term1 term2&quot;))</code></pre>
 <blockquote>
 <p>“amp” == “&amp;amp” which is the <code>HTML</code> term for &amp; / ampersand (but “&amp;” is removed when we create the corpus with <code>remove_punct = TRUE</code>, so only “amp” remains. Cool.)</p>
 </blockquote>
@@ -469,17 +1047,181 @@ joint_dfm &lt;- dfm(joint_corpus,
                  remove_url = TRUE,
                  tolower = TRUE,
                  verbose = FALSE) #for website readability
-topfeatures(joint_dfm, 20)</code></pre>
-<pre><code>##         #dvpw18        #dgs2018       #histag18          #dgs18 
-##            1681            1174            1037             584 
-## #informatik2018           panel   @dvpwkongress      demokratie 
-##             321             172             166             145 
-## @osymbaskanligi             dgs           innen            #dgs 
-##             123             121             114             113 
-##           @dvpw       #dvpw2018  @historikertag              bu 
-##             112             111             109             106 
-##              de   @dgsoziologie              mi           thema 
-##              97              95              94              93</code></pre>
+topfeatures(joint_dfm, 20) %&gt;% 
+  knitr::kable(format = &quot;html&quot;, digits = 2)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+#dvpw18
+</td>
+<td style="text-align:right;">
+1681
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dgs2018
+</td>
+<td style="text-align:right;">
+1174
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#histag18
+</td>
+<td style="text-align:right;">
+1037
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dgs18
+</td>
+<td style="text-align:right;">
+584
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#informatik2018
+</td>
+<td style="text-align:right;">
+321
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+panel
+</td>
+<td style="text-align:right;">
+172
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="citation">@dvpwkongress</span>
+</td>
+<td style="text-align:right;">
+166
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+demokratie
+</td>
+<td style="text-align:right;">
+145
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="citation">@osymbaskanligi</span>
+</td>
+<td style="text-align:right;">
+123
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+dgs
+</td>
+<td style="text-align:right;">
+121
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+innen
+</td>
+<td style="text-align:right;">
+114
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dgs
+</td>
+<td style="text-align:right;">
+113
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="citation">@dvpw</span>
+</td>
+<td style="text-align:right;">
+112
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dvpw2018
+</td>
+<td style="text-align:right;">
+111
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="citation">@historikertag</span>
+</td>
+<td style="text-align:right;">
+109
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+bu
+</td>
+<td style="text-align:right;">
+106
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+de
+</td>
+<td style="text-align:right;">
+97
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="citation">@dgsoziologie</span>
+</td>
+<td style="text-align:right;">
+95
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+mı
+</td>
+<td style="text-align:right;">
+94
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+thema
+</td>
+<td style="text-align:right;">
+93
+</td>
+</tr>
+</tbody>
+</table>
 <blockquote>
 <p>That’s better. But what’s up with “innen” and “bu”?</p>
 </blockquote>
@@ -489,8 +1231,8 @@ topfeatures(joint_dfm, 20)</code></pre>
 <pre class="r"><code>kwic(joint_corpus, &quot;innen&quot;, window = 3)  %&gt;% 
   as_tibble() %&gt;% # needed for kwic()
   select(pre:post) %&gt;%
-  head(10) %&gt;%
-  knitr::kable(format = &quot;html&quot;)</code></pre>
+  head(10) %&gt;% 
+  knitr::kable(format = &quot;html&quot;, digits = 2)</code></pre>
 <table>
 <thead>
 <tr>
@@ -632,17 +1374,181 @@ joint_dfm &lt;- dfm(joint_corpus,
                  remove_url = TRUE,
                  tolower = TRUE,
                  verbose = FALSE) #for website readability
-topfeatures(joint_dfm, 20)</code></pre>
-<pre><code>##         #dvpw18        #dgs2018       #histag18          #dgs18 
-##            1681            1174            1037             584 
-## #informatik2018           panel   @dvpwkongress      demokratie 
-##             321             172             166             145 
-## @osymbaskanligi             dgs            #dgs           @dvpw 
-##             123             121             113             112 
-##       #dvpw2018  @historikertag              bu              de 
-##             111             109             106              97 
-##   @dgsoziologie              mi           thema             bir 
-##              95              94              93              89</code></pre>
+topfeatures(joint_dfm, 20) %&gt;% 
+  knitr::kable(format = &quot;html&quot;, digits = 2)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+#dvpw18
+</td>
+<td style="text-align:right;">
+1681
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dgs2018
+</td>
+<td style="text-align:right;">
+1174
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#histag18
+</td>
+<td style="text-align:right;">
+1037
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dgs18
+</td>
+<td style="text-align:right;">
+584
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#informatik2018
+</td>
+<td style="text-align:right;">
+321
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+panel
+</td>
+<td style="text-align:right;">
+172
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="citation">@dvpwkongress</span>
+</td>
+<td style="text-align:right;">
+166
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+demokratie
+</td>
+<td style="text-align:right;">
+145
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="citation">@osymbaskanligi</span>
+</td>
+<td style="text-align:right;">
+123
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+dgs
+</td>
+<td style="text-align:right;">
+121
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dgs
+</td>
+<td style="text-align:right;">
+113
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="citation">@dvpw</span>
+</td>
+<td style="text-align:right;">
+112
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dvpw2018
+</td>
+<td style="text-align:right;">
+111
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="citation">@historikertag</span>
+</td>
+<td style="text-align:right;">
+109
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+bu
+</td>
+<td style="text-align:right;">
+106
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+de
+</td>
+<td style="text-align:right;">
+97
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="citation">@dgsoziologie</span>
+</td>
+<td style="text-align:right;">
+95
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+mı
+</td>
+<td style="text-align:right;">
+94
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+thema
+</td>
+<td style="text-align:right;">
+93
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+bir
+</td>
+<td style="text-align:right;">
+89
+</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 </div>
@@ -657,8 +1563,8 @@ topfeatures(joint_dfm, 20)</code></pre>
 <pre class="r"><code>kwic(joint_corpus, &quot;bu&quot;, window = 3) %&gt;% 
   as_tibble() %&gt;% # needed for kwic()
   select(pre:post) %&gt;%
-  head(10) %&gt;%
-  knitr::kable(format = &quot;html&quot;)</code></pre>
+  head(10) %&gt;% 
+  knitr::kable(format = &quot;html&quot;, digits = 2)</code></pre>
 <table>
 <thead>
 <tr>
@@ -798,38 +1704,186 @@ Bu
 <blockquote>
 <p>WHAT ELSE DID I MISS?</p>
 </blockquote>
-<pre class="r"><code>dgs_collection %&gt;% group_by(lang) %&gt;% count() %&gt;% arrange(desc(n))</code></pre>
-<pre><code>## # A tibble: 8 x 2
-## # Groups:   lang [8]
-##   lang      n
-##   &lt;chr&gt; &lt;int&gt;
-## 1 tr      957
-## 2 de      570
-## 3 en       72
-## 4 und      68
-## 5 in        4
-## 6 es        1
-## 7 fr        1
-## 8 tl        1</code></pre>
+<pre class="r"><code>dgs_collection %&gt;% group_by(lang) %&gt;% count() %&gt;% arrange(desc(n)) %&gt;% 
+  knitr::kable(format = &quot;html&quot;, digits = 2)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+lang
+</th>
+<th style="text-align:right;">
+n
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+tr
+</td>
+<td style="text-align:right;">
+957
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+de
+</td>
+<td style="text-align:right;">
+570
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:right;">
+72
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+und
+</td>
+<td style="text-align:right;">
+68
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+in
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+es
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fr
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tl
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+</tbody>
+</table>
 <blockquote>
 <p>Yikes! So my result from the previous post were totally biased in favour of the Sociology Conference. And what language is <code>&quot;und&quot;</code> and what about the joint collection?</p>
 </blockquote>
 <pre class="r"><code>joint_collection %&gt;% group_by(lang) %&gt;% count() %&gt;% 
-  filter(n &gt; 2) %&gt;% arrange(desc(n))</code></pre>
-<pre><code>## # A tibble: 10 x 2
-## # Groups:   lang [10]
-##    lang      n
-##    &lt;chr&gt; &lt;int&gt;
-##  1 de     3156
-##  2 tr      957
-##  3 en      540
-##  4 und     166
-##  5 nl       20
-##  6 sv        6
-##  7 es        5
-##  8 in        5
-##  9 fr        4
-## 10 no        3</code></pre>
+  filter(n &gt; 2) %&gt;% arrange(desc(n)) %&gt;% 
+  knitr::kable(format = &quot;html&quot;, digits = 2)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+lang
+</th>
+<th style="text-align:right;">
+n
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+de
+</td>
+<td style="text-align:right;">
+3156
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tr
+</td>
+<td style="text-align:right;">
+957
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:right;">
+540
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+und
+</td>
+<td style="text-align:right;">
+166
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+nl
+</td>
+<td style="text-align:right;">
+20
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+sv
+</td>
+<td style="text-align:right;">
+6
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+es
+</td>
+<td style="text-align:right;">
+5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+in
+</td>
+<td style="text-align:right;">
+5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fr
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+no
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+</tbody>
+</table>
 <blockquote>
 <p><code>lang == &quot;tr&quot;</code> and <code>lang == &quot;und&quot;</code> definitly need some closer inspection.</p>
 </blockquote>
@@ -863,20 +1917,94 @@ joint_collection_week %&gt;%
   group_by(lang) %&gt;% 
   count() %&gt;%
   filter(n &gt; 2) %&gt;% 
-  arrange(desc(n))</code></pre>
-<pre><code>## # A tibble: 9 x 2
-## # Groups:   lang [9]
-##   lang      n
-##   &lt;chr&gt; &lt;int&gt;
-## 1 de     3068
-## 2 en      522
-## 3 und     120
-## 4 tr       92
-## 5 nl       19
-## 6 sv        6
-## 7 es        4
-## 8 fr        4
-## 9 no        3</code></pre>
+  arrange(desc(n)) %&gt;% 
+  knitr::kable(format = &quot;html&quot;, digits = 2)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+lang
+</th>
+<th style="text-align:right;">
+n
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+de
+</td>
+<td style="text-align:right;">
+3068
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:right;">
+522
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+und
+</td>
+<td style="text-align:right;">
+120
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tr
+</td>
+<td style="text-align:right;">
+92
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+nl
+</td>
+<td style="text-align:right;">
+19
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+sv
+</td>
+<td style="text-align:right;">
+6
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+es
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fr
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+no
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+</tbody>
+</table>
 <p>Ok, that’s already better, but there are still 92 Turkish Tweets in the sample, and 120 Tweets for <code>lang == &quot;und&quot;</code>.</p>
 <blockquote>
 <p>It turns out, however, that <code>lang == &quot;und&quot;</code> (un)fortunatly means <code>language undefined</code> <a href="https://blog.twitter.com/developer/en_us/a/2013/introducing-new-metadata-for-tweets.html" target="_blank">cf. Twitter</a>…</p>
@@ -885,16 +2013,49 @@ joint_collection_week %&gt;%
 <pre class="r"><code>joint_collection_week %&gt;%
   filter(lang == &quot;tr&quot;) %&gt;%
   select(text) %&gt;% 
-  head() # for website readability</code></pre>
-<pre><code>## # A tibble: 6 x 1
-##   text                                                                     
-##   &lt;chr&gt;                                                                    
-## 1 Çok sükür Allahim... #dgs2018 https://t.co/DAXRFoawzq                    
-## 2 &quot;Mimar sinan güzel sanatlarli olduk be \U0001f602 #Dgstercih #dgs2018&quot;   
-## 3 #dgs2018 derslerden muaf olmak için en çok 5 yil önce ilgili programdan ~
-## 4 #dgs2018 AÖF lisans dersleri DGS muafiyetinde kullaniyor mu??            
-## 5 &quot;Bilgi Üniversitesi&#39;nde 2000li arkadaslarimla hazirlik okuyacagim. Yasli~
-## 6 4 puan ile iktisat kaybettim sizce ek tercihlerde yazsam çikar mi?#dgs20~</code></pre>
+  head() %&gt;% # for website readability
+  knitr::kable(format = &quot;html&quot;, digits = 2) </code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+text
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Çok şükür Allahım… #dgs2018 <a href="https://t.co/DAXRFoawzq" class="uri">https://t.co/DAXRFoawzq</a>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Mimar sinan güzel sanatlarlı olduk be 😂 #Dgstercih #dgs2018
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dgs2018 derslerden muaf olmak için en çok 5 yıl önce ilgili programdan mezun olmak gerekir şartı var mı arkadaşlar????? Bilen birisi bilgilendirsin lütfen.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dgs2018 AÖF lisans dersleri DGS muafiyetinde kullanıyor mu??
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Bilgi Üniversitesi’nde 2000li arkadaşlarımla hazırlık okuyacağım. Yaşlı olmak kontenjanından dışlanmam umarım🙄 #dgs2018 <span class="citation">@BiLGiOfficial</span>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+4 puan ile iktisat kaybettim sizce ek tercihlerde yazsam çıkar mı?#dgs2018 #DGSekyerleştirme #dgs #DGSE #dgsmovie3 #dgs
+</td>
+</tr>
+</tbody>
+</table>
 <p>So all the Tweets are exclusivly in Turkish, and it is more than appropriate to exclude them from our analysis here AND in my preceding blog post. (Update incoming!)</p>
 <blockquote>
 <p>But who’s going to tell the German Sociologists that my report from last week had to be corrected and that they didn’t perform that well, actually …!?</p>
@@ -910,11 +2071,24 @@ joint_collection_week %&gt;%
   filter(str_detect(text,&quot;yks2018|yksdil|dgsankara|cumhuriyetüniversitesi|DanceKafe&quot;) | lang == &quot;tr&quot;) %&gt;% 
   select(user_id) %&gt;% 
   distinct()
-tr_user %&gt;% count()</code></pre>
-<pre><code>## # A tibble: 1 x 1
-##       n
-##   &lt;int&gt;
-## 1   529</code></pre>
+tr_user %&gt;% count() %&gt;% 
+  knitr::kable(format = &quot;html&quot;, digits = 2)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:right;">
+n
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+529
+</td>
+</tr>
+</tbody>
+</table>
 <p>Now, we’ll <code>anti_join()</code> the <code>dgs_collection</code> with this list</p>
 <pre class="r"><code>dgs_collection %&gt;% anti_join(tr_user, by = &quot;user_id&quot;) %&gt;% count()</code></pre>
 <pre><code>## # A tibble: 1 x 1
@@ -924,11 +2098,24 @@ tr_user %&gt;% count()</code></pre>
 <p>Let’s compare with the simpler <code>filter(lang!=&quot;tr&quot;)</code> approach</p>
 <pre class="r"><code>dgs_collection %&gt;% 
   filter(lang != &quot;tr&quot;) %&gt;% 
-  count()</code></pre>
-<pre><code>## # A tibble: 1 x 1
-##       n
-##   &lt;int&gt;
-## 1   717</code></pre>
+  count() %&gt;% 
+  knitr::kable(format = &quot;html&quot;, digits = 2)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:right;">
+n
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+717
+</td>
+</tr>
+</tbody>
+</table>
 <p>That’s a difference of another ~30 Tweets. Nice. We’ll use that in a minute.</p>
 </div>
 </div>
@@ -1020,7 +2207,7 @@ joint_corpus &lt;- joint_corpus + mixed_corpus #3,748 docs</code></pre>
 <pre><code>##    ... removed 608 features
 ##    ... created a 3,748 x 15,763 sparse dfm
 ##    ... complete. 
-## Elapsed time: 0.77 seconds.</code></pre>
+## Elapsed time: 0.42 seconds.</code></pre>
 <p>We’re down to 15763 features from 3748 documents (Tweets) and were able to get rid of 608 features with the iteratively refined approach.</p>
 <p>And as we might want to use a grouped dfm for group comparisons (and <code>dfm_group</code> doesn’t seem to work for me here), we’ll create a custom grouped one, too.</p>
 <pre class="r"><code>## not working:
@@ -1123,21 +2310,181 @@ joint_dfm_grouped &lt;- dfm(joint_corpus,
 <h2><span class="header-section-number">7.2</span> Hashtags</h2>
 <p><strong>Most popular hashtags by absolute numbers:</strong></p>
 <pre class="r"><code>hashtags_dfm &lt;- dfm_select(joint_dfm, (&#39;#*&#39;))
-topfeatures(hashtags_dfm, 20, scheme = &quot;count&quot;)</code></pre>
-<pre><code>##             #dvpw18           #histag18              #dgs18 
-##                1694                1043                 622 
-##     #informatik2018            #dgs2018           #dvpw2018 
-##                 313                 136                 113 
-##  #historikertag2018            #münster          #frankfurt 
-##                  84                  53                  46 
-##         #demokratie             #berlin    #digitalisierung 
-##                  45                  45                  43 
-##         #steinmeier #departmentstruktur         #soziologie 
-##                  41                  41                  38 
-##            #zetsche               #dvpw               #jena 
-##                  36                  35                  34 
-##             #bremen       #histocamptag 
-##                  33                  33</code></pre>
+topfeatures(hashtags_dfm, 20, scheme = &quot;count&quot;) %&gt;% 
+  knitr::kable(format = &quot;html&quot;, digits = 2)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+#dvpw18
+</td>
+<td style="text-align:right;">
+1694
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#histag18
+</td>
+<td style="text-align:right;">
+1043
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dgs18
+</td>
+<td style="text-align:right;">
+622
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#informatik2018
+</td>
+<td style="text-align:right;">
+313
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dgs2018
+</td>
+<td style="text-align:right;">
+136
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dvpw2018
+</td>
+<td style="text-align:right;">
+113
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#historikertag2018
+</td>
+<td style="text-align:right;">
+84
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#münster
+</td>
+<td style="text-align:right;">
+53
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#frankfurt
+</td>
+<td style="text-align:right;">
+46
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#demokratie
+</td>
+<td style="text-align:right;">
+45
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#berlin
+</td>
+<td style="text-align:right;">
+45
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#digitalisierung
+</td>
+<td style="text-align:right;">
+43
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#steinmeier
+</td>
+<td style="text-align:right;">
+41
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#departmentstruktur
+</td>
+<td style="text-align:right;">
+41
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#soziologie
+</td>
+<td style="text-align:right;">
+38
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#zetsche
+</td>
+<td style="text-align:right;">
+36
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dvpw
+</td>
+<td style="text-align:right;">
+35
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#jena
+</td>
+<td style="text-align:right;">
+34
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#bremen
+</td>
+<td style="text-align:right;">
+33
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#histocamptag
+</td>
+<td style="text-align:right;">
+33
+</td>
+</tr>
+</tbody>
+</table>
 <p><strong>Most popular hashtags by absolute numbers per Discipline:</strong></p>
 <pre class="r"><code>topfeatures(hashtags_dfm, 20, group = &quot;Discipline&quot;, scheme = &quot;count&quot;)</code></pre>
 <pre><code>## $PolSci
@@ -1220,27 +2567,261 @@ topfeatures(hashtags_dfm, 20, scheme = &quot;count&quot;)</code></pre>
 </blockquote>
 <p><strong>Most popular Hashtags by shared <code>docfreq</code> / feature-document frequency:</strong></p>
 <pre class="r"><code>dfm_select(joint_dfm_grouped, (&#39;#*&#39;)) %&gt;% 
-  topfeatures(30, scheme = &quot;docfreq&quot;)</code></pre>
-<pre><code>##               #dvpw18             #histag18       #informatik2018 
-##                     5                     5                     5 
-##                 #powi             #dvpw2018            #göttingen 
-##                     4                     4                     4 
-##            #archivtag              #twitter      #digitalisierung 
-##                     4                     4                     4 
-##                  #afd #sozialwissenschaften                #dgs18 
-##                     4                     4                     4 
-##            #infdh2018              #gfm2018         #servicetweet 
-##                     4                     4                     3 
-##                  #gew               #türkei              #daimler 
-##                     3                     3                     3 
-##               #berlin          #hambibleibt       #hambacherforst 
-##                     3                     3                     3 
-##       #nachhaltigkeit           #openaccess            #migration 
-##                     3                     3                     3 
-##          #darkphoenix         #facebookdown   #innsbrucktirol2018 
-##                     3                     3                     3 
-##              #bigdata                  #spd                   #ff 
-##                     3                     3                     3</code></pre>
+  topfeatures(30, scheme = &quot;docfreq&quot;) %&gt;% 
+  knitr::kable(format = &quot;html&quot;, digits = 2)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+#dvpw18
+</td>
+<td style="text-align:right;">
+5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#histag18
+</td>
+<td style="text-align:right;">
+5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#informatik2018
+</td>
+<td style="text-align:right;">
+5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#powi
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dvpw2018
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#göttingen
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#archivtag
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#twitter
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#digitalisierung
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#afd
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#sozialwissenschaften
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dgs18
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#infdh2018
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#gfm2018
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#servicetweet
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#gew
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#türkei
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#daimler
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#berlin
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#hambibleibt
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#hambacherforst
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#nachhaltigkeit
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#openaccess
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#migration
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#darkphoenix
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#facebookdown
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#innsbrucktirol2018
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#bigdata
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#spd
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#ff
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div id="network-of-feature-co-occurrences" class="section level2">
 <h2><span class="header-section-number">7.3</span> Network of feature co-occurrences</h2>

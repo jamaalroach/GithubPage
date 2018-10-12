@@ -117,16 +117,17 @@ mixed_collection <- subset(joint_collection,
   distinct(status_id, .keep_all = TRUE) # find duplicates
 
 mixed_collection$Discipline <- "Mixed"
-mixed_collection %>% count() # %>% knitr::kable()
 ```
 
-> Only 42 Tweets? Out of a sample of almost 5K? Twitter Silos, anyone?
+> Only `r mixed_collection %>% count()` Tweets? Out of a sample of almost 5K? Twitter Silos, anyone?
 
 ## Inspect "Interdisciplinary" Tweets
 
 ```{r echo=TRUE}
-mixed_collection %>% arrange(created_at) %>% select(text) %>% head(10) # %>%
-  # knitr::kable(format = "html")
+mixed_collection %>% 
+  arrange(created_at) %>% 
+  select(text) %>% head(10) %>% 
+  knitr::kable(format = "html", digits = 2)
 ```
 
 
@@ -194,7 +195,8 @@ joint_dfm <- dfm(joint_corpus,
 ```
 
 ```{r}
-topfeatures(joint_dfm, 20)
+topfeatures(joint_dfm, 20) %>% 
+  knitr::kable(format = "html", digits = 2)
 ```
 
 We get `nfeat(joint_dfm)` = `r nfeat(joint_dfm)` features, but as we can see from the `topfeatures()` output, the top features are mostly (and unsurprisingly very common German words which are also know as `stopwords` in NLP).
@@ -208,7 +210,8 @@ joint_dfm <- dfm(joint_corpus,
                  remove_url = TRUE,
                  tolower = TRUE,
                  verbose = FALSE) #for website readability
-topfeatures(joint_dfm, 20)
+topfeatures(joint_dfm, 20) %>% 
+  knitr::kable(format = "html", digits = 2)
 ```
 
 > Apart from English tokens (to, on, is, for, of, a), common German words such as "beim" or "dass" are still included. The latter is rather weird...
@@ -220,7 +223,8 @@ Since we've seen that "dass" is still included in our corpus, let's i.e. look at
 ```{r}
 stopwords("german") %>%
   as_tibble() %>%
-  filter(str_detect(value, pattern = "^da.*"))
+  filter(str_detect(value, pattern = "^da.*")) %>% 
+  knitr::kable(format = "html", digits = 2)
 # missing: beim
 ```
 
@@ -260,7 +264,8 @@ joint_dfm <- dfm(joint_corpus,
                  remove_url = TRUE,
                  tolower = TRUE,
                  verbose = FALSE) #for website readability
-topfeatures(joint_dfm, 20)
+topfeatures(joint_dfm, 20) %>% 
+  knitr::kable(format = "html", digits = 2)
 ```
 
 > Great. But ... what is "amp"???
@@ -268,12 +273,13 @@ topfeatures(joint_dfm, 20)
 ### Inspect "Keyword in Context" `kwic()` for "amp"
 
 ```{r}
-kwic(joint_corpus, "amp", window = 3)  %>% 
+kwic(joint_corpus, "amp", window = 3)  %>%
+  # vs. kwic(x, phrase("term1 term2"))
   as_tibble() %>% # needed for kwic()
   select(pre:post) %>%
-  head(10) %>%
-  knitr::kable("html")
-# vs. kwic(x, phrase("term1 term2"))
+  head(10) %>% 
+  knitr::kable(format = "html", digits = 2)
+
 ```
 
 > "amp" == "\&amp" which is the `HTML` term for \& / ampersand (but "\&" is removed when we create the corpus with `remove_punct = TRUE`, so only "amp" remains. Cool.)
@@ -293,7 +299,8 @@ joint_dfm <- dfm(joint_corpus,
                  remove_url = TRUE,
                  tolower = TRUE,
                  verbose = FALSE) #for website readability
-topfeatures(joint_dfm, 20)
+topfeatures(joint_dfm, 20) %>% 
+  knitr::kable(format = "html", digits = 2)
 ```
 
 > That's better. But what's up with "innen" and "bu"?
@@ -304,8 +311,8 @@ topfeatures(joint_dfm, 20)
 kwic(joint_corpus, "innen", window = 3)  %>% 
   as_tibble() %>% # needed for kwic()
   select(pre:post) %>%
-  head(10) %>%
-  knitr::kable(format = "html")
+  head(10) %>% 
+  knitr::kable(format = "html", digits = 2)
 ```
 
 > Ok, so `"< / | * >innen"` is part of the gendered forms of plurals of German terms such as Colleagues, Citizens, Rassists et al. We might want to think of a robust solution - which should not be stemming - here. Maybe `ngrams=2` or some clever `str_c(<regex> + (* | /) + "innen"")` might help. But for now we'll just add `"innen"` as a stopword.
@@ -322,7 +329,8 @@ joint_dfm <- dfm(joint_corpus,
                  remove_url = TRUE,
                  tolower = TRUE,
                  verbose = FALSE) #for website readability
-topfeatures(joint_dfm, 20)
+topfeatures(joint_dfm, 20) %>% 
+  knitr::kable(format = "html", digits = 2)
 ```
 
 # The Turkish Plot-Twist
@@ -337,8 +345,8 @@ So what about `"bu"`?
 kwic(joint_corpus, "bu", window = 3) %>% 
   as_tibble() %>% # needed for kwic()
   select(pre:post) %>%
-  head(10) %>%
-  knitr::kable(format = "html")
+  head(10) %>% 
+  knitr::kable(format = "html", digits = 2)
 ```
 
 > Turkish? Huh? Seems like the Sociologists' hashtag (\#dgs18, \#dgs2018) was heaviliy used by the Turkish Twitter community, too.
@@ -352,14 +360,16 @@ dgs_collection %>% filter(lang == "tr") %>% count()
 > WHAT ELSE DID I MISS?
 
 ```{r}
-dgs_collection %>% group_by(lang) %>% count() %>% arrange(desc(n))
+dgs_collection %>% group_by(lang) %>% count() %>% arrange(desc(n)) %>% 
+  knitr::kable(format = "html", digits = 2)
 ```
 
 > Yikes! So my result from the previous post were totally biased in favour of the Sociology Conference. And what language is `"und"` and what about the joint collection?
 
 ```{r}
 joint_collection %>% group_by(lang) %>% count() %>% 
-  filter(n > 2) %>% arrange(desc(n))
+  filter(n > 2) %>% arrange(desc(n)) %>% 
+  knitr::kable(format = "html", digits = 2)
 ```
 
 > `lang == "tr"` and `lang == "und" ` definitly need some closer inspection.
@@ -400,7 +410,8 @@ joint_collection_week %>%
   group_by(lang) %>% 
   count() %>%
   filter(n > 2) %>% 
-  arrange(desc(n))
+  arrange(desc(n)) %>% 
+  knitr::kable(format = "html", digits = 2)
 ```
 
 Ok, that's already better, but there are still `r joint_collection_week %>% filter(lang=="tr") %>% count()` Turkish Tweets in the sample, and `r joint_collection_week %>% filter(lang=="und") %>% count()` Tweets for `lang == "und"`.
@@ -413,7 +424,8 @@ Let's have a look at the remaining Turkish Tweets and then rebuild our corpora a
 joint_collection_week %>%
   filter(lang == "tr") %>%
   select(text) %>% 
-  head() # for website readability
+  head() %>% # for website readability
+  knitr::kable(format = "html", digits = 2) 
 ```
 
 So all the Tweets are exclusivly in Turkish, and it is more than appropriate to exclude them from our analysis here AND in my preceding blog post. (Update incoming!)
@@ -431,7 +443,8 @@ tr_user <- dgs_collection %>%
   filter(str_detect(text,"yks2018|yksdil|dgsankara|cumhuriyetüniversitesi|DanceKafe") | lang == "tr") %>% 
   select(user_id) %>% 
   distinct()
-tr_user %>% count()
+tr_user %>% count() %>% 
+  knitr::kable(format = "html", digits = 2)
 ```
 
 Now, we'll `anti_join()` the `dgs_collection` with this list
@@ -445,7 +458,8 @@ Let's compare with the simpler `filter(lang!="tr")` approach
 ```{r}
 dgs_collection %>% 
   filter(lang != "tr") %>% 
-  count()
+  count() %>% 
+  knitr::kable(format = "html", digits = 2)
 ```
 
 That's a difference of another ~30 Tweets. Nice. We'll use that in a minute.
@@ -593,7 +607,8 @@ topfeatures(joint_dfm, 20, groups = "Discipline") # %>% map(unlist) %>% map(knit
 
 ```{r}
 hashtags_dfm <- dfm_select(joint_dfm, ('#*'))
-topfeatures(hashtags_dfm, 20, scheme = "count")
+topfeatures(hashtags_dfm, 20, scheme = "count") %>% 
+  knitr::kable(format = "html", digits = 2)
 ```
 
 **Most popular hashtags by absolute numbers per Discipline:**
@@ -608,7 +623,8 @@ topfeatures(hashtags_dfm, 20, group = "Discipline", scheme = "count")
 
 ```{r}
 dfm_select(joint_dfm_grouped, ('#*')) %>% 
-  topfeatures(30, scheme = "docfreq")
+  topfeatures(30, scheme = "docfreq") %>% 
+  knitr::kable(format = "html", digits = 2)
 ```
 
 ## Network of feature co-occurrences
