@@ -45,18 +45,18 @@ Notice that you can score 0-18 points, where a final score of 8 allows you to be
 ## Import the Data
 Let's fetch the date from the official page of the Berlin Senate. You'll get a PDF which you have to destill with the tabulizer package (or by hand) in order to get a CSV. I will follow up with a post on using tabulizer from within RStudio anytime soon.
 
-```{r, message=TRUE}
+```{r, message=FALSE}
 library(tidyverse)
 # Datenquelle: https://www.berlin.de/sen/justiz/juristenausbildung/juristische-pruefungen/artikel.264039.php
 data_path <- here::here("static", "data", "/")
 noten_raw <- read_csv2(str_c(data_path, "noten_201704.csv")) # nach PDF -> Tabulizer
-head(noten_raw)
+head(noten_raw) %>% knitr::kable("html", 2)
 ```
 
 ## Skim / Preview the Data
 The skimr-Package - among others - is great for quickly inspecting what kind of data (variables, data type, NAs etc.) you get.
 ```{r}
-skimr::skim(noten_raw)
+skimr::skim_to_wide(noten_raw) %>% knitr::kable("html", 2)
 ```
 
 (In RStudio / R Markdown the hist column is rendered properly. You get a nice histogram per (numeric) variable. There seems to be an issue with Knitr & UTF-8 encoding on MS Windows systems.)
@@ -72,14 +72,14 @@ noten_raw %>%
   gather(key = Fach, value = noten_raw[,2:8]) %>% 
   rename(Punkte = `noten_raw[, 2:8]`) -> noten_long
 
-head(noten_long, 1)
+head(noten_long) %>% knitr::kable("html", 2)
 ```
 
 
 ## 2017/IV Joyplot 
 ### ggridges-Pkg + colors
 We load the ggridges Pkg and the beautiful Viridis color palette
-```{r, echo=TRUE}
+```{r message=FALSE}
 library(ggridges)
 library(viridis)
 ```
@@ -88,7 +88,8 @@ library(viridis)
 ```{r echo=TRUE}
 # Beschriftungen
 title_a <- c("2. Juristisches Staatsexamen, GJPA Berlin/Brandenburg")
-subtitle_a = paste0("Notenverteilung Kampagne 4/17; n = 263; \"Dur\" = durchschnittl. Examensnote\r\nLinien: rot  = \"bestanden (ausreichend)\", blau  = \"vollbefriedigend\",\r\nschwarz  = Median Gesamtnote (",median_2017,")")
+subtitle_a = paste0("Notenverteilung Kampagne 4/17; n = ",nrow(noten_raw),
+                    "; \"Dur\" = durchschnittl. Examensnote\r\nLinien: rot  = \"bestanden (ausreichend)\", blau  = \"vollbefriedigend\",\r\nschwarz  = Median Gesamtnote (",median_2017,")")
 caption_a = c("@fubits; Daten: GJPA 2018")
 ```
 
@@ -111,7 +112,10 @@ noten_long %>%
   scale_y_discrete(expand = c(0.01,0.0)) +
   scale_fill_viridis(option = "D", name = "Frequency n",
                      direction = -1, discrete = TRUE) +
-  theme(legend.position = "none")
+  # theme(legend.position = "none")
+  theme_minimal() +
+  guides(fill = FALSE)
+  
 ```
 
 
@@ -128,7 +132,9 @@ ggplot() +
     direction = -1, discrete = TRUE
   ) +
   labs(title = title_a, subtitle = subtitle_a, caption = caption_a) +
-  theme(legend.position = "none") +
+  # theme(legend.position = "none")
+  theme_minimal() +
+  guides(fill = FALSE) +
   # Linien zur Orientierung
   geom_hline(yintercept = 10, color = "blue", linetype = 4, size = 1) +
   geom_hline(yintercept = 4, color = "red", linetype = 4, size = 1) +
@@ -141,12 +147,12 @@ Grades from the 2018/01 campaign just have been released. Let's plot them for co
 ```{r, message=FALSE}
 # Datenquelle: https://www.berlin.de/sen/justiz/juristenausbildung/juristische-pruefungen/artikel.264039.php
 noten_raw_2018 <- read_csv2(str_c(data_path, "noten_201801.csv")) # nach PDF -> Tabulizer
-head(noten_raw_2018)
+head(noten_raw_2018) %>% knitr::kable("html", 2)
 ```
 
 
 ```{r}
-skimr::skim(noten_raw_2018)
+skimr::skim_to_wide(noten_raw_2018) %>% knitr::kable("html", 2)
 ```
 
 ```{r echo=TRUE}
@@ -156,13 +162,14 @@ noten_raw_2018 %>%
   gather(key = Fach, value = noten_raw_2018[,2:8]) %>% 
   rename(Punkte = `noten_raw_2018[, 2:8]`) -> noten_long_2018
 
-head(noten_long_2018, 1)
+head(noten_long_2018, 1) %>% knitr::kable("html", 2)
 ```
 
 ```{r echo=TRUE}
 # Beschriftungen
 title_a <- c("2. Juristisches Staatsexamen, GJPA Berlin/Brandenburg")
-subtitle_a = paste0("Notenverteilung Kampagne 1/18; n = 277; \"Dur\" = durchschnittl. Examensnote\r\nLinien: rot  = \"bestanden (ausreichend)\", blau  = \"vollbefriedigend\",\r\nschwarz  = Median Gesamtnote (",median_2018,")")
+subtitle_a = paste0("Notenverteilung Kampagne 1/18; n = ",nrow(noten_raw_2018),
+                    "; \"Dur\" = durchschnittl. Examensnote\r\nLinien: rot  = \"bestanden (ausreichend)\", blau  = \"vollbefriedigend\",\r\nschwarz  = Median Gesamtnote (",median_2018,")")
 caption_a = c("@fubits; Daten: GJPA 2018")
 ```
 
@@ -186,7 +193,9 @@ noten_long_2018 %>%
   scale_y_discrete(expand = c(0.01,0.0)) +
   scale_fill_viridis(option = "D", name = "Frequency n",
                      direction = -1, discrete = TRUE) +
-  theme(legend.position = "none")
+  # theme(legend.position = "none")
+  theme_minimal() +
+  guides(fill = FALSE)
 ```
 
 
@@ -201,7 +210,9 @@ ggplot() +
     direction = -1, discrete = TRUE
   ) +
   labs(title = title_a, subtitle = subtitle_a, caption = caption_a) +
-  theme(legend.position = "none") +
+  # theme(legend.position = "none")
+  theme_minimal() +
+  guides(fill = FALSE) +
   # Linien zur Orientierung
   geom_hline(yintercept = 10, color = "blue", linetype = 4, size = 1) +
   geom_hline(yintercept = 4, color = "red", linetype = 4, size = 1) +
