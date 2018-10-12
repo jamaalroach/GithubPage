@@ -135,7 +135,7 @@ twitter_token &lt;- readRDS(str_c(home_directory,&quot;/twitter_token.rds&quot;)
     unlist() %&gt;% glue::glue_collapse()
   }
 getTimeString()</code></pre>
-<pre><code>## 20181010223053</code></pre>
+<pre><code>## 20181012090850</code></pre>
 </div>
 <div id="prepare-filepath-for-.rds-with-here" class="section level2">
 <h2><span class="header-section-number">2.3</span> (Prepare filepath for .rds with <code>here()</code>)</h2>
@@ -725,7 +725,7 @@ all_n_tweets &lt;- all_cons %&gt;% distinct(status_id) %&gt;% nrow()</code></pre
   mutate(avg_output = (Tweets + RT + Favs)/3) %&gt;% 
   arrange(desc(avg_output)) #&gt; 1262
 # all_cons_per_user %&gt;% distinct(screen_name) %&gt;% count() #&gt; 1262
-all_cons_per_user %&gt;% head(20) %&gt;% knitr::kable(&quot;html&quot;)</code></pre>
+all_cons_per_user %&gt;% head(20) %&gt;% knitr::kable(&quot;html&quot;, digits = 2)</code></pre>
 <table>
 <thead>
 <tr>
@@ -767,7 +767,7 @@ dvpw
 PolSci
 </td>
 <td style="text-align:right;">
-512.00000
+512.00
 </td>
 </tr>
 <tr>
@@ -787,7 +787,7 @@ dvpwkongress
 PolSci
 </td>
 <td style="text-align:right;">
-198.00000
+198.00
 </td>
 </tr>
 <tr>
@@ -807,7 +807,7 @@ thothiel
 PolSci
 </td>
 <td style="text-align:right;">
-124.33333
+124.33
 </td>
 </tr>
 <tr>
@@ -827,7 +827,7 @@ Mareike2405
 History
 </td>
 <td style="text-align:right;">
-113.33333
+113.33
 </td>
 </tr>
 <tr>
@@ -847,7 +847,7 @@ ronpatz
 PolSci
 </td>
 <td style="text-align:right;">
-106.33333
+106.33
 </td>
 </tr>
 <tr>
@@ -867,7 +867,7 @@ PortalLISA
 History
 </td>
 <td style="text-align:right;">
-87.00000
+87.00
 </td>
 </tr>
 <tr>
@@ -887,7 +887,7 @@ moritz_hoffmann
 History
 </td>
 <td style="text-align:right;">
-86.33333
+86.33
 </td>
 </tr>
 <tr>
@@ -907,7 +907,7 @@ janinefunke
 History
 </td>
 <td style="text-align:right;">
-84.66667
+84.67
 </td>
 </tr>
 <tr>
@@ -927,7 +927,7 @@ SassanGholiagha
 PolSci
 </td>
 <td style="text-align:right;">
-82.00000
+82.00
 </td>
 </tr>
 <tr>
@@ -947,7 +947,7 @@ elvira_rosert
 PolSci
 </td>
 <td style="text-align:right;">
-81.66667
+81.67
 </td>
 </tr>
 <tr>
@@ -967,7 +967,7 @@ LordElend
 Sociology
 </td>
 <td style="text-align:right;">
-80.66667
+80.67
 </td>
 </tr>
 <tr>
@@ -987,7 +987,7 @@ juergenzimmerer
 History
 </td>
 <td style="text-align:right;">
-76.33333
+76.33
 </td>
 </tr>
 <tr>
@@ -1007,7 +1007,7 @@ RichterHedwig
 History
 </td>
 <td style="text-align:right;">
-72.66667
+72.67
 </td>
 </tr>
 <tr>
@@ -1027,7 +1027,7 @@ DrMichaelHein
 PolSci
 </td>
 <td style="text-align:right;">
-72.33333
+72.33
 </td>
 </tr>
 <tr>
@@ -1047,7 +1047,7 @@ jakobfrohmann
 History
 </td>
 <td style="text-align:right;">
-71.33333
+71.33
 </td>
 </tr>
 <tr>
@@ -1067,7 +1067,7 @@ wahlforschung
 PolSci
 </td>
 <td style="text-align:right;">
-71.00000
+71.00
 </td>
 </tr>
 <tr>
@@ -1087,7 +1087,7 @@ PetraGuasti
 PolSci
 </td>
 <td style="text-align:right;">
-68.00000
+68.00
 </td>
 </tr>
 <tr>
@@ -1107,7 +1107,7 @@ daniellambach
 PolSci
 </td>
 <td style="text-align:right;">
-68.00000
+68.00
 </td>
 </tr>
 <tr>
@@ -1127,7 +1127,7 @@ aberehrlich
 History
 </td>
 <td style="text-align:right;">
-64.33333
+64.33
 </td>
 </tr>
 <tr>
@@ -1147,7 +1147,7 @@ MaxGrund4
 History
 </td>
 <td style="text-align:right;">
-63.66667
+63.67
 </td>
 </tr>
 </tbody>
@@ -1321,15 +1321,116 @@ gfm_box &lt;- gfm_counts %&gt;%
   group_by(discipline) %&gt;% 
   summarise(Users = n(), Tweets = sum(Tweets),
             RT = sum(RT), Fav = sum(Favs)) %&gt;% 
-  arrange(desc(Users))</code></pre>
-<pre><code>## # A tibble: 5 x 5
-##   discipline   Users Tweets    RT   Fav
-##   &lt;chr&gt;        &lt;int&gt;  &lt;int&gt; &lt;int&gt; &lt;int&gt;
-## 1 History        299   1049  1514  6362
-## 2 PolSci         240   1752  1678  5203
-## 3 Sociology      150    641   514  2677
-## 4 CS              94    307   394  1020
-## 5 MediaStudies    42    127   147   582</code></pre>
+  arrange(desc(Users)) %&gt;% 
+  knitr::kable(format = &quot;html&quot;, digits = 2)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+discipline
+</th>
+<th style="text-align:right;">
+Users
+</th>
+<th style="text-align:right;">
+Tweets
+</th>
+<th style="text-align:right;">
+RT
+</th>
+<th style="text-align:right;">
+Fav
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+History
+</td>
+<td style="text-align:right;">
+299
+</td>
+<td style="text-align:right;">
+1049
+</td>
+<td style="text-align:right;">
+1514
+</td>
+<td style="text-align:right;">
+6362
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PolSci
+</td>
+<td style="text-align:right;">
+240
+</td>
+<td style="text-align:right;">
+1752
+</td>
+<td style="text-align:right;">
+1678
+</td>
+<td style="text-align:right;">
+5203
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Sociology
+</td>
+<td style="text-align:right;">
+150
+</td>
+<td style="text-align:right;">
+641
+</td>
+<td style="text-align:right;">
+514
+</td>
+<td style="text-align:right;">
+2677
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CS
+</td>
+<td style="text-align:right;">
+94
+</td>
+<td style="text-align:right;">
+307
+</td>
+<td style="text-align:right;">
+394
+</td>
+<td style="text-align:right;">
+1020
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MediaStudies
+</td>
+<td style="text-align:right;">
+42
+</td>
+<td style="text-align:right;">
+127
+</td>
+<td style="text-align:right;">
+147
+</td>
+<td style="text-align:right;">
+582
+</td>
+</tr>
+</tbody>
+</table>
 <p><del>Sociology</del> History has the highest number of active users and Favs (wow!), while PolSci has a lead with the total number of Tweets.</p>
 <p>And what if we average out Tweets+RTs+Favs per User?</p>
 <pre class="r"><code>bind_rows(dvpw_counts, dgs_counts, hist_counts, inf_counts, gfm_counts) %&gt;%
@@ -1337,15 +1438,134 @@ gfm_box &lt;- gfm_counts %&gt;%
   summarise(Users = n(), Tweets = sum(Tweets),
             RT = sum(RT), Fav = sum(Favs)) %&gt;% 
   mutate(avg_output = (Tweets + RT + Fav) / Users) %&gt;% 
-  arrange(desc(avg_output))</code></pre>
-<pre><code>## # A tibble: 5 x 6
-##   discipline   Users Tweets    RT   Fav avg_output
-##   &lt;chr&gt;        &lt;int&gt;  &lt;int&gt; &lt;int&gt; &lt;int&gt;      &lt;dbl&gt;
-## 1 PolSci         240   1752  1678  5203       36.0
-## 2 History        299   1049  1514  6362       29.8
-## 3 Sociology      150    641   514  2677       25.5
-## 4 MediaStudies    42    127   147   582       20.4
-## 5 CS              94    307   394  1020       18.3</code></pre>
+  arrange(desc(avg_output)) %&gt;% 
+  knitr::kable(format = &quot;html&quot;, digits = 2)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+discipline
+</th>
+<th style="text-align:right;">
+Users
+</th>
+<th style="text-align:right;">
+Tweets
+</th>
+<th style="text-align:right;">
+RT
+</th>
+<th style="text-align:right;">
+Fav
+</th>
+<th style="text-align:right;">
+avg_output
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+PolSci
+</td>
+<td style="text-align:right;">
+240
+</td>
+<td style="text-align:right;">
+1752
+</td>
+<td style="text-align:right;">
+1678
+</td>
+<td style="text-align:right;">
+5203
+</td>
+<td style="text-align:right;">
+35.97
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+History
+</td>
+<td style="text-align:right;">
+299
+</td>
+<td style="text-align:right;">
+1049
+</td>
+<td style="text-align:right;">
+1514
+</td>
+<td style="text-align:right;">
+6362
+</td>
+<td style="text-align:right;">
+29.85
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Sociology
+</td>
+<td style="text-align:right;">
+150
+</td>
+<td style="text-align:right;">
+641
+</td>
+<td style="text-align:right;">
+514
+</td>
+<td style="text-align:right;">
+2677
+</td>
+<td style="text-align:right;">
+25.55
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MediaStudies
+</td>
+<td style="text-align:right;">
+42
+</td>
+<td style="text-align:right;">
+127
+</td>
+<td style="text-align:right;">
+147
+</td>
+<td style="text-align:right;">
+582
+</td>
+<td style="text-align:right;">
+20.38
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CS
+</td>
+<td style="text-align:right;">
+94
+</td>
+<td style="text-align:right;">
+307
+</td>
+<td style="text-align:right;">
+394
+</td>
+<td style="text-align:right;">
+1020
+</td>
+<td style="text-align:right;">
+18.31
+</td>
+</tr>
+</tbody>
+</table>
 <p>Here, the PolSci crowd has been the busiest <del>(and Sociology was rather lazy)</del>. But…</p>
 <p>... let’s have look without the <code>#TeamTakeOver</code> coup by <code>@dvpw</code>:</p>
 <pre class="r"><code>bind_rows(dvpw_counts, dgs_counts, hist_counts, inf_counts, gfm_counts) %&gt;%
@@ -1354,15 +1574,134 @@ gfm_box &lt;- gfm_counts %&gt;%
   summarise(Users = n(), Tweets = sum(Tweets),
             RT = sum(RT), Fav = sum(Favs)) %&gt;% 
   mutate(avg_output = (Tweets + RT + Fav) / Users) %&gt;% 
-  arrange(desc(avg_output))</code></pre>
-<pre><code>## # A tibble: 5 x 6
-##   discipline   Users Tweets    RT   Fav avg_output
-##   &lt;chr&gt;        &lt;int&gt;  &lt;int&gt; &lt;int&gt; &lt;int&gt;      &lt;dbl&gt;
-## 1 History        299   1049  1514  6362       29.8
-## 2 PolSci         239   1292  1182  4623       29.7
-## 3 Sociology      150    641   514  2677       25.5
-## 4 MediaStudies    42    127   147   582       20.4
-## 5 CS              94    307   394  1020       18.3</code></pre>
+  arrange(desc(avg_output)) %&gt;% 
+  knitr::kable(format = &quot;html&quot;, digits = 2)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+discipline
+</th>
+<th style="text-align:right;">
+Users
+</th>
+<th style="text-align:right;">
+Tweets
+</th>
+<th style="text-align:right;">
+RT
+</th>
+<th style="text-align:right;">
+Fav
+</th>
+<th style="text-align:right;">
+avg_output
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+History
+</td>
+<td style="text-align:right;">
+299
+</td>
+<td style="text-align:right;">
+1049
+</td>
+<td style="text-align:right;">
+1514
+</td>
+<td style="text-align:right;">
+6362
+</td>
+<td style="text-align:right;">
+29.85
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PolSci
+</td>
+<td style="text-align:right;">
+239
+</td>
+<td style="text-align:right;">
+1292
+</td>
+<td style="text-align:right;">
+1182
+</td>
+<td style="text-align:right;">
+4623
+</td>
+<td style="text-align:right;">
+29.69
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Sociology
+</td>
+<td style="text-align:right;">
+150
+</td>
+<td style="text-align:right;">
+641
+</td>
+<td style="text-align:right;">
+514
+</td>
+<td style="text-align:right;">
+2677
+</td>
+<td style="text-align:right;">
+25.55
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MediaStudies
+</td>
+<td style="text-align:right;">
+42
+</td>
+<td style="text-align:right;">
+127
+</td>
+<td style="text-align:right;">
+147
+</td>
+<td style="text-align:right;">
+582
+</td>
+<td style="text-align:right;">
+20.38
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CS
+</td>
+<td style="text-align:right;">
+94
+</td>
+<td style="text-align:right;">
+307
+</td>
+<td style="text-align:right;">
+394
+</td>
+<td style="text-align:right;">
+1020
+</td>
+<td style="text-align:right;">
+18.31
+</td>
+</tr>
+</tbody>
+</table>
 <p>Well done, Historians! If we ignore <span class="citation">@dvpw</span>’s Twitter takeover, you actually performed best (in terms of numbers, at least)!</p>
 <blockquote>
 <p>I guess it is fair to conclude that a well organised Twitter takeover by conference participants can have quite an effect on the visibility of a conference.</p>

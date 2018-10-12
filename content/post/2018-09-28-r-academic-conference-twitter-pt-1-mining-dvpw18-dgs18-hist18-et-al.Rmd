@@ -853,7 +853,7 @@ all_cons_per_user <- bind_rows(dvpw_counts, dgs_counts, hist_counts, inf_counts,
   mutate(avg_output = (Tweets + RT + Favs)/3) %>% 
   arrange(desc(avg_output)) #> 1262
 # all_cons_per_user %>% distinct(screen_name) %>% count() #> 1262
-all_cons_per_user %>% head(20) %>% knitr::kable("html")
+all_cons_per_user %>% head(20) %>% knitr::kable("html", digits = 2)
 ```
 
 ## Joint Scatterplot: per-User
@@ -980,7 +980,8 @@ bind_rows(dvpw_counts, dgs_counts, hist_counts, inf_counts, gfm_counts) %>%
   group_by(discipline) %>% 
   summarise(Users = n(), Tweets = sum(Tweets),
             RT = sum(RT), Fav = sum(Favs)) %>% 
-  arrange(desc(Users))
+  arrange(desc(Users)) %>% 
+  knitr::kable(format = "html", digits = 2)
 ```
 
 ~~Sociology~~ History has the highest number of active users and Favs (wow!), while PolSci has a lead with the total number of Tweets.
@@ -993,7 +994,8 @@ bind_rows(dvpw_counts, dgs_counts, hist_counts, inf_counts, gfm_counts) %>%
   summarise(Users = n(), Tweets = sum(Tweets),
             RT = sum(RT), Fav = sum(Favs)) %>% 
   mutate(avg_output = (Tweets + RT + Fav) / Users) %>% 
-  arrange(desc(avg_output))
+  arrange(desc(avg_output)) %>% 
+  knitr::kable(format = "html", digits = 2)
 ```
 
 Here, the PolSci crowd has been the busiest ~~(and Sociology  was rather lazy)~~. But...
@@ -1007,7 +1009,8 @@ bind_rows(dvpw_counts, dgs_counts, hist_counts, inf_counts, gfm_counts) %>%
   summarise(Users = n(), Tweets = sum(Tweets),
             RT = sum(RT), Fav = sum(Favs)) %>% 
   mutate(avg_output = (Tweets + RT + Fav) / Users) %>% 
-  arrange(desc(avg_output))
+  arrange(desc(avg_output)) %>% 
+  knitr::kable(format = "html", digits = 2)
 ```
 
 Well done, Historians! If we ignore @dvpw's Twitter takeover, you actually performed best (in terms of numbers, at least)!
