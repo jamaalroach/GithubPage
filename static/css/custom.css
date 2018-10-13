@@ -519,7 +519,8 @@ figure.hljs.highlight div.line {
     white-space: -moz-pre-wrap;  
     white-space: -pre-wrap;      
     white-space: -o-pre-wrap;    
-	word-wrap: break-word;  
+	word-wrap: break-word;
+	hyphens: auto;
 }	
 
 .post .post-content code, .post .post-content pre {
