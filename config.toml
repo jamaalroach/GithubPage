@@ -47,7 +47,7 @@ copyright = ""            # default: author.name ↓
 #  identifier = "categories"
 #  url = "/categories/"
 [[menu.main]]
-  name = "Tags"
+  name = "Topics"
   weight = 35
   identifier = "tags"
   url = "/tags/"
@@ -96,7 +96,7 @@ copyright = ""            # default: author.name ↓
   # Link custom CSS and JS assets
   #   (relative to /static/css and /static/js respectively)
   customCSS = ["custom.css"]
-  customJS = ["highlight.pack.js"]
+  customJS = ["highlight.pack.js", "custom.js"]
 
   [params.publicCDN]        # load these files from public cdn
     enable = false

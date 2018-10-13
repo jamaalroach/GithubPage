@@ -139,7 +139,7 @@ Even.fancybox = function() {
   }
 };
 
-Even.highlight = function() {
+/* Even.highlight = function() {
   const blocks = document.querySelectorAll('pre code');
   for (let i = 0; i < blocks.length; i++) {
     const block = blocks[i];
@@ -175,7 +175,7 @@ Even.chroma = function() {
     const lang = afterHighLight ? afterHighLight.className : '';
     block.className += ' ' + lang;
   }
-};
+}; */
 
 Even.toc = function() {
   const tocContainer = document.getElementById('post-toc');

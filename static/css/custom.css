@@ -211,6 +211,8 @@ h1, h2, h3, h4, h5, h6 {
 		z-index: 1;
 		padding: 10px 0 0 0;
 		border-bottom: 1px dashed #c05b4d;
+		transition: 0.2s; /* Add a transition effect when scrolling */
+		transition-timing-function: ease-out;
 	}
 	#header .site-navbar .menu {
 		padding-right: 0;
