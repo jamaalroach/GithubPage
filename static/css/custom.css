@@ -269,9 +269,9 @@ h6 {
 		display: none
 	}
 
-	.main {
-		padding-top: 1em;
-	}
+	/* .main {
+		padding-top: 10px;
+	} */
 
 	/* mobile: offset #target header fixed to avoid overlapping */
 	:target:not(.footnoteRef):not(li)::before {
