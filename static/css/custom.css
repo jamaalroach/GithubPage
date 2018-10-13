@@ -522,4 +522,6 @@ figure.hljs.highlight div.line {
 	word-wrap: break-word;  
 }	
 
-
+.post .post-content code, .post .post-content pre {
+	background: #f8f5ec;
+}
