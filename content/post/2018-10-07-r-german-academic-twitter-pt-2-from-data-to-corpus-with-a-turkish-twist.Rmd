@@ -209,7 +209,7 @@ joint_dfm <- dfm(joint_corpus,
                  remove_punct = TRUE,
                  remove_url = TRUE,
                  tolower = TRUE,
-                 verbose = FALSE) #for website readability
+                 verbose = FALSE)
 topfeatures(joint_dfm, 20) %>% 
   knitr::kable(format = "html", digits = 2)
 ```
@@ -225,10 +225,9 @@ stopwords("german") %>%
   as_tibble() %>%
   filter(str_detect(value, pattern = "^da.*")) %>% 
   knitr::kable(format = "html", digits = 2)
-# missing: beim
 ```
 
-> Ok, "daß" instead of "dass" suggests that `quanteda`'s stopword list for German terms might need an update... :) 
+> Ok, "beim" is missing, and "daß" instead of "dass" suggests that `quanteda`'s German stopword list terms might need an update... :) 
 
 Also, note how `stopwords("german")` consists of `r stopwords("german") %>% length() ` tokens. Just for comparison, `tidytext::stop_words` has a total of `r  tidytext::stop_words %>% count()` stopwords for English. So we probably will have to include custom stopword lists repeatedly.
 
@@ -239,12 +238,13 @@ Also, note how `stopwords("german")` consists of `r stopwords("german") %>% leng
 ```{r message=FALSE}
 ger_stopwords <- read_lines("https://raw.githubusercontent.com/stopwords-iso/stopwords-de/master/stopwords-de.txt")
 # saveRDS(ger_stopwords, "ger_stopwords.rds")
+```
+
+```{r eval=FALSE}
 length(ger_stopwords) #> 621 stopwords
 c(ger_stopwords, stopwords("german")) %>% length() #> 852
 c(ger_stopwords, stopwords("german")) %>% unique() %>% length() #> 621
-
 ```
-
 
 ### Include Custom Stopwords and Remove English Stopwords
 ```{r}
@@ -263,7 +263,7 @@ joint_dfm <- dfm(joint_corpus,
                  remove_punct = TRUE,
                  remove_url = TRUE,
                  tolower = TRUE,
-                 verbose = FALSE) #for website readability
+                 verbose = FALSE)
 topfeatures(joint_dfm, 20) %>% 
   knitr::kable(format = "html", digits = 2)
 ```
@@ -279,7 +279,6 @@ kwic(joint_corpus, "amp", window = 3)  %>%
   select(pre:post) %>%
   head(10) %>% 
   knitr::kable(format = "html", digits = 2)
-
 ```
 
 > "amp" == "\&amp" which is the `HTML` term for \& / ampersand (but "\&" is removed when we create the corpus with `remove_punct = TRUE`, so only "amp" remains. Cool.)
@@ -298,7 +297,7 @@ joint_dfm <- dfm(joint_corpus,
                  remove_punct = TRUE,
                  remove_url = TRUE,
                  tolower = TRUE,
-                 verbose = FALSE) #for website readability
+                 verbose = FALSE)
 topfeatures(joint_dfm, 20) %>% 
   knitr::kable(format = "html", digits = 2)
 ```
@@ -328,7 +327,7 @@ joint_dfm <- dfm(joint_corpus,
                  remove_punct = TRUE,
                  remove_url = TRUE,
                  tolower = TRUE,
-                 verbose = FALSE) #for website readability
+                 verbose = FALSE)
 topfeatures(joint_dfm, 20) %>% 
   knitr::kable(format = "html", digits = 2)
 ```
@@ -352,7 +351,8 @@ kwic(joint_corpus, "bu", window = 3) %>%
 > Turkish? Huh? Seems like the Sociologists' hashtag (\#dgs18, \#dgs2018) was heaviliy used by the Turkish Twitter community, too.
 
 ```{r}
-dgs_collection %>% filter(lang == "tr") %>% count()
+dgs_collection %>% filter(lang == "tr") %>% count() %>%
+  knitr::kable("html")
 ```
 
 > Oopsie... From the Sociology Corpus, `r dgs_collection %>% filter(lang == "tr") %>% count()` Tweets out of `r dgs_collection %>% count()` are labelled as Turkish...
@@ -389,7 +389,7 @@ dgs_collection %>% filter(lang == "tr" | lang == "de") %>%
 
 > Key Learning: I could have avoided stepping into this trap if I had plotted the distribution of Tweets over time... Exploratory Data Analysis FTW.
 
-This is what I would've seen, if I had done it right:
+This is what I would've seen, I had done it right:
 
 ```{r}
 joint_collection %>%
@@ -450,7 +450,8 @@ tr_user %>% count() %>%
 Now, we'll `anti_join()` the `dgs_collection` with this list
 
 ```{r}
-dgs_collection %>% anti_join(tr_user, by = "user_id") %>% count()
+dgs_collection %>% anti_join(tr_user, by = "user_id") %>% count() %>%
+  knitr::kable("html")
 ```
 
 Let's compare with the simpler `filter(lang!="tr")` approach
@@ -489,13 +490,13 @@ An even easier way would be to filter out Turkish Tweets from the already existi
 joint_corpus %>% corpus_subset(joint_corpus$documents$lang != "tr")
 ```
 
-However, if you have been jumping back and forth within this post (or `.Rmd` Notebook), then you (=me) might have lost track of the various manipulations and state differences (i.e. think of `custom_stopwords`). Plus, your `dgs_corpus` would still need our attention, too, and as we've filtered out a lot of Tweets by setting a lower time limit, the common time period for the corpora would differ, too. BAD!
+However, if you have been jumping back and forth within this post (or `.Rmd` Notebook), then you (=me) might have lost track of the various manipulations and state differences (i.e. think of `custom_stopwords`). Plus, the `dgs_corpus` would still need attention, too, and as we've filtered out a lot of Tweets by setting a lower time limit, the common time period for the corpora would differ, too. BAD!
 
 > So let's rebuild the corpora from scratch.
 
 ## Re-Build individual Corpora from Scratch
 
-We'll just add `filter(created_at > "2018-09-23")` and for the sake of robustness, we'll filter all corpora for `lang != "tr"`, and `anti_join(tr_user)` with the `dgs_corpus`
+We'll just add `filter(created_at > "2018-09-23")` and for the sake of robustness, we'll filter all corpora for `lang != "tr"`, and `anti_join(dgs_corpus)` with `tr_user`.
 
 **As I want both, discipline-specific copora with "multidisciplinary Tweets" and a redundancy-free joint corpus, I'll build the corpora in two steps.**
 
@@ -590,34 +591,24 @@ joint_dfm_grouped <- dfm(joint_corpus,
 
 # Some quick Analyses
 
-## Top Features per Discipline
-```{r}
-topfeatures(joint_dfm, 20, groups = "Discipline") # %>% map(unlist) %>% map(knitr::kable)
-```
-
-> There are still a couple features which would qualify for being removed (such as "unsere", "mal", "schon"), but we will take care of that with the super-useful `quanteda::dfm_trim(<term_freq>)` threshold-based feature selection.
-
-> Plus, removing or parsing hashtags and applying `dfm(stem = TRUE)` would largely increase descriptive accuracy
-
-
-
-## Hashtags
-
-**Most popular hashtags by absolute numbers:**
+## Top Hashtags
 
 ```{r}
-hashtags_dfm <- dfm_select(joint_dfm, ('#*'))
+hashtags_dfm <- dfm_select(joint_dfm, ('#*'), selection = "keep")
 topfeatures(hashtags_dfm, 20, scheme = "count") %>% 
   knitr::kable(format = "html", digits = 2)
 ```
 
-**Most popular hashtags by absolute numbers per Discipline:**
+## Top Hashtags per Discipline
 
-```{r}
-topfeatures(hashtags_dfm, 20, group = "Discipline", scheme = "count")
+```{r results="asis"}
+topfeatures(hashtags_dfm, 20,
+            group = "Discipline",
+            scheme = "count") %>% 
+  map(knitr::kable, "html")
 ```
 
-> ~The Sociology Corpus has still some Turkish features. There are ways to adress this, but I have to post-pone this for another post.~ 
+> ~~The Sociology Corpus has still some Turkish features. There are ways to adress this, but I have to post-pone this for another post.~~ ([cf. this approach](https://ellocke.github.io/post/r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al/#sociology-dgs18-dgs2018-update)) 
 
 **Most popular Hashtags by shared `docfreq` / feature-document frequency:**
 
@@ -626,6 +617,34 @@ dfm_select(joint_dfm_grouped, ('#*')) %>%
   topfeatures(30, scheme = "docfreq") %>% 
   knitr::kable(format = "html", digits = 2)
 ```
+
+## Top Features
+
+> Without Hashtags and Twitter @Nicks
+
+```{r}
+# {r results="asis"}
+features <- dfm_select(joint_dfm, pattern = list('#*',"@*"),
+                       selection = "remove",
+                       min_nchar = 3)
+topfeatures(features, 40) %>% 
+  knitr::kable("html")
+```
+
+## Top Features per Discipline
+
+```{r results="asis"}
+# {r results="asis"}
+features <- dfm_select(joint_dfm, pattern = list('#*',"@*"),
+                       selection = "remove",
+                       min_nchar = 3)
+topfeatures(features, 20, groups = "Discipline") %>% 
+  map(knitr::kable, "html")
+```
+
+> There are still a couple features which would qualify for being removed (such as "unsere", "mal", "schon"), but we will take care of that with the super-useful `quanteda::dfm_trim(<term_freq>)` threshold-based feature selection.
+
+> Plus, removing or parsing hashtags and applying `dfm(stem = TRUE)` would largely increase descriptive accuracy
 
 ## Network of feature co-occurrences
 ```{r}

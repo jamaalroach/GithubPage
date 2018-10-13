@@ -69,10 +69,12 @@ sequenceDiagrams:
 </ul></li>
 <li><a href="#rd-attempt-dfm-building"><span class="toc-section-number">6</span> 3rd Attempt @ <code>dfm()</code> Building</a></li>
 <li><a href="#some-quick-analyses"><span class="toc-section-number">7</span> Some quick Analyses</a><ul>
-<li><a href="#top-features-per-discipline"><span class="toc-section-number">7.1</span> Top Features per Discipline</a></li>
-<li><a href="#hashtags"><span class="toc-section-number">7.2</span> Hashtags</a></li>
-<li><a href="#network-of-feature-co-occurrences"><span class="toc-section-number">7.3</span> Network of feature co-occurrences</a></li>
-<li><a href="#grouped-wordcloud-of-features"><span class="toc-section-number">7.4</span> Grouped wordcloud of features</a></li>
+<li><a href="#top-hashtags"><span class="toc-section-number">7.1</span> Top Hashtags</a></li>
+<li><a href="#top-hashtags-per-discipline"><span class="toc-section-number">7.2</span> Top Hashtags per Discipline</a></li>
+<li><a href="#top-features"><span class="toc-section-number">7.3</span> Top Features</a></li>
+<li><a href="#top-features-per-discipline"><span class="toc-section-number">7.4</span> Top Features per Discipline</a></li>
+<li><a href="#network-of-feature-co-occurrences"><span class="toc-section-number">7.5</span> Network of feature co-occurrences</a></li>
+<li><a href="#grouped-wordcloud-of-features"><span class="toc-section-number">7.6</span> Grouped wordcloud of features</a></li>
 </ul></li>
 <li><a href="#whats-next"><span class="toc-section-number">8</span> What’s next?</a></li>
 </ul>
@@ -449,7 +451,7 @@ dem
                  remove_punct = TRUE,
                  remove_url = TRUE,
                  tolower = TRUE,
-                 verbose = FALSE) #for website readability
+                 verbose = FALSE)
 topfeatures(joint_dfm, 20) %&gt;% 
   knitr::kable(format = &quot;html&quot;, digits = 2)</code></pre>
 <table>
@@ -681,9 +683,8 @@ dazu
 </tr>
 </tbody>
 </table>
-<pre class="r"><code># missing: beim</code></pre>
 <blockquote>
-<p>Ok, “daß” instead of “dass” suggests that <code>quanteda</code>’s stopword list for German terms might need an update… :)</p>
+<p>Ok, “beim” is missing, and “daß” instead of “dass” suggests that <code>quanteda</code>’s German stopword list terms might need an update… :)</p>
 </blockquote>
 <p>Also, note how <code>stopwords(&quot;german&quot;)</code> consists of 231 tokens. Just for comparison, <code>tidytext::stop_words</code> has a total of 1149 stopwords for English. So we probably will have to include custom stopword lists repeatedly.</p>
 <blockquote>
@@ -693,13 +694,10 @@ dazu
 <p>We’ll use the text file with the German stopwords: <a href="https://raw.githubusercontent.com/stopwords-iso/stopwords-de/master/stopwords-de.txt" target="_blank">stopwords-de.txt</a></p>
 </blockquote>
 <pre class="r"><code>ger_stopwords &lt;- read_lines(&quot;https://raw.githubusercontent.com/stopwords-iso/stopwords-de/master/stopwords-de.txt&quot;)
-# saveRDS(ger_stopwords, &quot;ger_stopwords.rds&quot;)
-length(ger_stopwords) #&gt; 621 stopwords</code></pre>
-<pre><code>## [1] 621</code></pre>
-<pre class="r"><code>c(ger_stopwords, stopwords(&quot;german&quot;)) %&gt;% length() #&gt; 852</code></pre>
-<pre><code>## [1] 852</code></pre>
-<pre class="r"><code>c(ger_stopwords, stopwords(&quot;german&quot;)) %&gt;% unique() %&gt;% length() #&gt; 621</code></pre>
-<pre><code>## [1] 621</code></pre>
+# saveRDS(ger_stopwords, &quot;ger_stopwords.rds&quot;)</code></pre>
+<pre class="r"><code>length(ger_stopwords) #&gt; 621 stopwords
+c(ger_stopwords, stopwords(&quot;german&quot;)) %&gt;% length() #&gt; 852
+c(ger_stopwords, stopwords(&quot;german&quot;)) %&gt;% unique() %&gt;% length() #&gt; 621</code></pre>
 </div>
 <div id="include-custom-stopwords-and-remove-english-stopwords" class="section level3">
 <h3><span class="header-section-number">3.2.2</span> Include Custom Stopwords and Remove English Stopwords</h3>
@@ -716,7 +714,7 @@ custom_stopwords &lt;- setdiff(ger_stopwords, stopwords(&quot;german&quot;)) # o
                  remove_punct = TRUE,
                  remove_url = TRUE,
                  tolower = TRUE,
-                 verbose = FALSE) #for website readability
+                 verbose = FALSE)
 topfeatures(joint_dfm, 20) %&gt;% 
   knitr::kable(format = &quot;html&quot;, digits = 2)</code></pre>
 <table>
@@ -1046,7 +1044,7 @@ joint_dfm &lt;- dfm(joint_corpus,
                  remove_punct = TRUE,
                  remove_url = TRUE,
                  tolower = TRUE,
-                 verbose = FALSE) #for website readability
+                 verbose = FALSE)
 topfeatures(joint_dfm, 20) %&gt;% 
   knitr::kable(format = &quot;html&quot;, digits = 2)</code></pre>
 <table>
@@ -1373,7 +1371,7 @@ joint_dfm &lt;- dfm(joint_corpus,
                  remove_punct = TRUE,
                  remove_url = TRUE,
                  tolower = TRUE,
-                 verbose = FALSE) #for website readability
+                 verbose = FALSE)
 topfeatures(joint_dfm, 20) %&gt;% 
   knitr::kable(format = &quot;html&quot;, digits = 2)</code></pre>
 <table>
@@ -1693,11 +1691,24 @@ Bu
 <blockquote>
 <p>Turkish? Huh? Seems like the Sociologists’ hashtag (#dgs18, #dgs2018) was heaviliy used by the Turkish Twitter community, too.</p>
 </blockquote>
-<pre class="r"><code>dgs_collection %&gt;% filter(lang == &quot;tr&quot;) %&gt;% count()</code></pre>
-<pre><code>## # A tibble: 1 x 1
-##       n
-##   &lt;int&gt;
-## 1   957</code></pre>
+<pre class="r"><code>dgs_collection %&gt;% filter(lang == &quot;tr&quot;) %&gt;% count() %&gt;%
+  knitr::kable(&quot;html&quot;)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:right;">
+n
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+957
+</td>
+</tr>
+</tbody>
+</table>
 <blockquote>
 <p>Oopsie… From the Sociology Corpus, 957 Tweets out of 1674 are labelled as Turkish…</p>
 </blockquote>
@@ -1895,17 +1906,17 @@ no
   group_by(lang) %&gt;% 
   rtweet::ts_plot() +
     theme_minimal()</code></pre>
-<p><img src="/post/2018-10-07-r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist_files/figure-html/unnamed-chunk-23-1.png" width="672" /></p>
+<p><img src="/post/2018-10-07-r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
 <p>… unfortunately, I didn’t use it last time…</p>
 <blockquote>
 <p>Key Learning: I could have avoided stepping into this trap if I had plotted the distribution of Tweets over time… Exploratory Data Analysis FTW.</p>
 </blockquote>
-<p>This is what I would’ve seen, if I had done it right:</p>
+<p>This is what I would’ve seen, I had done it right:</p>
 <pre class="r"><code>joint_collection %&gt;%
   group_by(Discipline) %&gt;% 
   rtweet::ts_plot() +
     theme_minimal()</code></pre>
-<p><img src="/post/2018-10-07-r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
+<p><img src="/post/2018-10-07-r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist_files/figure-html/unnamed-chunk-25-1.png" width="672" /></p>
 <blockquote>
 <p>See that left peak around the 20th? Arghhhh!</p>
 </blockquote>
@@ -2090,11 +2101,24 @@ n
 </tbody>
 </table>
 <p>Now, we’ll <code>anti_join()</code> the <code>dgs_collection</code> with this list</p>
-<pre class="r"><code>dgs_collection %&gt;% anti_join(tr_user, by = &quot;user_id&quot;) %&gt;% count()</code></pre>
-<pre><code>## # A tibble: 1 x 1
-##       n
-##   &lt;int&gt;
-## 1   686</code></pre>
+<pre class="r"><code>dgs_collection %&gt;% anti_join(tr_user, by = &quot;user_id&quot;) %&gt;% count() %&gt;%
+  knitr::kable(&quot;html&quot;)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:right;">
+n
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+686
+</td>
+</tr>
+</tbody>
+</table>
 <p>Let’s compare with the simpler <code>filter(lang!=&quot;tr&quot;)</code> approach</p>
 <pre class="r"><code>dgs_collection %&gt;% 
   filter(lang != &quot;tr&quot;) %&gt;% 
@@ -2134,13 +2158,13 @@ n
                 mixed_corpus</code></pre>
 <p>An even easier way would be to filter out Turkish Tweets from the already existing <code>joint_corpus</code> with <code>quanteda::corpus_subset()</code>:</p>
 <pre class="r"><code>joint_corpus %&gt;% corpus_subset(joint_corpus$documents$lang != &quot;tr&quot;)</code></pre>
-<p>However, if you have been jumping back and forth within this post (or <code>.Rmd</code> Notebook), then you (=me) might have lost track of the various manipulations and state differences (i.e. think of <code>custom_stopwords</code>). Plus, your <code>dgs_corpus</code> would still need our attention, too, and as we’ve filtered out a lot of Tweets by setting a lower time limit, the common time period for the corpora would differ, too. BAD!</p>
+<p>However, if you have been jumping back and forth within this post (or <code>.Rmd</code> Notebook), then you (=me) might have lost track of the various manipulations and state differences (i.e. think of <code>custom_stopwords</code>). Plus, the <code>dgs_corpus</code> would still need attention, too, and as we’ve filtered out a lot of Tweets by setting a lower time limit, the common time period for the corpora would differ, too. BAD!</p>
 <blockquote>
 <p>So let’s rebuild the corpora from scratch.</p>
 </blockquote>
 <div id="re-build-individual-corpora-from-scratch" class="section level2">
 <h2><span class="header-section-number">5.1</span> Re-Build individual Corpora from Scratch</h2>
-<p>We’ll just add <code>filter(created_at &gt; &quot;2018-09-23&quot;)</code> and for the sake of robustness, we’ll filter all corpora for <code>lang != &quot;tr&quot;</code>, and <code>anti_join(tr_user)</code> with the <code>dgs_corpus</code></p>
+<p>We’ll just add <code>filter(created_at &gt; &quot;2018-09-23&quot;)</code> and for the sake of robustness, we’ll filter all corpora for <code>lang != &quot;tr&quot;</code>, and <code>anti_join(dgs_corpus)</code> with <code>tr_user</code>.</p>
 <p><strong>As I want both, discipline-specific copora with “multidisciplinary Tweets” and a redundancy-free joint corpus, I’ll build the corpora in two steps.</strong></p>
 <pre class="r"><code>dvpw_corpus &lt;- dvpw_collection %&gt;% 
   filter(created_at &gt; &quot;2018-09-23&quot; &amp; lang != &quot;tr&quot;) %&gt;% # combined filter()
@@ -2207,7 +2231,7 @@ joint_corpus &lt;- joint_corpus + mixed_corpus #3,748 docs</code></pre>
 <pre><code>##    ... removed 608 features
 ##    ... created a 3,748 x 15,763 sparse dfm
 ##    ... complete. 
-## Elapsed time: 0.42 seconds.</code></pre>
+## Elapsed time: 0.49 seconds.</code></pre>
 <p>We’re down to 15763 features from 3748 documents (Tweets) and were able to get rid of 608 features with the iteratively refined approach.</p>
 <p>And as we might want to use a grouped dfm for group comparisons (and <code>dfm_group</code> doesn’t seem to work for me here), we’ll create a custom grouped one, too.</p>
 <pre class="r"><code>## not working:
@@ -2233,83 +2257,9 @@ joint_dfm_grouped &lt;- dfm(joint_corpus,
 </div>
 <div id="some-quick-analyses" class="section level1">
 <h1><span class="header-section-number">7</span> Some quick Analyses</h1>
-<div id="top-features-per-discipline" class="section level2">
-<h2><span class="header-section-number">7.1</span> Top Features per Discipline</h2>
-<pre class="r"><code>topfeatures(joint_dfm, 20, groups = &quot;Discipline&quot;) # %&gt;% map(unlist) %&gt;% map(knitr::kable)</code></pre>
-<pre><code>## $PolSci
-##             #dvpw18       @dvpwkongress          demokratie 
-##                1604                 146                 130 
-##           #dvpw2018               @dvpw               panel 
-##                 108                 107                 105 
-##           democracy          @goetheuni           frankfurt 
-##                  84                  69                  60 
-##           political             grenzen          steinmeier 
-##                  51                  49                  47 
-## politikwissenschaft         #demokratie          democratic 
-##                  45                  43                  41 
-##         #steinmeier #departmentstruktur            kongress 
-##                  41                  41                  38 
-##                rede               #dvpw 
-##                  36                  35 
-## 
-## $Sociology
-##        #dgs18      #dgs2018 @dgsoziologie    soziologie   #soziologie 
-##           576           131            86            55            38 
-##       vortrag       #dvpw18      kongress     #sozkon18     göttingen 
-##            32            29            26            26            23 
-##         panel     spannende    #göttingen  gesellschaft        gruppe 
-##            17            17            16            15            15 
-##            et       session          raum        plenum             2 
-##            14            14            14            14            13 
-## 
-## $History
-##              #histag18         @historikertag     #historikertag2018 
-##                   1004                     98                     81 
-##                münster                sektion               #münster 
-##                     67                     56                     51 
-##             historiker             @vhdtweets          historikertag 
-##                     49                     43                     41 
-##               digitale             geschichte                  panel 
-##                     40                     36                     33 
-##                     de          #histocamptag                @digigw 
-##                     33                     33                     32 
-## geschichtswissenschaft                  stand                 poster 
-##                     30                     29                     29 
-##                  thema             #archivtag 
-##                     28                     26 
-## 
-## $CS
-## #informatik2018         #berlin        #zetsche      #frankfurt 
-##             307              42              33              32 
-##         #bremen           #jena       #dortmund      #kontrolle 
-##              32              32              32              32 
-##      #kanzlerin         #hessen     #nrwtag2018         #bayern 
-##              32              32              32              32 
-##  #niedersachsen    #brandenburg       #saarland          #baden 
-##              32              32              32              32 
-##    #württemberg          #koeln       #muenchen        #dresden 
-##              32              32              32              32 
-## 
-## $Mixed
-##       #dvpw18        #dgs18     #histag18 @dvpwkongress         woche 
-##            38            30            25             4             3 
-##        findet        tweets       minuten         gibts     digitalen 
-##             3             3             3             3             3 
-##      #dgs2018    #infdh2018         @dvpw     frankfurt        kolleg 
-##             3             3             2             2             2 
-##     #dvpw2018         sehen kongresswoche             1          good 
-##             2             2             2             2             2</code></pre>
-<blockquote>
-<p>There are still a couple features which would qualify for being removed (such as “unsere”, “mal”, “schon”), but we will take care of that with the super-useful <code>quanteda::dfm_trim(&lt;term_freq&gt;)</code> threshold-based feature selection.</p>
-</blockquote>
-<blockquote>
-<p>Plus, removing or parsing hashtags and applying <code>dfm(stem = TRUE)</code> would largely increase descriptive accuracy</p>
-</blockquote>
-</div>
-<div id="hashtags" class="section level2">
-<h2><span class="header-section-number">7.2</span> Hashtags</h2>
-<p><strong>Most popular hashtags by absolute numbers:</strong></p>
-<pre class="r"><code>hashtags_dfm &lt;- dfm_select(joint_dfm, (&#39;#*&#39;))
+<div id="top-hashtags" class="section level2">
+<h2><span class="header-section-number">7.1</span> Top Hashtags</h2>
+<pre class="r"><code>hashtags_dfm &lt;- dfm_select(joint_dfm, (&#39;#*&#39;), selection = &quot;keep&quot;)
 topfeatures(hashtags_dfm, 20, scheme = &quot;count&quot;) %&gt;% 
   knitr::kable(format = &quot;html&quot;, digits = 2)</code></pre>
 <table>
@@ -2485,85 +2435,885 @@ x
 </tr>
 </tbody>
 </table>
-<p><strong>Most popular hashtags by absolute numbers per Discipline:</strong></p>
-<pre class="r"><code>topfeatures(hashtags_dfm, 20, group = &quot;Discipline&quot;, scheme = &quot;count&quot;)</code></pre>
-<pre><code>## $PolSci
-##              #dvpw18            #dvpw2018          #demokratie 
-##                 1604                  108                   43 
-##          #steinmeier  #departmentstruktur                #dvpw 
-##                   41                   41                   35 
-##                #powi     #bundespräsident #politikwissenschaft 
-##                   26                   26                   25 
-##           #democracy            #takeover           #powilehre 
-##                   23                   17                   15 
-##           #frankfurt        #energiewende        #servicetweet 
-##                   14                   12                    9 
-##            #populism     #twittertakeover      #janemansbridge 
-##                    9                    9                    9 
-##             #keynote             #polisci 
-##                    9                    7 
-## 
-## $Sociology
-##              #dgs18            #dgs2018         #soziologie 
-##                 576                 131                  38 
-##             #dvpw18           #sozkon18          #göttingen 
-##                  29                  26                  16 
-##           #histag18                #dgs        #dgskongress 
-##                  12                  11                  10 
-##        #integration #soziologiekongress       #mixedmethods 
-##                   9                   9                   8 
-##    #digitalisierung             #flucht          #migration 
-##                   7                   7                   6 
-##    #forschungsethik         #sozkon2018            #sfb1265 
-##                   6                   5                   4 
-##            #luhmann             #simmel 
-##                   4                   4 
-## 
-## $History
-##          #histag18 #historikertag2018           #münster 
-##               1004                 81                 51 
-##      #histocamptag         #archivtag            #dvpw18 
-##                 33                 26                 21 
-##     #historikertag  #doktorandenforum             #dgs18 
-##                 19                 15                 14 
-##   #twitterstorians   #forschungsdaten        #geschichte 
-##                 13                 11                 11 
-## #digitalhumanities           #auxhist            #digigw 
-##                 11                 11                 10 
-##       #gtshistag18        #openaccess   #digitalisierung 
-##                  9                  8                  8 
-##          #muenster        #histag2018 
-##                  8                  8 
-## 
-## $CS
-## #informatik2018         #berlin        #zetsche      #frankfurt 
-##             307              42              33              32 
-##         #bremen           #jena       #dortmund      #kontrolle 
-##              32              32              32              32 
-##      #kanzlerin         #hessen     #nrwtag2018         #bayern 
-##              32              32              32              32 
-##  #niedersachsen    #brandenburg       #saarland          #baden 
-##              32              32              32              32 
-##    #württemberg          #koeln       #muenchen        #dresden 
-##              32              32              32              32 
-## 
-## $Mixed
-##            #dvpw18             #dgs18          #histag18 
-##                 38                 30                 25 
-##           #dgs2018         #infdh2018          #dvpw2018 
-##                  3                  3                  2 
-##           #daimler    #informatik2018         #archivtag 
-##                  2                  2                  2 
-##           #gfm2018 #historikertag2018            #kauder 
-##                  2                  2                  2 
-##            #fcbfca              #powi               #gew 
-##                  2                  1                  1 
-##         #göttingen            #türkei           #twitter 
-##                  1                  1                  1 
-##       #hambibleibt    #hambacherforst 
-##                  1                  1</code></pre>
+</div>
+<div id="top-hashtags-per-discipline" class="section level2">
+<h2><span class="header-section-number">7.2</span> Top Hashtags per Discipline</h2>
+<pre class="r"><code>topfeatures(hashtags_dfm, 20,
+            group = &quot;Discipline&quot;,
+            scheme = &quot;count&quot;) %&gt;% 
+  map(knitr::kable, &quot;html&quot;)</code></pre>
+$PolSci
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+#dvpw18
+</td>
+<td style="text-align:right;">
+1604
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dvpw2018
+</td>
+<td style="text-align:right;">
+108
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#demokratie
+</td>
+<td style="text-align:right;">
+43
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#steinmeier
+</td>
+<td style="text-align:right;">
+41
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#departmentstruktur
+</td>
+<td style="text-align:right;">
+41
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dvpw
+</td>
+<td style="text-align:right;">
+35
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#powi
+</td>
+<td style="text-align:right;">
+26
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#bundespräsident
+</td>
+<td style="text-align:right;">
+26
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#politikwissenschaft
+</td>
+<td style="text-align:right;">
+25
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#democracy
+</td>
+<td style="text-align:right;">
+23
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#takeover
+</td>
+<td style="text-align:right;">
+17
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#powilehre
+</td>
+<td style="text-align:right;">
+15
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#frankfurt
+</td>
+<td style="text-align:right;">
+14
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#energiewende
+</td>
+<td style="text-align:right;">
+12
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#servicetweet
+</td>
+<td style="text-align:right;">
+9
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#populism
+</td>
+<td style="text-align:right;">
+9
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#twittertakeover
+</td>
+<td style="text-align:right;">
+9
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#janemansbridge
+</td>
+<td style="text-align:right;">
+9
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#keynote
+</td>
+<td style="text-align:right;">
+9
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#polisci
+</td>
+<td style="text-align:right;">
+7
+</td>
+</tr>
+</tbody>
+</table>
+$Sociology
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+#dgs18
+</td>
+<td style="text-align:right;">
+576
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dgs2018
+</td>
+<td style="text-align:right;">
+131
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#soziologie
+</td>
+<td style="text-align:right;">
+38
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dvpw18
+</td>
+<td style="text-align:right;">
+29
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#sozkon18
+</td>
+<td style="text-align:right;">
+26
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#göttingen
+</td>
+<td style="text-align:right;">
+16
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#histag18
+</td>
+<td style="text-align:right;">
+12
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dgs
+</td>
+<td style="text-align:right;">
+11
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dgskongress
+</td>
+<td style="text-align:right;">
+10
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#integration
+</td>
+<td style="text-align:right;">
+9
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#soziologiekongress
+</td>
+<td style="text-align:right;">
+9
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#mixedmethods
+</td>
+<td style="text-align:right;">
+8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#digitalisierung
+</td>
+<td style="text-align:right;">
+7
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#flucht
+</td>
+<td style="text-align:right;">
+7
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#migration
+</td>
+<td style="text-align:right;">
+6
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#forschungsethik
+</td>
+<td style="text-align:right;">
+6
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#sozkon2018
+</td>
+<td style="text-align:right;">
+5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#sfb1265
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#luhmann
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#simmel
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+</tbody>
+</table>
+$History
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+#histag18
+</td>
+<td style="text-align:right;">
+1004
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#historikertag2018
+</td>
+<td style="text-align:right;">
+81
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#münster
+</td>
+<td style="text-align:right;">
+51
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#histocamptag
+</td>
+<td style="text-align:right;">
+33
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#archivtag
+</td>
+<td style="text-align:right;">
+26
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dvpw18
+</td>
+<td style="text-align:right;">
+21
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#historikertag
+</td>
+<td style="text-align:right;">
+19
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#doktorandenforum
+</td>
+<td style="text-align:right;">
+15
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dgs18
+</td>
+<td style="text-align:right;">
+14
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#twitterstorians
+</td>
+<td style="text-align:right;">
+13
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#forschungsdaten
+</td>
+<td style="text-align:right;">
+11
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#geschichte
+</td>
+<td style="text-align:right;">
+11
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#digitalhumanities
+</td>
+<td style="text-align:right;">
+11
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#auxhist
+</td>
+<td style="text-align:right;">
+11
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#digigw
+</td>
+<td style="text-align:right;">
+10
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#gtshistag18
+</td>
+<td style="text-align:right;">
+9
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#openaccess
+</td>
+<td style="text-align:right;">
+8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#digitalisierung
+</td>
+<td style="text-align:right;">
+8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#muenster
+</td>
+<td style="text-align:right;">
+8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#histag2018
+</td>
+<td style="text-align:right;">
+8
+</td>
+</tr>
+</tbody>
+</table>
+$CS
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+#informatik2018
+</td>
+<td style="text-align:right;">
+307
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#berlin
+</td>
+<td style="text-align:right;">
+42
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#zetsche
+</td>
+<td style="text-align:right;">
+33
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#frankfurt
+</td>
+<td style="text-align:right;">
+32
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#bremen
+</td>
+<td style="text-align:right;">
+32
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#jena
+</td>
+<td style="text-align:right;">
+32
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dortmund
+</td>
+<td style="text-align:right;">
+32
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#kontrolle
+</td>
+<td style="text-align:right;">
+32
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#kanzlerin
+</td>
+<td style="text-align:right;">
+32
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#hessen
+</td>
+<td style="text-align:right;">
+32
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#nrwtag2018
+</td>
+<td style="text-align:right;">
+32
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#bayern
+</td>
+<td style="text-align:right;">
+32
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#niedersachsen
+</td>
+<td style="text-align:right;">
+32
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#brandenburg
+</td>
+<td style="text-align:right;">
+32
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#saarland
+</td>
+<td style="text-align:right;">
+32
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#baden
+</td>
+<td style="text-align:right;">
+32
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#württemberg
+</td>
+<td style="text-align:right;">
+32
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#koeln
+</td>
+<td style="text-align:right;">
+32
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#muenchen
+</td>
+<td style="text-align:right;">
+32
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dresden
+</td>
+<td style="text-align:right;">
+32
+</td>
+</tr>
+</tbody>
+</table>
+$Mixed
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+#dvpw18
+</td>
+<td style="text-align:right;">
+38
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dgs18
+</td>
+<td style="text-align:right;">
+30
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#histag18
+</td>
+<td style="text-align:right;">
+25
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dgs2018
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#infdh2018
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#dvpw2018
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#daimler
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#informatik2018
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#archivtag
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#gfm2018
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#historikertag2018
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#kauder
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#fcbfca
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#powi
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#gew
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#göttingen
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#türkei
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#twitter
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#hambibleibt
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#hambacherforst
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+</tbody>
+</table>
 <blockquote>
-<p>~The Sociology Corpus has still some Turkish features. There are ways to adress this, but I have to post-pone this for another post.~</p>
+<p><del>The Sociology Corpus has still some Turkish features. There are ways to adress this, but I have to post-pone this for another post.</del> (<a href="https://ellocke.github.io/post/r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al/#sociology-dgs18-dgs2018-update">cf. this approach</a>)</p>
 </blockquote>
 <p><strong>Most popular Hashtags by shared <code>docfreq</code> / feature-document frequency:</strong></p>
 <pre class="r"><code>dfm_select(joint_dfm_grouped, (&#39;#*&#39;)) %&gt;% 
@@ -2823,14 +3573,1244 @@ x
 </tbody>
 </table>
 </div>
+<div id="top-features" class="section level2">
+<h2><span class="header-section-number">7.3</span> Top Features</h2>
+<blockquote>
+<p>Without Hashtags and Twitter <span class="citation">@Nicks</span></p>
+</blockquote>
+<pre class="r"><code># {r results=&quot;asis&quot;}
+features &lt;- dfm_select(joint_dfm, pattern = list(&#39;#*&#39;,&quot;@*&quot;),
+                       selection = &quot;remove&quot;,
+                       min_nchar = 3)
+topfeatures(features, 40) %&gt;% 
+  knitr::kable(&quot;html&quot;)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+panel
+</td>
+<td style="text-align:right;">
+167
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+demokratie
+</td>
+<td style="text-align:right;">
+142
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+thema
+</td>
+<td style="text-align:right;">
+93
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+democracy
+</td>
+<td style="text-align:right;">
+86
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+sektion
+</td>
+<td style="text-align:right;">
+76
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+münster
+</td>
+<td style="text-align:right;">
+73
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+diskussion
+</td>
+<td style="text-align:right;">
+69
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+kongress
+</td>
+<td style="text-align:right;">
+67
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+frankfurt
+</td>
+<td style="text-align:right;">
+65
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+danke
+</td>
+<td style="text-align:right;">
+64
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+vortrag
+</td>
+<td style="text-align:right;">
+63
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+spannende
+</td>
+<td style="text-align:right;">
+60
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+digitale
+</td>
+<td style="text-align:right;">
+59
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+soziologie
+</td>
+<td style="text-align:right;">
+59
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+frage
+</td>
+<td style="text-align:right;">
+58
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+findet
+</td>
+<td style="text-align:right;">
+55
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+grenzen
+</td>
+<td style="text-align:right;">
+55
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+gesellschaft
+</td>
+<td style="text-align:right;">
+55
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+political
+</td>
+<td style="text-align:right;">
+54
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+spricht
+</td>
+<td style="text-align:right;">
+54
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+prof
+</td>
+<td style="text-align:right;">
+54
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+historiker
+</td>
+<td style="text-align:right;">
+54
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+stand
+</td>
+<td style="text-align:right;">
+53
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2018
+</td>
+<td style="text-align:right;">
+51
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+forschung
+</td>
+<td style="text-align:right;">
+51
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fragen
+</td>
+<td style="text-align:right;">
+51
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+freuen
+</td>
+<td style="text-align:right;">
+50
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+steinmeier
+</td>
+<td style="text-align:right;">
+50
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+deutschen
+</td>
+<td style="text-align:right;">
+49
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+politikwissenschaft
+</td>
+<td style="text-align:right;">
+46
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+geht’s
+</td>
+<td style="text-align:right;">
+45
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+arbeit
+</td>
+<td style="text-align:right;">
+45
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+german
+</td>
+<td style="text-align:right;">
+44
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+new
+</td>
+<td style="text-align:right;">
+44
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+digitalen
+</td>
+<td style="text-align:right;">
+43
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+historikertag
+</td>
+<td style="text-align:right;">
+43
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rede
+</td>
+<td style="text-align:right;">
+42
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+geschichte
+</td>
+<td style="text-align:right;">
+42
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+democratic
+</td>
+<td style="text-align:right;">
+41
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+eigentlich
+</td>
+<td style="text-align:right;">
+40
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="top-features-per-discipline" class="section level2">
+<h2><span class="header-section-number">7.4</span> Top Features per Discipline</h2>
+<pre class="r"><code># {r results=&quot;asis&quot;}
+features &lt;- dfm_select(joint_dfm, pattern = list(&#39;#*&#39;,&quot;@*&quot;),
+                       selection = &quot;remove&quot;,
+                       min_nchar = 3)
+topfeatures(features, 20, groups = &quot;Discipline&quot;) %&gt;% 
+  map(knitr::kable, &quot;html&quot;)</code></pre>
+$PolSci
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+demokratie
+</td>
+<td style="text-align:right;">
+130
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+panel
+</td>
+<td style="text-align:right;">
+105
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+democracy
+</td>
+<td style="text-align:right;">
+84
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+frankfurt
+</td>
+<td style="text-align:right;">
+60
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+political
+</td>
+<td style="text-align:right;">
+51
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+grenzen
+</td>
+<td style="text-align:right;">
+49
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+steinmeier
+</td>
+<td style="text-align:right;">
+47
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+politikwissenschaft
+</td>
+<td style="text-align:right;">
+45
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+democratic
+</td>
+<td style="text-align:right;">
+41
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+kongress
+</td>
+<td style="text-align:right;">
+38
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rede
+</td>
+<td style="text-align:right;">
+36
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+frage
+</td>
+<td style="text-align:right;">
+35
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+representation
+</td>
+<td style="text-align:right;">
+34
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+diskussion
+</td>
+<td style="text-align:right;">
+34
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+thema
+</td>
+<td style="text-align:right;">
+31
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+politik
+</td>
+<td style="text-align:right;">
+29
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+podiumsdiskussion
+</td>
+<td style="text-align:right;">
+29
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+bundespräsident
+</td>
+<td style="text-align:right;">
+28
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+need
+</td>
+<td style="text-align:right;">
+28
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+dvpw
+</td>
+<td style="text-align:right;">
+27
+</td>
+</tr>
+</tbody>
+</table>
+$Sociology
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+soziologie
+</td>
+<td style="text-align:right;">
+55
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+vortrag
+</td>
+<td style="text-align:right;">
+32
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+kongress
+</td>
+<td style="text-align:right;">
+26
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+göttingen
+</td>
+<td style="text-align:right;">
+23
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+panel
+</td>
+<td style="text-align:right;">
+17
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+spannende
+</td>
+<td style="text-align:right;">
+17
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+gesellschaft
+</td>
+<td style="text-align:right;">
+15
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+gruppe
+</td>
+<td style="text-align:right;">
+15
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+session
+</td>
+<td style="text-align:right;">
+14
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+raum
+</td>
+<td style="text-align:right;">
+14
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+plenum
+</td>
+<td style="text-align:right;">
+14
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+sektion
+</td>
+<td style="text-align:right;">
+13
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+danke
+</td>
+<td style="text-align:right;">
+12
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+freuen
+</td>
+<td style="text-align:right;">
+12
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+forschung
+</td>
+<td style="text-align:right;">
+12
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+thema
+</td>
+<td style="text-align:right;">
+12
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+diskussion
+</td>
+<td style="text-align:right;">
+12
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+sozialen
+</td>
+<td style="text-align:right;">
+12
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+vogel
+</td>
+<td style="text-align:right;">
+12
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+woche
+</td>
+<td style="text-align:right;">
+11
+</td>
+</tr>
+</tbody>
+</table>
+$History
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+münster
+</td>
+<td style="text-align:right;">
+67
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+sektion
+</td>
+<td style="text-align:right;">
+56
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+historiker
+</td>
+<td style="text-align:right;">
+49
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+historikertag
+</td>
+<td style="text-align:right;">
+41
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+digitale
+</td>
+<td style="text-align:right;">
+40
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+geschichte
+</td>
+<td style="text-align:right;">
+36
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+panel
+</td>
+<td style="text-align:right;">
+33
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+geschichtswissenschaft
+</td>
+<td style="text-align:right;">
+30
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+stand
+</td>
+<td style="text-align:right;">
+29
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+poster
+</td>
+<td style="text-align:right;">
+29
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+thema
+</td>
+<td style="text-align:right;">
+28
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+van
+</td>
+<td style="text-align:right;">
+25
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+danke
+</td>
+<td style="text-align:right;">
+22
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+forschung
+</td>
+<td style="text-align:right;">
+21
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+geht’s
+</td>
+<td style="text-align:right;">
+21
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+digitalen
+</td>
+<td style="text-align:right;">
+21
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+history
+</td>
+<td style="text-align:right;">
+21
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+gespaltene
+</td>
+<td style="text-align:right;">
+21
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+freuen
+</td>
+<td style="text-align:right;">
+20
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+findet
+</td>
+<td style="text-align:right;">
+19
+</td>
+</tr>
+</tbody>
+</table>
+$CS
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+thema
+</td>
+<td style="text-align:right;">
+21
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+prof
+</td>
+<td style="text-align:right;">
+16
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+zukunft
+</td>
+<td style="text-align:right;">
+15
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+digitale
+</td>
+<td style="text-align:right;">
+14
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+digitalisierung
+</td>
+<td style="text-align:right;">
+13
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+informatik
+</td>
+<td style="text-align:right;">
+13
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+panel
+</td>
+<td style="text-align:right;">
+12
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+stefan
+</td>
+<td style="text-align:right;">
+12
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+data
+</td>
+<td style="text-align:right;">
+12
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+berlin
+</td>
+<td style="text-align:right;">
+11
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+diskussion
+</td>
+<td style="text-align:right;">
+11
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ullrich
+</td>
+<td style="text-align:right;">
+11
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+science
+</td>
+<td style="text-align:right;">
+10
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+keynote
+</td>
+<td style="text-align:right;">
+10
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+digital
+</td>
+<td style="text-align:right;">
+9
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+amt
+</td>
+<td style="text-align:right;">
+9
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ranga
+</td>
+<td style="text-align:right;">
+9
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+erklärt
+</td>
+<td style="text-align:right;">
+8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+arbeit
+</td>
+<td style="text-align:right;">
+8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+gesellschaft
+</td>
+<td style="text-align:right;">
+8
+</td>
+</tr>
+</tbody>
+</table>
+$Mixed
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+woche
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+findet
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tweets
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+minuten
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+gibts
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+digitalen
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+frankfurt
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+kolleg
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+sehen
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+kongresswoche
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+good
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+laufen
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+gemeinsam
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+interessant
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+begriff
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+deutlich
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+stärker
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+derzeit
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+politikwissenschaftler
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+digitalisierung
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>There are still a couple features which would qualify for being removed (such as “unsere”, “mal”, “schon”), but we will take care of that with the super-useful <code>quanteda::dfm_trim(&lt;term_freq&gt;)</code> threshold-based feature selection.</p>
+</blockquote>
+<blockquote>
+<p>Plus, removing or parsing hashtags and applying <code>dfm(stem = TRUE)</code> would largely increase descriptive accuracy</p>
+</blockquote>
+</div>
 <div id="network-of-feature-co-occurrences" class="section level2">
-<h2><span class="header-section-number">7.3</span> Network of feature co-occurrences</h2>
+<h2><span class="header-section-number">7.5</span> Network of feature co-occurrences</h2>
 <pre class="r"><code>topfeats &lt;- names(topfeatures(joint_dfm, 60))
 textplot_network(dfm_select(joint_dfm, topfeats), min_freq = 0.8)</code></pre>
-<p><img src="/post/2018-10-07-r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist_files/figure-html/unnamed-chunk-40-1.png" width="672" /></p>
+<p><img src="/post/2018-10-07-r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist_files/figure-html/unnamed-chunk-42-1.png" width="672" /></p>
 </div>
 <div id="grouped-wordcloud-of-features" class="section level2">
-<h2><span class="header-section-number">7.4</span> Grouped wordcloud of features</h2>
+<h2><span class="header-section-number">7.6</span> Grouped wordcloud of features</h2>
 <blockquote>
 <p>“wordcloud, where the feature labels are plotted with their sizes proportional to their numerical values in the dfm” (Vignette for <code>quanteda::textplot_wordcloud</code>)</p>
 </blockquote>
@@ -2839,7 +4819,7 @@ textplot_network(dfm_select(joint_dfm, topfeats), min_freq = 0.8)</code></pre>
                    min_size = 0.5,
                    max_size = 3,
                    max_words = 60)</code></pre>
-<p><img src="/post/2018-10-07-r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist_files/figure-html/unnamed-chunk-41-1.png" width="960" /></p>
+<p><img src="/post/2018-10-07-r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist_files/figure-html/unnamed-chunk-43-1.png" width="960" /></p>
 </div>
 </div>
 <div id="whats-next" class="section level1">
