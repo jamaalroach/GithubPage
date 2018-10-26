@@ -502,6 +502,7 @@ div>table tbody tr:hover {
 div>table tbody td {
 	padding-right: 5px;
 	padding-bottom: 5px;
+	vertical-align: top;
 }
 
 div>table tbody:first-child {
