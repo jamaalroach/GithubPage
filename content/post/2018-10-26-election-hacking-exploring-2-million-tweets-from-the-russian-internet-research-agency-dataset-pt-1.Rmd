@@ -1,5 +1,5 @@
 ---
-title: 'Election Hacking: Exploring 2 Million Tweets from the Russian Internet Research
+title: 'Election Hacking: Exploring 10 Million Tweets from the Russian Internet Research
   Agency Dataset, Pt. 1'
 author: Ilja / fubits
 date: '2018-10-26'
@@ -17,8 +17,8 @@ output:
     number_sections: yes
     toc: yes
 lastmod: '2018-10-26T16:18:07+02:00'
-description: "A bit over a week ago, Twitter's new-ish Elections integrity team released two datasets with 'all the accounts and related content associated with potential information operations that we have found on our service since 2016.' We're talking about millions of Tweets in dozens of languages stored in a single 1.24 GB CSV file. Tidyverse to the rescue!" 
-abstract: ''
+description: "A bit over a week ago, Twitter's new-ish Elections integrity team released two datasets with 'all the accounts and related content associated with potential information operations that we have found on our service since 2016.' We're talking about millions of Tweets in dozens of languages stored in a single 5.3 GB CSV file. Tidyverse to the rescue!" 
+abstract: 'Post updated with data from the full 5.3GB CSV file from the "Internet Research Agency" dataset'
 thumbnail: "/img/thumbs/IRA_Tweets.jpg"
 rmdlink: yes
 keywords: []
@@ -44,11 +44,11 @@ A bit over a week ago, [Twitter's new-ish Elections integrity team released two 
 
 In particular, this is what we are talking about here:
 
-> "**What’s included?**\n\n Our initial disclosures cover two previously disclosed campaigns, and include information from 3,841 accounts believed to be connected to the Russian Internet Research Agency [also known as IRA], and 770 accounts believed to originate in Iran."
+> "Our initial disclosures cover two previously disclosed campaigns, and include information from 3,841 accounts believed to be connected to the Russian Internet Research Agency [also known as IRA], and 770 accounts believed to originate in Iran." ([Twitter's Election Integrity Team](https://blog.twitter.com/official/en_us/topics/company/2018/enabling-further-research-of-information-operations-on-twitter.html){target="_blank"})
 
 The IRA zip alone is **1.24 GB** big! Let's dive in and explore. Before we can start with any in-depth analysis, automated or not, we have to inspect and prepare the data - remember: [EDA FTW](https://ellocke.github.io/post/r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist/#the-turkish-plot-twist)!
 
-Anyways, a dataset of this size is a perfect excersise in data wrangeling and exploratory analysis with tools from the galactic `tidyverse`. So what I'm aiming to highlight with this post, is my more or less systematic approach to turning an granular dataset into something more useful (and reliable!) for further in-depth analysis.
+Anyways, a dataset of this size is a perfect exerciser in data wrangling and exploratory analysis with tools from the galactic `tidyverse`. So what I'm aiming to highlight with this post, is my more or less systematic approach to turning an granular dataset into something more useful (and reliable!) for further in-depth analysis.
 
 # Data Preperation
 
@@ -64,57 +64,51 @@ library(tidyverse)
 
 First, we need to unpack the `.zip` file and then read the `.csv` file into R.
 
-
 ```{r eval=FALSE}
-codebook <- readLines("https://storage.googleapis.com/twitter-election-integrity/hashed/Twitter_Elections_Integrity_Datasets_hashed_README.txt")
-
 csvfile <- "ira_tweets_csv_hashed.csv"
-
-data <- read_csv("ira_tweets_csv_hashed.csv")
-
+data_raw <- read_csv("ira_tweets_csv_hashed.csv")
 
 # Just for comparison
-data2 <- data.table::fread(csvfile,
+data2_raw <- data.table::fread(csvfile,
                           encoding = "UTF-8",
                           # na.strings = ",,",
                           verbose = TRUE)
 ```
 
-`> 1899596 userid closing quote at end of file ""        'ira_tweets_csv_hashed.csv' file 2 1899596 NA     31 columns                   2 columns 'ira_tweets_csv_hashed.csv'` 
- 
-> I ([like others](https://twitter.com/avuko/status/1052573187869986816){target="_blank"}) am getting an CRC error message when unpacking the zip file. The resulting CSV is 1.17 GB big, so that's not all the Tweets from the IRA dataset. We might want to come back to this issue later.
+> At first – I ([like others](https://twitter.com/avuko/status/1052573187869986816){target="_blank"}) – was getting an CRC error message when unpacking the zip file. The resulting CSV was only 1.17 GB big, so that were not all the Tweets from the IRA dataset. After upgrading `7-zip` to `v18.05` unpacking the `zip` results in a 5.3 GB big CSV, which is quite a difference I'd say :)
 
-> `data.table` is by light years the fastest method, but `read_csv()` gives me `NA`'s without an extra hassle. `data.table::fread()` seems to be ignoring any patterns for `na.strings`. Therefore I'll be working with the data object from `read_csv()` here. Since `read_csv()` is rather slow with a `CSV` this big, you can speed up your exploration if you save the read in data as an `.rds` file.
+> `data.table` is by light years the fastest method, but `read_csv()` gives me `NA`'s without an extra hassle while `data.table::fread()` seems to be ignoring any patterns for `na.strings`. Therefore I'll be working with the data object from `read_csv()` here. Since `read_csv()` is rather slow with a `CSV` this big, you can speed up your exploration if you save the data object as an `.rds` or `.RData` file.
 
-```{r cache=TRUE}
+```{r}
 data_path <- here::here("static", "data", "IRA_Tweets", "/")
 # if (!dir.exists(data_path)) dir.create(data_path)
-# saveRDS(data, str_c(data_path, "infoops_data.rds"))
+# saveRDS(data_raw, str_c(data_path, "infoops_data.rds"))
+# save(data_raw, file = str_c(data_path, "infoops_data.RData"))
 data_raw <- readRDS(str_c(data_path, "infoops_data.rds"))
 ```
 
 With a dataset this big, skimr:skim() is just perfect (and it's much more functional in RStudio)!
 
 ```{r cache=TRUE}
-data_raw %>% skimr::skim_to_wide() %>% knitr::kable("html", 2)
+data_raw %>% skimr::skim_to_wide() %>% knitr::kable("html")
 ```
 
 We can already make some interesting observations from this summary alone:
 
-  * The IRA dataset consist of ~ 1.899.595 Tweets in 51 languages, from ~ 3.460 unique accounts with 11 account languages. That's "diverse" but also quite complex.
-  * `$is_retweet` has only 2 unique values, so it's obviously a boolean
-  * There's 1.899.595 observations for `$tweet_text`, but only 1.634.942 are unique. This difference just screams: spam bots and/or coordinated campaigns!
-  * only ~50K Tweets are replies -> rather few interactions
+  * The IRA dataset consist of ~~1.899.595~~ 9.041.308 Tweets in ~~51~~ 58 languages, from ~~3.460~~ 3.667 unique accounts and 11 account languages. That's pretty "diverse" but also quite complex.
+  * `$is_retweet` has only 2 unique values, so it's obviously a Boolean -> `mutate()`
+  * There's ~~1.899.595~~ 9.041.308 observations for `$tweet_text`, but only ~~1.634.942~~ 6.598.905 are unique. This huge delta just screams: spam bots and/or coordinated campaigns!
+  * only ~~50K~~ 266.208 Tweets are replies -> rather few interactions
   * there are some prominent accounts with up to 257.638 followers
-  * 743.828 URLs to explore
-  * we can see from `$retweet_userid` that apparently, 703.467 Tweets are just Retweets and not unique Tweets.
-  * if we were to try to classify accounts by profile description, there's a corpus of 2451 unique profile descriptions (`$user_profile_description`) and 193 unique `$user_profile_url`s
-  * all the `$*_tweetid` were read as nummeric, which we'll also need to change as IDs are supposed to be unique identifieres and not continuous values
-  * the Tweets were posted in the period from 2009-05-09 (!) to 2018-06-21, with the median around 2015-07-08
-  * half of the accounts were created on or after 2014-03-26. Like there was an upcoming election or something :)
-  * 588 accounts have named a location in their profile, and there are 846 geolocated Tweets. That's not much, we could try to double-check these locations with the respective `$account_language` values.
+  * ~~743.828~~ 2.760.160 URLs to explore
+  * we can see from `$retweet_userid` that apparently, ~~703.467~~ 3.333.184 Tweets are just Retweets and not unique/original Tweets.
+  * if we were to try to classify accounts by profile description, there's a corpus of ~~2.451~~ 2.597 unique profile descriptions (`$user_profile_description`) and 200 unique `$user_profile_url`s
+  * all the `$*_tweetid` were read as numeric, which we'll also need to change, as IDs are supposed to be unique identifiers and not continuous values -> `mutate()`
+  * the Tweets were posted in the period from 2009-05-09 (!) to 2018-06-21, with the median around 2015-07-17
+  * half of the accounts were created on or after 2014-03-28. Like there was an upcoming election or a referendum or something :)
+  * there are 608 unique account locations (from an unknown number of accounts at this point), and there are 4.779 geolocated Tweets. That's not much, but we could try to double-check these locations with the respective `$account_language` values.
     
-That should be enough leads for an initial inquiry. Let's continue with the data preparation and adress what we have discovered so far.
+That should be enough leads for an initial inquiry. Let's continue with the data preparation and address what we have discovered so far.
 
 ## Change Variable Types
 
@@ -139,15 +133,17 @@ data_raw %>%
   knitr::kable("html", 2)
 ```
 
-Ok, now we know that 703.467 Tweets are Retweets of 551.034 unique Tweets. Good to know for any Natural Language Processing Method, i.e. Topic Modelling, or when building a corpus for descriptive analyses.
+Ok, now we know that 3.333.184 (~1/3) Tweets are Retweets (of 1.725.841 unique Tweets). Good to know for any Natural Language Processing Method which depends on statistics, i.e. Topic Modelling, or when building a corpus for descriptive analyses.
 
 ## Remove Duplicates
+
+It's probably more efficient to remove duplicates as the first step. This reduces the data object we're working with.
 
 ```{r}
 data_unique <- data_raw %>% filter(is_retweet == FALSE)
 ```
 
-Now we're down to `r n_distinct(data_unique$tweetid)` unique Tweets by `r n_distinct(data_unique$userid)` Users. 
+Now we're down to `r n_distinct(data_unique$tweetid)` unique Tweets in `r n_distinct(data_unique$tweet_language)` Tweet languages by `r n_distinct(data_unique$userid)` Users with `r n_distinct(data_unique$account_language)` account languages.
 
 ## Reduce/Recode Language Variables
 
@@ -157,12 +153,12 @@ Now we're down to `r n_distinct(data_unique$tweetid)` unique Tweets by `r n_dist
 data_unique %>% 
   group_by(tweet_language) %>% 
   count() %>% 
+  filter(n > 1000) %>% 
   arrange(desc(n)) %>%
-  #head(20) %>% 
   knitr::kable(format = "html")
 ```
 
-So there's 12 Tweet languages with n > 1000.
+That's quite a lot, even if we only consider Tweet languages with n > 1000 Tweets.
 
 **merge NA and und[defined]**
 
@@ -171,22 +167,24 @@ data_unique <- data_unique %>%
   mutate(tweet_language = if_else(is.na(tweet_language), "und", tweet_language))
 ```
 
-**recode all langs with n < 1000 as "other"**
+**recode all langs with n < 5000 as "other"**
 
-I'm very sure that there's a more elegant solution for mutating observations row-wise based on grouped counts... 
+We need to reduce the scope of Tweet languages for now. 5000 is only slightly less than 1% of the unique Tweets, so this sound like a good threshold.
 
 ```{r}
+# I'm very sure that there's a more elegant solution for mutating observations row-wise based on grouped counts... However, whatever works, works.
+
 other_langs <- data_unique %>% 
   group_by(tweet_language) %>% 
   count() %>% 
-  filter(n < 1000) %>% 
+  filter(n < 5000) %>% 
   select(tweet_language)
 ```
 
 ```{r}
 data_unique <- data_unique %>% 
   mutate(tweet_language = 
-           if_else(tweet_language %in% other_langs$tweet_language, "other",
+           if_else(tweet_language %in% other_langs$tweet_language, "other_44",
                                   tweet_language))
 ```
 
@@ -194,7 +192,7 @@ data_unique <- data_unique %>%
 n_distinct(data_unique$tweet_language)
 ```
 
-We're down to `r n_distinct(data_unique$tweet_language)` language groups for the Tweets. That's better!
+We're down to `r n_distinct(data_unique$tweet_language)` language groups for the Tweets. That's far better!
 
 **$account_language**
 
@@ -203,28 +201,29 @@ data_unique %>%
   group_by(account_language) %>% 
   distinct(userid) %>% 
   count() %>% 
-  arrange(desc(n))
+  arrange(desc(n)) %>% 
+  knitr::kable("html")
 ```
 
-So there's `r n_distinct(data_unique$account_language)` account languages, but we should should focus on those with n > 100
+So there's `r n_distinct(data_unique$account_language)` account languages. I'm going to focus on languages with n > 100 accounts, and recode the rest as "other_6" (since we can assume "uk" == "en-gb", that's one language less).
 
-> merge langs with n < 100
 
 ```{r}
-account_langs <- data_unique %>% 
+other_langs_acc <- data_unique %>% 
+  distinct(userid, .keep_all = TRUE) %>% 
   group_by(account_language) %>% 
-  distinct(userid) %>% 
   count() %>% 
-  filter(n < 100)  %>% 
+  filter(n < 100) %>% 
   select(account_language)
 
 data_unique <- data_unique %>% 
-  mutate(account_language = if_else(account_language %in% account_langs$account_language,
-                                    "other", account_language))
+  mutate(account_language = 
+           if_else(account_language %in% other_langs_acc$account_language, "other_6",
+                                  account_language))
 n_distinct(data_unique$account_language)
 ```
 
-Great! Now we're down to `r n_distinct(data_unique$account_language)` account laguages.
+Great! Now we're down to `r n_distinct(data_unique$account_language)` account languages.
 
 ## IRA Dataset Languages: Summary
 
@@ -236,7 +235,7 @@ unique(c(data_unique$tweet_language, data_unique$account_language))
 
 Now let's create a preliminary overview.
 
-```{r}
+```{r cache=TRUE}
 data_count_by_tweet_lang <- data_unique %>%
   # filter(is_retweet == TRUE) %>% 
   group_by(tweet_language) %>%
@@ -281,6 +280,7 @@ data_unique %>% filter(is.na(tweet_language) | is.na(account_language)) %>%
   count()
 ```
 
+That's great news, so far!
 
 **(Optional: recode if(tweet_lang == NA &/| user_lang == NA))**
 
@@ -304,16 +304,8 @@ data_recoded <- data_unique %>%
          )
 ```
 
-What if a `user == is.na(account_language)` has tweeted in multiple languages? --> Let's double-check with `data_raw`
 
-```{r}
-data_raw %>% 
-  filter(is.na(account_language))
-```
-
-> That's BTW the Tweet, where the `zip` throws an CRC error...
-
-# Who tweeted at what language?
+# Who tweeted in what language?
 
 Now it's about time to look into which account language groups tweeted in what languages.
 
@@ -324,18 +316,18 @@ Now it's about time to look into which account language groups tweeted in what l
 **German subset**
 ```{r cache=TRUE}
 german_subset <- data_unique %>% filter(tweet_language == "de" | account_language == "de")
-german_subset %>% count()
 ```
+
+The German subset has `r n_distinct(german_subset$tweetid)` Tweets by `r n_distinct(german_subset$userid)` users.
 
 **Undefined Subset**
 ```{r cache=TRUE}
 undefined_subset <- data_unique %>% 
   filter(tweet_language == "und" | account_language == "und" | 
            is.na(tweet_language) | is.na(account_language))
-
-undefined_subset %>% distinct(tweetid) %>% count()
-undefined_subset %>% distinct(userid) %>% count()
 ```
+
+The undefined ("und" & "NA") subset has `r n_distinct(undefined_subset$tweetid)` Tweets by `r n_distinct(undefined_subset$userid)` users.
 
 ## Summary Plots: Languages & General Activity
 
@@ -362,7 +354,7 @@ data_unique %>%
     title = "#TwitterDump 2018 – Russian InfoOP Dataset: Shares of Languages (Tweets)",
     subtitle = str_c("Total of ", 
       n_distinct(data_unique$tweetid), " unique Tweets (no RTs) from ",
-      n_distinct(data_unique$tweetid), " unique Users"
+      n_distinct(data_unique$userid), " unique Users"
     ),
     caption = str_c("@fubits")
   ) +
@@ -412,18 +404,18 @@ data_counts <- data_unique %>%
     RT = sum(retweet_count),
     Follower = unique(follower_count),
     Following = unique(following_count),
-    Influence = (((Follower + 1) + (Following + 1)) / (Following + 1)) * (Follower + 1),
+    Influence = (((Follower + 1) / (Following + 1)) + (Follower + 1)),
     Tweet_Langs = list(tweet_language),
     Tweet_Langs_Counts = list(unlist(Tweet_Langs) %>% fct_count())
   ) %>%
   arrange(desc(Tweets))
 ```
 
-Now the `$Tweet_Langs` var contains a list of all Tweet Languages from every single Tweet posted by an Account. Compare the number of `$Tweets` with the length of the vector (in the list).
+Now the `$Tweet_Langs` var contains a list of all Tweet Languages from every single Tweet posted by an Account. Compare the number of `$Tweets` with the length of the vector (in the list) further below.
 
-For `$Tweet_Langs_Counts`, we have utilised the quite elegant `forcats::fct_count()` which gives us a `list` of of the grouped language counts.
+For `$Tweet_Langs_Counts`, we have utilized the quite elegant `forcats::fct_count()` which gives us a `list` of of the grouped language counts.
 
-So the first User in our dataset - who has tweeted a total of `r data_counts[1,]$Tweets` times - has been busy in 5 languages. Impressive :)
+So the first User in our dataset - who has tweeted a total of `r data_counts[1,]$Tweets` times - has been busy in 6 languages. Impressive language skills :)
 
 ```{r cache=TRUE}
 data_counts[1,]$Tweet_Langs_Counts[[1]] %>% knitr::kable("html")
@@ -434,27 +426,26 @@ And this is what this tibble looks like (without `$userid` and `$Tweet_Langs` fo
 ```{r cache=TRUE}
 data_counts %>%  
   select(-userid, -Tweet_Langs) %>% 
-  head(10) %>% knitr::kable()
+  head(10) %>% knitr::kable("html", digits = 0)
 ```
 
-I'll get back to this in a minute. Let's now visualise the general characteristics of all accounts in the IRA dataset.
+I'll get back to this in a minute. Let's now visualize the general characteristics of all accounts in the IRA dataset.
 
 ### General Activity Plots
 
 
 ```{r fig.width=10, cache=TRUE}
 ggplot(data_counts, aes(x = Follower, y = Following)) +
-  geom_point(aes(size = Tweets, color = userid, alpha = RT)) +
+  geom_point(aes(size = Tweets, color = userid, alpha = Influence)) +
   scale_color_viridis_d(direction = -1) +
   scale_alpha_continuous(range = c(0.3,1),
-                         labels = scales::number_format(big.mark = ".",
-                                                    decimal.mark = ",")) +
+                         breaks = scales::pretty_breaks(5)) +
   scale_size(range = c(1,5), labels = scales::number_format(big.mark = ".",
                                                     decimal.mark = ",")) +
   scale_x_continuous(breaks = scales::pretty_breaks(6),
                      labels = scales::number_format(big.mark = ".",
                                                     decimal.mark = ",")) +
-  scale_y_continuous(breaks = scales::pretty_breaks(3),
+  scale_y_continuous(breaks = scales::pretty_breaks(6),
                      labels = scales::number_format(big.mark = ".",
                                                     decimal.mark = ",")) +
   coord_fixed() +
@@ -471,19 +462,16 @@ ggplot(data_counts, aes(x = Follower, y = Following)) +
     size = "# of Tweets",
     alpha = "Alpha: # Retweets"
   ) +
-    guides(color = FALSE,
-         alpha = guide_legend(override.aes = list(size = 4, stroke = 0)
-                               )
-         )
+    guides(color = FALSE, alpha = FALSE)
 ```
 
-From what we can see here, is that we have quite an amount of "influencers" - accounts with lots of followers with low rates of following others.
+From what we can see here, is that we have quite an amount of "influencers" - accounts with lots of followers and low rates of following others.
 
 What if we look at the account languages?
 
 ```{r fig.width=10, cache=TRUE}
 ggplot(data_counts, aes(x = Follower, y = Following)) +
-  geom_point(aes(size = Tweets, color = fct_infreq(Account_Lang), alpha = RT)) +
+  geom_point(aes(size = Tweets, color = fct_infreq(Account_Lang), alpha = Influence)) +
   scale_color_viridis_d(option = "B", direction = 1) +
   scale_alpha_continuous(range = c(0.3,1),
                          labels = scales::number_format(big.mark = ".",
@@ -493,7 +481,7 @@ ggplot(data_counts, aes(x = Follower, y = Following)) +
   scale_x_continuous(breaks = scales::pretty_breaks(6),
                      labels = scales::number_format(big.mark = ".",
                                                     decimal.mark = ",")) +
-  scale_y_continuous(breaks = scales::pretty_breaks(3),
+  scale_y_continuous(breaks = scales::pretty_breaks(6),
                      labels = scales::number_format(big.mark = ".",
                                                     decimal.mark = ",")) +
   coord_fixed() +
@@ -511,12 +499,11 @@ ggplot(data_counts, aes(x = Follower, y = Following)) +
     color = "Account Language"
   ) +
     guides(alpha = FALSE,
-           colour = guide_legend(override.aes = list(size = 5, stroke = 1.5)
-                                 )
+           colour = guide_legend(override.aes = list(size = 5, stroke = 1.5))
            )
 ```
 
-And now let's just look at when the most influental accounts were created.
+And now let's just look at when the most influential accounts were created.
 
 ```{r fig.width=10, cache=TRUE}
 influencers <- data_counts %>% 
@@ -526,7 +513,7 @@ influencers <- data_counts %>%
 data_counts %>% 
   arrange(desc(Influence)) %>% 
   ggplot(data = ., aes(x = Follower, y = Following)) +
-    geom_point(aes(size = Tweets, color = fct_infreq(Account_Lang), alpha = RT)) +
+    geom_point(aes(size = Tweets, color = fct_infreq(Account_Lang), alpha = Influence)) +
     ggrepel::geom_label_repel(data = influencers,
                             aes(label = lubridate::year(Created),
                                 fill = Account_Lang),
@@ -540,7 +527,7 @@ data_counts %>%
     scale_x_continuous(breaks = scales::pretty_breaks(6),
                        labels = scales::number_format(big.mark = ".",
                                                       decimal.mark = ",")) +
-    scale_y_continuous(breaks = scales::pretty_breaks(3),
+    scale_y_continuous(breaks = scales::pretty_breaks(6),
                        labels = scales::number_format(big.mark = ".",
                                                       decimal.mark = ",")) +
     coord_fixed() +
@@ -561,6 +548,23 @@ data_counts %>%
              colour = FALSE)
 ```
 
+Interesting, one of the most influential accounts is neither Russian nor English-speaking!
+
+```{r}
+data_counts %>% 
+  arrange(desc(Influence)) %>% 
+  select(userid, Account_Lang, Follower, Following) %>% 
+  head(15) %>% knitr::kable("html")
+```
+
+> 2518710111 is not hashed :) Let's find out who this is!
+
+```{r}
+data_raw %>% filter(userid == 2518710111) %>% select(userid, user_display_name, user_screen_name, account_language) %>% head(1) %>% knitr::kable("html")
+```
+
+> "Вестник Новосибирска" - Newspaper of Novosibirsk - doesn't sound too British :) the account has been suspended by Twitter, btw.
+
 What about accounts with the most Tweets?
 
 ```{r fig.width=10, cache=TRUE}
@@ -580,7 +584,7 @@ data_counts %>%
     scale_x_continuous(breaks = scales::pretty_breaks(6),
                        labels = scales::number_format(big.mark = ".",
                                                       decimal.mark = ",")) +
-    scale_y_continuous(breaks = scales::pretty_breaks(3),
+    scale_y_continuous(breaks = scales::pretty_breaks(6),
                        labels = scales::number_format(big.mark = ".",
                                                       decimal.mark = ",")) +
     coord_fixed() +
@@ -601,13 +605,13 @@ data_counts %>%
              colour = FALSE)
 ```
 
-We can see from both plots that the most influential or active accounts were created in 2014 or later, and that the relation between Russian and English account languages is rather balanced at the top.
+We can see from both plots that the most influential or active accounts were created in 2014 or later, and that the relation between Russian and English-language account languages is rather balanced in terms of max. Tweet numbers. However, English-speaking accounts are more dominant in terms of numeric dominance (Following/Followers).
 
 ## Languages: Accounts vs Tweets
 
 Now it's time to have look at the **account language to tweet languages** relations.
 
-This is what the Top 20 (of 50) language combinations look like:
+This is what the Top 20 (of 57) language combinations look like:
 
 ```{r cache=TRUE}
 data_unique %>% 
@@ -620,7 +624,7 @@ data_unique %>%
 
 Ok, so we could probably have expected that Russian and English speaking accounts would mostly tweet in their respective languages. But who would have suspected that 185.803 Russian language tweets were posted by English-speaking accounts? Right :)
 
-Now let's visualise all the 50 Account Language -> Tweet Language combinations.
+Now let's visualize all the 57 Account Language -> Tweet Language combinations.
 
 ```{r fig.width=7, cache=TRUE}
 data_unique %>% 
@@ -632,7 +636,7 @@ data_unique %>%
                   y = account_language,
                   fill = n)) +
     scale_fill_viridis_c(option = "B", direction = -1,
-                         breaks = scales::pretty_breaks(6),
+                         breaks = scales::pretty_breaks(4),
                          labels = scales::number_format(big.mark = ".",
                                                         decimal.mark = ",")) + 
     coord_fixed() +
@@ -690,11 +694,13 @@ data_unique %>%
   knitr::kable("html")
 ```
 
+Or what about "undefined"
 ```{r}
 data_unique %>%
   filter(tweet_language == "und") %>% 
   select(tweet_text) %>% 
-  tail(10) %>% 
+  head(10) %>% 
   knitr::kable("html")
 ```
 
+> Btw, have you already discovered the US-Republican-sponsored (sic!) [RussiaTweets.com](https://russiatweets.com/){target="_blank"} Project?

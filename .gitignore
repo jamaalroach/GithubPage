@@ -3,6 +3,7 @@
 *.7z
 *.RData
 .RData
+*.csv
 *.rds
 *.rdb
 *.rdx

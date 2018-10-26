@@ -1,5 +1,5 @@
 ---
-title: 'Election Hacking: Exploring 2 Million Tweets from the Russian Internet Research
+title: 'Election Hacking: Exploring 10 Million Tweets from the Russian Internet Research
   Agency Dataset, Pt. 1'
 author: Ilja / fubits
 date: '2018-10-26'
@@ -17,8 +17,8 @@ output:
     number_sections: yes
     toc: yes
 lastmod: '2018-10-26T16:18:07+02:00'
-description: "A bit over a week ago, Twitter's new-ish Elections integrity team released two datasets with 'all the accounts and related content associated with potential information operations that we have found on our service since 2016.' We're talking about millions of Tweets in dozens of languages stored in a single 1.24 GB CSV file. Tidyverse to the rescue!" 
-abstract: ''
+description: "A bit over a week ago, Twitter's new-ish Elections integrity team released two datasets with 'all the accounts and related content associated with potential information operations that we have found on our service since 2016.' We're talking about millions of Tweets in dozens of languages stored in a single 5.3 GB CSV file. Tidyverse to the rescue!" 
+abstract: 'Post updated with data from the full 5.3GB CSV file from the "Internet Research Agency" dataset'
 thumbnail: "/img/thumbs/IRA_Tweets.jpg"
 rmdlink: yes
 keywords: []
@@ -49,7 +49,7 @@ sequenceDiagrams:
 <li><a href="#reducerecode-language-variables"><span class="toc-section-number">1.3</span> Reduce/Recode Language Variables</a></li>
 <li><a href="#ira-dataset-languages-summary"><span class="toc-section-number">1.4</span> IRA Dataset Languages: Summary</a></li>
 </ul></li>
-<li><a href="#who-tweeted-at-what-language"><span class="toc-section-number">2</span> Who tweeted at what language?</a><ul>
+<li><a href="#who-tweeted-in-what-language"><span class="toc-section-number">2</span> Who tweeted in what language?</a><ul>
 <li><a href="#create-specific-subsets"><span class="toc-section-number">2.1</span> Create specific Subsets</a></li>
 <li><a href="#summary-plots-languages-general-activity"><span class="toc-section-number">2.2</span> Summary Plots: Languages &amp; General Activity</a><ul>
 <li><a href="#consolidating-tweet-languages-per-account"><span class="toc-section-number">2.2.1</span> Consolidating Tweet Languages per Account</a></li>
@@ -63,10 +63,10 @@ sequenceDiagrams:
 <p>A bit over a week ago, <a href="https://blog.twitter.com/official/en_us/topics/company/2018/enabling-further-research-of-information-operations-on-twitter.html" target="_blank">Twitter’s new-ish Elections integrity team released two datasets</a> with “all the accounts and related content associated with potential information operations that we have found on our service since 2016.”</p>
 <p>In particular, this is what we are talking about here:</p>
 <blockquote>
-<p>“<strong>What’s included?</strong>Our initial disclosures cover two previously disclosed campaigns, and include information from 3,841 accounts believed to be connected to the Russian Internet Research Agency [also known as IRA], and 770 accounts believed to originate in Iran.”</p>
+<p>“Our initial disclosures cover two previously disclosed campaigns, and include information from 3,841 accounts believed to be connected to the Russian Internet Research Agency [also known as IRA], and 770 accounts believed to originate in Iran.” (<a href="https://blog.twitter.com/official/en_us/topics/company/2018/enabling-further-research-of-information-operations-on-twitter.html" target="_blank">Twitter’s Election Integrity Team</a>)</p>
 </blockquote>
 <p>The IRA zip alone is <strong>1.24 GB</strong> big! Let’s dive in and explore. Before we can start with any in-depth analysis, automated or not, we have to inspect and prepare the data - remember: <a href="https://ellocke.github.io/post/r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist/#the-turkish-plot-twist">EDA FTW</a>!</p>
-<p>Anyways, a dataset of this size is a perfect excersise in data wrangeling and exploratory analysis with tools from the galactic <code>tidyverse</code>. So what I’m aiming to highlight with this post, is my more or less systematic approach to turning an granular dataset into something more useful (and reliable!) for further in-depth analysis.</p>
+<p>Anyways, a dataset of this size is a perfect exerciser in data wrangling and exploratory analysis with tools from the galactic <code>tidyverse</code>. So what I’m aiming to highlight with this post, is my more or less systematic approach to turning an granular dataset into something more useful (and reliable!) for further in-depth analysis.</p>
 <div id="data-preperation" class="section level1">
 <h1><span class="header-section-number">1</span> Data Preperation</h1>
 <p>You can get the data from here:</p>
@@ -77,31 +77,27 @@ sequenceDiagrams:
 </ul>
 <pre class="r"><code>library(tidyverse)</code></pre>
 <p>First, we need to unpack the <code>.zip</code> file and then read the <code>.csv</code> file into R.</p>
-<pre class="r"><code>codebook &lt;- readLines(&quot;https://storage.googleapis.com/twitter-election-integrity/hashed/Twitter_Elections_Integrity_Datasets_hashed_README.txt&quot;)
-
-csvfile &lt;- &quot;ira_tweets_csv_hashed.csv&quot;
-
-data &lt;- read_csv(&quot;ira_tweets_csv_hashed.csv&quot;)
-
+<pre class="r"><code>csvfile &lt;- &quot;ira_tweets_csv_hashed.csv&quot;
+data_raw &lt;- read_csv(&quot;ira_tweets_csv_hashed.csv&quot;)
 
 # Just for comparison
-data2 &lt;- data.table::fread(csvfile,
+data2_raw &lt;- data.table::fread(csvfile,
                           encoding = &quot;UTF-8&quot;,
                           # na.strings = &quot;,,&quot;,
                           verbose = TRUE)</code></pre>
-<p><code>&gt; 1899596 userid closing quote at end of file &quot;&quot;        'ira_tweets_csv_hashed.csv' file 2 1899596 NA     31 columns                   2 columns 'ira_tweets_csv_hashed.csv'</code></p>
 <blockquote>
-<p>I (<a href="https://twitter.com/avuko/status/1052573187869986816" target="_blank">like others</a>) am getting an CRC error message when unpacking the zip file. The resulting CSV is 1.17 GB big, so that’s not all the Tweets from the IRA dataset. We might want to come back to this issue later.</p>
+<p>At first – I (<a href="https://twitter.com/avuko/status/1052573187869986816" target="_blank">like others</a>) – was getting an CRC error message when unpacking the zip file. The resulting CSV was only 1.17 GB big, so that were not all the Tweets from the IRA dataset. After upgrading <code>7-zip</code> to <code>v18.05</code> unpacking the <code>zip</code> results in a 5.3 GB big CSV, which is quite a difference I’d say :)</p>
 </blockquote>
 <blockquote>
-<p><code>data.table</code> is by light years the fastest method, but <code>read_csv()</code> gives me <code>NA</code>’s without an extra hassle. <code>data.table::fread()</code> seems to be ignoring any patterns for <code>na.strings</code>. Therefore I’ll be working with the data object from <code>read_csv()</code> here. Since <code>read_csv()</code> is rather slow with a <code>CSV</code> this big, you can speed up your exploration if you save the read in data as an <code>.rds</code> file.</p>
+<p><code>data.table</code> is by light years the fastest method, but <code>read_csv()</code> gives me <code>NA</code>’s without an extra hassle while <code>data.table::fread()</code> seems to be ignoring any patterns for <code>na.strings</code>. Therefore I’ll be working with the data object from <code>read_csv()</code> here. Since <code>read_csv()</code> is rather slow with a <code>CSV</code> this big, you can speed up your exploration if you save the data object as an <code>.rds</code> or <code>.RData</code> file.</p>
 </blockquote>
 <pre class="r"><code>data_path &lt;- here::here(&quot;static&quot;, &quot;data&quot;, &quot;IRA_Tweets&quot;, &quot;/&quot;)
 # if (!dir.exists(data_path)) dir.create(data_path)
-# saveRDS(data, str_c(data_path, &quot;infoops_data.rds&quot;))
+# saveRDS(data_raw, str_c(data_path, &quot;infoops_data.rds&quot;))
+# save(data_raw, file = str_c(data_path, &quot;infoops_data.RData&quot;))
 data_raw &lt;- readRDS(str_c(data_path, &quot;infoops_data.rds&quot;))</code></pre>
 <p>With a dataset this big, skimr:skim() is just perfect (and it’s much more functional in RStudio)!</p>
-<pre class="r"><code>data_raw %&gt;% skimr::skim_to_wide() %&gt;% knitr::kable(&quot;html&quot;, 2)</code></pre>
+<pre class="r"><code>data_raw %&gt;% skimr::skim_to_wide() %&gt;% knitr::kable(&quot;html&quot;)</code></pre>
 <table>
 <thead>
 <tr>
@@ -170,13 +166,13 @@ character
 account_language
 </td>
 <td style="text-align:left;">
-1
+0
 </td>
 <td style="text-align:left;">
-1899595
+9041308
 </td>
 <td style="text-align:left;">
-1899596
+9041308
 </td>
 <td style="text-align:left;">
 2
@@ -226,25 +222,25 @@ character
 hashtags
 </td>
 <td style="text-align:left;">
-510585
+2378775
 </td>
 <td style="text-align:left;">
-1389011
+6662533
 </td>
 <td style="text-align:left;">
-1899596
+9041308
 </td>
 <td style="text-align:left;">
 2
 </td>
 <td style="text-align:left;">
-140
+156
 </td>
 <td style="text-align:left;">
 0
 </td>
 <td style="text-align:left;">
-75180
+244865
 </td>
 <td style="text-align:left;">
 NA
@@ -282,16 +278,16 @@ character
 in_reply_to_userid
 </td>
 <td style="text-align:left;">
-1791412
+8503421
 </td>
 <td style="text-align:left;">
-108184
+537887
 </td>
 <td style="text-align:left;">
-1899596
+9041308
 </td>
 <td style="text-align:left;">
-4
+2
 </td>
 <td style="text-align:left;">
 64
@@ -300,7 +296,7 @@ in_reply_to_userid
 0
 </td>
 <td style="text-align:left;">
-20501
+82809
 </td>
 <td style="text-align:left;">
 NA
@@ -338,13 +334,13 @@ character
 is_retweet
 </td>
 <td style="text-align:left;">
-1
+0
 </td>
 <td style="text-align:left;">
-1899595
+9041308
 </td>
 <td style="text-align:left;">
-1899596
+9041308
 </td>
 <td style="text-align:left;">
 4
@@ -394,16 +390,16 @@ character
 latitude
 </td>
 <td style="text-align:left;">
-1898750
+9036529
 </td>
 <td style="text-align:left;">
-846
+4779
 </td>
 <td style="text-align:left;">
-1899596
+9041308
 </td>
 <td style="text-align:left;">
-4
+3
 </td>
 <td style="text-align:left;">
 19
@@ -412,7 +408,7 @@ latitude
 0
 </td>
 <td style="text-align:left;">
-683
+2752
 </td>
 <td style="text-align:left;">
 NA
@@ -450,16 +446,16 @@ character
 longitude
 </td>
 <td style="text-align:left;">
-1898750
+9036529
 </td>
 <td style="text-align:left;">
-846
+4779
 </td>
 <td style="text-align:left;">
-1899596
+9041308
 </td>
 <td style="text-align:left;">
-5
+3
 </td>
 <td style="text-align:left;">
 18
@@ -468,7 +464,7 @@ longitude
 0
 </td>
 <td style="text-align:left;">
-685
+2807
 </td>
 <td style="text-align:left;">
 NA
@@ -506,25 +502,25 @@ character
 poll_choices
 </td>
 <td style="text-align:left;">
-1899339
+9040172
 </td>
 <td style="text-align:left;">
-257
+1136
 </td>
 <td style="text-align:left;">
-1899596
+9041308
 </td>
 <td style="text-align:left;">
 5
 </td>
 <td style="text-align:left;">
-76
+80
 </td>
 <td style="text-align:left;">
 0
 </td>
 <td style="text-align:left;">
-164
+708
 </td>
 <td style="text-align:left;">
 NA
@@ -562,13 +558,13 @@ character
 retweet_userid
 </td>
 <td style="text-align:left;">
-1196129
+5708124
 </td>
 <td style="text-align:left;">
-703467
+3333184
 </td>
 <td style="text-align:left;">
-1899596
+9041308
 </td>
 <td style="text-align:left;">
 2
@@ -580,7 +576,7 @@ retweet_userid
 0
 </td>
 <td style="text-align:left;">
-71938
+204289
 </td>
 <td style="text-align:left;">
 NA
@@ -618,13 +614,13 @@ character
 tweet_client_name
 </td>
 <td style="text-align:left;">
-9017
+40341
 </td>
 <td style="text-align:left;">
-1890579
+9000967
 </td>
 <td style="text-align:left;">
-1899596
+9041308
 </td>
 <td style="text-align:left;">
 3
@@ -636,7 +632,7 @@ tweet_client_name
 0
 </td>
 <td style="text-align:left;">
-257
+333
 </td>
 <td style="text-align:left;">
 NA
@@ -674,13 +670,13 @@ character
 tweet_language
 </td>
 <td style="text-align:left;">
-67178
+296106
 </td>
 <td style="text-align:left;">
-1832418
+8745202
 </td>
 <td style="text-align:left;">
-1899596
+9041308
 </td>
 <td style="text-align:left;">
 2
@@ -692,7 +688,7 @@ tweet_language
 0
 </td>
 <td style="text-align:left;">
-51
+58
 </td>
 <td style="text-align:left;">
 NA
@@ -730,25 +726,25 @@ character
 tweet_text
 </td>
 <td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+9041308
+</td>
+<td style="text-align:left;">
+9041308
+</td>
+<td style="text-align:left;">
 1
 </td>
 <td style="text-align:left;">
-1899595
-</td>
-<td style="text-align:left;">
-1899596
-</td>
-<td style="text-align:left;">
-1
-</td>
-<td style="text-align:left;">
-686
+710
 </td>
 <td style="text-align:left;">
 0
 </td>
 <td style="text-align:left;">
-1634942
+6598905
 </td>
 <td style="text-align:left;">
 NA
@@ -786,25 +782,25 @@ character
 urls
 </td>
 <td style="text-align:left;">
-349363
+1640484
 </td>
 <td style="text-align:left;">
-1550233
+7400824
 </td>
 <td style="text-align:left;">
-1899596
+9041308
 </td>
 <td style="text-align:left;">
 2
 </td>
 <td style="text-align:left;">
-1103
+2057
 </td>
 <td style="text-align:left;">
 0
 </td>
 <td style="text-align:left;">
-743828
+2760160
 </td>
 <td style="text-align:left;">
 NA
@@ -842,13 +838,13 @@ character
 user_display_name
 </td>
 <td style="text-align:left;">
-1
+0
 </td>
 <td style="text-align:left;">
-1899595
+9041308
 </td>
 <td style="text-align:left;">
-1899596
+9041308
 </td>
 <td style="text-align:left;">
 5
@@ -860,7 +856,7 @@ user_display_name
 0
 </td>
 <td style="text-align:left;">
-3457
+3664
 </td>
 <td style="text-align:left;">
 NA
@@ -898,13 +894,13 @@ character
 user_mentions
 </td>
 <td style="text-align:left;">
-1071572
+5047231
 </td>
 <td style="text-align:left;">
-828024
+3994077
 </td>
 <td style="text-align:left;">
-1899596
+9041308
 </td>
 <td style="text-align:left;">
 3
@@ -916,7 +912,7 @@ user_mentions
 0
 </td>
 <td style="text-align:left;">
-143446
+570293
 </td>
 <td style="text-align:left;">
 NA
@@ -954,13 +950,13 @@ character
 user_profile_description
 </td>
 <td style="text-align:left;">
-294084
+1371499
 </td>
 <td style="text-align:left;">
-1605512
+7669809
 </td>
 <td style="text-align:left;">
-1899596
+9041308
 </td>
 <td style="text-align:left;">
 1
@@ -972,7 +968,7 @@ user_profile_description
 0
 </td>
 <td style="text-align:left;">
-2451
+2597
 </td>
 <td style="text-align:left;">
 NA
@@ -1010,13 +1006,13 @@ character
 user_profile_url
 </td>
 <td style="text-align:left;">
-1516322
+7146952
 </td>
 <td style="text-align:left;">
-383274
+1894356
 </td>
 <td style="text-align:left;">
-1899596
+9041308
 </td>
 <td style="text-align:left;">
 22
@@ -1028,7 +1024,7 @@ user_profile_url
 0
 </td>
 <td style="text-align:left;">
-193
+200
 </td>
 <td style="text-align:left;">
 NA
@@ -1066,13 +1062,13 @@ character
 user_reported_location
 </td>
 <td style="text-align:left;">
-325967
+1526654
 </td>
 <td style="text-align:left;">
-1573629
+7514654
 </td>
 <td style="text-align:left;">
-1899596
+9041308
 </td>
 <td style="text-align:left;">
 2
@@ -1084,7 +1080,7 @@ user_reported_location
 0
 </td>
 <td style="text-align:left;">
-588
+608
 </td>
 <td style="text-align:left;">
 NA
@@ -1122,13 +1118,13 @@ character
 user_screen_name
 </td>
 <td style="text-align:left;">
-1
+0
 </td>
 <td style="text-align:left;">
-1899595
+9041308
 </td>
 <td style="text-align:left;">
-1899596
+9041308
 </td>
 <td style="text-align:left;">
 6
@@ -1140,7 +1136,7 @@ user_screen_name
 0
 </td>
 <td style="text-align:left;">
-3460
+3667
 </td>
 <td style="text-align:left;">
 NA
@@ -1181,10 +1177,10 @@ userid
 0
 </td>
 <td style="text-align:left;">
-1899596
+9041308
 </td>
 <td style="text-align:left;">
-1899596
+9041308
 </td>
 <td style="text-align:left;">
 9
@@ -1196,7 +1192,7 @@ userid
 0
 </td>
 <td style="text-align:left;">
-3461
+3667
 </td>
 <td style="text-align:left;">
 NA
@@ -1234,13 +1230,13 @@ Date
 account_creation_date
 </td>
 <td style="text-align:left;">
-1
+0
 </td>
 <td style="text-align:left;">
-1899595
+9041308
 </td>
 <td style="text-align:left;">
-1899596
+9041308
 </td>
 <td style="text-align:left;">
 2009-04-24
@@ -1252,10 +1248,10 @@ account_creation_date
 NA
 </td>
 <td style="text-align:left;">
-633
+653
 </td>
 <td style="text-align:left;">
-2014-03-26
+2014-03-28
 </td>
 <td style="text-align:left;">
 NA
@@ -1290,16 +1286,13 @@ integer
 follower_count
 </td>
 <td style="text-align:left;">
-1
+0
 </td>
 <td style="text-align:left;">
-1899595
+9041308
 </td>
 <td style="text-align:left;">
-1899596
-</td>
-<td style="text-align:left;">
-NA
+9041308
 </td>
 <td style="text-align:left;">
 NA
@@ -1314,22 +1307,25 @@ NA
 NA
 </td>
 <td style="text-align:left;">
-8829.46
+NA
 </td>
 <td style="text-align:left;">
-23091.87
+8670.2
+</td>
+<td style="text-align:left;">
+22146.39
 </td>
 <td style="text-align:left;">
 0
 </td>
 <td style="text-align:left;">
-320
+346
 </td>
 <td style="text-align:left;">
-833
+842
 </td>
 <td style="text-align:left;">
-4506
+4486
 </td>
 <td style="text-align:left;">
 257638
@@ -1346,16 +1342,13 @@ integer
 following_count
 </td>
 <td style="text-align:left;">
-1
+0
 </td>
 <td style="text-align:left;">
-1899595
+9041308
 </td>
 <td style="text-align:left;">
-1899596
-</td>
-<td style="text-align:left;">
-NA
+9041308
 </td>
 <td style="text-align:left;">
 NA
@@ -1370,22 +1363,25 @@ NA
 NA
 </td>
 <td style="text-align:left;">
-2520.72
+NA
 </td>
 <td style="text-align:left;">
-5011.33
+2522.47
+</td>
+<td style="text-align:left;">
+5028.83
 </td>
 <td style="text-align:left;">
 0
 </td>
 <td style="text-align:left;">
-285
+284
 </td>
 <td style="text-align:left;">
 618
 </td>
 <td style="text-align:left;">
-2024
+2014
 </td>
 <td style="text-align:left;">
 74664
@@ -1402,16 +1398,13 @@ integer
 like_count
 </td>
 <td style="text-align:left;">
-471
+2673
 </td>
 <td style="text-align:left;">
-1899125
+9038635
 </td>
 <td style="text-align:left;">
-1899596
-</td>
-<td style="text-align:left;">
-NA
+9041308
 </td>
 <td style="text-align:left;">
 NA
@@ -1426,10 +1419,13 @@ NA
 NA
 </td>
 <td style="text-align:left;">
-3.89
+NA
 </td>
 <td style="text-align:left;">
-257.11
+4
+</td>
+<td style="text-align:left;">
+290.31
 </td>
 <td style="text-align:left;">
 0
@@ -1444,7 +1440,7 @@ NA
 0
 </td>
 <td style="text-align:left;">
-182821
+325826
 </td>
 <td style="text-align:left;">
 ▇▁▁▁▁▁▁▁
@@ -1458,13 +1454,13 @@ integer
 quote_count
 </td>
 <td style="text-align:left;">
-471
+2673
 </td>
 <td style="text-align:left;">
-1899125
+9038635
 </td>
 <td style="text-align:left;">
-1899596
+9041308
 </td>
 <td style="text-align:left;">
 NA
@@ -1485,7 +1481,7 @@ NA
 0.2
 </td>
 <td style="text-align:left;">
-15.57
+13.07
 </td>
 <td style="text-align:left;">
 0
@@ -1514,16 +1510,13 @@ integer
 reply_count
 </td>
 <td style="text-align:left;">
-471
+2673
 </td>
 <td style="text-align:left;">
-1899125
+9038635
 </td>
 <td style="text-align:left;">
-1899596
-</td>
-<td style="text-align:left;">
-NA
+9041308
 </td>
 <td style="text-align:left;">
 NA
@@ -1538,10 +1531,13 @@ NA
 NA
 </td>
 <td style="text-align:left;">
-0.29
+NA
 </td>
 <td style="text-align:left;">
-7.19
+0.28
+</td>
+<td style="text-align:left;">
+7.41
 </td>
 <td style="text-align:left;">
 0
@@ -1556,7 +1552,7 @@ NA
 0
 </td>
 <td style="text-align:left;">
-2621
+3249
 </td>
 <td style="text-align:left;">
 ▇▁▁▁▁▁▁▁
@@ -1570,16 +1566,13 @@ integer
 retweet_count
 </td>
 <td style="text-align:left;">
-471
+2673
 </td>
 <td style="text-align:left;">
-1899125
+9038635
 </td>
 <td style="text-align:left;">
-1899596
-</td>
-<td style="text-align:left;">
-NA
+9041308
 </td>
 <td style="text-align:left;">
 NA
@@ -1594,10 +1587,13 @@ NA
 NA
 </td>
 <td style="text-align:left;">
-3.42
+NA
 </td>
 <td style="text-align:left;">
-121.68
+3.46
+</td>
+<td style="text-align:left;">
+140.33
 </td>
 <td style="text-align:left;">
 0
@@ -1612,7 +1608,7 @@ NA
 0
 </td>
 <td style="text-align:left;">
-74524
+123617
 </td>
 <td style="text-align:left;">
 ▇▁▁▁▁▁▁▁
@@ -1626,13 +1622,13 @@ numeric
 in_reply_to_tweetid
 </td>
 <td style="text-align:left;">
-1850047
+8775100
 </td>
 <td style="text-align:left;">
-49549
+266208
 </td>
 <td style="text-align:left;">
-1899596
+9041308
 </td>
 <td style="text-align:left;">
 NA
@@ -1653,7 +1649,7 @@ NA
 6.1e+17
 </td>
 <td style="text-align:left;">
-1.4e+17
+1.3e+17
 </td>
 <td style="text-align:left;">
 0
@@ -1682,13 +1678,13 @@ numeric
 quoted_tweet_tweetid
 </td>
 <td style="text-align:left;">
-1864146
+8853395
 </td>
 <td style="text-align:left;">
-35450
+187913
 </td>
 <td style="text-align:left;">
-1899596
+9041308
 </td>
 <td style="text-align:left;">
 NA
@@ -1709,13 +1705,13 @@ NA
 8e+17
 </td>
 <td style="text-align:left;">
-8.3e+16
+8.7e+16
 </td>
 <td style="text-align:left;">
-4.1e+09
+1.8e+09
 </td>
 <td style="text-align:left;">
-7.8e+17
+7.7e+17
 </td>
 <td style="text-align:left;">
 8.1e+17
@@ -1738,13 +1734,13 @@ numeric
 retweet_tweetid
 </td>
 <td style="text-align:left;">
-1196129
+5708124
 </td>
 <td style="text-align:left;">
-703467
+3333184
 </td>
 <td style="text-align:left;">
-1899596
+9041308
 </td>
 <td style="text-align:left;">
 NA
@@ -1768,7 +1764,7 @@ NA
 1.2e+17
 </td>
 <td style="text-align:left;">
-8e+08
+100
 </td>
 <td style="text-align:left;">
 5.7e+17
@@ -1797,10 +1793,10 @@ tweetid
 0
 </td>
 <td style="text-align:left;">
-1899596
+9041308
 </td>
 <td style="text-align:left;">
-1899596
+9041308
 </td>
 <td style="text-align:left;">
 NA
@@ -1850,13 +1846,13 @@ POSIXct
 tweet_time
 </td>
 <td style="text-align:left;">
-1
+0
 </td>
 <td style="text-align:left;">
-1899595
+9041308
 </td>
 <td style="text-align:left;">
-1899596
+9041308
 </td>
 <td style="text-align:left;">
 2009-05-09
@@ -1868,10 +1864,10 @@ tweet_time
 NA
 </td>
 <td style="text-align:left;">
-916505
+1788062
 </td>
 <td style="text-align:left;">
-2015-07-08
+2015-07-17
 </td>
 <td style="text-align:left;">
 NA
@@ -1902,20 +1898,20 @@ NA
 </table>
 <p>We can already make some interesting observations from this summary alone:</p>
 <ul>
-<li>The IRA dataset consist of ~ 1.899.595 Tweets in 51 languages, from ~ 3.460 unique accounts with 11 account languages. That’s “diverse” but also quite complex.</li>
-<li><code>$is_retweet</code> has only 2 unique values, so it’s obviously a boolean</li>
-<li>There’s 1.899.595 observations for <code>$tweet_text</code>, but only 1.634.942 are unique. This difference just screams: spam bots and/or coordinated campaigns!</li>
-<li>only ~50K Tweets are replies -&gt; rather few interactions</li>
+<li>The IRA dataset consist of <del>1.899.595</del> 9.041.308 Tweets in <del>51</del> 58 languages, from <del>3.460</del> 3.667 unique accounts and 11 account languages. That’s pretty “diverse” but also quite complex.</li>
+<li><code>$is_retweet</code> has only 2 unique values, so it’s obviously a Boolean -&gt; <code>mutate()</code></li>
+<li>There’s <del>1.899.595</del> 9.041.308 observations for <code>$tweet_text</code>, but only <del>1.634.942</del> 6.598.905 are unique. This huge delta just screams: spam bots and/or coordinated campaigns!</li>
+<li>only <del>50K</del> 266.208 Tweets are replies -&gt; rather few interactions</li>
 <li>there are some prominent accounts with up to 257.638 followers</li>
-<li>743.828 URLs to explore</li>
-<li>we can see from <code>$retweet_userid</code> that apparently, 703.467 Tweets are just Retweets and not unique Tweets.</li>
-<li>if we were to try to classify accounts by profile description, there’s a corpus of 2451 unique profile descriptions (<code>$user_profile_description</code>) and 193 unique <code>$user_profile_url</code>s</li>
-<li>all the <code>$*_tweetid</code> were read as nummeric, which we’ll also need to change as IDs are supposed to be unique identifieres and not continuous values</li>
-<li>the Tweets were posted in the period from 2009-05-09 (!) to 2018-06-21, with the median around 2015-07-08</li>
-<li>half of the accounts were created on or after 2014-03-26. Like there was an upcoming election or something :)</li>
-<li>588 accounts have named a location in their profile, and there are 846 geolocated Tweets. That’s not much, we could try to double-check these locations with the respective <code>$account_language</code> values.</li>
+<li><del>743.828</del> 2.760.160 URLs to explore</li>
+<li>we can see from <code>$retweet_userid</code> that apparently, <del>703.467</del> 3.333.184 Tweets are just Retweets and not unique/original Tweets.</li>
+<li>if we were to try to classify accounts by profile description, there’s a corpus of <del>2.451</del> 2.597 unique profile descriptions (<code>$user_profile_description</code>) and 200 unique <code>$user_profile_url</code>s</li>
+<li>all the <code>$*_tweetid</code> were read as numeric, which we’ll also need to change, as IDs are supposed to be unique identifiers and not continuous values -&gt; <code>mutate()</code></li>
+<li>the Tweets were posted in the period from 2009-05-09 (!) to 2018-06-21, with the median around 2015-07-17</li>
+<li>half of the accounts were created on or after 2014-03-28. Like there was an upcoming election or a referendum or something :)</li>
+<li>there are 608 unique account locations (from an unknown number of accounts at this point), and there are 4.779 geolocated Tweets. That’s not much, but we could try to double-check these locations with the respective <code>$account_language</code> values.</li>
 </ul>
-<p>That should be enough leads for an initial inquiry. Let’s continue with the data preparation and adress what we have discovered so far.</p>
+<p>That should be enough leads for an initial inquiry. Let’s continue with the data preparation and address what we have discovered so far.</p>
 <div id="change-variable-types" class="section level2">
 <h2><span class="header-section-number">1.1</span> Change Variable Types</h2>
 <p><strong>convert <code>$is_retweet</code> into a boolean</strong></p>
@@ -2145,12 +2141,13 @@ FAL: 1196128, TRU: 703467, NA: 1
 </tr>
 </tbody>
 </table>
-<p>Ok, now we know that 703.467 Tweets are Retweets of 551.034 unique Tweets. Good to know for any Natural Language Processing Method, i.e. Topic Modelling, or when building a corpus for descriptive analyses.</p>
+<p>Ok, now we know that 3.333.184 (~1/3) Tweets are Retweets (of 1.725.841 unique Tweets). Good to know for any Natural Language Processing Method which depends on statistics, i.e. Topic Modelling, or when building a corpus for descriptive analyses.</p>
 </div>
 <div id="remove-duplicates" class="section level2">
 <h2><span class="header-section-number">1.2</span> Remove Duplicates</h2>
+<p>It’s probably more efficient to remove duplicates as the first step. This reduces the data object we’re working with.</p>
 <pre class="r"><code>data_unique &lt;- data_raw %&gt;% filter(is_retweet == FALSE)</code></pre>
-<p>Now we’re down to 1196110 unique Tweets by 3295 Users.</p>
+<p>Now we’re down to 5707611 unique Tweets in 57 Tweet languages by 3548 Users with 11 account languages.</p>
 </div>
 <div id="reducerecode-language-variables" class="section level2">
 <h2><span class="header-section-number">1.3</span> Reduce/Recode Language Variables</h2>
@@ -2158,8 +2155,8 @@ FAL: 1196128, TRU: 703467, NA: 1
 <pre class="r"><code>data_unique %&gt;% 
   group_by(tweet_language) %&gt;% 
   count() %&gt;% 
+  filter(n &gt; 1000) %&gt;% 
   arrange(desc(n)) %&gt;%
-  #head(20) %&gt;% 
   knitr::kable(format = &quot;html&quot;)</code></pre>
 <table>
 <thead>
@@ -2178,7 +2175,7 @@ n
 ru
 </td>
 <td style="text-align:right;">
-609547
+2839622
 </td>
 </tr>
 <tr>
@@ -2186,7 +2183,7 @@ ru
 en
 </td>
 <td style="text-align:right;">
-443041
+2178309
 </td>
 </tr>
 <tr>
@@ -2194,7 +2191,7 @@ en
 NA
 </td>
 <td style="text-align:right;">
-64908
+285539
 </td>
 </tr>
 <tr>
@@ -2202,7 +2199,7 @@ NA
 und
 </td>
 <td style="text-align:right;">
-22355
+119098
 </td>
 </tr>
 <tr>
@@ -2210,7 +2207,7 @@ und
 de
 </td>
 <td style="text-align:right;">
-17791
+86259
 </td>
 </tr>
 <tr>
@@ -2218,7 +2215,7 @@ de
 uk
 </td>
 <td style="text-align:right;">
-10313
+49889
 </td>
 </tr>
 <tr>
@@ -2226,7 +2223,7 @@ uk
 bg
 </td>
 <td style="text-align:right;">
-7642
+36576
 </td>
 </tr>
 <tr>
@@ -2234,7 +2231,7 @@ bg
 ar
 </td>
 <td style="text-align:right;">
-7185
+35811
 </td>
 </tr>
 <tr>
@@ -2242,15 +2239,7 @@ ar
 es
 </td>
 <td style="text-align:right;">
-1823
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-fr
-</td>
-<td style="text-align:right;">
-1322
+8402
 </td>
 </tr>
 <tr>
@@ -2258,7 +2247,15 @@ fr
 in
 </td>
 <td style="text-align:right;">
-1249
+7543
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fr
+</td>
+<td style="text-align:right;">
+7501
 </td>
 </tr>
 <tr>
@@ -2266,7 +2263,7 @@ in
 sr
 </td>
 <td style="text-align:right;">
-1157
+5604
 </td>
 </tr>
 <tr>
@@ -2274,15 +2271,7 @@ sr
 tl
 </td>
 <td style="text-align:right;">
-835
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-et
-</td>
-<td style="text-align:right;">
-760
+5176
 </td>
 </tr>
 <tr>
@@ -2290,47 +2279,15 @@ et
 ht
 </td>
 <td style="text-align:right;">
-666
+4944
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-tr
+et
 </td>
 <td style="text-align:right;">
-645
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-da
-</td>
-<td style="text-align:right;">
-483
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-ro
-</td>
-<td style="text-align:right;">
-464
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-it
-</td>
-<td style="text-align:right;">
-418
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-nl
-</td>
-<td style="text-align:right;">
-412
+4920
 </td>
 </tr>
 <tr>
@@ -2338,15 +2295,47 @@ nl
 sk
 </td>
 <td style="text-align:right;">
-384
+2982
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-pt
+tr
 </td>
 <td style="text-align:right;">
-365
+2903
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+da
+</td>
+<td style="text-align:right;">
+2699
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ro
+</td>
+<td style="text-align:right;">
+2517
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+it
+</td>
+<td style="text-align:right;">
+2493
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+nl
+</td>
+<td style="text-align:right;">
+2292
 </td>
 </tr>
 <tr>
@@ -2354,7 +2343,7 @@ pt
 cy
 </td>
 <td style="text-align:right;">
-307
+2214
 </td>
 </tr>
 <tr>
@@ -2362,15 +2351,15 @@ cy
 sl
 </td>
 <td style="text-align:right;">
-262
+2123
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-lt
+pt
 </td>
 <td style="text-align:right;">
-258
+1857
 </td>
 </tr>
 <tr>
@@ -2378,15 +2367,7 @@ lt
 fi
 </td>
 <td style="text-align:right;">
-238
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-sv
-</td>
-<td style="text-align:right;">
-222
+1414
 </td>
 </tr>
 <tr>
@@ -2394,7 +2375,23 @@ sv
 pl
 </td>
 <td style="text-align:right;">
-200
+1325
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+sv
+</td>
+<td style="text-align:right;">
+1191
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+lt
+</td>
+<td style="text-align:right;">
+1190
 </td>
 </tr>
 <tr>
@@ -2402,7 +2399,7 @@ pl
 no
 </td>
 <td style="text-align:right;">
-180
+1135
 </td>
 </tr>
 <tr>
@@ -2410,31 +2407,128 @@ no
 ja
 </td>
 <td style="text-align:right;">
-139
+1117
+</td>
+</tr>
+</tbody>
+</table>
+<p>That’s quite a lot, even if we only consider Tweet languages with n &gt; 1000 Tweets.</p>
+<p><strong>merge NA and und[defined]</strong></p>
+<pre class="r"><code>data_unique &lt;- data_unique %&gt;% 
+  mutate(tweet_language = if_else(is.na(tweet_language), &quot;und&quot;, tweet_language))</code></pre>
+<p><strong>recode all langs with n &lt; 5000 as “other”</strong></p>
+<p>We need to reduce the scope of Tweet languages for now. 5000 is only slightly less than 1% of the unique Tweets, so this sound like a good threshold.</p>
+<pre class="r"><code># I&#39;m very sure that there&#39;s a more elegant solution for mutating observations row-wise based on grouped counts... However, whatever works, works.
+
+other_langs &lt;- data_unique %&gt;% 
+  group_by(tweet_language) %&gt;% 
+  count() %&gt;% 
+  filter(n &lt; 5000) %&gt;% 
+  select(tweet_language)</code></pre>
+<pre class="r"><code>data_unique &lt;- data_unique %&gt;% 
+  mutate(tweet_language = 
+           if_else(tweet_language %in% other_langs$tweet_language, &quot;other_44&quot;,
+                                  tweet_language))</code></pre>
+<pre class="r"><code>n_distinct(data_unique$tweet_language)</code></pre>
+<pre><code>## [1] 12</code></pre>
+<p>We’re down to 13 language groups for the Tweets. That’s far better!</p>
+<p><strong>$account_language</strong></p>
+<pre class="r"><code>data_unique %&gt;% 
+  group_by(account_language) %&gt;% 
+  distinct(userid) %&gt;% 
+  count() %&gt;% 
+  arrange(desc(n)) %&gt;% 
+  knitr::kable(&quot;html&quot;)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+account_language
+</th>
+<th style="text-align:right;">
+n
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:right;">
+2214
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-cs
+ru
 </td>
 <td style="text-align:right;">
-112
+982
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-bs
+es
 </td>
 <td style="text-align:right;">
-87
+194
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-lv
+de
 </td>
 <td style="text-align:right;">
-64
+107
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ar
+</td>
+<td style="text-align:right;">
+21
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fr
+</td>
+<td style="text-align:right;">
+11
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+it
+</td>
+<td style="text-align:right;">
+7
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+en-gb
+</td>
+<td style="text-align:right;">
+6
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+zh-cn
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+uk
+</td>
+<td style="text-align:right;">
+2
 </td>
 </tr>
 <tr>
@@ -2442,202 +2536,34 @@ lv
 id
 </td>
 <td style="text-align:right;">
-57
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-hu
-</td>
-<td style="text-align:right;">
-54
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-hr
-</td>
-<td style="text-align:right;">
-48
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-vi
-</td>
-<td style="text-align:right;">
-30
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-eu
-</td>
-<td style="text-align:right;">
-29
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-ko
-</td>
-<td style="text-align:right;">
-23
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-is
-</td>
-<td style="text-align:right;">
-22
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-hi
-</td>
-<td style="text-align:right;">
-14
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-zh
-</td>
-<td style="text-align:right;">
-5
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-el
-</td>
-<td style="text-align:right;">
-2
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-fa
-</td>
-<td style="text-align:right;">
-2
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-iw
-</td>
-<td style="text-align:right;">
-2
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-th
-</td>
-<td style="text-align:right;">
-2
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-he
-</td>
-<td style="text-align:right;">
-1
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-hy
-</td>
-<td style="text-align:right;">
-1
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-ml
-</td>
-<td style="text-align:right;">
-1
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-ur
-</td>
-<td style="text-align:right;">
 1
 </td>
 </tr>
 </tbody>
 </table>
-<p>So there’s 12 Tweet languages with n &gt; 1000.</p>
-<p><strong>merge NA and und[defined]</strong></p>
-<pre class="r"><code>data_unique &lt;- data_unique %&gt;% 
-  mutate(tweet_language = if_else(is.na(tweet_language), &quot;und&quot;, tweet_language))</code></pre>
-<p><strong>recode all langs with n &lt; 1000 as “other”</strong></p>
-<p>I’m very sure that there’s a more elegant solution for mutating observations row-wise based on grouped counts…</p>
-<pre class="r"><code>other_langs &lt;- data_unique %&gt;% 
-  group_by(tweet_language) %&gt;% 
-  count() %&gt;% 
-  filter(n &lt; 1000) %&gt;% 
-  select(tweet_language)</code></pre>
-<pre class="r"><code>data_unique &lt;- data_unique %&gt;% 
-  mutate(tweet_language = 
-           if_else(tweet_language %in% other_langs$tweet_language, &quot;other&quot;,
-                                  tweet_language))</code></pre>
-<pre class="r"><code>n_distinct(data_unique$tweet_language)</code></pre>
-<pre><code>## [1] 12</code></pre>
-<p>We’re down to 12 language groups for the Tweets. That’s better!</p>
-<p><strong>$account_language</strong></p>
-<pre class="r"><code>data_unique %&gt;% 
+<p>So there’s 11 account languages. I’m going to focus on languages with n &gt; 100 accounts, and recode the rest as “other_6” (since we can assume “uk” == “en-gb”, that’s one language less).</p>
+<pre class="r"><code>other_langs_acc &lt;- data_unique %&gt;% 
+  distinct(userid, .keep_all = TRUE) %&gt;% 
   group_by(account_language) %&gt;% 
-  distinct(userid) %&gt;% 
   count() %&gt;% 
-  arrange(desc(n))</code></pre>
-<pre><code>## # A tibble: 11 x 2
-## # Groups:   account_language [11]
-##    account_language     n
-##    &lt;chr&gt;            &lt;int&gt;
-##  1 en                2030
-##  2 ru                 955
-##  3 es                 172
-##  4 de                 102
-##  5 ar                  15
-##  6 fr                   8
-##  7 en-gb                6
-##  8 zh-cn                3
-##  9 uk                   2
-## 10 id                   1
-## 11 it                   1</code></pre>
-<p>So there’s 11 account languages, but we should should focus on those with n &gt; 100</p>
-<blockquote>
-<p>merge langs with n &lt; 100</p>
-</blockquote>
-<pre class="r"><code>account_langs &lt;- data_unique %&gt;% 
-  group_by(account_language) %&gt;% 
-  distinct(userid) %&gt;% 
-  count() %&gt;% 
-  filter(n &lt; 100)  %&gt;% 
+  filter(n &lt; 100) %&gt;% 
   select(account_language)
 
 data_unique &lt;- data_unique %&gt;% 
-  mutate(account_language = if_else(account_language %in% account_langs$account_language,
-                                    &quot;other&quot;, account_language))
+  mutate(account_language = 
+           if_else(account_language %in% other_langs_acc$account_language, &quot;other_6&quot;,
+                                  account_language))
 n_distinct(data_unique$account_language)</code></pre>
 <pre><code>## [1] 5</code></pre>
-<p>Great! Now we’re down to 5 account laguages.</p>
+<p>Great! Now we’re down to 5 account languages.</p>
 </div>
 <div id="ira-dataset-languages-summary" class="section level2">
 <h2><span class="header-section-number">1.4</span> IRA Dataset Languages: Summary</h2>
 <p>Let’s see how many different languages we have by now.</p>
 <pre class="r"><code>unique(c(data_unique$tweet_language, data_unique$account_language))</code></pre>
-<pre><code>##  [1] &quot;ru&quot;    &quot;bg&quot;    &quot;en&quot;    &quot;und&quot;   &quot;other&quot; &quot;de&quot;    &quot;uk&quot;    &quot;es&quot;   
-##  [9] &quot;ar&quot;    &quot;fr&quot;    &quot;in&quot;    &quot;sr&quot;</code></pre>
+<pre><code>##  [1] &quot;ru&quot;       &quot;bg&quot;       &quot;en&quot;       &quot;und&quot;      &quot;other_44&quot; &quot;de&quot;      
+##  [7] &quot;uk&quot;       &quot;tl&quot;       &quot;es&quot;       &quot;ar&quot;       &quot;fr&quot;       &quot;in&quot;      
+## [13] &quot;sr&quot;       &quot;other_6&quot;</code></pre>
 <p>Now let’s create a preliminary overview.</p>
 <pre class="r"><code>data_count_by_tweet_lang &lt;- data_unique %&gt;%
   # filter(is_retweet == TRUE) %&gt;% 
@@ -2698,16 +2624,16 @@ A.Share
 en
 </td>
 <td style="text-align:right;">
-443.038
+2.178.206
 </td>
 <td style="text-align:right;">
-37,04
+38,16
 </td>
 <td style="text-align:right;">
-2.030
+2.214
 </td>
 <td style="text-align:right;">
-61,61
+62,40
 </td>
 </tr>
 <tr>
@@ -2715,16 +2641,16 @@ en
 ru
 </td>
 <td style="text-align:right;">
-609.538
+2.839.362
 </td>
 <td style="text-align:right;">
-50,96
+49,75
 </td>
 <td style="text-align:right;">
-955
+982
 </td>
 <td style="text-align:right;">
-28,98
+27,68
 </td>
 </tr>
 <tr>
@@ -2732,16 +2658,16 @@ ru
 es
 </td>
 <td style="text-align:right;">
-1.823
+8.402
 </td>
 <td style="text-align:right;">
 0,15
 </td>
 <td style="text-align:right;">
-172
+194
 </td>
 <td style="text-align:right;">
-5,22
+5,47
 </td>
 </tr>
 <tr>
@@ -2749,33 +2675,33 @@ es
 de
 </td>
 <td style="text-align:right;">
-17.791
+86.258
 </td>
 <td style="text-align:right;">
-1,49
+1,51
 </td>
 <td style="text-align:right;">
-102
+107
 </td>
 <td style="text-align:right;">
-3,10
+3,02
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-other
+other_6
 </td>
 <td style="text-align:right;">
-7.795
+NA
 </td>
 <td style="text-align:right;">
-0,65
+NA
 </td>
 <td style="text-align:right;">
-36
+51
 </td>
 <td style="text-align:right;">
-1,09
+1,44
 </td>
 </tr>
 <tr>
@@ -2783,10 +2709,10 @@ other
 ar
 </td>
 <td style="text-align:right;">
-7.185
+35.811
 </td>
 <td style="text-align:right;">
-0,60
+0,63
 </td>
 <td style="text-align:right;">
 NA
@@ -2800,7 +2726,7 @@ NA
 bg
 </td>
 <td style="text-align:right;">
-7.642
+36.575
 </td>
 <td style="text-align:right;">
 0,64
@@ -2817,10 +2743,10 @@ NA
 fr
 </td>
 <td style="text-align:right;">
-1.322
+7.501
 </td>
 <td style="text-align:right;">
-0,11
+0,13
 </td>
 <td style="text-align:right;">
 NA
@@ -2834,10 +2760,27 @@ NA
 in
 </td>
 <td style="text-align:right;">
-1.249
+7.543
 </td>
 <td style="text-align:right;">
-0,10
+0,13
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+other_44
+</td>
+<td style="text-align:right;">
+42.795
+</td>
+<td style="text-align:right;">
+0,75
 </td>
 <td style="text-align:right;">
 NA
@@ -2851,7 +2794,7 @@ NA
 sr
 </td>
 <td style="text-align:right;">
-1.157
+5.604
 </td>
 <td style="text-align:right;">
 0,10
@@ -2865,13 +2808,30 @@ NA
 </tr>
 <tr>
 <td style="text-align:left;">
+tl
+</td>
+<td style="text-align:right;">
+5.176
+</td>
+<td style="text-align:right;">
+0,09
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
 uk
 </td>
 <td style="text-align:right;">
-10.313
+49.887
 </td>
 <td style="text-align:right;">
-0,86
+0,87
 </td>
 <td style="text-align:right;">
 NA
@@ -2885,10 +2845,10 @@ NA
 und
 </td>
 <td style="text-align:right;">
-87.259
+404.557
 </td>
 <td style="text-align:right;">
-7,30
+7,09
 </td>
 <td style="text-align:right;">
 NA
@@ -2909,6 +2869,7 @@ NA
 ##       n
 ##   &lt;int&gt;
 ## 1     0</code></pre>
+<p>That’s great news, so far!</p>
 <p><strong>(Optional: recode if(tweet_lang == NA &amp;/| user_lang == NA))</strong></p>
 <p>Since we’ve reduced our dataset and already recoded the <code>NA</code>s, this step is not necessary anymore (before that, I worked without <code>is_retweet == FALSE</code> and things looked a bit different). However, I’m just leaving the syntax here, since it might be useful to others (and to myself).</p>
 <pre class="r"><code>data_recoded &lt;- data_unique %&gt;%
@@ -2926,30 +2887,10 @@ NA
                             account_language)
                             )
          )</code></pre>
-<p>What if a <code>user == is.na(account_language)</code> has tweeted in multiple languages? –&gt; Let’s double-check with <code>data_raw</code></p>
-<pre class="r"><code>data_raw %&gt;% 
-  filter(is.na(account_language))</code></pre>
-<pre><code>## # A tibble: 1 x 31
-##   tweetid userid user_display_na~ user_screen_name user_reported_l~
-##   &lt;chr&gt;   &lt;chr&gt;  &lt;chr&gt;            &lt;chr&gt;            &lt;chr&gt;           
-## 1 840375~ 54276~ &lt;NA&gt;             &lt;NA&gt;             &lt;NA&gt;            
-## # ... with 26 more variables: user_profile_description &lt;chr&gt;,
-## #   user_profile_url &lt;chr&gt;, follower_count &lt;int&gt;, following_count &lt;int&gt;,
-## #   account_creation_date &lt;date&gt;, account_language &lt;chr&gt;,
-## #   tweet_language &lt;chr&gt;, tweet_text &lt;chr&gt;, tweet_time &lt;dttm&gt;,
-## #   tweet_client_name &lt;chr&gt;, in_reply_to_tweetid &lt;chr&gt;,
-## #   in_reply_to_userid &lt;chr&gt;, quoted_tweet_tweetid &lt;chr&gt;,
-## #   is_retweet &lt;lgl&gt;, retweet_userid &lt;chr&gt;, retweet_tweetid &lt;chr&gt;,
-## #   latitude &lt;chr&gt;, longitude &lt;chr&gt;, quote_count &lt;int&gt;, reply_count &lt;int&gt;,
-## #   like_count &lt;int&gt;, retweet_count &lt;int&gt;, hashtags &lt;chr&gt;, urls &lt;chr&gt;,
-## #   user_mentions &lt;chr&gt;, poll_choices &lt;chr&gt;</code></pre>
-<blockquote>
-<p>That’s BTW the Tweet, where the <code>zip</code> throws an CRC error…</p>
-</blockquote>
 </div>
 </div>
-<div id="who-tweeted-at-what-language" class="section level1">
-<h1><span class="header-section-number">2</span> Who tweeted at what language?</h1>
+<div id="who-tweeted-in-what-language" class="section level1">
+<h1><span class="header-section-number">2</span> Who tweeted in what language?</h1>
 <p>Now it’s about time to look into which account language groups tweeted in what languages.</p>
 <div id="create-specific-subsets" class="section level2">
 <h2><span class="header-section-number">2.1</span> Create specific Subsets</h2>
@@ -2957,27 +2898,13 @@ NA
 <p>This is also a good moment to create language-specific or other intereting subsets from our refined dataset.</p>
 </blockquote>
 <p><strong>German subset</strong></p>
-<pre class="r"><code>german_subset &lt;- data_unique %&gt;% filter(tweet_language == &quot;de&quot; | account_language == &quot;de&quot;)
-german_subset %&gt;% count()</code></pre>
-<pre><code>## # A tibble: 1 x 1
-##       n
-##   &lt;int&gt;
-## 1 19547</code></pre>
+<pre class="r"><code>german_subset &lt;- data_unique %&gt;% filter(tweet_language == &quot;de&quot; | account_language == &quot;de&quot;)</code></pre>
+<p>The German subset has 98064 Tweets by 782 users.</p>
 <p><strong>Undefined Subset</strong></p>
 <pre class="r"><code>undefined_subset &lt;- data_unique %&gt;% 
   filter(tweet_language == &quot;und&quot; | account_language == &quot;und&quot; | 
-           is.na(tweet_language) | is.na(account_language))
-
-undefined_subset %&gt;% distinct(tweetid) %&gt;% count()</code></pre>
-<pre><code>## # A tibble: 1 x 1
-##       n
-##   &lt;int&gt;
-## 1 87259</code></pre>
-<pre class="r"><code>undefined_subset %&gt;% distinct(userid) %&gt;% count()</code></pre>
-<pre><code>## # A tibble: 1 x 1
-##       n
-##   &lt;int&gt;
-## 1  2078</code></pre>
+           is.na(tweet_language) | is.na(account_language))</code></pre>
+<p>The undefined (“und” &amp; “NA”) subset has 404557 Tweets by 2867 users.</p>
 </div>
 <div id="summary-plots-languages-general-activity" class="section level2">
 <h2><span class="header-section-number">2.2</span> Summary Plots: Languages &amp; General Activity</h2>
@@ -3003,12 +2930,12 @@ undefined_subset %&gt;% distinct(tweetid) %&gt;% count()</code></pre>
     title = &quot;#TwitterDump 2018 – Russian InfoOP Dataset: Shares of Languages (Tweets)&quot;,
     subtitle = str_c(&quot;Total of &quot;, 
       n_distinct(data_unique$tweetid), &quot; unique Tweets (no RTs) from &quot;,
-      n_distinct(data_unique$tweetid), &quot; unique Users&quot;
+      n_distinct(data_unique$userid), &quot; unique Users&quot;
     ),
     caption = str_c(&quot;@fubits&quot;)
   ) +
   guides(fill = FALSE)</code></pre>
-<p><img src="/post/2018-10-26-election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
+<p><img src="/post/2018-10-26-election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1_files/figure-html/unnamed-chunk-23-1.png" width="672" /></p>
 <pre class="r"><code>data_unique %&gt;%
   group_by(account_language) %&gt;%
   summarise(n = n()) %&gt;%
@@ -3036,7 +2963,7 @@ undefined_subset %&gt;% distinct(tweetid) %&gt;% count()</code></pre>
     caption = str_c(&quot;@fubits&quot;)
   ) +
   guides(fill = FALSE)</code></pre>
-<p><img src="/post/2018-10-26-election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1_files/figure-html/unnamed-chunk-25-1.png" width="672" /></p>
+<p><img src="/post/2018-10-26-election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
 <div id="consolidating-tweet-languages-per-account" class="section level3">
 <h3><span class="header-section-number">2.2.1</span> Consolidating Tweet Languages per Account</h3>
 <pre class="r"><code>data_counts &lt;- data_unique %&gt;%
@@ -3049,14 +2976,14 @@ undefined_subset %&gt;% distinct(tweetid) %&gt;% count()</code></pre>
     RT = sum(retweet_count),
     Follower = unique(follower_count),
     Following = unique(following_count),
-    Influence = (((Follower + 1) + (Following + 1)) / (Following + 1)) * (Follower + 1),
+    Influence = (((Follower + 1) / (Following + 1)) + (Follower + 1)),
     Tweet_Langs = list(tweet_language),
     Tweet_Langs_Counts = list(unlist(Tweet_Langs) %&gt;% fct_count())
   ) %&gt;%
   arrange(desc(Tweets))</code></pre>
-<p>Now the <code>$Tweet_Langs</code> var contains a list of all Tweet Languages from every single Tweet posted by an Account. Compare the number of <code>$Tweets</code> with the length of the vector (in the list).</p>
-<p>For <code>$Tweet_Langs_Counts</code>, we have utilised the quite elegant <code>forcats::fct_count()</code> which gives us a <code>list</code> of of the grouped language counts.</p>
-<p>So the first User in our dataset - who has tweeted a total of 30940 times - has been busy in 5 languages. Impressive :)</p>
+<p>Now the <code>$Tweet_Langs</code> var contains a list of all Tweet Languages from every single Tweet posted by an Account. Compare the number of <code>$Tweets</code> with the length of the vector (in the list) further below.</p>
+<p>For <code>$Tweet_Langs_Counts</code>, we have utilized the quite elegant <code>forcats::fct_count()</code> which gives us a <code>list</code> of of the grouped language counts.</p>
+<p>So the first User in our dataset - who has tweeted a total of 95210 times - has been busy in 6 languages. Impressive language skills :)</p>
 <pre class="r"><code>data_counts[1,]$Tweet_Langs_Counts[[1]] %&gt;% knitr::kable(&quot;html&quot;)</code></pre>
 <table>
 <thead>
@@ -3075,7 +3002,15 @@ n
 bg
 </td>
 <td style="text-align:right;">
-177
+536
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:right;">
+2
 </td>
 </tr>
 <tr>
@@ -3083,7 +3018,7 @@ bg
 ru
 </td>
 <td style="text-align:right;">
-30400
+93478
 </td>
 </tr>
 <tr>
@@ -3091,7 +3026,7 @@ ru
 sr
 </td>
 <td style="text-align:right;">
-10
+26
 </td>
 </tr>
 <tr>
@@ -3099,7 +3034,7 @@ sr
 uk
 </td>
 <td style="text-align:right;">
-328
+1093
 </td>
 </tr>
 <tr>
@@ -3107,7 +3042,7 @@ uk
 und
 </td>
 <td style="text-align:right;">
-25
+75
 </td>
 </tr>
 </tbody>
@@ -3115,139 +3050,314 @@ und
 <p>And this is what this tibble looks like (without <code>$userid</code> and <code>$Tweet_Langs</code> for better Website readability):</p>
 <pre class="r"><code>data_counts %&gt;%  
   select(-userid, -Tweet_Langs) %&gt;% 
-  head(10) %&gt;% knitr::kable()</code></pre>
+  head(10) %&gt;% knitr::kable(&quot;html&quot;, digits = 0)</code></pre>
 <table>
 <thead>
-<tr class="header">
-<th align="left">Created</th>
-<th align="left">Account_Lang</th>
-<th align="right">Tweets</th>
-<th align="right">RT</th>
-<th align="right">Follower</th>
-<th align="right">Following</th>
-<th align="right">Influence</th>
-<th align="left">Tweet_Langs_Counts</th>
+<tr>
+<th style="text-align:left;">
+Created
+</th>
+<th style="text-align:left;">
+Account_Lang
+</th>
+<th style="text-align:right;">
+Tweets
+</th>
+<th style="text-align:right;">
+RT
+</th>
+<th style="text-align:right;">
+Follower
+</th>
+<th style="text-align:right;">
+Following
+</th>
+<th style="text-align:right;">
+Influence
+</th>
+<th style="text-align:left;">
+Tweet_Langs_Counts
+</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td align="left">16237</td>
-<td align="left">ru</td>
-<td align="right">30940</td>
-<td align="right">60537</td>
-<td align="right">15753</td>
-<td align="right">6862</td>
-<td align="right">51917.269</td>
-<td align="left">list(f = 1:5, n = c(177, 30400, 10, 328, 25))</td>
+<tr>
+<td style="text-align:left;">
+16237
+</td>
+<td style="text-align:left;">
+ru
+</td>
+<td style="text-align:right;">
+95210
+</td>
+<td style="text-align:right;">
+188332
+</td>
+<td style="text-align:right;">
+15753
+</td>
+<td style="text-align:right;">
+6862
+</td>
+<td style="text-align:right;">
+15756
+</td>
+<td style="text-align:left;">
+list(f = 1:6, n = c(536, 2, 93478, 26, 1093, 75))
+</td>
 </tr>
-<tr class="even">
-<td align="left">14553</td>
-<td align="left">ru</td>
-<td align="right">18984</td>
-<td align="right">3231</td>
-<td align="right">1543</td>
-<td align="right">34</td>
-<td align="right">69656.457</td>
-<td align="left">list(f = 1:10, n = c(130, 5, 79, 4, 4, 51, 7272, 20, 185, 11234))</td>
+<tr>
+<td style="text-align:left;">
+14553
+</td>
+<td style="text-align:left;">
+ru
+</td>
+<td style="text-align:right;">
+68784
+</td>
+<td style="text-align:right;">
+11700
+</td>
+<td style="text-align:right;">
+1543
+</td>
+<td style="text-align:right;">
+34
+</td>
+<td style="text-align:right;">
+1588
+</td>
+<td style="text-align:left;">
+list(f = 1:13, n = c(3, 488, 14, 290, 12, 10, 1, 153, 26633, 90, 9, 686, 40395))
+</td>
 </tr>
-<tr class="odd">
-<td align="left">17093</td>
-<td align="left">ru</td>
-<td align="right">14020</td>
-<td align="right">439</td>
-<td align="right">423</td>
-<td align="right">187</td>
-<td align="right">1380.255</td>
-<td align="left">list(f = 1:6, n = c(76, 1, 13799, 2, 122, 20))</td>
+<tr>
+<td style="text-align:left;">
+16625
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:right;">
+64495
+</td>
+<td style="text-align:right;">
+1898
+</td>
+<td style="text-align:right;">
+791
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1056
+</td>
+<td style="text-align:left;">
+list(f = 1:11, n = c(17, 1105, 44410, 766, 753, 2561, 13267, 1, 1474, 6, 135))
+</td>
 </tr>
-<tr class="even">
-<td align="left">16204</td>
-<td align="left">en</td>
-<td align="right">13517</td>
-<td align="right">7595</td>
-<td align="right">23595</td>
-<td align="right">13665</td>
-<td align="right">64337.345</td>
-<td align="left">list(f = 1:7, n = c(19, 13354, 20, 35, 9, 65, 15))</td>
+<tr>
+<td style="text-align:left;">
+16309
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:right;">
+59397
+</td>
+<td style="text-align:right;">
+44258
+</td>
+<td style="text-align:right;">
+66980
+</td>
+<td style="text-align:right;">
+10500
+</td>
+<td style="text-align:right;">
+66987
+</td>
+<td style="text-align:left;">
+list(f = 1:8, n = c(64, 58607, 94, 113, 44, 339, 42, 94))
+</td>
 </tr>
-<tr class="odd">
-<td align="left">16205</td>
-<td align="left">en</td>
-<td align="right">12109</td>
-<td align="right">5187</td>
-<td align="right">22688</td>
-<td align="right">8375</td>
-<td align="right">84149.210</td>
-<td align="left">list(f = 1:7, n = c(21, 11927, 33, 24, 8, 79, 17))</td>
+<tr>
+<td style="text-align:left;">
+16204
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:right;">
+53781
+</td>
+<td style="text-align:right;">
+29179
+</td>
+<td style="text-align:right;">
+23595
+</td>
+<td style="text-align:right;">
+13665
+</td>
+<td style="text-align:right;">
+23598
+</td>
+<td style="text-align:left;">
+list(f = 1:8, n = c(75, 53067, 90, 135, 28, 308, 9, 69))
+</td>
 </tr>
-<tr class="even">
-<td align="left">16431</td>
-<td align="left">en</td>
-<td align="right">12097</td>
-<td align="right">959</td>
-<td align="right">13358</td>
-<td align="right">13851</td>
-<td align="right">26242.546</td>
-<td align="left">list(f = 1:7, n = c(6, 11902, 36, 33, 15, 88, 17))</td>
+<tr>
+<td style="text-align:left;">
+16227
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:right;">
+52838
+</td>
+<td style="text-align:right;">
+19670
+</td>
+<td style="text-align:right;">
+29357
+</td>
+<td style="text-align:right;">
+6720
+</td>
+<td style="text-align:right;">
+29362
+</td>
+<td style="text-align:left;">
+list(f = 1:8, n = c(129, 51643, 148, 147, 68, 463, 92, 148))
+</td>
 </tr>
-<tr class="odd">
-<td align="left">15399</td>
-<td align="left">en</td>
-<td align="right">11230</td>
-<td align="right">100330</td>
-<td align="right">149672</td>
-<td align="right">1024</td>
-<td align="right">22005289.516</td>
-<td align="left">list(f = 1:10, n = c(106, 2, 10, 1, 1, 7, 9316, 9, 96, 1682))</td>
+<tr>
+<td style="text-align:left;">
+17093
+</td>
+<td style="text-align:left;">
+ru
+</td>
+<td style="text-align:right;">
+50224
+</td>
+<td style="text-align:right;">
+1526
+</td>
+<td style="text-align:right;">
+423
+</td>
+<td style="text-align:right;">
+187
+</td>
+<td style="text-align:right;">
+426
+</td>
+<td style="text-align:left;">
+list(f = 1:7, n = c(247, 1, 2, 49436, 8, 442, 88))
+</td>
 </tr>
-<tr class="even">
-<td align="left">15387</td>
-<td align="left">ru</td>
-<td align="right">10630</td>
-<td align="right">525</td>
-<td align="right">1676</td>
-<td align="right">414</td>
-<td align="right">8453.696</td>
-<td align="left">list(f = 1:5, n = c(31, 2, 2882, 7, 7708))</td>
+<tr>
+<td style="text-align:left;">
+16431
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:right;">
+46738
+</td>
+<td style="text-align:right;">
+3619
+</td>
+<td style="text-align:right;">
+13358
+</td>
+<td style="text-align:right;">
+13851
+</td>
+<td style="text-align:right;">
+13360
+</td>
+<td style="text-align:left;">
+list(f = 1:8, n = c(46, 45943, 149, 115, 48, 293, 43, 101))
+</td>
 </tr>
-<tr class="odd">
-<td align="left">17095</td>
-<td align="left">es</td>
-<td align="right">10310</td>
-<td align="right">4138</td>
-<td align="right">4123</td>
-<td align="right">3393</td>
-<td align="right">9135.012</td>
-<td align="left">list(f = 1:7, n = c(19, 10150, 22, 34, 10, 55, 20))</td>
+<tr>
+<td style="text-align:left;">
+16195
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:right;">
+46572
+</td>
+<td style="text-align:right;">
+25119
+</td>
+<td style="text-align:right;">
+35988
+</td>
+<td style="text-align:right;">
+11010
+</td>
+<td style="text-align:right;">
+35992
+</td>
+<td style="text-align:left;">
+list(f = 1:8, n = c(72, 45890, 56, 163, 58, 264, 34, 35))
+</td>
 </tr>
-<tr class="even">
-<td align="left">16227</td>
-<td align="left">en</td>
-<td align="right">8923</td>
-<td align="right">3165</td>
-<td align="right">29357</td>
-<td align="right">6720</td>
-<td align="right">157596.679</td>
-<td align="left">list(f = 1:7, n = c(24, 8724, 29, 23, 10, 88, 25))</td>
+<tr>
+<td style="text-align:left;">
+16626
+</td>
+<td style="text-align:left;">
+ru
+</td>
+<td style="text-align:right;">
+46440
+</td>
+<td style="text-align:right;">
+24685
+</td>
+<td style="text-align:right;">
+13913
+</td>
+<td style="text-align:right;">
+1650
+</td>
+<td style="text-align:right;">
+13922
+</td>
+<td style="text-align:left;">
+list(f = 1:7, n = c(344, 1, 4, 45398, 19, 560, 114))
+</td>
 </tr>
 </tbody>
 </table>
-<p>I’ll get back to this in a minute. Let’s now visualise the general characteristics of all accounts in the IRA dataset.</p>
+<p>I’ll get back to this in a minute. Let’s now visualize the general characteristics of all accounts in the IRA dataset.</p>
 </div>
 <div id="general-activity-plots" class="section level3">
 <h3><span class="header-section-number">2.2.2</span> General Activity Plots</h3>
 <pre class="r"><code>ggplot(data_counts, aes(x = Follower, y = Following)) +
-  geom_point(aes(size = Tweets, color = userid, alpha = RT)) +
+  geom_point(aes(size = Tweets, color = userid, alpha = Influence)) +
   scale_color_viridis_d(direction = -1) +
   scale_alpha_continuous(range = c(0.3,1),
-                         labels = scales::number_format(big.mark = &quot;.&quot;,
-                                                    decimal.mark = &quot;,&quot;)) +
+                         breaks = scales::pretty_breaks(5)) +
   scale_size(range = c(1,5), labels = scales::number_format(big.mark = &quot;.&quot;,
                                                     decimal.mark = &quot;,&quot;)) +
   scale_x_continuous(breaks = scales::pretty_breaks(6),
                      labels = scales::number_format(big.mark = &quot;.&quot;,
                                                     decimal.mark = &quot;,&quot;)) +
-  scale_y_continuous(breaks = scales::pretty_breaks(3),
+  scale_y_continuous(breaks = scales::pretty_breaks(6),
                      labels = scales::number_format(big.mark = &quot;.&quot;,
                                                     decimal.mark = &quot;,&quot;)) +
   coord_fixed() +
@@ -3264,15 +3374,12 @@ und
     size = &quot;# of Tweets&quot;,
     alpha = &quot;Alpha: # Retweets&quot;
   ) +
-    guides(color = FALSE,
-         alpha = guide_legend(override.aes = list(size = 4, stroke = 0)
-                               )
-         )</code></pre>
-<p><img src="/post/2018-10-26-election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1_files/figure-html/unnamed-chunk-29-1.png" width="960" /></p>
-<p>From what we can see here, is that we have quite an amount of “influencers” - accounts with lots of followers with low rates of following others.</p>
+    guides(color = FALSE, alpha = FALSE)</code></pre>
+<p><img src="/post/2018-10-26-election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1_files/figure-html/unnamed-chunk-28-1.png" width="960" /></p>
+<p>From what we can see here, is that we have quite an amount of “influencers” - accounts with lots of followers and low rates of following others.</p>
 <p>What if we look at the account languages?</p>
 <pre class="r"><code>ggplot(data_counts, aes(x = Follower, y = Following)) +
-  geom_point(aes(size = Tweets, color = fct_infreq(Account_Lang), alpha = RT)) +
+  geom_point(aes(size = Tweets, color = fct_infreq(Account_Lang), alpha = Influence)) +
   scale_color_viridis_d(option = &quot;B&quot;, direction = 1) +
   scale_alpha_continuous(range = c(0.3,1),
                          labels = scales::number_format(big.mark = &quot;.&quot;,
@@ -3282,7 +3389,7 @@ und
   scale_x_continuous(breaks = scales::pretty_breaks(6),
                      labels = scales::number_format(big.mark = &quot;.&quot;,
                                                     decimal.mark = &quot;,&quot;)) +
-  scale_y_continuous(breaks = scales::pretty_breaks(3),
+  scale_y_continuous(breaks = scales::pretty_breaks(6),
                      labels = scales::number_format(big.mark = &quot;.&quot;,
                                                     decimal.mark = &quot;,&quot;)) +
   coord_fixed() +
@@ -3300,11 +3407,10 @@ und
     color = &quot;Account Language&quot;
   ) +
     guides(alpha = FALSE,
-           colour = guide_legend(override.aes = list(size = 5, stroke = 1.5)
-                                 )
+           colour = guide_legend(override.aes = list(size = 5, stroke = 1.5))
            )</code></pre>
-<p><img src="/post/2018-10-26-election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1_files/figure-html/unnamed-chunk-30-1.png" width="960" /></p>
-<p>And now let’s just look at when the most influental accounts were created.</p>
+<p><img src="/post/2018-10-26-election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1_files/figure-html/unnamed-chunk-29-1.png" width="960" /></p>
+<p>And now let’s just look at when the most influential accounts were created.</p>
 <pre class="r"><code>influencers &lt;- data_counts %&gt;% 
   arrange(desc(Influence)) %&gt;% 
   top_n(15, Influence)
@@ -3312,7 +3418,7 @@ und
 data_counts %&gt;% 
   arrange(desc(Influence)) %&gt;% 
   ggplot(data = ., aes(x = Follower, y = Following)) +
-    geom_point(aes(size = Tweets, color = fct_infreq(Account_Lang), alpha = RT)) +
+    geom_point(aes(size = Tweets, color = fct_infreq(Account_Lang), alpha = Influence)) +
     ggrepel::geom_label_repel(data = influencers,
                             aes(label = lubridate::year(Created),
                                 fill = Account_Lang),
@@ -3326,7 +3432,7 @@ data_counts %&gt;%
     scale_x_continuous(breaks = scales::pretty_breaks(6),
                        labels = scales::number_format(big.mark = &quot;.&quot;,
                                                       decimal.mark = &quot;,&quot;)) +
-    scale_y_continuous(breaks = scales::pretty_breaks(3),
+    scale_y_continuous(breaks = scales::pretty_breaks(6),
                        labels = scales::number_format(big.mark = &quot;.&quot;,
                                                       decimal.mark = &quot;,&quot;)) +
     coord_fixed() +
@@ -3345,7 +3451,283 @@ data_counts %&gt;%
     ) +
       guides(alpha = FALSE,
              colour = FALSE)</code></pre>
-<p><img src="/post/2018-10-26-election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1_files/figure-html/unnamed-chunk-31-1.png" width="960" /></p>
+<p><img src="/post/2018-10-26-election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1_files/figure-html/unnamed-chunk-30-1.png" width="960" /></p>
+<p>Interesting, one of the most influential accounts is neither Russian nor English-speaking!</p>
+<pre class="r"><code>data_counts %&gt;% 
+  arrange(desc(Influence)) %&gt;% 
+  select(userid, Account_Lang, Follower, Following) %&gt;% 
+  head(15) %&gt;% knitr::kable(&quot;html&quot;)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+userid
+</th>
+<th style="text-align:left;">
+Account_Lang
+</th>
+<th style="text-align:right;">
+Follower
+</th>
+<th style="text-align:right;">
+Following
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+2527472164
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:right;">
+257638
+</td>
+<td style="text-align:right;">
+544
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+508761973
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:right;">
+149672
+</td>
+<td style="text-align:right;">
+1024
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+4224729994
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:right;">
+147767
+</td>
+<td style="text-align:right;">
+74664
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+449689677
+</td>
+<td style="text-align:left;">
+ru
+</td>
+<td style="text-align:right;">
+123989
+</td>
+<td style="text-align:right;">
+10
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2808833544
+</td>
+<td style="text-align:left;">
+ru
+</td>
+<td style="text-align:right;">
+134805
+</td>
+<td style="text-align:right;">
+2796
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2648734430
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:right;">
+106462
+</td>
+<td style="text-align:right;">
+386
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+890237781737435138
+</td>
+<td style="text-align:left;">
+ru
+</td>
+<td style="text-align:right;">
+51964
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+3676820373
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:right;">
+85293
+</td>
+<td style="text-align:right;">
+316
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+3729867851
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:right;">
+84167
+</td>
+<td style="text-align:right;">
+143
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2665564544
+</td>
+<td style="text-align:left;">
+ru
+</td>
+<td style="text-align:right;">
+84642
+</td>
+<td style="text-align:right;">
+2575
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2882331822
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:right;">
+79152
+</td>
+<td style="text-align:right;">
+22607
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+4272870988
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:right;">
+72121
+</td>
+<td style="text-align:right;">
+42080
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2752677905
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:right;">
+66980
+</td>
+<td style="text-align:right;">
+10500
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2518710111
+</td>
+<td style="text-align:left;">
+other_6
+</td>
+<td style="text-align:right;">
+60869
+</td>
+<td style="text-align:right;">
+1246
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2573726278
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:right;">
+59724
+</td>
+<td style="text-align:right;">
+556
+</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>2518710111 is not hashed :) Let’s find out who this is!</p>
+</blockquote>
+<pre class="r"><code>data_raw %&gt;% filter(userid == 2518710111) %&gt;% select(userid, user_display_name, user_screen_name, account_language) %&gt;% head(1) %&gt;% knitr::kable(&quot;html&quot;)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+userid
+</th>
+<th style="text-align:left;">
+user_display_name
+</th>
+<th style="text-align:left;">
+user_screen_name
+</th>
+<th style="text-align:left;">
+account_language
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+2518710111
+</td>
+<td style="text-align:left;">
+Вестник Новосибирска
+</td>
+<td style="text-align:left;">
+NovostiNsk
+</td>
+<td style="text-align:left;">
+en-gb
+</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>“Вестник Новосибирска” - Newspaper of Novosibirsk - doesn’t sound too British :) the account has been suspended by Twitter, btw.</p>
+</blockquote>
 <p>What about accounts with the most Tweets?</p>
 <pre class="r"><code>data_counts %&gt;% 
   ggplot(data = ., aes(x = Follower, y = Following)) +
@@ -3363,7 +3745,7 @@ data_counts %&gt;%
     scale_x_continuous(breaks = scales::pretty_breaks(6),
                        labels = scales::number_format(big.mark = &quot;.&quot;,
                                                       decimal.mark = &quot;,&quot;)) +
-    scale_y_continuous(breaks = scales::pretty_breaks(3),
+    scale_y_continuous(breaks = scales::pretty_breaks(6),
                        labels = scales::number_format(big.mark = &quot;.&quot;,
                                                       decimal.mark = &quot;,&quot;)) +
     coord_fixed() +
@@ -3382,14 +3764,14 @@ data_counts %&gt;%
     ) +
       guides(alpha = FALSE,
              colour = FALSE)</code></pre>
-<p><img src="/post/2018-10-26-election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1_files/figure-html/unnamed-chunk-32-1.png" width="960" /></p>
-<p>We can see from both plots that the most influential or active accounts were created in 2014 or later, and that the relation between Russian and English account languages is rather balanced at the top.</p>
+<p><img src="/post/2018-10-26-election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1_files/figure-html/unnamed-chunk-33-1.png" width="960" /></p>
+<p>We can see from both plots that the most influential or active accounts were created in 2014 or later, and that the relation between Russian and English-language account languages is rather balanced in terms of max. Tweet numbers. However, English-speaking accounts are more dominant in terms of numeric dominance (Following/Followers).</p>
 </div>
 </div>
 <div id="languages-accounts-vs-tweets" class="section level2">
 <h2><span class="header-section-number">2.3</span> Languages: Accounts vs Tweets</h2>
 <p>Now it’s time to have look at the <strong>account language to tweet languages</strong> relations.</p>
-<p>This is what the Top 20 (of 50) language combinations look like:</p>
+<p>This is what the Top 20 (of 57) language combinations look like:</p>
 <pre class="r"><code>data_unique %&gt;% 
   group_by(account_language, tweet_language) %&gt;% 
   count() %&gt;% 
@@ -3398,7 +3780,7 @@ data_counts %&gt;%
   knitr::kable(&quot;html&quot;, caption = &quot;Top 20 Language Combinations from the IRA Dataset&quot;)</code></pre>
 <table>
 <caption>
-<span id="tab:unnamed-chunk-33">Table 2.1: </span>Top 20 Language Combinations from the IRA Dataset
+<span id="tab:unnamed-chunk-34">Table 2.1: </span>Top 20 Language Combinations from the IRA Dataset
 </caption>
 <thead>
 <tr>
@@ -3422,7 +3804,7 @@ ru
 ru
 </td>
 <td style="text-align:right;">
-421362
+1985869
 </td>
 </tr>
 <tr>
@@ -3433,7 +3815,7 @@ en
 en
 </td>
 <td style="text-align:right;">
-375730
+1842222
 </td>
 </tr>
 <tr>
@@ -3444,7 +3826,7 @@ en
 ru
 </td>
 <td style="text-align:right;">
-185803
+836074
 </td>
 </tr>
 <tr>
@@ -3455,7 +3837,7 @@ ru
 und
 </td>
 <td style="text-align:right;">
-69191
+310192
 </td>
 </tr>
 <tr>
@@ -3466,18 +3848,7 @@ es
 en
 </td>
 <td style="text-align:right;">
-58112
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-de
-</td>
-<td style="text-align:left;">
-de
-</td>
-<td style="text-align:right;">
-16411
+275732
 </td>
 </tr>
 <tr>
@@ -3488,18 +3859,40 @@ en
 und
 </td>
 <td style="text-align:right;">
-16036
+80810
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-other
+de
+</td>
+<td style="text-align:left;">
+de
+</td>
+<td style="text-align:right;">
+78301
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+other_6
 </td>
 <td style="text-align:left;">
 en
 </td>
 <td style="text-align:right;">
-7339
+51105
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:left;">
+other_44
+</td>
+<td style="text-align:right;">
+35542
 </td>
 </tr>
 <tr>
@@ -3510,18 +3903,7 @@ en
 ar
 </td>
 <td style="text-align:right;">
-6606
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-en
-</td>
-<td style="text-align:left;">
-other
-</td>
-<td style="text-align:right;">
-6157
+33013
 </td>
 </tr>
 <tr>
@@ -3532,7 +3914,18 @@ ru
 uk
 </td>
 <td style="text-align:right;">
-5741
+28038
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ru
+</td>
+<td style="text-align:left;">
+bg
+</td>
+<td style="text-align:right;">
+21923
 </td>
 </tr>
 <tr>
@@ -3543,18 +3936,18 @@ en
 uk
 </td>
 <td style="text-align:right;">
-4532
+21520
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-ru
+other_6
 </td>
 <td style="text-align:left;">
-bg
+ru
 </td>
 <td style="text-align:right;">
-4439
+17679
 </td>
 </tr>
 <tr>
@@ -3565,40 +3958,7 @@ en
 bg
 </td>
 <td style="text-align:right;">
-3190
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-other
-</td>
-<td style="text-align:left;">
-ru
-</td>
-<td style="text-align:right;">
-2382
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-ru
-</td>
-<td style="text-align:left;">
-en
-</td>
-<td style="text-align:right;">
-1706
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-en
-</td>
-<td style="text-align:left;">
-es
-</td>
-<td style="text-align:right;">
-1550
+14539
 </td>
 </tr>
 <tr>
@@ -3609,7 +3969,29 @@ de
 und
 </td>
 <td style="text-align:right;">
-1451
+10387
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ru
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:right;">
+8500
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:left;">
+es
+</td>
+<td style="text-align:right;">
+7259
 </td>
 </tr>
 <tr>
@@ -3620,7 +4002,7 @@ en
 de
 </td>
 <td style="text-align:right;">
-1126
+6637
 </td>
 </tr>
 <tr>
@@ -3628,16 +4010,16 @@ de
 en
 </td>
 <td style="text-align:left;">
-fr
+in
 </td>
 <td style="text-align:right;">
-1050
+6407
 </td>
 </tr>
 </tbody>
 </table>
 <p>Ok, so we could probably have expected that Russian and English speaking accounts would mostly tweet in their respective languages. But who would have suspected that 185.803 Russian language tweets were posted by English-speaking accounts? Right :)</p>
-<p>Now let’s visualise all the 50 Account Language -&gt; Tweet Language combinations.</p>
+<p>Now let’s visualize all the 57 Account Language -&gt; Tweet Language combinations.</p>
 <pre class="r"><code>data_unique %&gt;% 
   group_by(account_language, tweet_language) %&gt;% 
   count() %&gt;% 
@@ -3647,7 +4029,7 @@ fr
                   y = account_language,
                   fill = n)) +
     scale_fill_viridis_c(option = &quot;B&quot;, direction = -1,
-                         breaks = scales::pretty_breaks(6),
+                         breaks = scales::pretty_breaks(4),
                          labels = scales::number_format(big.mark = &quot;.&quot;,
                                                         decimal.mark = &quot;,&quot;)) + 
     coord_fixed() +
@@ -3664,7 +4046,7 @@ fr
       x = &quot;Tweet Language&quot;,
       y = &quot;Account Language&quot;
     )</code></pre>
-<p><img src="/post/2018-10-26-election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1_files/figure-html/unnamed-chunk-34-1.png" width="672" /></p>
+<p><img src="/post/2018-10-26-election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1_files/figure-html/unnamed-chunk-35-1.png" width="672" /></p>
 <pre class="r"><code>data_unique %&gt;% 
   group_by(account_language, tweet_language) %&gt;% 
   count() %&gt;% 
@@ -3689,7 +4071,7 @@ fr
       caption = str_c(&quot;@fubits&quot;),
       fill = &quot;Language Combo:\nShare of Total&quot;
     )</code></pre>
-<p><img src="/post/2018-10-26-election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1_files/figure-html/unnamed-chunk-35-1.png" width="672" /></p>
+<p><img src="/post/2018-10-26-election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1_files/figure-html/unnamed-chunk-36-1.png" width="672" /></p>
 <blockquote>
 <p>Alright, that’s enough exploration and heavy data wrangling for today. Stay tuned for Part 2: Content Analysis</p>
 </blockquote>
@@ -3760,10 +4142,11 @@ tweet_text
 </tr>
 </tbody>
 </table>
+<p>Or what about “undefined”</p>
 <pre class="r"><code>data_unique %&gt;%
   filter(tweet_language == &quot;und&quot;) %&gt;% 
   select(tweet_text) %&gt;% 
-  tail(10) %&gt;% 
+  head(10) %&gt;% 
   knitr::kable(&quot;html&quot;)</code></pre>
 <table>
 <thead>
@@ -3776,55 +4159,58 @@ tweet_text
 <tbody>
 <tr>
 <td style="text-align:left;">
-Americans help to spread the rumors about the russian attacks on Ukraine.Dirty provocation about Russian invasion #UkrainianLie
+#волгоград #сталинград <a href="https://t.co/RCoCV12FP0" class="uri">https://t.co/RCoCV12FP0</a>
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-Огненный закат🔥 📷pritokoff <a href="https://t.co/StcfnBb2ex" class="uri">https://t.co/StcfnBb2ex</a>
+*** <a href="http://t.co/qpmvojRvYx" class="uri">http://t.co/qpmvojRvYx</a>
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-Землетрясение магнитудой 5,1 произошло сегодня утром на Курилах
+<span class="citation">@stratosathens</span> Strat, Every time we are in the state of burning chemical plants! Why is it happened with us?!
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-На гонках в Сербии автомобиль врезался в толпу
+<a href="http://t.co/RFTj00YJXU" class="uri">http://t.co/RFTj00YJXU</a>
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-Автомобиль снес остановку на севере Москвы, есть пострадавшая
+<a href="https://t.co/pDSEWw50AH" class="uri">https://t.co/pDSEWw50AH</a>
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-Пассажирский автобус опрокинулся в Псковской области
+<a href="http://t.co/yYLD9IhvYO" class="uri">http://t.co/yYLD9IhvYO</a>
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-*** <a href="http://t.co/yQ5q2OYLaf" class="uri">http://t.co/yQ5q2OYLaf</a>
+<span class="citation">@b059c98801ff33056eb46bee9088256f2b6b85dc8d6926579bf42dbf1b2d9c1a</span> Curiosity «завис» на Марсе из-за сбоя в компьютере
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-<span class="citation">@992383d1e284b292a5d8651f4efcc0ddfb9a965ede26adcb89f7d9f8df518aeb</span> Седан Chevrolet Malibu обновят досрочно
+<span class="citation">@bee7d3ea2fb7ece347e636f3c21b9340e1e17626bfd7543d1d36b51d00d0a4ce</span> Чехия испытывает дефицит российской нефти
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-<span class="citation">@8f76b66ceb2eecf7f76925ff4b84ad3f468aa9425e7a9eb505b1413d53bac6c4</span> Турция продолжает пользоваться популярностью среди туристов стран СНГ
+Автомобиль Дворковича попал в ДТП
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-<a href="https://t.co/mwRmwTS1Qg" class="uri">https://t.co/mwRmwTS1Qg</a> <a href="https://t.co/W8R0ixHa7O" class="uri">https://t.co/W8R0ixHa7O</a> #amb
+<span class="citation">@050f6f287ff564463cb290ec9933a045e07d0eea41352e3ed893cd570e97adbb</span> “Доктор Питер”: Петербургские инвесторы могут построить в Белоруссии фармацевтический завод #СПб #spb
 </td>
 </tr>
 </tbody>
 </table>
+<blockquote>
+<p>Btw, have you already discovered the US-Republican-sponsored (sic!) <a href="https://russiatweets.com/" target="_blank">RussiaTweets.com</a> Project?</p>
+</blockquote>
 </div>
 </div>
