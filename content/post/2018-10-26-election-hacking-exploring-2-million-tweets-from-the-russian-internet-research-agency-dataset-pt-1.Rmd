@@ -19,7 +19,7 @@ output:
 lastmod: '2018-10-26T16:18:07+02:00'
 description: "A bit over a week ago, Twitter's new-ish Elections integrity team released two datasets with 'all the accounts and related content associated with potential information operations that we have found on our service since 2016.' We're talking about millions of Tweets in dozens of languages stored in a single 1.24 GB CSV file. Tidyverse to the rescue!" 
 abstract: ''
-thumbnail: "/img/thumbs/conference_tweets_pt2.jpg"
+thumbnail: "/img/thumbs/IRA_Tweets.jpg"
 rmdlink: yes
 keywords: []
 comment: no

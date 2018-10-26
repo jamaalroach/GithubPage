@@ -3,6 +3,7 @@
 *.7z
 *.RData
 .RData
+*.rds
 *.rdb
 *.rdx
 .Rproj.user
