@@ -7,7 +7,7 @@ enableEmoji = true
 theme = "hugo-theme-even"
 relativeurls = true
 
-ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$", "\\.csv$", "\\.rda$", "\\.tif$"]
+ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$", "\\.csv$", "\\.rda$", "\\.tif$", "\\.rds$",]
 
 publishDir = "../ellocke.github.io/"
 

@@ -91,7 +91,7 @@ data2_raw &lt;- data.table::fread(csvfile,
                           # na.strings = &quot;,,&quot;,
                           verbose = TRUE)</code></pre>
 <blockquote>
-<p>At first – I (<a href="https://twitter.com/avuko/status/1052573187869986816" target="_blank">like others</a>) – was getting an CRC error message when unpacking the zip file. The resulting CSV was only 1.17 GB big, so that were not all the Tweets from the IRA dataset. After upgrading <code>7-zip</code> to <code>v18.05</code> unpacking the <code>zip</code> results in a 5.3 GB big CSV, which is quite a difference I’d say :)</p>
+<p>At first – I (<a href="https://twitter.com/avuko/status/1052573187869986816" target="_blank">like others</a>) – was getting an CRC error message when unpacking the zip file. The resulting CSV was only 1.17 GB big, so that were not all the Tweets from the IRA dataset. After upgrading <code>7-zip</code> to <code>v18.05</code> unpacking the <code>zip</code> results in a <strong>5.3 GB big CSV</strong>, which is quite a difference I’d say :)</p>
 </blockquote>
 <blockquote>
 <p><code>data.table</code> is by light years the fastest method, but <code>read_csv()</code> gives me <code>NA</code>’s without an extra hassle while <code>data.table::fread()</code> seems to be ignoring any patterns for <code>na.strings</code>. Therefore I’ll be working with the data object from <code>read_csv()</code> here. Since <code>read_csv()</code> is rather slow with a <code>CSV</code> this big, you can speed up your exploration if you save the data object as an <code>.rds</code> or <code>.RData</code> file.</p>
@@ -99,7 +99,6 @@ data2_raw &lt;- data.table::fread(csvfile,
 <pre class="r"><code>data_path &lt;- here::here(&quot;static&quot;, &quot;data&quot;, &quot;IRA_Tweets&quot;, &quot;/&quot;)
 # if (!dir.exists(data_path)) dir.create(data_path)
 # saveRDS(data_raw, str_c(data_path, &quot;infoops_data.rds&quot;))
-# save(data_raw, file = str_c(data_path, &quot;infoops_data.RData&quot;))
 data_raw &lt;- readRDS(str_c(data_path, &quot;infoops_data.rds&quot;))</code></pre>
 <p>With a dataset this big, skimr::skim() is just perfect (and it’s output much more functional in RStudio)!</p>
 <pre class="r"><code>data_raw %&gt;% skimr::skim_to_wide() %&gt;% knitr::kable(&quot;html&quot;)</code></pre>
@@ -2877,7 +2876,7 @@ NA
 ##       n
 ##   &lt;int&gt;
 ## 1     0</code></pre>
-<p>That’s great news, so far!</p>
+<p>That’s great news so far!</p>
 <p><strong>(Optional: recode if(tweet_lang == NA &amp;/| user_lang == NA))</strong></p>
 <p>Since we’ve reduced our dataset and already recoded the <code>NA</code>s, this step is not necessary anymore (before that, I worked without <code>is_retweet == FALSE</code> and things looked a bit different). However, I’m just leaving the syntax here, since it might be useful to others (and to myself).</p>
 <pre class="r"><code>data_recoded &lt;- data_unique %&gt;%
@@ -2895,6 +2894,14 @@ NA
                             account_language)
                             )
          )</code></pre>
+<blockquote>
+<p>This is a good moment in our data preparation cycle to create a hardcopy of our processed <code>data_unique</code> object in a <code>.rds</code> file. This way, we won’t have to redo all the wrangling and recoding we did so far, and can just start with any in-depth analysis by loading the object with <code>data_unique &lt;- readRDS(file)</code>. ANd we can reduce our local in-memory load by <code>rm(data_raw)</code></p>
+</blockquote>
+<pre class="r"><code># data_path &lt;- here::here(&quot;static&quot;, &quot;data&quot;, &quot;IRA_Tweets&quot;, &quot;/&quot;)
+# if (!dir.exists(data_path)) dir.create(data_path)
+saveRDS(data_unique, str_c(data_path, &quot;infoops_data_processed.rds&quot;))
+rm(data_raw)
+data_unique &lt;- readRDS(str_c(data_path, &quot;infoops_data_processed.rds&quot;))</code></pre>
 </div>
 </div>
 <div id="who-tweeted-in-what-language" class="section level1">
@@ -2943,7 +2950,7 @@ NA
     caption = str_c(&quot;@fubits&quot;)
   ) +
   guides(fill = FALSE)</code></pre>
-<p><img src="/post/2018-10-26-election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1_files/figure-html/unnamed-chunk-23-1.png" width="672" /></p>
+<p><img src="/post/2018-10-26-election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
 <pre class="r"><code>data_unique %&gt;%
   group_by(account_language) %&gt;%
   summarise(n = n()) %&gt;%
@@ -2971,7 +2978,7 @@ NA
     caption = str_c(&quot;@fubits&quot;)
   ) +
   guides(fill = FALSE)</code></pre>
-<p><img src="/post/2018-10-26-election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
+<p><img src="/post/2018-10-26-election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1_files/figure-html/unnamed-chunk-25-1.png" width="672" /></p>
 <div id="consolidating-tweet-languages-per-account" class="section level3">
 <h3><span class="header-section-number">2.2.1</span> Consolidating Tweet Languages per Account</h3>
 <pre class="r"><code>data_counts &lt;- data_unique %&gt;%
@@ -3383,7 +3390,7 @@ list(f = 1:7, n = c(344, 1, 4, 45398, 19, 560, 114))
     alpha = &quot;Alpha: # Retweets&quot;
   ) +
     guides(color = FALSE, alpha = FALSE)</code></pre>
-<p><img src="/post/2018-10-26-election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1_files/figure-html/unnamed-chunk-28-1.png" width="960" /></p>
+<p><img src="/post/2018-10-26-election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1_files/figure-html/unnamed-chunk-29-1.png" width="960" /></p>
 <p>From what we can see here, we have quite an amount of “influencers” - accounts with lots of followers and low rates of following others.</p>
 <p>What if we look at the account languages?</p>
 <pre class="r"><code>ggplot(data_counts, aes(x = Follower, y = Following)) +
@@ -3417,7 +3424,7 @@ list(f = 1:7, n = c(344, 1, 4, 45398, 19, 560, 114))
     guides(alpha = FALSE,
            colour = guide_legend(override.aes = list(size = 5, stroke = 1.5))
            )</code></pre>
-<p><img src="/post/2018-10-26-election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1_files/figure-html/unnamed-chunk-29-1.png" width="960" /></p>
+<p><img src="/post/2018-10-26-election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1_files/figure-html/unnamed-chunk-30-1.png" width="960" /></p>
 <p>And now let’s just look at when the most influential accounts were created.</p>
 <pre class="r"><code>influencers &lt;- data_counts %&gt;% 
   arrange(desc(Influence)) %&gt;% 
@@ -3459,7 +3466,7 @@ data_counts %&gt;%
     ) +
       guides(alpha = FALSE,
              colour = FALSE)</code></pre>
-<p><img src="/post/2018-10-26-election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1_files/figure-html/unnamed-chunk-30-1.png" width="960" /></p>
+<p><img src="/post/2018-10-26-election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1_files/figure-html/unnamed-chunk-31-1.png" width="960" /></p>
 <p>Interesting, one of the most influential accounts is neither Russian nor English-speaking!</p>
 <pre class="r"><code>data_counts %&gt;% 
   arrange(desc(Influence)) %&gt;% 
@@ -3772,7 +3779,7 @@ en-gb
     ) +
       guides(alpha = FALSE,
              colour = FALSE)</code></pre>
-<p><img src="/post/2018-10-26-election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1_files/figure-html/unnamed-chunk-33-1.png" width="960" /></p>
+<p><img src="/post/2018-10-26-election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1_files/figure-html/unnamed-chunk-34-1.png" width="960" /></p>
 <p>We can see from both plots that the most influential or active accounts were created in 2014 or later, and that the relation between Russian- and English-labelled accounts is rather balanced in terms of max. Tweet numbers. However, English-speaking accounts are more dominant in terms of numeric dominance (Following/Followers).</p>
 </div>
 </div>
@@ -3788,7 +3795,7 @@ en-gb
   knitr::kable(&quot;html&quot;, caption = &quot;Top 20 Language Combinations from the IRA Dataset&quot;)</code></pre>
 <table>
 <caption>
-<span id="tab:unnamed-chunk-34">Table 2.1: </span>Top 20 Language Combinations from the IRA Dataset
+<span id="tab:unnamed-chunk-35">Table 2.1: </span>Top 20 Language Combinations from the IRA Dataset
 </caption>
 <thead>
 <tr>
@@ -4054,7 +4061,7 @@ in
       x = &quot;Tweet Language&quot;,
       y = &quot;Account Language&quot;
     )</code></pre>
-<p><img src="/post/2018-10-26-election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1_files/figure-html/unnamed-chunk-35-1.png" width="672" /></p>
+<p><img src="/post/2018-10-26-election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1_files/figure-html/unnamed-chunk-36-1.png" width="672" /></p>
 <pre class="r"><code>data_unique %&gt;% 
   group_by(account_language, tweet_language) %&gt;% 
   count() %&gt;% 
@@ -4079,7 +4086,7 @@ in
       caption = str_c(&quot;@fubits&quot;),
       fill = &quot;Language Combo:\nShare of Total&quot;
     )</code></pre>
-<p><img src="/post/2018-10-26-election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1_files/figure-html/unnamed-chunk-36-1.png" width="672" /></p>
+<p><img src="/post/2018-10-26-election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1_files/figure-html/unnamed-chunk-37-1.png" width="672" /></p>
 <blockquote>
 <p>Alright, that’s enough exploration and heavy data wrangling for today. Stay tuned for Part 2: Content Analysis</p>
 </blockquote>

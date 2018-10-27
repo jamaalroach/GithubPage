@@ -79,7 +79,7 @@ data2_raw <- data.table::fread(csvfile,
                           verbose = TRUE)
 ```
 
-> At first – I ([like others](https://twitter.com/avuko/status/1052573187869986816){target="_blank"}) – was getting an CRC error message when unpacking the zip file. The resulting CSV was only 1.17 GB big, so that were not all the Tweets from the IRA dataset. After upgrading `7-zip` to `v18.05` unpacking the `zip` results in a 5.3 GB big CSV, which is quite a difference I'd say :)
+> At first – I ([like others](https://twitter.com/avuko/status/1052573187869986816){target="_blank"}) – was getting an CRC error message when unpacking the zip file. The resulting CSV was only 1.17 GB big, so that were not all the Tweets from the IRA dataset. After upgrading `7-zip` to `v18.05` unpacking the `zip` results in a **5.3 GB big CSV**, which is quite a difference I'd say :)
 
 > `data.table` is by light years the fastest method, but `read_csv()` gives me `NA`'s without an extra hassle while `data.table::fread()` seems to be ignoring any patterns for `na.strings`. Therefore I'll be working with the data object from `read_csv()` here. Since `read_csv()` is rather slow with a `CSV` this big, you can speed up your exploration if you save the data object as an `.rds` or `.RData` file.
 
@@ -87,7 +87,6 @@ data2_raw <- data.table::fread(csvfile,
 data_path <- here::here("static", "data", "IRA_Tweets", "/")
 # if (!dir.exists(data_path)) dir.create(data_path)
 # saveRDS(data_raw, str_c(data_path, "infoops_data.rds"))
-# save(data_raw, file = str_c(data_path, "infoops_data.RData"))
 data_raw <- readRDS(str_c(data_path, "infoops_data.rds"))
 ```
 
@@ -286,7 +285,7 @@ data_unique %>% filter(is.na(tweet_language) | is.na(account_language)) %>%
   count()
 ```
 
-That's great news, so far!
+That's great news so far!
 
 **(Optional: recode if(tweet_lang == NA &/| user_lang == NA))**
 
@@ -310,6 +309,15 @@ data_recoded <- data_unique %>%
          )
 ```
 
+> This is a good moment in our data preparation cycle to create a hardcopy of our processed `data_unique` object in a `.rds` file. This way, we won't have to redo all the wrangling and recoding we did so far, and can just start with any in-depth analysis by loading the object with `data_unique <- readRDS(file)`. ANd we can reduce our local in-memory load by `rm(data_raw)`
+
+```{r eval=FALSE}
+# data_path <- here::here("static", "data", "IRA_Tweets", "/")
+# if (!dir.exists(data_path)) dir.create(data_path)
+saveRDS(data_unique, str_c(data_path, "infoops_data_processed.rds"))
+rm(data_raw)
+data_unique <- readRDS(str_c(data_path, "infoops_data_processed.rds"))
+```
 
 # Who tweeted in what language?
 
