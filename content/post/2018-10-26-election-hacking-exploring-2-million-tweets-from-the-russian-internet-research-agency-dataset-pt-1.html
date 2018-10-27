@@ -50,7 +50,7 @@ sequenceDiagrams:
 <li><a href="#ira-dataset-languages-summary"><span class="toc-section-number">1.4</span> IRA Dataset Languages: Summary</a></li>
 </ul></li>
 <li><a href="#who-tweeted-in-what-language"><span class="toc-section-number">2</span> Who tweeted in what language?</a><ul>
-<li><a href="#create-specific-subsets"><span class="toc-section-number">2.1</span> Create specific Subsets</a></li>
+<li><a href="#create-language-specific-subsets"><span class="toc-section-number">2.1</span> Create Language-specific Subsets</a></li>
 <li><a href="#summary-plots-languages-general-activity"><span class="toc-section-number">2.2</span> Summary Plots: Languages &amp; General Activity</a><ul>
 <li><a href="#consolidating-tweet-languages-per-account"><span class="toc-section-number">2.2.1</span> Consolidating Tweet Languages per Account</a></li>
 <li><a href="#general-activity-plots"><span class="toc-section-number">2.2.2</span> General Activity Plots</a></li>
@@ -60,13 +60,18 @@ sequenceDiagrams:
 </ul>
 </div>
 
+<div class="figure">
+<img src="/img/IRA_dataset/IRA_Tweets_Dates.png" alt="(Creation Date of Top 15 Accounts in the IRA Dataset)" style="width:100.0%" />
+<p class="caption"><em>(Creation Date of Top 15 Accounts in the IRA Dataset)</em></p>
+</div>
 <p>A bit over a week ago, <a href="https://blog.twitter.com/official/en_us/topics/company/2018/enabling-further-research-of-information-operations-on-twitter.html" target="_blank">Twitter’s new-ish Elections integrity team released two datasets</a> with “all the accounts and related content associated with potential information operations that we have found on our service since 2016.”</p>
-<p>In particular, this is what we are talking about here:</p>
+<p>In particular, this is what we are talking about:</p>
 <blockquote>
 <p>“Our initial disclosures cover two previously disclosed campaigns, and include information from 3,841 accounts believed to be connected to the Russian Internet Research Agency [also known as IRA], and 770 accounts believed to originate in Iran.” (<a href="https://blog.twitter.com/official/en_us/topics/company/2018/enabling-further-research-of-information-operations-on-twitter.html" target="_blank">Twitter’s Election Integrity Team</a>)</p>
 </blockquote>
-<p>The IRA zip alone is <strong>1.24 GB</strong> big! Let’s dive in and explore. Before we can start with any in-depth analysis, automated or not, we have to inspect and prepare the data - remember: <a href="https://ellocke.github.io/post/r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist/#the-turkish-plot-twist">EDA FTW</a>!</p>
-<p>Anyways, a dataset of this size is a perfect exerciser in data wrangling and exploratory analysis with tools from the galactic <code>tidyverse</code>. So what I’m aiming to highlight with this post, is my more or less systematic approach to turning an granular dataset into something more useful (and reliable!) for further in-depth analysis.</p>
+<p>For a bit of a context on the IRA’s activities and the Russian Influence Operation in general, <a href="https://mashable.com/article/russian-trolls-spies-operatives/?europe=true&amp;geo=AS&amp;utm_cid=mash-prod-nav-geo#7pbvrw1_DaqI" target="_blank">Mashable</a> offers a nice overview.</p>
+<p>The IRA zip alone is <strong>1.24 GB</strong> big! Let’s dive in and explore. Before we can start with any analysis, automated or not, we have to inspect and prepare the data - remember: <a href="https://ellocke.github.io/post/r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist/#the-turkish-plot-twist">EDA FTW</a>!</p>
+<p>Anyways, a dataset of this size is a perfect exercise in data wrangling and exploratory analysis with tools from the galactic <code>tidyverse</code>. So what I’m aiming to highlight with this post, is my more or less systematic approach to turning an granular dataset with millions of observations into something more useful (and reliable!) for further in-depth analysis.</p>
 <div id="data-preperation" class="section level1">
 <h1><span class="header-section-number">1</span> Data Preperation</h1>
 <p>You can get the data from here:</p>
@@ -96,7 +101,7 @@ data2_raw &lt;- data.table::fread(csvfile,
 # saveRDS(data_raw, str_c(data_path, &quot;infoops_data.rds&quot;))
 # save(data_raw, file = str_c(data_path, &quot;infoops_data.RData&quot;))
 data_raw &lt;- readRDS(str_c(data_path, &quot;infoops_data.rds&quot;))</code></pre>
-<p>With a dataset this big, skimr:skim() is just perfect (and it’s much more functional in RStudio)!</p>
+<p>With a dataset this big, skimr::skim() is just perfect (and it’s output much more functional in RStudio)!</p>
 <pre class="r"><code>data_raw %&gt;% skimr::skim_to_wide() %&gt;% knitr::kable(&quot;html&quot;)</code></pre>
 <table>
 <thead>
@@ -1901,17 +1906,17 @@ NA
 <li>The IRA dataset consist of <del>1.899.595</del> 9.041.308 Tweets in <del>51</del> 58 languages, from <del>3.460</del> 3.667 unique accounts and 11 account languages. That’s pretty “diverse” but also quite complex.</li>
 <li><code>$is_retweet</code> has only 2 unique values, so it’s obviously a Boolean -&gt; <code>mutate()</code></li>
 <li>There’s <del>1.899.595</del> 9.041.308 observations for <code>$tweet_text</code>, but only <del>1.634.942</del> 6.598.905 are unique. This huge delta just screams: spam bots and/or coordinated campaigns!</li>
-<li>only <del>50K</del> 266.208 Tweets are replies -&gt; rather few interactions</li>
-<li>there are some prominent accounts with up to 257.638 followers</li>
+<li>only <del>50K</del> 266K Tweets are replies -&gt; rather few interactions</li>
+<li>there are some prominent accounts with up to 257K followers</li>
 <li><del>743.828</del> 2.760.160 URLs to explore</li>
 <li>we can see from <code>$retweet_userid</code> that apparently, <del>703.467</del> 3.333.184 Tweets are just Retweets and not unique/original Tweets.</li>
 <li>if we were to try to classify accounts by profile description, there’s a corpus of <del>2.451</del> 2.597 unique profile descriptions (<code>$user_profile_description</code>) and 200 unique <code>$user_profile_url</code>s</li>
-<li>all the <code>$*_tweetid</code> were read as numeric, which we’ll also need to change, as IDs are supposed to be unique identifiers and not continuous values -&gt; <code>mutate()</code></li>
+<li>all the <code>$*_tweetid</code> vars were read as numeric, which we’ll also need to change, as IDs are supposed to be unique identifiers and not continuous values -&gt; <code>mutate()</code></li>
 <li>the Tweets were posted in the period from 2009-05-09 (!) to 2018-06-21, with the median around 2015-07-17</li>
 <li>half of the accounts were created on or after 2014-03-28. Like there was an upcoming election or a referendum or something :)</li>
-<li>there are 608 unique account locations (from an unknown number of accounts at this point), and there are 4.779 geolocated Tweets. That’s not much, but we could try to double-check these locations with the respective <code>$account_language</code> values.</li>
+<li>there are 608 unique account locations (shared by an unknown number of those 3.667 accounts at this point), and there are 4.779 geolocated Tweets. That’s not much, but we could try to double-check these locations with the respective <code>$account_language</code> values.</li>
 </ul>
-<p>That should be enough leads for an initial inquiry. Let’s continue with the data preparation and address what we have discovered so far.</p>
+<p>That should give us enough leads for an initial inquiry. Let’s continue with the data preparation and address what we have discovered so far.</p>
 <div id="change-variable-types" class="section level2">
 <h2><span class="header-section-number">1.1</span> Change Variable Types</h2>
 <p><strong>convert <code>$is_retweet</code> into a boolean</strong></p>
@@ -1924,7 +1929,7 @@ NA
 <pre class="r"><code>data_raw %&gt;% 
   select(is_retweet, ends_with(&quot;tweetid&quot;)) %&gt;% 
   skimr::skim_to_wide(noten_raw) %&gt;%
-  knitr::kable(&quot;html&quot;, 2)</code></pre>
+  knitr::kable(&quot;html&quot;)</code></pre>
 <table>
 <thead>
 <tr>
@@ -1972,25 +1977,25 @@ character
 in_reply_to_tweetid
 </td>
 <td style="text-align:left;">
-1850047
+8775100
 </td>
 <td style="text-align:left;">
-49549
+266208
 </td>
 <td style="text-align:left;">
-1899596
+9041308
 </td>
 <td style="text-align:left;">
 1
 </td>
 <td style="text-align:left;">
-18
+19
 </td>
 <td style="text-align:left;">
 0
 </td>
 <td style="text-align:left;">
-47162
+236322
 </td>
 <td style="text-align:left;">
 NA
@@ -2007,13 +2012,13 @@ character
 quoted_tweet_tweetid
 </td>
 <td style="text-align:left;">
-1864146
+8853395
 </td>
 <td style="text-align:left;">
-35450
+187913
 </td>
 <td style="text-align:left;">
-1899596
+9041308
 </td>
 <td style="text-align:left;">
 10
@@ -2025,7 +2030,7 @@ quoted_tweet_tweetid
 0
 </td>
 <td style="text-align:left;">
-31394
+144609
 </td>
 <td style="text-align:left;">
 NA
@@ -2042,16 +2047,16 @@ character
 retweet_tweetid
 </td>
 <td style="text-align:left;">
-1196129
+5708124
 </td>
 <td style="text-align:left;">
-703467
+3333184
 </td>
 <td style="text-align:left;">
-1899596
+9041308
 </td>
 <td style="text-align:left;">
-9
+3
 </td>
 <td style="text-align:left;">
 19
@@ -2060,7 +2065,7 @@ retweet_tweetid
 0
 </td>
 <td style="text-align:left;">
-551034
+1725841
 </td>
 <td style="text-align:left;">
 NA
@@ -2080,10 +2085,10 @@ tweetid
 0
 </td>
 <td style="text-align:left;">
-1899596
+9041308
 </td>
 <td style="text-align:left;">
-1899596
+9041308
 </td>
 <td style="text-align:left;">
 10
@@ -2095,7 +2100,7 @@ tweetid
 0
 </td>
 <td style="text-align:left;">
-1899324
+9035946
 </td>
 <td style="text-align:left;">
 NA
@@ -2112,13 +2117,13 @@ logical
 is_retweet
 </td>
 <td style="text-align:left;">
-1
+0
 </td>
 <td style="text-align:left;">
-1899595
+9041308
 </td>
 <td style="text-align:left;">
-1899596
+9041308
 </td>
 <td style="text-align:left;">
 NA
@@ -2136,7 +2141,7 @@ NA
 0.37
 </td>
 <td style="text-align:left;">
-FAL: 1196128, TRU: 703467, NA: 1
+FAL: 5708124, TRU: 3333184, NA: 0
 </td>
 </tr>
 </tbody>
@@ -2417,7 +2422,7 @@ ja
 <pre class="r"><code>data_unique &lt;- data_unique %&gt;% 
   mutate(tweet_language = if_else(is.na(tweet_language), &quot;und&quot;, tweet_language))</code></pre>
 <p><strong>recode all langs with n &lt; 5000 as “other”</strong></p>
-<p>We need to reduce the scope of Tweet languages for now. 5000 is only slightly less than 1% of the unique Tweets, so this sound like a good threshold.</p>
+<p>We need to reduce the scope of Tweet languages for now. 5000 is only slightly less than 1% of the unique Tweets, so this sounds like a good threshold.</p>
 <pre class="r"><code># I&#39;m very sure that there&#39;s a more elegant solution for mutating observations row-wise based on grouped counts... However, whatever works, works.
 
 other_langs &lt;- data_unique %&gt;% 
@@ -2431,7 +2436,7 @@ other_langs &lt;- data_unique %&gt;%
                                   tweet_language))</code></pre>
 <pre class="r"><code>n_distinct(data_unique$tweet_language)</code></pre>
 <pre><code>## [1] 12</code></pre>
-<p>We’re down to 13 language groups for the Tweets. That’s far better!</p>
+<p>We’re down to 13 language categories for the Tweets. That’s far better!</p>
 <p><strong>$account_language</strong></p>
 <pre class="r"><code>data_unique %&gt;% 
   group_by(account_language) %&gt;% 
@@ -2862,6 +2867,9 @@ NA
 <blockquote>
 <p>That’s already interesting, but let’s not jump to conclusion about who tweeted in what language, yet… This summary alone does enable us to claim that, for instance, Russian accounts where responsible for all the Russian Tweets, and so on.</p>
 </blockquote>
+<blockquote>
+<p>What’s really striking is that 50% of the Tweets from this 9M Tweets IRA dataset are in Russian (or at least labelled as such), which does not quite fit the dominant narrative of a solely US-centric information operation. These numbers show that Russia’s activities were concered with Russian-speaking people as much as with an English-speaking audience (among German and Spanish).</p>
+</blockquote>
 <p><strong>Check for any remaining language NA’s</strong></p>
 <pre class="r"><code>data_unique %&gt;% filter(is.na(tweet_language) | is.na(account_language)) %&gt;% 
   count()</code></pre>
@@ -2892,8 +2900,8 @@ NA
 <div id="who-tweeted-in-what-language" class="section level1">
 <h1><span class="header-section-number">2</span> Who tweeted in what language?</h1>
 <p>Now it’s about time to look into which account language groups tweeted in what languages.</p>
-<div id="create-specific-subsets" class="section level2">
-<h2><span class="header-section-number">2.1</span> Create specific Subsets</h2>
+<div id="create-language-specific-subsets" class="section level2">
+<h2><span class="header-section-number">2.1</span> Create Language-specific Subsets</h2>
 <blockquote>
 <p>This is also a good moment to create language-specific or other intereting subsets from our refined dataset.</p>
 </blockquote>
@@ -2982,7 +2990,7 @@ NA
   ) %&gt;%
   arrange(desc(Tweets))</code></pre>
 <p>Now the <code>$Tweet_Langs</code> var contains a list of all Tweet Languages from every single Tweet posted by an Account. Compare the number of <code>$Tweets</code> with the length of the vector (in the list) further below.</p>
-<p>For <code>$Tweet_Langs_Counts</code>, we have utilized the quite elegant <code>forcats::fct_count()</code> which gives us a <code>list</code> of of the grouped language counts.</p>
+<p>For <code>$Tweet_Langs_Counts</code>, we have utilized the quite elegant <code>forcats::fct_count()</code> which gives us a <code>list</code> of the aggregated language counts.</p>
 <p>So the first User in our dataset - who has tweeted a total of 95210 times - has been busy in 6 languages. Impressive language skills :)</p>
 <pre class="r"><code>data_counts[1,]$Tweet_Langs_Counts[[1]] %&gt;% knitr::kable(&quot;html&quot;)</code></pre>
 <table>
@@ -3376,7 +3384,7 @@ list(f = 1:7, n = c(344, 1, 4, 45398, 19, 560, 114))
   ) +
     guides(color = FALSE, alpha = FALSE)</code></pre>
 <p><img src="/post/2018-10-26-election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1_files/figure-html/unnamed-chunk-28-1.png" width="960" /></p>
-<p>From what we can see here, is that we have quite an amount of “influencers” - accounts with lots of followers and low rates of following others.</p>
+<p>From what we can see here, we have quite an amount of “influencers” - accounts with lots of followers and low rates of following others.</p>
 <p>What if we look at the account languages?</p>
 <pre class="r"><code>ggplot(data_counts, aes(x = Follower, y = Following)) +
   geom_point(aes(size = Tweets, color = fct_infreq(Account_Lang), alpha = Influence)) +
@@ -3765,7 +3773,7 @@ en-gb
       guides(alpha = FALSE,
              colour = FALSE)</code></pre>
 <p><img src="/post/2018-10-26-election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1_files/figure-html/unnamed-chunk-33-1.png" width="960" /></p>
-<p>We can see from both plots that the most influential or active accounts were created in 2014 or later, and that the relation between Russian and English-language account languages is rather balanced in terms of max. Tweet numbers. However, English-speaking accounts are more dominant in terms of numeric dominance (Following/Followers).</p>
+<p>We can see from both plots that the most influential or active accounts were created in 2014 or later, and that the relation between Russian- and English-labelled accounts is rather balanced in terms of max. Tweet numbers. However, English-speaking accounts are more dominant in terms of numeric dominance (Following/Followers).</p>
 </div>
 </div>
 <div id="languages-accounts-vs-tweets" class="section level2">
@@ -4018,8 +4026,8 @@ in
 </tr>
 </tbody>
 </table>
-<p>Ok, so we could probably have expected that Russian and English speaking accounts would mostly tweet in their respective languages. But who would have suspected that 185.803 Russian language tweets were posted by English-speaking accounts? Right :)</p>
-<p>Now let’s visualize all the 57 Account Language -&gt; Tweet Language combinations.</p>
+<p>Ok, so we probably could have expected that Russian and English speaking accounts would mostly tweet in their respective languages. But who would have suspected that 185.803 Russian language tweets were posted by English-speaking accounts? Right :)</p>
+<p>Now let’s visualize all the 57 <strong>Account Language -&gt; Tweet Language</strong> combinations. For an easier understanding of these plots, just keep in mind that Tweets are posted by accounts, so the Tweet language (bottom) is our dependent variable here.</p>
 <pre class="r"><code>data_unique %&gt;% 
   group_by(account_language, tweet_language) %&gt;% 
   count() %&gt;% 
