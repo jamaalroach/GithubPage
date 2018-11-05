@@ -1,0 +1,4691 @@
+---
+title: 'Election Hacking: Exploring 10 Million Tweets from the Russian Internet Research
+  Agency Dataset, Pt. 2 - Corpus & DFM'
+author: Ilja / fubits
+date: '2018-10-27'
+slug: election-hacking-exploring-10-million-tweets-from-the-russian-internet-research-agency-dataset-pt-2-corpus-dfm
+categories:
+  - Rstats
+  - DataViz
+  - Natural Language Processing NLP
+tags:
+  - ggplot
+  - Twitter
+  - CSV
+output:
+  blogdown::html_page:
+    number_sections: yes
+    toc: yes
+lastmod: "2018-10-27T14:40:59+02:00"
+description: "This is the sceond part of my \"Internet Researc Agency\" series. We'll encounter in-memory computing problems, adress them with tweaks on Windows and Linux, and finally succeed at building a 5.7M x 1.5M big sparse Document-Feature Matrix."
+abstract: "This is the sceond part of my \"Internet Researc Agency\" series. We'll encounter in-memory computing problems, adress them with tweaks on Windows and Linux, and finally succeed at building a 5.7M x 1.5M big sparse Document-Feature Matrix."
+thumbnail: "/img/thumbs/IRA_tweets_2.jpg"
+rmdlink: yes
+keywords: []
+comment: no
+autoCollapseToc: no
+postMetaInFooter: no
+hiddenFromHomePage: no
+contentCopyright: no
+reward: no
+mathjax: no
+mathjaxEnableSingleDollar: no
+mathjaxEnableAutoNumber: no
+hideHeaderAndFooter: no
+flowchartDiagrams:
+  enable: no
+  options: ''
+sequenceDiagrams:
+  enable: no
+  options: ''
+---
+
+
+<div id="TOC">
+<ul>
+<li><a href="#packages-data"><span class="toc-section-number">1</span> Packages &amp; Data</a></li>
+<li><a href="#international-corpus-an-exersise-in-too-big-for-in-memory"><span class="toc-section-number">2</span> International Corpus: An Exersise in “Too Big for In-Memory”</a><ul>
+<li><a href="#data-exploration-time-series-plots"><span class="toc-section-number">2.1</span> Data Exploration: Time-Series Plots</a></li>
+<li><a href="#building-a-corpus-with-quanteda"><span class="toc-section-number">2.2</span> Building a Corpus with <code>Quanteda</code></a><ul>
+<li><a href="#memory-management"><span class="toc-section-number">2.2.1</span> Memory Management</a></li>
+</ul></li>
+<li><a href="#corpus-exploration-key-word-in-context"><span class="toc-section-number">2.3</span> Corpus Exploration: Key-Word-in Context</a></li>
+<li><a href="#building-a-5.7m-x-1.5m-sparse-document-feature-matrix"><span class="toc-section-number">2.4</span> Building a 5.7M x 1.5M sparse Document-Feature Matrix</a><ul>
+<li><a href="#stopwords"><span class="toc-section-number">2.4.1</span> Stopwords</a></li>
+<li><a href="#deprecated-approach"><span class="toc-section-number">2.4.2</span> Deprecated Approach</a></li>
+<li><a href="#regular-approach"><span class="toc-section-number">2.4.3</span> Regular Approach</a></li>
+</ul></li>
+<li><a href="#international-tweets-top-features"><span class="toc-section-number">2.5</span> International Tweets: Top-Features</a></li>
+</ul></li>
+</ul>
+</div>
+
+<div class="figure">
+<img src="/img/IRA_dataset/IRA_keywords.png" alt="(73 Topics from 2M English-language Tweets; modelled with the stm()-packages; K auto-induced with t-SNE/PCA)" />
+<p class="caption"><em>(73 Topics from 2M English-language Tweets; modelled with the stm()-packages; K auto-induced with t-SNE/PCA)</em></p>
+</div>
+<p>Now that we are done with <a href="election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1">pre-processing the Internet Research Agency dataset</a>, we can unleash the full R powers and dive into automated content analysis. For a primer, see the following excellent intros and posts re: core NLP concepts, R packages, and tools:</p>
+<ul>
+<li>Emmanuel Ameisen: <a href="https://blog.insightdatascience.com/how-to-solve-90-of-nlp-problems-a-step-by-step-guide-fda605278e4e" target="_blank">How to solve 90% of NLP problems: a step-by-step guide</a> (this is a very beginner-friendly overview of key NLP concepts. Not R related, but a great TL;DR primer.)</li>
+<li>Julia Silge: <a href="https://juliasilge.com/blog/sherlock-holmes-stm/" target="_blank">The game is afoot! Topic modeling of Sherlock Holmes stories</a></li>
+<li>Julia Silge and David Robinson: <a href="https://www.tidytextmining.com/" target="_blank">Text Mining with R - A Tidy Approach</a></li>
+<li>Cornelius Puschmann: <a href="http://cbpuschmann.net/inhaltsanalyse-mit-r/index.html" target="_blank">Automatisierte Inhaltsanalyse mit R (in German)</a></li>
+<li>Kenneth Benoit et al.: <a href="http://joss.theoj.org/papers/10.21105/joss.00774" target="_blank">quanteda: An R package for the quantitative analysis of textual data</a></li>
+<li>Benoit et al.? <a href="http://www.et.bs.ehu.es/cran/web/packages/quanteda/vignettes/quickstart.html" target="_blank">Quanteda vignette: Getting Started with Quanteda</a></li>
+<li>Nicolas Merz: <a href="https://manifesto-project.wzb.eu/down/tutorials/quanteda" target="_blank">Using the Manifesto Corpus with quanteda</a></li>
+</ul>
+<p><strong>Bonus</strong>: <a href="https://twitter.com/c_schwemmer" target="_blank">Carsten Schwemmer</a> (who introduced me to the <code>Tidyverse</code> and automated content analysis with R, btw!) has build an <code>Shiny</code> app, which allows you to explore Structural Topic Models with a browser-based GUI: <a href="https://cschwem2er.github.io/stminsights/" target="_blank">stminsights - A Shiny Application for Structural Topic Models</a></p>
+<blockquote>
+<p>Just a word of caution: Topic Modelling is a statistical method, and doing it the way I’m doing here - on the full 5.7M Tweets corpus OR even on a subset of 2M Tweets without any frequency-based feature reduction (i.e. with <code>quanteda::dfm_trim()</code>) - will take some time. A lot of time actually. I have a decent Gamer’s Laptop with 16GB RAM, a quad-core Intel i7-7500 CPU and a SSD (SATA tho) - and computing the Topic model on the English subset (2M Tweets, with auto-induced K=73 topics, based on 15K features -&gt; 3rd Post) took a whole day (22,5 hours). Don’t try this at home or without some free AWS credits :)</p>
+</blockquote>
+<div id="packages-data" class="section level1">
+<h1><span class="header-section-number">1</span> Packages &amp; Data</h1>
+<p>Let’s get started. Here are some tweaks/tricks/adjustments I discovering along writing this (<a href="https://stackoverflow.com/questions/5171593/r-memory-management-cannot-allocate-vector-of-size-n-mb" target="_blank">in this 8 years old Stack Overflow post, for instance</a>) in order to increase the computing performance ;)</p>
+<blockquote>
+<p>i.e.: <code>memory.limit(size = NA)</code> sets the maximum memory limit to what’s ever possible on your system (it’s a bit more complicated on Windows)</p>
+</blockquote>
+<blockquote>
+<p>You can enforce R’s garabage collection at any time with <code>gc()</code> (see the vignette for the params); this is esp. helpful after <code>rm(huge_object)</code></p>
+</blockquote>
+<blockquote>
+<p>Save any large output as an <code>.rds</code> or <code>.RData</code> (if you can afford) to your harddrive, clear your environment and start the next step with as low of a RAM footprint as possible.</p>
+</blockquote>
+<blockquote>
+<p>My <strong>key-learning</strong> of this post, however: If you’re on Windows, set-up a Linux distro to dual-boot. R is so much more performant on Ubuntu et al. (also with regards to Unicode, path length, memory management and much more) You’ll start the environment with at least 1GB more of free RAM; you’ll have full CLI control over the swap drive/file; and then some more.</p>
+</blockquote>
+<p>Let’s start. Here are the packages we’ll need:</p>
+<pre class="r"><code>library(tidyverse)
+library(quanteda)
+quanteda_options(&quot;threads&quot; = 4) # 4 is the limit on my Laptop
+print(str_c(&quot;Threads for Quanteda: &quot;, quanteda_options(&quot;threads&quot;)))</code></pre>
+<pre><code>## [1] &quot;Threads for Quanteda: 4&quot;</code></pre>
+<pre class="r"><code>library(stm)
+library(lubridate)</code></pre>
+<p>Since we’ve already <a href="election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1">pre-processed the Internet Research Agency dataset</a>, we can just load the exported data object and go on with corpus-building.</p>
+<pre class="r"><code>data_path &lt;- here::here(&quot;static&quot;, &quot;data&quot;, &quot;IRA_Tweets&quot;, &quot;/&quot;)
+data_unique &lt;- readRDS(str_c(data_path, &quot;infoops_data_processed.rds&quot;))
+# devtools::install_github(&quot;brooke-watson/BRRR&quot;)
+BRRR::skrrrahh(&quot;flava&quot;) # play sound when ready</code></pre>
+</div>
+<div id="international-corpus-an-exersise-in-too-big-for-in-memory" class="section level1">
+<h1><span class="header-section-number">2</span> International Corpus: An Exersise in “Too Big for In-Memory”</h1>
+<div id="data-exploration-time-series-plots" class="section level2">
+<h2><span class="header-section-number">2.1</span> Data Exploration: Time-Series Plots</h2>
+<p>As I didn’t do this in my last post, let’s have a quick look at the time-wise distribution of Tweets in total, and grouped by Tweet and Account languages. This way, we might see what time periods and what languages might be worth special attention.</p>
+<p>First, we’ll reduce the observations to language groups and further aggregate on a weekly basis.</p>
+<pre class="r"><code>IRA_TS &lt;- data_unique %&gt;%
+  mutate(tweet_time = as_date(tweet_time),
+         week = lubridate::floor_date(tweet_time, &quot;week&quot;)) %&gt;%
+  group_by(week, account_language, tweet_language) %&gt;%
+  count() %&gt;% 
+  arrange(desc(n))</code></pre>
+<pre class="r"><code>IRA_TS %&gt;% 
+  head() %&gt;%
+  knitr::kable(&quot;html&quot;)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+week
+</th>
+<th style="text-align:left;">
+account_language
+</th>
+<th style="text-align:left;">
+tweet_language
+</th>
+<th style="text-align:right;">
+n
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+2014-07-13
+</td>
+<td style="text-align:left;">
+ru
+</td>
+<td style="text-align:left;">
+ru
+</td>
+<td style="text-align:right;">
+89198
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2015-03-15
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:right;">
+71421
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2017-08-13
+</td>
+<td style="text-align:left;">
+es
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:right;">
+71037
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2017-08-06
+</td>
+<td style="text-align:left;">
+es
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:right;">
+55256
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2014-06-22
+</td>
+<td style="text-align:left;">
+ru
+</td>
+<td style="text-align:left;">
+ru
+</td>
+<td style="text-align:right;">
+49209
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2014-08-10
+</td>
+<td style="text-align:left;">
+ru
+</td>
+<td style="text-align:left;">
+ru
+</td>
+<td style="text-align:right;">
+46044
+</td>
+</tr>
+</tbody>
+</table>
+<p>Now we’ll plot time series grouped by account languages.</p>
+<pre class="r"><code>IRA_TS %&gt;% 
+    ggplot() +
+      geom_line(aes(x = week, y = n, color = fct_infreq(account_language)),
+                alpha = 0.5) +
+      scale_color_brewer(palette = &quot;Paired&quot;, direction = -1) +
+      scale_x_date(limits = c(as_date(&quot;2009-01-01&quot;), NA),
+                   breaks = scales::date_breaks(width = &quot;1 year&quot;),
+                   labels = scales::date_format(format = &quot;%Y&quot;),
+                   minor_breaks = &quot;6 months&quot;) +
+      scale_y_continuous(breaks = scales::pretty_breaks(9),
+                         labels = scales::number_format(big.mark = &quot;.&quot;,
+                                                    decimal.mark = &quot;,&quot;)) +
+      theme_minimal() +
+      labs(
+        title = &quot;Russian Internet Agency Dataset: Weekly Activity per Account Language&quot;,
+        subtitle = str_c(
+          &quot;Subset of &quot;, n_distinct(data_unique$tweetid), 
+          &quot; unique Tweets (no RTs) from &quot;,
+          n_distinct(data_unique$userid), &quot; unique Users&quot;
+        ),
+        caption = &quot;@fubits&quot;,
+        color = &quot;Account Language&quot;,
+        x = &quot;&quot;,         y = &quot;Tweets&quot;        ) +
+      guides(colour = guide_legend(override.aes = list(size = 5, stroke = 1.5)))</code></pre>
+<p><img src="/post/2018-10-27-election-hacking-exploring-10-million-tweets-from-the-russian-internet-research-agency-dataset-pt-2-nlproc-corpus-dfm_files/figure-html/unnamed-chunk-5-1.png" width="960" /></p>
+<p>Well that’s some interesting peaks - first “ru”, then “en”, than a little phase with “ru” followed by “es” (as in Español)! We can neglect everything before 2012 for now, so the following plots should become a bit more detailed.</p>
+<p>Let’s see what we can get observe by plotting the <strong>Tweet Languages</strong> and inspect the top peaks’ dates. To further reduce noise, we’ll filter out languages with less than 500 Tweets per week from 2012 on (as we have aggregated the Tweets on a weekly basis, in fact, only week-wise values will be filtered).</p>
+<pre class="r"><code>IRA_TS %&gt;% 
+  filter(week &gt; &quot;2011-12-25&quot; &amp; n &gt; 500) %&gt;% 
+    ggplot() +
+      geom_line(aes(x = week, y = n, color = fct_infreq(tweet_language)),
+                alpha = 0.5) +
+      scale_color_brewer(palette = &quot;Paired&quot;, direction = -1) +
+      scale_x_date(limits = c(as_date(&quot;2011-11-01&quot;), NA),
+                   breaks = scales::date_breaks(width = &quot;1 year&quot;),
+                   labels = scales::date_format(format = &quot;%Y&quot;),
+                   minor_breaks = &quot;6 months&quot;) +
+      scale_y_continuous(breaks = scales::pretty_breaks(9),
+                         labels = scales::number_format(big.mark = &quot;.&quot;,
+                                                    decimal.mark = &quot;,&quot;)) +
+      theme_minimal() +
+      labs(
+        title = &quot;Russian Internet Agency Dataset: Weekly Activity per Tweet Language&quot;,
+        subtitle = str_c(
+          &quot;Subset of &quot;, n_distinct(data_unique$tweetid), 
+          &quot; unique Tweets (no RTs) from &quot;,
+          n_distinct(data_unique$userid), &quot; unique Users&quot;
+        ),
+        caption = &quot;@fubits&quot;,
+        color = &quot;Tweet Language&quot;,
+        x = &quot;&quot;,
+        y = &quot;Tweets&quot;
+        ) +
+      guides(colour = guide_legend(override.aes = list(size = 5, stroke = 1.5)))</code></pre>
+<p><img src="/post/2018-10-27-election-hacking-exploring-10-million-tweets-from-the-russian-internet-research-agency-dataset-pt-2-nlproc-corpus-dfm_files/figure-html/unnamed-chunk-6-1.png" width="960" /></p>
+<p>Those patterns are really telling! And we can add one more helper: Text labels (the Mondays for the respective weeks) for those top peaks (global maxima), colored by the respective Account languages:</p>
+<pre class="r"><code>IRA_TS %&gt;% 
+  filter(week &gt; &quot;2011-12-25&quot; &amp; n &gt; 500) %&gt;% 
+    ggplot() +
+      geom_line(aes(x = week, y = n, color = fct_infreq(tweet_language)),
+                alpha = 0.5) +
+      geom_point(data = IRA_TS[1:10,], aes(x = week, y = n, 
+                                          color = fct_infreq(tweet_language)), size = 2) +
+      scale_color_brewer(palette = &quot;Paired&quot;, direction = -1, aesthetics = c(&quot;color&quot;, &quot;fill&quot;)) +
+      ggrepel::geom_label_repel(data = IRA_TS[1:10,],
+                                aes(x = week, y = n,
+                                    label = str_c(month(week, label = T, abbr = T), &quot;-&quot;, day(week)),
+                                    fill = account_language),
+                                    size = 3) +
+      scale_x_date(limits = c(as_date(&quot;2011-11-01&quot;), NA),
+                   breaks = scales::date_breaks(width = &quot;1 year&quot;),
+                   labels = scales::date_format(format = &quot;%Y&quot;),
+                   minor_breaks = &quot;6 months&quot;) +
+      scale_y_continuous(breaks = scales::pretty_breaks(9),
+                         labels = scales::number_format(big.mark = &quot;.&quot;,
+                                                    decimal.mark = &quot;,&quot;)) +
+      theme_minimal() +
+      labs(
+        title = &quot;Russian Internet Agency Dataset: Weekly Activity per Language (Top 10 Peaks)&quot;,
+        subtitle = str_c(
+            &quot;Subset of &quot;, n_distinct(data_unique$tweetid), 
+            &quot; unique Tweets (no RTs) from &quot;,
+            n_distinct(data_unique$userid), &quot; unique Users&quot;, &quot;; Label: week&#39;s Monday; Label fill: Account language&quot;
+          ),
+        caption = &quot;@fubits&quot;,
+        color = &quot;Language&quot;,
+        x = &quot;&quot;,
+        y = &quot;Tweets&quot;
+        ) +
+      guides(color = guide_legend(override.aes = list(size = 5, stroke = 0)),
+             fill = FALSE)</code></pre>
+<p><img src="/post/2018-10-27-election-hacking-exploring-10-million-tweets-from-the-russian-internet-research-agency-dataset-pt-2-nlproc-corpus-dfm_files/figure-html/unnamed-chunk-7-1.png" width="960" /></p>
+<blockquote>
+<p>Technically, we could repeat this for all peaks of any particular Tweet or Account language and find out more about the particular events (.i.e. German-language Tweets peaking around the Federal Elections in autum 2017 - barely visibly with this color palette) with the help of Wikipedia’s super-handsome <a href="https://en.wikipedia.org/wiki/Portal:Current_events#Events_by_month" target="_blank">current events portal</a>.</p>
+</blockquote>
+<p>For instance, we can observe <strong>Russian-language</strong> Tweets starting to peak in the beginning of <strong>2014</strong>:</p>
+<ul>
+<li>post-Maidan, the Ukraine-Russia conflict just entered a full-fledged armed conflict period, complemented by Russia’s Annexation of Crimea et al.</li>
+<li>on 17 July Malaysia Airlines Flight MH17 was shot down over Ukraine (cf. <a href="https://www.bellingcat.com/tag/mh17/" target="_blank">Bellingcat’s OSINT work</a>]).</li>
+</ul>
+<p>As for the <strong>English-language</strong> Tweets (attributed to the Russian “Internet Research Agency” in this dataset), we see them gain momentum starting in <strong>mid 2014</strong>, shortly after the shot-down of MH17…</p>
+<p>Beyond that, in <strong>2015</strong>:</p>
+<ul>
+<li>the Greeks elected a new Parliament on 4 January</li>
+<li>the Charlie Hebdo attack took place on 7 January,</li>
+<li>the Ferguson unrest had another bloody month in March</li>
+<li>well… and on 16 June 2015, <strong>Trump</strong> announced his presidential campaign.</li>
+</ul>
+<p>Post election, English-language Tweets calmed down and didn’t re-peak before August 2017:</p>
+<ul>
+<li>on 3 August 2017, “Special counsel Robert Mueller has impaneled a grand jury in Washington, D.C. to investigate allegations of Russia’s interference in the 2016 elections”<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a></li>
+<li>(and Neymar was bought by PSG for €222 million on the same day, which might explain why Spanish Accounts where most active)</li>
+<li>on 12 August 2017, “fights break out between white supremacists and counterprotesters in <strong>Charlottesville</strong>, Virginia, over the removal of the Robert Edward Lee Sculpture.”<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a>.</li>
+<li>on 13 August 2017 the Barcelona attacks happened</li>
+</ul>
+<p>As we can see, the activities really peak around certain events, either concerning US-American left-right clashes and other intra-state affairs, or they concern topics with Russian involvement. What’s striking, however, is that the days around the infamous <strong>Brexit</strong> referendum (23/24 June 2016) are among those time periods with the <strong>overall lowest activies</strong>.</p>
+<p>Just for comparison (of plain numbers to the usefulness of exploration by data visualization), here’s some tables of data we just visualized. You can easily identify the dates of the events from the numbers alone. But in order to recognize patterns, esp. language patterns, a visual representation is really helpful. However, without this table I probably would have missed the <strong>Spanish</strong>-language Accounts peaking with Tweets in English in two subsequent weeks…</p>
+<pre class="r"><code>IRA_TS %&gt;% 
+  group_by(week, account_language, tweet_language) %&gt;%
+  summarise(n = sum(n)) %&gt;% 
+  arrange(desc(n)) %&gt;% 
+  head(20) %&gt;% 
+  knitr::kable(&quot;html&quot;)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+week
+</th>
+<th style="text-align:left;">
+account_language
+</th>
+<th style="text-align:left;">
+tweet_language
+</th>
+<th style="text-align:right;">
+n
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+2014-07-13
+</td>
+<td style="text-align:left;">
+ru
+</td>
+<td style="text-align:left;">
+ru
+</td>
+<td style="text-align:right;">
+89198
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2015-03-15
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:right;">
+71421
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2017-08-13
+</td>
+<td style="text-align:left;">
+es
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:right;">
+71037
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2017-08-06
+</td>
+<td style="text-align:left;">
+es
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:right;">
+55256
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2014-06-22
+</td>
+<td style="text-align:left;">
+ru
+</td>
+<td style="text-align:left;">
+ru
+</td>
+<td style="text-align:right;">
+49209
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2014-08-10
+</td>
+<td style="text-align:left;">
+ru
+</td>
+<td style="text-align:left;">
+ru
+</td>
+<td style="text-align:right;">
+46044
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2015-01-04
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:right;">
+45167
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2014-10-05
+</td>
+<td style="text-align:left;">
+ru
+</td>
+<td style="text-align:left;">
+ru
+</td>
+<td style="text-align:right;">
+44925
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2014-07-20
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:left;">
+ru
+</td>
+<td style="text-align:right;">
+41167
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2014-07-13
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:left;">
+ru
+</td>
+<td style="text-align:right;">
+40059
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2017-07-30
+</td>
+<td style="text-align:left;">
+es
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:right;">
+35927
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2014-06-29
+</td>
+<td style="text-align:left;">
+ru
+</td>
+<td style="text-align:left;">
+ru
+</td>
+<td style="text-align:right;">
+33153
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2014-08-17
+</td>
+<td style="text-align:left;">
+ru
+</td>
+<td style="text-align:left;">
+ru
+</td>
+<td style="text-align:right;">
+33068
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2014-07-27
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:left;">
+ru
+</td>
+<td style="text-align:right;">
+31603
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2014-06-15
+</td>
+<td style="text-align:left;">
+ru
+</td>
+<td style="text-align:left;">
+ru
+</td>
+<td style="text-align:right;">
+31592
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2015-01-18
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:right;">
+30791
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2014-10-19
+</td>
+<td style="text-align:left;">
+ru
+</td>
+<td style="text-align:left;">
+ru
+</td>
+<td style="text-align:right;">
+30689
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2015-01-11
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:right;">
+30341
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2014-08-24
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:right;">
+29403
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+2014-08-17
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:left;">
+en
+</td>
+<td style="text-align:right;">
+29123
+</td>
+</tr>
+</tbody>
+</table>
+<p>Alright. Point made. Let’s continue with preparing our automated content analysis.</p>
+<pre class="r"><code>rm(IRA_TS) # free up some RAM first</code></pre>
+</div>
+<div id="building-a-corpus-with-quanteda" class="section level2">
+<h2><span class="header-section-number">2.2</span> Building a Corpus with <code>Quanteda</code></h2>
+<p>We’re going to build a corpus from our dataset, turn the corpus into a sparse Document-Feature Matrix (DFM), reduce unnecessary features (words/tokens) from the DFM and then use the DFM for Structural Topic Modelling.</p>
+<blockquote>
+<p>Now let’s try to do something really <strong>naive</strong>: We’ll build a corpus from <strong>all Tweets</strong> - with <strong>all languages</strong>.will take a minute ot two (actually: each step took me <strong>hours</strong>…) with <code>corpus()</code>, and <code>dfm()</code>, but this way we can explore a lot of presumed topics in various languages early on.*test** where the limits of in-memory computing with text as data might be with R (“Big Data calling”)…</p>
+</blockquote>
+<p><strong>Corpus from all Tweets</strong></p>
+<pre class="r"><code>system.time({ # just measuring run-time
+IRA_corpus &lt;- data_unique %&gt;% 
+  corpus(text_field = &quot;tweet_text&quot;,
+         docid_field = &quot;tweetid&quot;,
+         docvars = data_unique, # probably obsolete when docid_field is set
+         compress = FALSE # compression is better for in-memory, but will slow down processing  
+         )
+})
+BRRR::skrrrahh(&quot;flava&quot;)</code></pre>
+<div id="memory-management" class="section level3">
+<h3><span class="header-section-number">2.2.1</span> Memory Management</h3>
+<p>That’s my fairly refined approach (from this post) to work in-memory with as low of a RAM footprint as possible:</p>
+<ul>
+<li>save the data object to the hard-drive</li>
+<li>clear your R environment with rm() and gc() (&lt;- garbage collection)</li>
+<li>restart R</li>
+<li>load the data object from the harddrive</li>
+<li>go on with the next task</li>
+</ul>
+<p><strong>save <code>IRA_corpus</code> to HDD</strong></p>
+<pre class="r"><code>saveRDS(IRA_corpus, str_c(data_path, &quot;IRA_corpus_naive.rds&quot;))
+# saveRDS(IRA_corpus, str_c(data_path, &quot;IRA_corpus_naive_compressed.rds&quot;))</code></pre>
+<p><strong>clear environment and restart R</strong></p>
+<pre class="r"><code>rm(data_unique)
+rm(IRA_corpus)
+gc(full = TRUE, verbose = TRUE)
+# .rs.restartR()
+rstudioapi::restartSession()</code></pre>
+<blockquote>
+<p>Linux: down to 1.4 GiB</p>
+</blockquote>
+<p><strong>load <code>IRA_corpus</code> from HDD</strong></p>
+<pre class="r"><code># data_path &lt;- here::here(&quot;static&quot;, &quot;data&quot;, &quot;IRA_Tweets&quot;, &quot;/&quot;)
+IRA_corpus &lt;- readRDS(str_c(data_path, &quot;IRA_corpus_naive.rds&quot;))
+# IRA_corpus &lt;- readRDS(stringr::str_c(data_path, &quot;IRA_corpus_naive_compressed.rds&quot;))
+BRRR::skrrrahh(&quot;flava&quot;)</code></pre>
+</div>
+</div>
+<div id="corpus-exploration-key-word-in-context" class="section level2">
+<h2><span class="header-section-number">2.3</span> Corpus Exploration: Key-Word-in Context</h2>
+<p>Now we can explore some specific keywords and their full-text conetxt, i.e. those where we can already assume that they should take up a prominent spot in the corpus.</p>
+<p>In particular, I’m interested in the following terms:</p>
+<ul>
+<li>компромат | kompromat (just for you, <a href="https://twitter.com/RidT" target="_blank">@RidT</a>)</li>
+<li>soros</li>
+<li>fake news: phrase(“fake news”)</li>
+<li>pee tape: phrase(“pee tape”)</li>
+<li>msm</li>
+<li>hillary | clinton</li>
+<li>nazi</li>
+<li>antifa</li>
+<li>zion</li>
+<li>civil war</li>
+<li>deep state</li>
+</ul>
+<p><strong>test <code>kwic()</code> functionality</strong></p>
+<pre class="r"><code>IRA_corpus %&gt;% 
+  corpus_sample(1000000) %&gt;% # always test with smaller sample
+  kwic(c(&quot;компромат&quot;,&quot;kompromat&quot;), window = 10, case_insensitive = TRUE)  %&gt;%
+  # vs. kwic(x, phrase(&quot;term1 term2&quot;))
+  as_tibble() %&gt;% # needed for kwic()
+  select(pre:post) %&gt;%
+  head(10) %&gt;%
+  knitr::kable(&quot;html&quot;)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+pre
+</th>
+<th style="text-align:left;">
+keyword
+</th>
+<th style="text-align:left;">
+post
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+</tr>
+</tbody>
+</table>
+<p>We’ll put the keywords into a (<code>kwic()</code>-friendly) vector and then do a single run with all keywords instead of repeating this n-times. This will take time and might not work properlly without enough RAM.</p>
+<pre class="r"><code>kwic_keywords &lt;- c(
+  c(&quot;компромат&quot;,&quot;kompromat&quot;),
+  &quot;soros&quot;,
+  phrase(&quot;fake news&quot;),
+  phrase(&quot;pee tape&quot;),
+  &quot;msm&quot;,
+  c(&quot;hillary&quot;, &quot;clinton&quot;),
+  &quot;nazi&quot;,
+  &quot;antifa&quot;,
+  &quot;zion&quot;,
+  phrase(&quot;civil war&quot;),
+  phrase(&quot;deep state&quot;)
+  )</code></pre>
+<p><strong>enforce Garbage Collection to free up RAM</strong></p>
+<pre class="r"><code>gc(full = TRUE, verbose = TRUE)</code></pre>
+<p><strong>now search for Keywords-in-context from <code>kwic_keywords</code> vector</strong></p>
+<pre class="r"><code>library(magrittr)
+system.time({
+  kwic_results &lt;- IRA_corpus %&gt;% 
+    # corpus_sample(1000000) %&gt;% # Test smale-scale sample first
+    quanteda::kwic(kwic_keywords, window = 10, case_insensitive = TRUE)
+})
+
+saveRDS(kwic_results, str_c(data_path, &quot;kwic_corpus_naive.rds&quot;))
+# this genius thing plays Flavor Flav when the chunk is done
+BRRR::skrrrahh(&quot;flava&quot;)</code></pre>
+<blockquote>
+<p>I was getting this error repeatedly on Windows:: cannot allocate vector of size 64.0 MbTiming stopped at: 1599 562.6 2294</p>
+</blockquote>
+<blockquote>
+<p>This was the moment where I arrived at my individual “too big for in-memory” point of failure - even with 16GB RAM. After trying out some <code>memory.size()</code> tricks on Windows, among other things, I decided to change my OS (for R at least) to Ubuntu (MATE 18.10) and set up dual-boot. My first motiviation was to reduce some memory load (i.e. Skype, iTunes, Office et al. all helpers running in the background). Eventually, I had to extend the “in-memory” capacity by creating a dedicated 64GB swap drive on a USB 3.0 thumb drive. As soons as I get hold of a new, bigger, and faster SSD, I’ll have a look at the performance of a SSD-based swap drive.</p>
+</blockquote>
+<p><strong>Visualization</strong></p>
+<pre class="r"><code>kwic_results &lt;- readRDS(str_c(data_path, &quot;kwic_corpus_naive.rds&quot;))</code></pre>
+<pre class="r"><code>kwic_results %&gt;% 
+  mutate(keyword = tolower(keyword)) %&gt;% 
+  group_by(keyword) %&gt;% 
+  count() %&gt;% 
+  arrange(desc(n)) %&gt;% 
+  knitr::kable(&quot;html&quot;)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+keyword
+</th>
+<th style="text-align:right;">
+n
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+clinton
+</td>
+<td style="text-align:right;">
+18216
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hillary
+</td>
+<td style="text-align:right;">
+17353
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+antifa
+</td>
+<td style="text-align:right;">
+6771
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fake news
+</td>
+<td style="text-align:right;">
+2897
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+soros
+</td>
+<td style="text-align:right;">
+2673
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+msm
+</td>
+<td style="text-align:right;">
+1567
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+nazi
+</td>
+<td style="text-align:right;">
+1273
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+deep state
+</td>
+<td style="text-align:right;">
+852
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+civil war
+</td>
+<td style="text-align:right;">
+741
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+компромат
+</td>
+<td style="text-align:right;">
+118
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+zion
+</td>
+<td style="text-align:right;">
+67
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pee tape
+</td>
+<td style="text-align:right;">
+7
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+kompromat
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+</tbody>
+</table>
+<p>This is not as many results as I would have expected. However, this might have been caused by me by not explicitly defining the search pattern as “glob” or “regex”. I’ll re-do this post with better equipment soon-ish.</p>
+<pre class="r"><code>kwic_results %&gt;%
+  filter(keyword == &quot;soros&quot;) %&gt;% 
+  select(pre, keyword, post) %&gt;% 
+  head(10) %&gt;%
+  knitr::kable(&quot;html&quot;)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+pre
+</th>
+<th style="text-align:left;">
+keyword
+</th>
+<th style="text-align:left;">
+post
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Ah_peaceseeker3 AmericanVoterUS KevinDaGunny FoxNews realDonaldTrump Right ? It’s coming from
+</td>
+<td style="text-align:left;">
+soros
+</td>
+<td style="text-align:left;">
+European ba … https : / / t.co / vdqVmwNR7v
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MittRomney I’ve learned they’re both antifa’s . I’m positive .
+</td>
+<td style="text-align:left;">
+soros
+</td>
+<td style="text-align:left;">
+put out ads 7 d … https : / /
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RT apostlelaurinda : howjohns123 CGHallenbeck RealJamesWoods all funded by
+</td>
+<td style="text-align:left;">
+soros
+</td>
+<td style="text-align:left;">
+and saudi prince $ $ $ . . . birds
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+TaylorLorenz Another
+</td>
+<td style="text-align:left;">
+soros
+</td>
+<td style="text-align:left;">
+troll ? Or truly compassionate . These days none of
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+them on the list too . They’re the colluders with
+</td>
+<td style="text-align:left;">
+soros
+</td>
+<td style="text-align:left;">
+.
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Soros / Killary gonna take place of ANTIFA ANOTHER 501C
+</td>
+<td style="text-align:left;">
+soros
+</td>
+<td style="text-align:left;">
+/ K … https : / / t.co / U7QhxwnPyN
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+You guys are pushing the antifa agenda . You know
+</td>
+<td style="text-align:left;">
+soros
+</td>
+<td style="text-align:left;">
+paid off Gov , Mayor &amp; amp ; Police Chief
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+glad you agree . We’re now watching phase 2 of
+</td>
+<td style="text-align:left;">
+soros
+</td>
+<td style="text-align:left;">
+plan . Destroy US infrastructur … https : / /
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RT MikeObrigewitch : TeamTrumpAZ No I think obama and
+</td>
+<td style="text-align:left;">
+soros
+</td>
+<td style="text-align:left;">
+should be removed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+the entire movement . These kids are being controlled by
+</td>
+<td style="text-align:left;">
+soros
+</td>
+<td style="text-align:left;">
+via the M … https : / / t.co /
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>kwic_results %&gt;% 
+  left_join(data_unique, by = c(&quot;docname&quot; = &quot;tweetid&quot;)) %&gt;% 
+  select(keyword, tweet_time, account_language, tweet_language) %&gt;%
+  mutate(keyword = tolower(keyword), date = floor_date(tweet_time, &quot;week&quot;)) %&gt;% 
+  group_by(keyword, date, account_language) %&gt;% 
+  count() %&gt;% 
+  ggplot() +
+    geom_point(aes(x = date, y = fct_rev(keyword),
+                   color = account_language,
+                   size = n), alpha = 0.5) +
+    scale_color_brewer(palette = &quot;Paired&quot;, direction = 1) +
+    labs(title = &quot;Russian Internet Agency Dataset: Selected Keywords - Weekly Activity per Account Language&quot;,
+         subtitle = str_c(&quot;Based on n = &quot;, nrow(kwic_results), &quot; hits from the full IRA dataset&quot;),
+         caption = &quot;@fubits&quot;,
+         x = &quot;Weekly Activity&quot;,
+         y = &quot;&quot;,
+         color = &quot;Account\nLanguage&quot;) +
+    theme_minimal() +
+    guides(color = guide_legend(override.aes = list(size = 5,
+                                                    stroke = 0,
+                                                    alpha = 1)))</code></pre>
+<p><img src="/post/2018-10-27-election-hacking-exploring-10-million-tweets-from-the-russian-internet-research-agency-dataset-pt-2-nlproc-corpus-dfm_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
+<p>The Spanish-language dominance in 2017 looks really weird.</p>
+<pre class="r"><code>kwic_results %&gt;% 
+    left_join(data_unique, by = c(&quot;docname&quot; = &quot;tweetid&quot;)) %&gt;% 
+    filter(account_language == &quot;es&quot;) %&gt;% 
+    select(pre, keyword, post, tweet_time, account_language, tweet_language) %&gt;%
+  head(20) %&gt;% 
+  knitr::kable(&quot;html&quot;)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+pre
+</th>
+<th style="text-align:left;">
+keyword
+</th>
+<th style="text-align:left;">
+post
+</th>
+<th style="text-align:left;">
+tweet_time
+</th>
+<th style="text-align:left;">
+account_language
+</th>
+<th style="text-align:left;">
+tweet_language
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+SHOCKING : Look What Crooked Favor James Comey Did For
+</td>
+<td style="text-align:left;">
+Hillary
+</td>
+<td style="text-align:left;">
+Clinton https : / / t.co / weUNOc0m98
+</td>
+<td style="text-align:left;">
+2017-09-01 16:55:00
+</td>
+<td style="text-align:left;">
+es
+</td>
+<td style="text-align:left;">
+en
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+: Look What Crooked Favor James Comey Did For Hillary
+</td>
+<td style="text-align:left;">
+Clinton
+</td>
+<td style="text-align:left;">
+https : / / t.co / weUNOc0m98
+</td>
+<td style="text-align:left;">
+2017-09-01 16:55:00
+</td>
+<td style="text-align:left;">
+es
+</td>
+<td style="text-align:left;">
+en
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RT Cernovich :
+</td>
+<td style="text-align:left;">
+ANTIFA
+</td>
+<td style="text-align:left;">
+, a left wing group , would punch solo #UnitetheRight
+</td>
+<td style="text-align:left;">
+2017-08-12 19:24:00
+</td>
+<td style="text-align:left;">
+es
+</td>
+<td style="text-align:left;">
+en
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#ade BOMBSHELL STUDY : Voter Fraud May Have Resulted in
+</td>
+<td style="text-align:left;">
+Hillary
+</td>
+<td style="text-align:left;">
+Winning New Hampshire https : / / t.co / a2KZEMQz1B
+</td>
+<td style="text-align:left;">
+2017-07-31 22:31:00
+</td>
+<td style="text-align:left;">
+es
+</td>
+<td style="text-align:left;">
+en
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#darccy Trump Supporters REACT to Mitt Romney PRAISING
+</td>
+<td style="text-align:left;">
+ANTIFA
+</td>
+<td style="text-align:left;">
+! https : / / t.co / QGyEnhJWfx #darcy https
+</td>
+<td style="text-align:left;">
+2017-08-17 00:47:00
+</td>
+<td style="text-align:left;">
+es
+</td>
+<td style="text-align:left;">
+en
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#mar RT comermd :
+</td>
+<td style="text-align:left;">
+Antifa
+</td>
+<td style="text-align:left;">
+Democrats have successfully aligned with Nazi beliefs . Tomecide is
+</td>
+<td style="text-align:left;">
+2017-08-16 17:52:00
+</td>
+<td style="text-align:left;">
+es
+</td>
+<td style="text-align:left;">
+en
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#mar RT comermd : Antifa Democrats have successfully aligned with
+</td>
+<td style="text-align:left;">
+Nazi
+</td>
+<td style="text-align:left;">
+beliefs . Tomecide is common before destroying a civilization !
+</td>
+<td style="text-align:left;">
+2017-08-16 17:52:00
+</td>
+<td style="text-align:left;">
+es
+</td>
+<td style="text-align:left;">
+en
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#emel BREAKING : Masked
+</td>
+<td style="text-align:left;">
+Antifa
+</td>
+<td style="text-align:left;">
+Thugs Pick a FIGHT With Chicago Police https : /
+</td>
+<td style="text-align:left;">
+2017-08-16 15:49:00
+</td>
+<td style="text-align:left;">
+es
+</td>
+<td style="text-align:left;">
+en
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RT stranahan :
+</td>
+<td style="text-align:left;">
+Soros
+</td>
+<td style="text-align:left;">
+funded spokesman runs from Beth Chapman https : / /
+</td>
+<td style="text-align:left;">
+2017-08-01 03:01:00
+</td>
+<td style="text-align:left;">
+es
+</td>
+<td style="text-align:left;">
+en
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#IStandWithHannity #IStandWithEricBolling Free speech &amp; amp ; truth ! NEVER
+</td>
+<td style="text-align:left;">
+Soros
+</td>
+<td style="text-align:left;">
+facists seanhannity eri … https : / / t.co /
+</td>
+<td style="text-align:left;">
+2017-08-08 14:29:00
+</td>
+<td style="text-align:left;">
+es
+</td>
+<td style="text-align:left;">
+en
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+: What the Dem #Fake Media Is Hiding About the
+</td>
+<td style="text-align:left;">
+Clinton
+</td>
+<td style="text-align:left;">
+Email Probe https : / / t.co / JviO83XBFA #just
+</td>
+<td style="text-align:left;">
+2017-08-10 11:11:00
+</td>
+<td style="text-align:left;">
+es
+</td>
+<td style="text-align:left;">
+en
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Sorry
+</td>
+<td style="text-align:left;">
+Hillary
+</td>
+<td style="text-align:left;">
+, Former President Carter Didn’t Vote For You https :
+</td>
+<td style="text-align:left;">
+2017-05-09 12:46:00
+</td>
+<td style="text-align:left;">
+es
+</td>
+<td style="text-align:left;">
+en
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+VIDEO : BUTSTED ! Bill
+</td>
+<td style="text-align:left;">
+Clinton
+</td>
+<td style="text-align:left;">
+Caught Ogling Ivanka Trump While Hillary Looks on in Disgust
+</td>
+<td style="text-align:left;">
+2017-01-21 01:53:00
+</td>
+<td style="text-align:left;">
+es
+</td>
+<td style="text-align:left;">
+en
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+: BUTSTED ! Bill Clinton Caught Ogling Ivanka Trump While
+</td>
+<td style="text-align:left;">
+Hillary
+</td>
+<td style="text-align:left;">
+Looks on in Disgust https : / / t.co /
+</td>
+<td style="text-align:left;">
+2017-01-21 01:53:00
+</td>
+<td style="text-align:left;">
+es
+</td>
+<td style="text-align:left;">
+en
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Trump to Release Unheard
+</td>
+<td style="text-align:left;">
+Hillary
+</td>
+<td style="text-align:left;">
+Tape … Stunning , Unprecedented https : / / t.co
+</td>
+<td style="text-align:left;">
+2017-05-15 18:40:00
+</td>
+<td style="text-align:left;">
+es
+</td>
+<td style="text-align:left;">
+en
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BREAKING : Man Planning to KILL Trump was
+</td>
+<td style="text-align:left;">
+Hillary
+</td>
+<td style="text-align:left;">
+Clinton’s Close Friend ! His Plan is SICK … https
+</td>
+<td style="text-align:left;">
+2017-01-22 17:34:00
+</td>
+<td style="text-align:left;">
+es
+</td>
+<td style="text-align:left;">
+en
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Peter Schweizer :
+</td>
+<td style="text-align:left;">
+Clinton
+</td>
+<td style="text-align:left;">
+Foundation Probe Must Continue - You Can’t Say ’ She
+</td>
+<td style="text-align:left;">
+2016-11-13 01:58:00
+</td>
+<td style="text-align:left;">
+es
+</td>
+<td style="text-align:left;">
+en
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Look What
+</td>
+<td style="text-align:left;">
+Antifa
+</td>
+<td style="text-align:left;">
+THUGS Did to This Black Student in Charlottesville https :
+</td>
+<td style="text-align:left;">
+2017-08-17 16:48:00
+</td>
+<td style="text-align:left;">
+es
+</td>
+<td style="text-align:left;">
+en
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#adsnn Violent
+</td>
+<td style="text-align:left;">
+Antifa
+</td>
+<td style="text-align:left;">
+THUG Arrested for Assault in Charlottesville https : / /
+</td>
+<td style="text-align:left;">
+2017-08-14 01:11:00
+</td>
+<td style="text-align:left;">
+es
+</td>
+<td style="text-align:left;">
+en
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+There is no one in the
+</td>
+<td style="text-align:left;">
+MSM
+</td>
+<td style="text-align:left;">
+who will tell the truth - period . Enlist in
+</td>
+<td style="text-align:left;">
+2017-08-18 01:17:00
+</td>
+<td style="text-align:left;">
+es
+</td>
+<td style="text-align:left;">
+en
+</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Hm, does not look too Spanish to me. That’s another topic for further exploration and investigation.</p>
+</blockquote>
+<blockquote>
+<p>#TODO</p>
+</blockquote>
+</div>
+<div id="building-a-5.7m-x-1.5m-sparse-document-feature-matrix" class="section level2">
+<h2><span class="header-section-number">2.4</span> Building a 5.7M x 1.5M sparse Document-Feature Matrix</h2>
+<p>From a tactical perspective with regards to large corpora and in-memory processing, this particular Stack Overflow introduced an interesting but actually misleading approach for creating a huge <code>dfm</code>: <a href="https://stackoverflow.com/questions/38931507/create-dfm-step-by-step-with-quanteda" target="_blank">000andy8484 - Create dfm step by step with quanteda</a>.</p>
+<p>After failing to build a <code>dfm</code> from the untouched <code>corpus</code> repeatedly (on Windows &amp; Linux), this SO-post explained how to reduce the number of features in the corpus by tokenizing the texts and removing unwanted tokens <strong>before</strong> creating the <code>dfm</code>. This way I really gained some momentum for <code>dfm()</code> (by reducing dimensions), but we would also loose the analytical methods / functionality of a corpus object (i.e. <code>kwic()</code>) as we destroy the basic corpus structure (full Tweets in our case) by replacing the texts with tokens. This experiment was more of a permormance evaluation than a recommended practice (for now, at least). I ended up with something like a 60M x 1.5M DFM, which obviously shows that I had lost the document-based corpus structure.</p>
+<p>Having said that, here’s our <strong>regular strategy</strong>:</p>
+<ul>
+<li>create untouched corpus (we did this above, already)</li>
+<li><del>remove obsolete tokens from corpus by directly tokensing the texts</del></li>
+<li><del>remove stopwords from corpus</del></li>
+<li>create dfm from <del>reduced</del> untouched corpus</li>
+<li>reduce dfm by removing unwanted features (stopwords, URLs, 2-char tokens and so on)</li>
+<li>build dfm subsets for specific analyses</li>
+<li>build topic models with stm() based on variations of the <code>dfm</code></li>
+</ul>
+<p><strong>Naive Corpus</strong></p>
+<pre class="r"><code># data_path &lt;- here::here(&quot;static&quot;, &quot;data&quot;, &quot;IRA_Tweets&quot;, &quot;/&quot;)
+IRA_corpus &lt;- readRDS(stringr::str_c(data_path, &quot;IRA_corpus_naive.rds&quot;))</code></pre>
+<div id="stopwords" class="section level3">
+<h3><span class="header-section-number">2.4.1</span> Stopwords</h3>
+<p>First of all, we will need to create list of very frequent tokens/words which we can simply filter out from our corpus. This is my current <strong>best-practice</strong> with regards to stopwords. I’m using three different sources to compile a super-list of stopwords for the language concerned. (As for “amp”, this is an artefact I learned from my <a href="https://ellocke.github.io/post/r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist/#inspect-keyword-in-context-kwic-for-amp">previous posts</a>: It’s just a left-over of <code>&amp;amp</code>, which is the HTML entitiy for string-parsing <code>&amp;</code>, and is created when we use <code>remove_punct = TRUE</code>. Same is true for <code>&amp;quot</code> and probably some other unparsed/escaped entities in the IRA datsset).</p>
+<pre class="r"><code># repo: https://github.com/stopwords-iso
+en_stopwords &lt;- readr::read_lines(&quot;https://raw.githubusercontent.com/stopwords-iso/stopwords-en/master/stopwords-en.txt&quot;)
+ru_stopwords &lt;- readr::read_lines(&quot;https://raw.githubusercontent.com/stopwords-iso/stopwords-ru/master/stopwords-ru.txt&quot;)
+de_stopwords &lt;- readr::read_lines(&quot;https://raw.githubusercontent.com/stopwords-iso/stopwords-de/master/stopwords-de.txt&quot;)
+
+custom_stopwords_en &lt;- unique(c(en_stopwords,
+                             tidytext::stop_words$word,
+                             quanteda::stopwords(&quot;english&quot;))) # only keep uniques
+custom_stopwords_ru &lt;- unique(c(ru_stopwords,
+                             quanteda::stopwords(&quot;russian&quot;))) # only keep uniques
+custom_stopwords_de &lt;- unique(c(de_stopwords,
+                             quanteda::stopwords(&quot;german&quot;))) # only keep uniques
+
+stopwords_extra &lt;- c(&quot;amp&quot;, &quot;http&quot;, &quot;https&quot;, &quot;quot&quot;)
+custom_stopwords_en &lt;- c(custom_stopwords_en, stopwords_extra)
+custom_stopwords_ru &lt;- c(custom_stopwords_ru, stopwords_extra)
+custom_stopwords_ru &lt;- c(custom_stopwords_ru, stopwords_extra)
+
+rm(en_stopwords) # free up RAM. We&#39;ll need it soon-ish
+rm(ru_stopwords)
+rm(de_stopwords)</code></pre>
+</div>
+<div id="deprecated-approach" class="section level3">
+<h3><span class="header-section-number">2.4.2</span> Deprecated Approach</h3>
+<blockquote>
+<p>Caution: This is the <strong>taboo</strong>-approach, which I tried out and would not recommend re-doing. It performs. but the analytical value of the output is very limited!</p>
+</blockquote>
+<blockquote>
+<p>This task alone would first approach taking up more than 20GB “RAM”&quot; on my Windows OS Laptop and evetually crash, so be warned again: proceed with caution!</p>
+</blockquote>
+<blockquote>
+<p>On Ubuntu Linux we’ll get along with 9GB-11GB for the same task (corpus building, tokenizing and reducing) without even touching the swap file. This difference is insane… However, this still would not work out for creating a <code>dfm</code> from the untouched, all-tweets corpus. If you want to replicate this, I suggest at least 16GB RAM + 20GB swap memory or 32GB RAM and a regular-sized swap file/drive. SSD performance might be better. Or cloud if you’re willing to pay 2-3€/hour for the larger instances…</p>
+</blockquote>
+<pre class="r"><code>library(quanteda)
+quanteda::quanteda_options(&quot;threads&quot; = 4)
+system.time({
+texts(IRA_corpus) &lt;- quanteda::tokens(IRA_corpus,
+                                      remove_twitter = TRUE,
+                                      remove_url = TRUE,
+                                      remove_punct = TRUE, 
+                                      remove_numbers = TRUE,
+                                      # ngrams = 1:2
+                                      )
+})
+BRRR::skrrrahh(&quot;flava&quot;)
+
+
+system.time({
+texts(IRA_corpus) &lt;- tokens_remove(texts(IRA_corpus),
+                                   c(custom_stopwords_en,custom_stopwords_ru))
+})
+BRRR::skrrrahh(&quot;flava&quot;)
+
+saveRDS(IRA_corpus, str_c(data_path, &quot;IRA_corpus_naive_clean.rds&quot;))
+BRRR::skrrrahh(&quot;flava&quot;)
+
+# **Reset session**
+
+rm(data_unique)
+rm(IRA_corpus)
+rm(custom_stopwords_en)
+rm(custom_stopwords_ru)
+gc(full = TRUE, verbose = TRUE)
+# .rs.restartR()
+rstudioapi::restartSession()
+
+data_path &lt;- here::here(&quot;static&quot;, &quot;data&quot;, &quot;IRA_Tweets&quot;, &quot;/&quot;)
+IRA_corpus &lt;- readRDS(str_c(data_path, &quot;IRA_corpus_naive_clean.rds&quot;))
+BRRR::skrrrahh(&quot;flava&quot;)</code></pre>
+</div>
+<div id="regular-approach" class="section level3">
+<h3><span class="header-section-number">2.4.3</span> Regular Approach</h3>
+<p><strong>Corpus</strong></p>
+<p>We already have a plain, untouched corpus object from further above:</p>
+<pre class="r"><code>IRA_corpus &lt;- data_unique %&gt;% 
+  corpus(text_field = &quot;tweet_text&quot;,
+         docid_field = &quot;tweetid&quot;,
+         docvars = data_unique, # probably obsolete when docid_field is set
+         compress = FALSE # compression is better for in-memory, but&#39;ll slow down processing  
+         )</code></pre>
+<p>We’ll load the clean, untouched corpus from our HDD and proceed with <code>dfm()</code></p>
+<pre class="r"><code>data_path &lt;- here::here(&quot;static&quot;, &quot;data&quot;, &quot;IRA_Tweets&quot;, &quot;/&quot;)
+IRA_corpus &lt;- readRDS(str_c(data_path, &quot;IRA_corpus_naive.rds&quot;))
+BRRR::skrrrahh(&quot;flava&quot;)</code></pre>
+<p><strong>Sparse Document-Feature Matrix with <code>quanteda::dfm()</code></strong></p>
+<p>Now we’ll turn the interational corpus into a sparse <a href="https://en.wikipedia.org/wiki/Document-term_matrix" target="_blank">Document-Feature Matrix / Document-Term-Matrix</a> with <code>quanteda::dfm()</code> <del>and include n-grams of 1 and 2 words (bigrams)</del>.</p>
+<blockquote>
+<p>My apporach for smaller tasks still is to clear the environment after every big step with <code>rm()</code> on the objects and enforcing <code>gc()</code>, then <code>.rs.restartR()</code> and then <code>readRDS()</code> the last processed object…</p>
+</blockquote>
+<blockquote>
+<p>On Windows, this task would slow down first, and then crash, no matter what. Eventually, I was able to get this done by:</p>
+</blockquote>
+<ul>
+<li>installing Linux/Ubuntu MATE 18.10</li>
+<li>setting up a USB 3.0 thumb drive as a 64GB swap drive (my current SSD is too small for Windows, Ubununtu + swap partition)</li>
+<li>calling <code>gcinfo(TRUE)</code> to make the garbage collection (<code>gc()</code>) verbose, so that I was able to monitor the memory states</li>
+<li>and finally, starting with a clean session (see the steps described just above)</li>
+</ul>
+<p><strong>dfm() pt.1</strong></p>
+<pre class="r"><code>gcinfo(TRUE) # sets gc() to verbose = TRUE; even when output == &quot;FALSE&quot;&quot;
+system.time({
+IRA_dfm &lt;- dfm(
+  # corpus_sample(IRA_corpus, 1000000), #always test with small n first
+  IRA_corpus, # full corpus
+  tolower = TRUE,
+  verbose = TRUE,
+  min_nchar = 3,
+  remove = c(custom_stopwords_en, custom_stopwords_ru, custom_stopwords_de),
+  remove_twitter = FALSE,
+  remove_numbers = TRUE,
+  remove_punct = TRUE,
+  remove_url = TRUE)
+})
+BRRR::skrrrahh(&quot;flava&quot;)</code></pre>
+<p><code>&gt; Argument min_nchar not used</code></p>
+<blockquote>
+<p>We’ll keep that in mind…</p>
+</blockquote>
+<p><code>... created a 5,708,124 x 1,534,498 sparse dfm</code></p>
+<blockquote>
+<p>Success! Thanks Linux! But don’t forget to save this dfm object!!!</p>
+</blockquote>
+<p><strong>dfm() pt.2</strong></p>
+<p>Now we’ll make sure that there are no left-over 1- and 2-character tokens (which are called features now) and then save the dfm to our HDD.</p>
+<pre class="r"><code>rm(IRA_corpus)
+IRA_dfm &lt;- dfm_select(IRA_dfm, min_nchar = 3) # double-checking
+saveRDS(IRA_dfm, str_c(data_path, &quot;IRA_dfm_naive_clean.rds&quot;))
+BRRR::skrrrahh(&quot;flava&quot;)
+gcinfo(FALSE) # turn off verbosing for garbage collection </code></pre>
+<pre class="r"><code>IRA_dfm &lt;- readRDS(str_c(data_path, &quot;IRA_dfm_naive_clean.rds&quot;))</code></pre>
+<p>Applying <code>min_nchar = 3</code> twice actually really helped. Now we are down to a:</p>
+<blockquote>
+<p>5708124 x 1530058 sparse DFM (4.5K features less now).</p>
+</blockquote>
+<pre class="r"><code>summary(IRA_dfm)</code></pre>
+<pre><code>##        Length         Class          Mode 
+## 8733760791192           dfm            S4</code></pre>
+<blockquote>
+<p>Holy sh*t. That’s the power of <code>Quanteda</code> on Linux I guess. So my “little” proof-of-concept experiment worked out. You <strong>can</strong> build a large dfm from a large corpus without resorting to cloud computing / AWS et al.</p>
+</blockquote>
+<p>Now we can explore a bit more at then proceed over to building a topic model.</p>
+</div>
+</div>
+<div id="international-tweets-top-features" class="section level2">
+<h2><span class="header-section-number">2.5</span> International Tweets: Top-Features</h2>
+<p>Let’s have a quick look at the most frequent features from all ~5.7M Tweets (in all Tweet languages)</p>
+<pre class="r"><code>topfeatures(IRA_dfm, 40) %&gt;%
+  knitr::kable(&quot;html&quot;)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+#news
+</td>
+<td style="text-align:right;">
+236677
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+россии
+</td>
+<td style="text-align:right;">
+115430
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+сша
+</td>
+<td style="text-align:right;">
+111463
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#sports
+</td>
+<td style="text-align:right;">
+96852
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+trump
+</td>
+<td style="text-align:right;">
+93964
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+украина
+</td>
+<td style="text-align:right;">
+87824
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#politics
+</td>
+<td style="text-align:right;">
+74959
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+украины
+</td>
+<td style="text-align:right;">
+67625
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+police
+</td>
+<td style="text-align:right;">
+58584
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+новости
+</td>
+<td style="text-align:right;">
+57005
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+украине
+</td>
+<td style="text-align:right;">
+56198
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#спб
+</td>
+<td style="text-align:right;">
+52898
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#local
+</td>
+<td style="text-align:right;">
+52026
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+people
+</td>
+<td style="text-align:right;">
+49801
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+путин
+</td>
+<td style="text-align:right;">
+47521
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+мнение
+</td>
+<td style="text-align:right;">
+45908
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+workout
+</td>
+<td style="text-align:right;">
+43647
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+love
+</td>
+<td style="text-align:right;">
+41963
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+obama
+</td>
+<td style="text-align:right;">
+39125
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#новости
+</td>
+<td style="text-align:right;">
+38359
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+области
+</td>
+<td style="text-align:right;">
+37143
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+life
+</td>
+<td style="text-align:right;">
+35277
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+time
+</td>
+<td style="text-align:right;">
+34470
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+из-за
+</td>
+<td style="text-align:right;">
+33244
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+video
+</td>
+<td style="text-align:right;">
+32206
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+day
+</td>
+<td style="text-align:right;">
+30315
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#world
+</td>
+<td style="text-align:right;">
+29351
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+фото
+</td>
+<td style="text-align:right;">
+27870
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+президент
+</td>
+<td style="text-align:right;">
+27017
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+breaking
+</td>
+<td style="text-align:right;">
+26119
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+#business
+</td>
+<td style="text-align:right;">
+25763
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+woman
+</td>
+<td style="text-align:right;">
+25379
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+president
+</td>
+<td style="text-align:right;">
+25149
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+москве
+</td>
+<td style="text-align:right;">
+24527
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+порошенко
+</td>
+<td style="text-align:right;">
+24517
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+u.s
+</td>
+<td style="text-align:right;">
+23593
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+сирии
+</td>
+<td style="text-align:right;">
+23327
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+black
+</td>
+<td style="text-align:right;">
+22892
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+shooting
+</td>
+<td style="text-align:right;">
+22701
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+house
+</td>
+<td style="text-align:right;">
+22352
+</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Funny! <strong>Russian terms</strong> dominate the international corpus aka Twitter’s “Internet Research Agency” dataset :)’s also noteworthy, is the top-ranked #news hashtag, probably pointing to the proliferation of the “fake news” term.</p>
+</blockquote>
+<p>Now let’s create a subset of our dfm without #hashtags and <span class="citation">@account</span> handles for a purer content analysis. It’s a bit redundant, but due to the (in-memory) size of the full-languages dfm (2.8GB without hashtags/accounts; 2.7GB w/o) this is neccessary, if want to work with and without Twitter artefacts.</p>
+<pre class="r"><code>IRA_dfm_no_twitter &lt;- dfm_select(IRA_dfm, pattern = list(&#39;#*&#39;,&quot;@*&quot;),
+                       selection = &quot;remove&quot;)
+saveRDS(IRA_dfm_no_twitter, str_c(data_path, &quot;IRA_dfm_naive_clean_no_twitter.rds&quot;))</code></pre>
+<blockquote>
+<p>We’ve further reduced the number of features from 1.530.058 to 965.278 by removing Twitter Account <span class="citation">@handles</span> and #hashtags</p>
+</blockquote>
+<blockquote>
+<p>This is another good moment to restart our session with a lower in-memory footprint.</p>
+</blockquote>
+<p><strong>Reset session</strong></p>
+<pre class="r"><code>rm(IRA_dfm)
+rm(IRA_dfm_no_twitter)
+gc(full = TRUE, verbose = TRUE)
+# .rs.restartR()
+rstudioapi::restartSession()</code></pre>
+<p><strong>re-load packages and dfm</strong></p>
+<pre class="r"><code>library(tidyverse)
+library(quanteda)
+quanteda_options(&quot;threads&quot; = 4) # 4 is the limit on my Laptop
+print(str_c(&quot;Threads for Quanteda: &quot;, quanteda_options(&quot;threads&quot;)))</code></pre>
+<pre><code>## [1] &quot;Threads for Quanteda: 4&quot;</code></pre>
+<pre class="r"><code>library(stm)
+data_path &lt;- here::here(&quot;static&quot;, &quot;data&quot;, &quot;IRA_Tweets&quot;, &quot;/&quot;)</code></pre>
+<blockquote>
+<p>Linux: down to 1.3GB RAM load</p>
+</blockquote>
+<pre class="r"><code>data_path &lt;- here::here(&quot;static&quot;, &quot;data&quot;, &quot;IRA_Tweets&quot;, &quot;/&quot;)
+IRA_dfm &lt;- readRDS(str_c(data_path, &quot;IRA_dfm_naive_clean_no_twitter.rds&quot;))</code></pre>
+<p>Now we can have another look at the top features from our dfm, this time without hashtags.</p>
+<blockquote>
+<p>While the default <code>scheme = &quot;count&quot;</code> would give us the absolut/total feature frequencies (i.e. 3x news in a single Tweet = 3x news in absolut terms), <code>scheme = &quot;docfreq&quot;</code> returns per-document frequencies (number of Tweets with this feature), which is more precise with regards to Tweets.</p>
+</blockquote>
+<pre class="r"><code>topfeatures(IRA_dfm, 40, scheme = &quot;docfreq&quot;) %&gt;%
+  knitr::kable(&quot;html&quot;)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+россии
+</td>
+<td style="text-align:right;">
+114300
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+сша
+</td>
+<td style="text-align:right;">
+109309
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+trump
+</td>
+<td style="text-align:right;">
+91500
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+украина
+</td>
+<td style="text-align:right;">
+86958
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+украины
+</td>
+<td style="text-align:right;">
+66896
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+police
+</td>
+<td style="text-align:right;">
+57166
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+новости
+</td>
+<td style="text-align:right;">
+56866
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+украине
+</td>
+<td style="text-align:right;">
+55187
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+people
+</td>
+<td style="text-align:right;">
+47189
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+путин
+</td>
+<td style="text-align:right;">
+45959
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+мнение
+</td>
+<td style="text-align:right;">
+45762
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+workout
+</td>
+<td style="text-align:right;">
+43296
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+obama
+</td>
+<td style="text-align:right;">
+38371
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+love
+</td>
+<td style="text-align:right;">
+37431
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+области
+</td>
+<td style="text-align:right;">
+36847
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+life
+</td>
+<td style="text-align:right;">
+33475
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+time
+</td>
+<td style="text-align:right;">
+33433
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+из-за
+</td>
+<td style="text-align:right;">
+33112
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+video
+</td>
+<td style="text-align:right;">
+31964
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+day
+</td>
+<td style="text-align:right;">
+29196
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+фото
+</td>
+<td style="text-align:right;">
+27675
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+президент
+</td>
+<td style="text-align:right;">
+26703
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+breaking
+</td>
+<td style="text-align:right;">
+26070
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+woman
+</td>
+<td style="text-align:right;">
+24963
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+president
+</td>
+<td style="text-align:right;">
+24644
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+москве
+</td>
+<td style="text-align:right;">
+24376
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+порошенко
+</td>
+<td style="text-align:right;">
+24092
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+u.s
+</td>
+<td style="text-align:right;">
+23235
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+сирии
+</td>
+<td style="text-align:right;">
+23062
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+shooting
+</td>
+<td style="text-align:right;">
+22473
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+house
+</td>
+<td style="text-align:right;">
+21988
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+рублей
+</td>
+<td style="text-align:right;">
+21941
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+killed
+</td>
+<td style="text-align:right;">
+21906
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+black
+</td>
+<td style="text-align:right;">
+21719
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+петербурге
+</td>
+<td style="text-align:right;">
+20946
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+политика
+</td>
+<td style="text-align:right;">
+20738
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+white
+</td>
+<td style="text-align:right;">
+20385
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+интересно
+</td>
+<td style="text-align:right;">
+20228
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+видео
+</td>
+<td style="text-align:right;">
+19800
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+дтп
+</td>
+<td style="text-align:right;">
+19681
+</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Wow. Russian features concerning Ukraine, Russia, and USA still dominate the top features in terms of frequency!</p>
+</blockquote>
+<p>We should also have a look at these frequencies grouped by Tweet languages:</p>
+<pre class="r"><code>topfeatures(IRA_dfm, 20, scheme = &quot;docfreq&quot;,
+            groups = &quot;tweet_language&quot;) %&gt;%
+  knitr::kable(&quot;html&quot;)</code></pre>
+<table class="kable_wrapper">
+<tbody>
+<tr>
+<td>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+россии
+</td>
+<td style="text-align:right;">
+107017
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+сша
+</td>
+<td style="text-align:right;">
+101932
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+украина
+</td>
+<td style="text-align:right;">
+83053
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+украины
+</td>
+<td style="text-align:right;">
+62503
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+новости
+</td>
+<td style="text-align:right;">
+53946
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+украине
+</td>
+<td style="text-align:right;">
+52553
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+мнение
+</td>
+<td style="text-align:right;">
+45032
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+путин
+</td>
+<td style="text-align:right;">
+42412
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+области
+</td>
+<td style="text-align:right;">
+33446
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+из-за
+</td>
+<td style="text-align:right;">
+29488
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+президент
+</td>
+<td style="text-align:right;">
+24976
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+фото
+</td>
+<td style="text-align:right;">
+24633
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+порошенко
+</td>
+<td style="text-align:right;">
+23273
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+сирии
+</td>
+<td style="text-align:right;">
+21842
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+рублей
+</td>
+<td style="text-align:right;">
+19868
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+интересно
+</td>
+<td style="text-align:right;">
+19818
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+москве
+</td>
+<td style="text-align:right;">
+19581
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+петербурге
+</td>
+<td style="text-align:right;">
+19046
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+политика
+</td>
+<td style="text-align:right;">
+18809
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+дтп
+</td>
+<td style="text-align:right;">
+17573
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+достойно
+</td>
+<td style="text-align:right;">
+835
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+доброе
+</td>
+<td style="text-align:right;">
+641
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+цитата
+</td>
+<td style="text-align:right;">
+518
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+слова
+</td>
+<td style="text-align:right;">
+391
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+чужие
+</td>
+<td style="text-align:right;">
+309
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+номер
+</td>
+<td style="text-align:right;">
+306
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+теме
+</td>
+<td style="text-align:right;">
+303
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+lol
+</td>
+<td style="text-align:right;">
+300
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+доходчиво
+</td>
+<td style="text-align:right;">
+291
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+путин
+</td>
+<td style="text-align:right;">
+284
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+по-царски
+</td>
+<td style="text-align:right;">
+283
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+благотворно
+</td>
+<td style="text-align:right;">
+279
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+уважения
+</td>
+<td style="text-align:right;">
+278
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+позиция
+</td>
+<td style="text-align:right;">
+269
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+новости
+</td>
+<td style="text-align:right;">
+267
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+материал
+</td>
+<td style="text-align:right;">
+264
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+суховат
+</td>
+<td style="text-align:right;">
+262
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+поощрения
+</td>
+<td style="text-align:right;">
+261
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+фото
+</td>
+<td style="text-align:right;">
+258
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+репост
+</td>
+<td style="text-align:right;">
+257
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+trump
+</td>
+<td style="text-align:right;">
+90333
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+police
+</td>
+<td style="text-align:right;">
+56297
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+people
+</td>
+<td style="text-align:right;">
+46701
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+workout
+</td>
+<td style="text-align:right;">
+43263
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+obama
+</td>
+<td style="text-align:right;">
+37492
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+love
+</td>
+<td style="text-align:right;">
+37018
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+life
+</td>
+<td style="text-align:right;">
+33078
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+time
+</td>
+<td style="text-align:right;">
+32824
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+video
+</td>
+<td style="text-align:right;">
+31283
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+day
+</td>
+<td style="text-align:right;">
+28849
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+breaking
+</td>
+<td style="text-align:right;">
+25934
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+woman
+</td>
+<td style="text-align:right;">
+24844
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+president
+</td>
+<td style="text-align:right;">
+24389
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+u.s
+</td>
+<td style="text-align:right;">
+23092
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+shooting
+</td>
+<td style="text-align:right;">
+22376
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+house
+</td>
+<td style="text-align:right;">
+21726
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+killed
+</td>
+<td style="text-align:right;">
+21649
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+black
+</td>
+<td style="text-align:right;">
+21408
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+white
+</td>
+<td style="text-align:right;">
+20299
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+city
+</td>
+<td style="text-align:right;">
+18623
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+россии
+</td>
+<td style="text-align:right;">
+7064
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+сша
+</td>
+<td style="text-align:right;">
+5577
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+москве
+</td>
+<td style="text-align:right;">
+4718
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+из-за
+</td>
+<td style="text-align:right;">
+3505
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+области
+</td>
+<td style="text-align:right;">
+2969
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+путин
+</td>
+<td style="text-align:right;">
+2840
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+видео
+</td>
+<td style="text-align:right;">
+2638
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+суд
+</td>
+<td style="text-align:right;">
+2182
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+млн
+</td>
+<td style="text-align:right;">
+2142
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+москвы
+</td>
+<td style="text-align:right;">
+2080
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+дтп
+</td>
+<td style="text-align:right;">
+2049
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+рублей
+</td>
+<td style="text-align:right;">
+1899
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+петербурге
+</td>
+<td style="text-align:right;">
+1814
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+погибли
+</td>
+<td style="text-align:right;">
+1788
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+фото
+</td>
+<td style="text-align:right;">
+1697
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+матче
+</td>
+<td style="text-align:right;">
+1464
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+медведев
+</td>
+<td style="text-align:right;">
+1414
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+человека
+</td>
+<td style="text-align:right;">
+1408
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+глава
+</td>
+<td style="text-align:right;">
+1308
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+динамо
+</td>
+<td style="text-align:right;">
+1302
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+cnn
+</td>
+<td style="text-align:right;">
+564
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+police
+</td>
+<td style="text-align:right;">
+472
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+potus
+</td>
+<td style="text-align:right;">
+380
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+twitter
+</td>
+<td style="text-align:right;">
+353
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+michael
+</td>
+<td style="text-align:right;">
+331
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+alex
+</td>
+<td style="text-align:right;">
+327
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+chris
+</td>
+<td style="text-align:right;">
+322
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ryan
+</td>
+<td style="text-align:right;">
+317
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+russia
+</td>
+<td style="text-align:right;">
+314
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+john
+</td>
+<td style="text-align:right;">
+302
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+android
+</td>
+<td style="text-align:right;">
+297
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+kim
+</td>
+<td style="text-align:right;">
+286
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+facebook
+</td>
+<td style="text-align:right;">
+275
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+special
+</td>
+<td style="text-align:right;">
+274
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+sarah
+</td>
+<td style="text-align:right;">
+270
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+share
+</td>
+<td style="text-align:right;">
+268
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+add
+</td>
+<td style="text-align:right;">
+268
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+prosecutor
+</td>
+<td style="text-align:right;">
+262
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+linkedin
+</td>
+<td style="text-align:right;">
+262
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+enjoy
+</td>
+<td style="text-align:right;">
+260
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+polizei
+</td>
+<td style="text-align:right;">
+2009
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+berlin
+</td>
+<td style="text-align:right;">
+1795
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+guten
+</td>
+<td style="text-align:right;">
+1407
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hamburg
+</td>
+<td style="text-align:right;">
+1374
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+stuttgart
+</td>
+<td style="text-align:right;">
+1183
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+köln
+</td>
+<td style="text-align:right;">
+1155
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+kölner
+</td>
+<td style="text-align:right;">
+1121
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+frau
+</td>
+<td style="text-align:right;">
+1084
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+schönen
+</td>
+<td style="text-align:right;">
+1026
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+verletzt
+</td>
+<td style="text-align:right;">
+998
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+deutschland
+</td>
+<td style="text-align:right;">
+969
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+berliner
+</td>
+<td style="text-align:right;">
+957
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+nacht
+</td>
+<td style="text-align:right;">
+956
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+merkel
+</td>
+<td style="text-align:right;">
+918
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+unfall
+</td>
+<td style="text-align:right;">
+905
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+euro
+</td>
+<td style="text-align:right;">
+855
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+trump
+</td>
+<td style="text-align:right;">
+771
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+auto
+</td>
+<td style="text-align:right;">
+696
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wünsche
+</td>
+<td style="text-align:right;">
+690
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+dresden
+</td>
+<td style="text-align:right;">
+665
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+украины
+</td>
+<td style="text-align:right;">
+3590
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+украина
+</td>
+<td style="text-align:right;">
+3429
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+новости
+</td>
+<td style="text-align:right;">
+2171
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+украине
+</td>
+<td style="text-align:right;">
+2032
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+сша
+</td>
+<td style="text-align:right;">
+1704
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+политика
+</td>
+<td style="text-align:right;">
+1542
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+фото
+</td>
+<td style="text-align:right;">
+946
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+критично
+</td>
+<td style="text-align:right;">
+920
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+перепост
+</td>
+<td style="text-align:right;">
+722
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+порошенко
+</td>
+<td style="text-align:right;">
+646
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+украину
+</td>
+<td style="text-align:right;">
+631
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+президент
+</td>
+<td style="text-align:right;">
+590
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+яценюк
+</td>
+<td style="text-align:right;">
+567
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+репост
+</td>
+<td style="text-align:right;">
+536
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+редкость
+</td>
+<td style="text-align:right;">
+507
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+власти
+</td>
+<td style="text-align:right;">
+487
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+владимир
+</td>
+<td style="text-align:right;">
+439
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+александр
+</td>
+<td style="text-align:right;">
+416
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+лнр
+</td>
+<td style="text-align:right;">
+409
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+млн
+</td>
+<td style="text-align:right;">
+407
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+kittens
+</td>
+<td style="text-align:right;">
+215
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hahaha
+</td>
+<td style="text-align:right;">
+194
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+cute
+</td>
+<td style="text-align:right;">
+166
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hahahah
+</td>
+<td style="text-align:right;">
+160
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+haha
+</td>
+<td style="text-align:right;">
+138
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+kiwiwang5
+</td>
+<td style="text-align:right;">
+129
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+usvetram
+</td>
+<td style="text-align:right;">
+128
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ethnicambiguity
+</td>
+<td style="text-align:right;">
+120
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+euroraver
+</td>
+<td style="text-align:right;">
+119
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+abitx2u
+</td>
+<td style="text-align:right;">
+95
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+persian
+</td>
+<td style="text-align:right;">
+94
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ha-ha
+</td>
+<td style="text-align:right;">
+80
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+life2tweet
+</td>
+<td style="text-align:right;">
+75
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hahahaha
+</td>
+<td style="text-align:right;">
+70
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+yung
+</td>
+<td style="text-align:right;">
+65
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rudy
+</td>
+<td style="text-align:right;">
+64
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+poster
+</td>
+<td style="text-align:right;">
+64
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+serge
+</td>
+<td style="text-align:right;">
+64
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ibaka
+</td>
+<td style="text-align:right;">
+64
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ahahaha
+</td>
+<td style="text-align:right;">
+64
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+del
+</td>
+<td style="text-align:right;">
+262
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+por
+</td>
+<td style="text-align:right;">
+206
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rt_america
+</td>
+<td style="text-align:right;">
+171
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+retweet
+</td>
+<td style="text-align:right;">
+160
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+adorable
+</td>
+<td style="text-align:right;">
+159
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+para
+</td>
+<td style="text-align:right;">
+151
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+obama
+</td>
+<td style="text-align:right;">
+148
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+puerto
+</td>
+<td style="text-align:right;">
+147
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+mayor
+</td>
+<td style="text-align:right;">
+132
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+méxico
+</td>
+<td style="text-align:right;">
+132
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+san
+</td>
+<td style="text-align:right;">
+125
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+video
+</td>
+<td style="text-align:right;">
+121
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+police
+</td>
+<td style="text-align:right;">
+120
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rico
+</td>
+<td style="text-align:right;">
+111
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+venezuela
+</td>
+<td style="text-align:right;">
+108
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+mexico
+</td>
+<td style="text-align:right;">
+104
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+las
+</td>
+<td style="text-align:right;">
+96
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+criminal
+</td>
+<td style="text-align:right;">
+93
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+una
+</td>
+<td style="text-align:right;">
+89
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+sos
+</td>
+<td style="text-align:right;">
+89
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+على
+</td>
+<td style="text-align:right;">
+6398
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+سوريا
+</td>
+<td style="text-align:right;">
+2133
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+السوري
+</td>
+<td style="text-align:right;">
+2119
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+الارهاب
+</td>
+<td style="text-align:right;">
+2060
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+الله
+</td>
+<td style="text-align:right;">
+1698
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+داعش
+</td>
+<td style="text-align:right;">
+1593
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+الجيش
+</td>
+<td style="text-align:right;">
+1577
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+الشعب
+</td>
+<td style="text-align:right;">
+1418
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+التي
+</td>
+<td style="text-align:right;">
+1356
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+الى
+</td>
+<td style="text-align:right;">
+1340
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+بعد
+</td>
+<td style="text-align:right;">
+1186
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+يلي
+</td>
+<td style="text-align:right;">
+1140
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+هذا
+</td>
+<td style="text-align:right;">
+1116
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+إلى
+</td>
+<td style="text-align:right;">
+1111
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+انو
+</td>
+<td style="text-align:right;">
+1063
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+الذي
+</td>
+<td style="text-align:right;">
+1006
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+هذه
+</td>
+<td style="text-align:right;">
+825
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+العالم
+</td>
+<td style="text-align:right;">
+819
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ولا
+</td>
+<td style="text-align:right;">
+796
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+حتى
+</td>
+<td style="text-align:right;">
+785
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+les
+</td>
+<td style="text-align:right;">
+309
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+police
+</td>
+<td style="text-align:right;">
+180
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+pour
+</td>
+<td style="text-align:right;">
+164
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+une
+</td>
+<td style="text-align:right;">
+152
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+trump
+</td>
+<td style="text-align:right;">
+132
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+detroit
+</td>
+<td style="text-align:right;">
+132
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+dans
+</td>
+<td style="text-align:right;">
+131
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hot
+</td>
+<td style="text-align:right;">
+115
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+dangerous
+</td>
+<td style="text-align:right;">
+114
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+abercrombie
+</td>
+<td style="text-align:right;">
+110
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+change
+</td>
+<td style="text-align:right;">
+108
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+models
+</td>
+<td style="text-align:right;">
+108
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ridiculous
+</td>
+<td style="text-align:right;">
+103
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+excellent
+</td>
+<td style="text-align:right;">
+100
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+obama
+</td>
+<td style="text-align:right;">
+99
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+vote
+</td>
+<td style="text-align:right;">
+99
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+senate
+</td>
+<td style="text-align:right;">
+92
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+france
+</td>
+<td style="text-align:right;">
+86
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+climate
+</td>
+<td style="text-align:right;">
+85
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+court
+</td>
+<td style="text-align:right;">
+78
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+sarah
+</td>
+<td style="text-align:right;">
+248
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+selfie
+</td>
+<td style="text-align:right;">
+157
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+retweet
+</td>
+<td style="text-align:right;">
+151
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rt_america
+</td>
+<td style="text-align:right;">
+151
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+blah
+</td>
+<td style="text-align:right;">
+101
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+susan
+</td>
+<td style="text-align:right;">
+81
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ryan
+</td>
+<td style="text-align:right;">
+75
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+megan
+</td>
+<td style="text-align:right;">
+69
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hannah
+</td>
+<td style="text-align:right;">
+68
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+laura
+</td>
+<td style="text-align:right;">
+62
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+sam
+</td>
+<td style="text-align:right;">
+60
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+boo
+</td>
+<td style="text-align:right;">
+58
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+car
+</td>
+<td style="text-align:right;">
+57
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+palestinian
+</td>
+<td style="text-align:right;">
+55
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+lisa
+</td>
+<td style="text-align:right;">
+54
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+emily
+</td>
+<td style="text-align:right;">
+53
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+dan
+</td>
+<td style="text-align:right;">
+53
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+adam
+</td>
+<td style="text-align:right;">
+53
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rabbi
+</td>
+<td style="text-align:right;">
+52
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+talve
+</td>
+<td style="text-align:right;">
+52
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+<td>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+x
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+рукам
+</td>
+<td style="text-align:right;">
+282
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+заметано
+</td>
+<td style="text-align:right;">
+282
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+славу
+</td>
+<td style="text-align:right;">
+272
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+метко
+</td>
+<td style="text-align:right;">
+271
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+бог
+</td>
+<td style="text-align:right;">
+264
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+где-то
+</td>
+<td style="text-align:right;">
+253
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+посередине
+</td>
+<td style="text-align:right;">
+253
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+велел
+</td>
+<td style="text-align:right;">
+240
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+путина
+</td>
+<td style="text-align:right;">
+189
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+зима
+</td>
+<td style="text-align:right;">
+112
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+андроид
+</td>
+<td style="text-align:right;">
+79
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+путин
+</td>
+<td style="text-align:right;">
+74
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+разлука
+</td>
+<td style="text-align:right;">
+74
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+политика
+</td>
+<td style="text-align:right;">
+58
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+обама
+</td>
+<td style="text-align:right;">
+46
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+лично
+</td>
+<td style="text-align:right;">
+44
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+подруге
+</td>
+<td style="text-align:right;">
+42
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+истина
+</td>
+<td style="text-align:right;">
+38
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+кличко
+</td>
+<td style="text-align:right;">
+36
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+август
+</td>
+<td style="text-align:right;">
+35
+</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>for orientation: this is the order of languages in this table (can’t get them to render as <code>col.names =</code> with <code>knitr:kable()</code> yet):<code>&quot;ru&quot;, &quot;bg&quot;, &quot;en&quot;, &quot;und&quot;, &quot;other_44&quot;, &quot;de&quot;, &quot;uk&quot;, &quot;tl&quot;, &quot;es&quot;, &quot;ar&quot;, &quot;fr&quot;, &quot;in&quot;, &quot;sr&quot;</code></p>
+</blockquote>
+<blockquote>
+<p>Mind that I only removed stopwords for Tweets labelled as English, Russian, and German (by Twitter). As we’ve explored in the previous post, <code>und</code> (=undefined) mostly containes Tweets in Russian. What’s interesting is that Bulgarian as well as Ukrainian both predominantly contain Russian features, with Russian orthography, which should not be the case here.</p>
+</blockquote>
+<p>Let’s have a look at how these features might be connected to each other:</p>
+<pre class="r"><code>topfeats &lt;- names(topfeatures(IRA_dfm, 100))
+textplot_network(dfm_select(IRA_dfm, topfeats), min_freq = 0.2,
+                 edge_alpha = 0.7, edge_size = 5, edge_color = &quot;grey&quot;, 
+                 vertex_size = 1)</code></pre>
+<p><img src="/post/2018-10-27-election-hacking-exploring-10-million-tweets-from-the-russian-internet-research-agency-dataset-pt-2-nlproc-corpus-dfm_files/figure-html/unnamed-chunk-39-1.png" width="960" /></p>
+<blockquote>
+<p>The two worlds collide on the topic of USA …</p>
+</blockquote>
+<p>With the mightiness of Quanteda, we could do a lot of further exploratory analysis and so on… However, it’s really about time to focus on a smaller and language-specific subset, as the following task (to be addressed in part #3 of this series) will be even more intense in terms of computing power and memory usage.</p>
+<blockquote>
+<p>However, here’s a preview from Topic Modelling on the English-language subset (~2M Tweets):</p>
+</blockquote>
+<div class="figure">
+<img src="/img/IRA_dataset/topic_modelling.jpg" alt="(73 Topics from 2M English-language Tweets; modelled with the stm()-packages; K auto-induced with t-SNE/PCA)" />
+<p class="caption"><em>(73 Topics from 2M English-language Tweets; modelled with the stm()-packages; K auto-induced with t-SNE/PCA)</em></p>
+</div>
+</div>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p><a href="https://en.wikipedia.org/wiki/Portal:Current_events/August_2017#2017_August_3" class="uri">https://en.wikipedia.org/wiki/Portal:Current_events/August_2017#2017_August_3</a><a href="#fnref1">↩</a></p></li>
+<li id="fn2"><p><a href="https://en.wikipedia.org/wiki/Portal:Current_events/August_2017#2017_August_12" class="uri">https://en.wikipedia.org/wiki/Portal:Current_events/August_2017#2017_August_12</a><a href="#fnref2">↩</a></p></li>
+</ol>
+</div>
