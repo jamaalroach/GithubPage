@@ -1,1 +1,12 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.RasterData
 data
+*.Rproj
+*.tif
+*.rda
+*.7z
+*.afphoto
+*.rds
