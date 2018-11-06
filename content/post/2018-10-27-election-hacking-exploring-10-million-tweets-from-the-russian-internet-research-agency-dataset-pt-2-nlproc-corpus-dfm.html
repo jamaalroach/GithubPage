@@ -696,7 +696,7 @@ rstudioapi::restartSession()</code></pre>
 <p>Linux: down to 1.4 GiB</p>
 </blockquote>
 <p><strong>load <code>IRA_corpus</code> from HDD</strong></p>
-<pre class="r"><code># data_path &lt;- here::here(&quot;static&quot;, &quot;data&quot;, &quot;IRA_Tweets&quot;, &quot;/&quot;)
+<pre class="r"><code>data_path &lt;- here::here(&quot;static&quot;, &quot;data&quot;, &quot;IRA_Tweets&quot;, &quot;/&quot;)
 IRA_corpus &lt;- readRDS(str_c(data_path, &quot;IRA_corpus_naive.rds&quot;))
 # IRA_corpus &lt;- readRDS(stringr::str_c(data_path, &quot;IRA_corpus_naive_compressed.rds&quot;))
 BRRR::skrrrahh(&quot;flava&quot;)</code></pre>
@@ -721,6 +721,7 @@ BRRR::skrrrahh(&quot;flava&quot;)</code></pre>
 </ul>
 <p><strong>test <code>kwic()</code> functionality</strong></p>
 <pre class="r"><code>IRA_corpus %&gt;% 
+  corpus_subset(tweet_language == &quot;ru&quot; | tweet_language == &quot;en&quot;) %&gt;% 
   corpus_sample(1000000) %&gt;% # always test with smaller sample
   kwic(c(&quot;компромат&quot;,&quot;kompromat&quot;), window = 10, case_insensitive = TRUE)  %&gt;%
   # vs. kwic(x, phrase(&quot;term1 term2&quot;))
@@ -744,9 +745,119 @@ post
 </thead>
 <tbody>
 <tr>
+<td style="text-align:left;">
+Хорошо , конечно , Лёша пристроился . Получает
+</td>
+<td style="text-align:left;">
+компромат
+</td>
+<td style="text-align:left;">
+и хорошо оплачиваемый заказ и под видом борца с коррупцией
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Их грязный
+</td>
+<td style="text-align:left;">
+компромат
+</td>
+<td style="text-align:left;">
+<ul>
+<li>наше честное демократическое расследование https : / / t.co
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ФБР проверяет
+</td>
+<td style="text-align:left;">
+компромат
+</td>
+<td style="text-align:left;">
+на Клинтон на фальшивость https : / / t.co /
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Новости США : Трамп рассказал о здоровье , Ассанж опубликует
+</td>
+<td style="text-align:left;">
+компромат
+</td>
+<td style="text-align:left;">
+на Клинтон https : / / t.co / MycpakGuRM https
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Американский журналист Джеймс О’Киф намерен « слить »
+</td>
+<td style="text-align:left;">
+компромат
+</td>
+<td style="text-align:left;">
+на CNN https : / / t.co / 40TkRYyEQz
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Илья Гращенков :
+</td>
+<td style="text-align:left;">
+Компромат
+</td>
+<td style="text-align:left;">
+на Порошенко может заинтересовать Трампа https : / / t.co
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+У Брэда Питта есть чудовищный
+</td>
+<td style="text-align:left;">
+компромат
+</td>
+<td style="text-align:left;">
+на Джоли : во время секса она резала себя https
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Власти Казахстана проверят аккаунты госслужащих в соцсетях на
+</td>
+<td style="text-align:left;">
+компромат
+</td>
+<td style="text-align:left;">
+https : / / t.co / sKzTyFti8v
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="citation">@LevSharansky</span> а вот и
+</td>
+<td style="text-align:left;">
+компромат
+</td>
+<td style="text-align:left;">
+подъехал
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Порошенко все .
+</td>
+<td style="text-align:left;">
+Компромат
+</td>
+<td style="text-align:left;">
+на него уже в США https : / / t.co
+</td>
 </tr>
 </tbody>
-</table>
+</table></li>
+</ul>
 <p>We’ll put the keywords into a (<code>kwic()</code>-friendly) vector and then do a single run with all keywords instead of repeating this n-times. This will take time and might not work properly without enough RAM.</p>
 <pre class="r"><code>kwic_keywords &lt;- c(
   c(&quot;компромат&quot;,&quot;kompromat&quot;),

@@ -312,7 +312,7 @@ rstudioapi::restartSession()
 **load `IRA_corpus` from HDD**
 
 ```{r}
-# data_path <- here::here("static", "data", "IRA_Tweets", "/")
+data_path <- here::here("static", "data", "IRA_Tweets", "/")
 IRA_corpus <- readRDS(str_c(data_path, "IRA_corpus_naive.rds"))
 # IRA_corpus <- readRDS(stringr::str_c(data_path, "IRA_corpus_naive_compressed.rds"))
 BRRR::skrrrahh("flava")
@@ -340,6 +340,7 @@ In particular, I'm interested in the following terms:
 
 ```{r}
 IRA_corpus %>% 
+  corpus_subset(tweet_language == "ru" | tweet_language == "en") %>% 
   corpus_sample(1000000) %>% # always test with smaller sample
   kwic(c("компромат","kompromat"), window = 10, case_insensitive = TRUE)  %>%
   # vs. kwic(x, phrase("term1 term2"))
