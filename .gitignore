@@ -7,7 +7,7 @@
 *.rds
 *.rdb
 *.rdx
-.Rproj.user
+.Rproj.user/**
 .Rhistory
 *.bat
 desktop.ini
@@ -15,3 +15,4 @@ Thumbs.db
 *.afphoto
 shortcuts.md
 .data
+
