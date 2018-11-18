@@ -62,8 +62,8 @@ sequenceDiagrams:
 &gt;&gt;&gt; <a href="#how-to-debug-hugo-esp.-on-windows">How to debug Hugo (esp. on Windows)</a></strong></p>
 </blockquote>
 <blockquote>
-<p><strong>Besides, I’ve documented <a href="#some-other-common-errors-troubles-with-blogdownhugo">some common <em>not-Windows-specific</em> errors / troubles with Blogdown / Hugo</a> which are hard to Google somehow, but far more easier to solve:<br />
-&gt;&gt;&gt; <a href="#some-other-common-errors-troubles-with-blogdownhugo">Dealing with <em>config.toml</em>, <em>seImpl()</em> &amp; <em>tomlparseImpl()</em> errors</a></strong></p>
+<p><strong>Besides, I’ve documented <a href="#some-other-common-errors-troubles-with-blogdownhugo-updated">some common <em>not-Windows-specific</em> errors / troubles with Blogdown / Hugo</a> which are hard to Google somehow, but far more easier to solve:<br />
+&gt;&gt;&gt; <a href="#some-other-common-errors-troubles-with-blogdownhugo-updated">Dealing with <em>config.toml</em>, <em>seImpl()</em> &amp; <em>tomlparseImpl()</em> errors</a></strong></p>
 </blockquote>
 <div id="when-blogdownserve_site-stops-working" class="section level1">
 <h1><span class="header-section-number">1</span> When blogdown::serve_site() stops working</h1>
@@ -82,7 +82,7 @@ sequenceDiagrams:
 <blockquote>
 <p><em>“If you do not understand HTML, CSS, or JavaScript, and have no experience with Hugo themes or templates, it may take you about <strong>10 minutes to get started</strong> with your new website, since you have to accept everything you are given (such as the default theme); if you do have the knowledge and experience (and desire to highly customize your site), it may take you <strong>several days</strong> to get started. Hugo is really powerful. Be cautious with power.”</em> (<a href="https://bookdown.org/yihui/blogdown/other-themes.html">Xie et al. 2018, Ch. 1.6, <em>emphasis added</em></a>)</p>
 </blockquote>
-<p>Consequently, after going straight<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> after (re-)publishing my first ever written <em>500-lines-of-code-with-binaries</em>-<a href="https://ellocke.github.io/post/r-low-budget-high-res-mapping-with-r-for-not-for-profit-print/">tutorial</a>, the preview function suddenly stopped working and <strong>I couldn’t figure out why</strong>. After numerous brute-force-ish re-set-ups of Blogdown and/or my git page repo[s]<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a> I was finally able to pin-point the problem and get the crucial <code>hugo -v</code> debugging command running. From here on, it was a piece of cake. <em>But</em>…</p>
+<p>Consequently, after going straight<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> after (re-)publishing my first ever written <em>500-lines-of-code-with-binaries</em>-<a href="/post/r-low-budget-high-res-mapping-with-r-for-not-for-profit-print/">tutorial</a>, the preview function suddenly stopped working and <strong>I couldn’t figure out why</strong>. After numerous brute-force-ish re-set-ups of Blogdown and/or my git page repo[s]<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a> I was finally able to pin-point the problem and get the crucial <code>hugo -v</code> debugging command running. From here on, it was a piece of cake. <em>But</em>…</p>
 <p>Since there seemed to be only a few hints at my exact problem – which is rather a stack of interdependent problems (and which I’m gonna describe in a minute) and no tailored working solution, I decide to write down what I’ve encountered and what eventually did the job for me. Depending on how many more “problems” I might encounter in my future blogdown-blogging “career” I will update this post from time to time.</p>
 </div>
 <div id="my-problem-space-working-enivironment" class="section level1">

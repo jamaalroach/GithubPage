@@ -39,7 +39,7 @@ sequenceDiagrams:
 
 ![](/img/Twitter_conf/Twitter_conf.png "This is what ~~4~~ 5 German academic conferences look like on Twitter"){width=100%}
 
->**Update 3**: As I've stumbled upon some irregularities in my [follow-up post](https://ellocke.github.io/post/r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist/#the-turkish-plot-twist), it turned out that the Twitter sample for the Sociology conference (esp. `#dgs2018`) was heavily cross-poluted by another popular event using the same Hashtag in Turkey... This has been adressed in the [follow-up post](https://ellocke.github.io/post/r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist/#the-turkish-plot-twist), ~~but has yet to be implemented here~~ and now is also adjusted for in this [post](#sociology-dgs18-dgs2018-update).
+>**Update 3**: As I've stumbled upon some irregularities in my [follow-up post](/post/r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist/#the-turkish-plot-twist), it turned out that the Twitter sample for the Sociology conference (esp. `#dgs2018`) was heavily cross-poluted by another popular event using the same Hashtag in Turkey... This has been adressed in the [follow-up post](/post/r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist/#the-turkish-plot-twist), ~~but has yet to be implemented here~~ and now is also adjusted for in this [post](#sociology-dgs18-dgs2018-update).
 
 > Update 2: The Media Studies conference (\#gfm2018) has been included
 
@@ -337,7 +337,7 @@ dgs_rds <- dir(path = data_path, pattern = "dgs_") %>%
   map_dfr(readRDS)
 ```
 
-> As I have discovered some irregularities while pre-processing the Tweets for a corpus analysis (see the [follow-up post](https://ellocke.github.io/post/r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist/#the-turkish-plot-twist) for details), the Sociology Twitter sample needs extra-filtering. Consequently, all the following analyses and plots have been re-done and updated.
+> As I have discovered some irregularities while pre-processing the Tweets for a corpus analysis (see the [follow-up post](/post/r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist/#the-turkish-plot-twist) for details), the Sociology Twitter sample needs extra-filtering. Consequently, all the following analyses and plots have been re-done and updated.
 
 **As we can see from the following time-series plot, the `#dgs2018` hashtag has, first been used by the Turkish community before German Sociologists took over around the 23th:**
 

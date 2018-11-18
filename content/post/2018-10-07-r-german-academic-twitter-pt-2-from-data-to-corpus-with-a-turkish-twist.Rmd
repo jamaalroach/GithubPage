@@ -39,7 +39,7 @@ sequenceDiagrams:
   options: ''
 ---
 
-Last week, I [mined almost 5K Tweets](https://ellocke.github.io/post/r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al/) from the annual meetings of five German academic societies. Now it's about time that we dive into the contents with [Kenneth Benoit's](https://twitter.com/kenbenoit){target="_blank"} powerful `quanteda` Package. Come for the corpus approaches to text as data, stay for the Turkish Plot-Twist...
+Last week, I [mined almost 5K Tweets](/post/r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al/) from the annual meetings of five German academic societies. Now it's about time that we dive into the contents with [Kenneth Benoit's](https://twitter.com/kenbenoit){target="_blank"} powerful `quanteda` Package. Come for the corpus approaches to text as data, stay for the Turkish Plot-Twist...
 
 ```{r message=FALSE}
 library(tidyverse)
@@ -52,7 +52,7 @@ quanteda_options("threads" = 4)
 
 # Import Tweets from `.rds`
 
-Please see [Twitter pt. 1](https://ellocke.github.io/post/r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al/) for Twitter Mining with `rtweet` and the details of the data handling approach.
+Please see [Twitter pt. 1](/post/r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al/) for Twitter Mining with `rtweet` and the details of the data handling approach.
 
 
 **Prepare here()-path to the `.rds` data**
@@ -608,7 +608,7 @@ topfeatures(hashtags_dfm, 20,
   map(knitr::kable, "html")
 ```
 
-> ~~The Sociology Corpus has still some Turkish features. There are ways to adress this, but I have to post-pone this for another post.~~ ([cf. this approach](https://ellocke.github.io/post/r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al/#sociology-dgs18-dgs2018-update)) 
+> ~~The Sociology Corpus has still some Turkish features. There are ways to adress this, but I have to post-pone this for another post.~~ ([cf. this approach](/post/r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al/#sociology-dgs18-dgs2018-update)) 
 
 **Most popular Hashtags by shared `docfreq` / feature-document frequency:**
 

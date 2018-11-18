@@ -39,8 +39,8 @@ sequenceDiagrams:
 >**TL;DR: I had to figure out how to debug() Hugo / my Blogdown page on Windows 10 and came up with 3 methods. Jump [there](#how-to-debug-hugo-esp.-on-windows) if you know that this is what you're looking for:\
 > \>\>\> [How to debug Hugo (esp. on Windows)](#how-to-debug-hugo-esp.-on-windows)**
 
->**Besides, I've documented [some common _not-Windows-specific_ errors / troubles with Blogdown / Hugo](#some-other-common-errors-troubles-with-blogdownhugo) which are hard to Google somehow, but far more easier to solve:\
-> \>\>\> [Dealing with *config.toml*, *seImpl()* & *tomlparseImpl()* errors](#some-other-common-errors-troubles-with-blogdownhugo)**
+>**Besides, I've documented [some common _not-Windows-specific_ errors / troubles with Blogdown / Hugo](#some-other-common-errors-troubles-with-blogdownhugo-updated) which are hard to Google somehow, but far more easier to solve:\
+> \>\>\> [Dealing with *config.toml*, *seImpl()* & *tomlparseImpl()* errors](#some-other-common-errors-troubles-with-blogdownhugo-updated)**
 
 # When blogdown::serve_site() stops working
 
@@ -60,7 +60,7 @@ Notice how Xie et al. actually have included a predictive word of **caution** â€
 
  >*"If you do not understand HTML, CSS, or JavaScript, and have no experience with Hugo themes or templates, it may take you about **10 minutes to get started** with your new website, since you have to accept everything you are given (such as the default theme); if you do have the knowledge and experience (and desire to highly customize your site), it may take you **several days** to get started. Hugo is really powerful. Be cautious with power."* ([Xie et al. 2018, Ch. 1.6, *emphasis added*](https://bookdown.org/yihui/blogdown/other-themes.html)\)
 
-Consequently, after going straight^[And implementing a customized theme, setting up my own Netlify-less R/Git-only workflow +++, and everything in parallel without controlled double-checking FML] after (re-)publishing my first ever written *500-lines-of-code-with-binaries*-[tutorial](https://ellocke.github.io/post/r-low-budget-high-res-mapping-with-r-for-not-for-profit-print/), the preview function suddenly stopped working and **I couldn't figure out why**. After numerous brute-force-ish re-set-ups of Blogdown and/or my git page repo[s]^[I ended up with 127 commits...] I was finally able to pin-point the problem and get the crucial `hugo -v` debugging command running. From here on, it was a piece of cake. *But*... 
+Consequently, after going straight^[And implementing a customized theme, setting up my own Netlify-less R/Git-only workflow +++, and everything in parallel without controlled double-checking FML] after (re-)publishing my first ever written *500-lines-of-code-with-binaries*-[tutorial](/post/r-low-budget-high-res-mapping-with-r-for-not-for-profit-print/), the preview function suddenly stopped working and **I couldn't figure out why**. After numerous brute-force-ish re-set-ups of Blogdown and/or my git page repo[s]^[I ended up with 127 commits...] I was finally able to pin-point the problem and get the crucial `hugo -v` debugging command running. From here on, it was a piece of cake. *But*... 
 
 Since there seemed to be only a few hints at my exact problem â€“ which is rather a stack of interdependent problems (and which I'm gonna describe in a minute) and no tailored working solution, I decide to write down what I've encountered and what eventually did the job for me. Depending on how many more "problems" I might encounter in my future blogdown-blogging "career" I will update this post from time to time.
 

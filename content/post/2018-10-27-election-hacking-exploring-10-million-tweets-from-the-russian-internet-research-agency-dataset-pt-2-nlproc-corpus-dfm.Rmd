@@ -4,6 +4,7 @@ title: '[R] Election Hacking: Exploring 10 Million Tweets from the Russian Inter
 author: Ilja / fubits
 date: '2018-11-05'
 slug: election-hacking-exploring-10-million-tweets-from-the-russian-internet-research-agency-dataset-pt-2-corpus-dfm
+hardslug: 2018-10-27-election-hacking-exploring-10-million-tweets-from-the-russian-internet-research-agency-dataset-pt-2-nlproc-corpus-dfm
 categories:
   - Rstats
   - DataViz
@@ -21,8 +22,8 @@ output:
     number_sections: yes
     toc: yes
 lastmod: "2018-10-27T14:40:59+02:00"
-description: "This is the sceond part of my \"Internet Research Agency\" series. We'll encounter in-memory computing problems, adress them with tweaks on Windows and Linux, and finally succeed at building a 5.7M x 1.5M big sparse Document-Feature Matrix."
-abstract: "This is the sceond part of my \"Internet Research Agency\" series. We'll encounter in-memory computing problems, adress them with tweaks on Windows and Linux, and finally succeed at building a 5.7M x 1.5M big sparse Document-Feature Matrix."
+description: "This is the sceond part of my \"Internet Research Agency\" series. We'll encounter in-memory computing problems, address them with tweaks on Windows and Linux, and finally succeed at building a 5.7M x 1.5M big sparse Document-Feature Matrix."
+abstract: "This is the sceond part of my \"Internet Research Agency\" series. We'll encounter in-memory computing problems, address them with tweaks on Windows and Linux, and finally succeed at building a 5.7M x 1.5M big sparse Document-Feature Matrix."
 thumbnail: "/img/thumbs/IRA_Tweets_2.jpg"
 rmdlink: yes
 keywords: []
@@ -83,7 +84,7 @@ library(stm)
 library(lubridate)
 ```
 
-Since we've already [pre-processed the Internet Research Agency dataset](election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1), we can just load the exported data object and go on with corpus-building.
+Since we've already [pre-processed the Internet Research Agency dataset](/post/election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1), we can just load the exported data object and go on with corpus-building.
 
 ```{r}
 data_path <- here::here("static", "data", "IRA_Tweets", "/")
@@ -741,4 +742,4 @@ With the mightiness of Quanteda, we could do a lot of further exploratory analys
 
 > However, here's a preview from Topic Modelling on the English-language subset (~2M Tweets):
 
-![*(73 Topics from 2M English-language Tweets; modelled with the stm()-packages; K auto-induced with t-SNE/PCA)*](/img/IRA_dataset/topic_modelling.jpg)
+![*(73 Topics from 2M English-language Tweets; modelled with the stm()-package; K auto-induced with t-SNE/PCA)*](/img/IRA_dataset/topic_modelling.jpg)

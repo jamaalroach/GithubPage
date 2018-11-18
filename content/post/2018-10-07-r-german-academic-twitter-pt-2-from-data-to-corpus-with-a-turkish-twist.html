@@ -80,7 +80,7 @@ sequenceDiagrams:
 </ul>
 </div>
 
-<p>Last week, I <a href="https://ellocke.github.io/post/r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al/">mined almost 5K Tweets</a> from the annual meetings of five German academic societies. Now it’s about time that we dive into the contents with <a href="https://twitter.com/kenbenoit" target="_blank">Kenneth Benoit’s</a> powerful <code>quanteda</code> Package. Come for the corpus approaches to text as data, stay for the Turkish Plot-Twist…</p>
+<p>Last week, I <a href="/post/r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al/">mined almost 5K Tweets</a> from the annual meetings of five German academic societies. Now it’s about time that we dive into the contents with <a href="https://twitter.com/kenbenoit" target="_blank">Kenneth Benoit’s</a> powerful <code>quanteda</code> Package. Come for the corpus approaches to text as data, stay for the Turkish Plot-Twist…</p>
 <pre class="r"><code>library(tidyverse)
 library(here)
 library(rtweet) # just in case we want to look up something on Twitter
@@ -89,7 +89,7 @@ quanteda_options(&quot;threads&quot; = 4)
 # quanteda_options(&quot;threads&quot;)</code></pre>
 <div id="import-tweets-from-.rds" class="section level1">
 <h1><span class="header-section-number">1</span> Import Tweets from <code>.rds</code></h1>
-<p>Please see <a href="https://ellocke.github.io/post/r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al/">Twitter pt. 1</a> for Twitter Mining with <code>rtweet</code> and the details of the data handling approach.</p>
+<p>Please see <a href="/post/r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al/">Twitter pt. 1</a> for Twitter Mining with <code>rtweet</code> and the details of the data handling approach.</p>
 <p><strong>Prepare here()-path to the <code>.rds</code> data</strong></p>
 <pre class="r"><code>data_path &lt;- here(&quot;static&quot;, &quot;data&quot;, &quot;ConferenceTweets&quot;, &quot;/&quot;)</code></pre>
 <p><strong>Bulk-read the <code>.rds</code> files</strong></p>
@@ -2231,7 +2231,7 @@ joint_corpus &lt;- joint_corpus + mixed_corpus #3,748 docs</code></pre>
 <pre><code>##    ... removed 608 features
 ##    ... created a 3,748 x 15,763 sparse dfm
 ##    ... complete. 
-## Elapsed time: 0.49 seconds.</code></pre>
+## Elapsed time: 0.442 seconds.</code></pre>
 <p>We’re down to 15763 features from 3748 documents (Tweets) and were able to get rid of 608 features with the iteratively refined approach.</p>
 <p>And as we might want to use a grouped dfm for group comparisons (and <code>dfm_group</code> doesn’t seem to work for me here), we’ll create a custom grouped one, too.</p>
 <pre class="r"><code>## not working:
@@ -3313,7 +3313,7 @@ x
 </tbody>
 </table>
 <blockquote>
-<p><del>The Sociology Corpus has still some Turkish features. There are ways to adress this, but I have to post-pone this for another post.</del> (<a href="https://ellocke.github.io/post/r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al/#sociology-dgs18-dgs2018-update">cf. this approach</a>)</p>
+<p><del>The Sociology Corpus has still some Turkish features. There are ways to adress this, but I have to post-pone this for another post.</del> (<a href="/post/r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al/#sociology-dgs18-dgs2018-update">cf. this approach</a>)</p>
 </blockquote>
 <p><strong>Most popular Hashtags by shared <code>docfreq</code> / feature-document frequency:</strong></p>
 <pre class="r"><code>dfm_select(joint_dfm_grouped, (&#39;#*&#39;)) %&gt;% 

@@ -76,7 +76,7 @@ sequenceDiagrams:
 
 </div>
 <blockquote>
-<p><strong>Update 3</strong>: As I’ve stumbled upon some irregularities in my <a href="https://ellocke.github.io/post/r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist/#the-turkish-plot-twist">follow-up post</a>, it turned out that the Twitter sample for the Sociology conference (esp. <code>#dgs2018</code>) was heavily cross-poluted by another popular event using the same Hashtag in Turkey… This has been adressed in the <a href="https://ellocke.github.io/post/r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist/#the-turkish-plot-twist">follow-up post</a>, <del>but has yet to be implemented here</del> and now is also adjusted for in this <a href="#sociology-dgs18-dgs2018-update">post</a>.</p>
+<p><strong>Update 3</strong>: As I’ve stumbled upon some irregularities in my <a href="/post/r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist/#the-turkish-plot-twist">follow-up post</a>, it turned out that the Twitter sample for the Sociology conference (esp. <code>#dgs2018</code>) was heavily cross-poluted by another popular event using the same Hashtag in Turkey… This has been adressed in the <a href="/post/r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist/#the-turkish-plot-twist">follow-up post</a>, <del>but has yet to be implemented here</del> and now is also adjusted for in this <a href="#sociology-dgs18-dgs2018-update">post</a>.</p>
 </blockquote>
 <blockquote>
 <p>Update 2: The Media Studies conference (#gfm2018) has been included</p>
@@ -135,7 +135,7 @@ twitter_token &lt;- readRDS(str_c(home_directory,&quot;/twitter_token.rds&quot;)
     unlist() %&gt;% glue::glue_collapse()
   }
 getTimeString()</code></pre>
-<pre><code>## 20181012090850</code></pre>
+<pre><code>## 20181118151242</code></pre>
 </div>
 <div id="prepare-filepath-for-.rds-with-here" class="section level2">
 <h2><span class="header-section-number">2.3</span> (Prepare filepath for .rds with <code>here()</code>)</h2>
@@ -314,7 +314,7 @@ saveRDS(dgs_tweets,
   str_c(data_path, .) %&gt;%
   map_dfr(readRDS)</code></pre>
 <blockquote>
-<p>As I have discovered some irregularities while pre-processing the Tweets for a corpus analysis (see the <a href="https://ellocke.github.io/post/r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist/#the-turkish-plot-twist">follow-up post</a> for details), the Sociology Twitter sample needs extra-filtering. Consequently, all the following analyses and plots have been re-done and updated.</p>
+<p>As I have discovered some irregularities while pre-processing the Tweets for a corpus analysis (see the <a href="/post/r-german-academic-twitter-pt-2-from-data-to-corpus-with-a-turkish-twist/#the-turkish-plot-twist">follow-up post</a> for details), the Sociology Twitter sample needs extra-filtering. Consequently, all the following analyses and plots have been re-done and updated.</p>
 </blockquote>
 <p><strong>As we can see from the following time-series plot, the <code>#dgs2018</code> hashtag has, first been used by the Turkish community before German Sociologists took over around the 23th:</strong></p>
 <pre class="r"><code>dgs_rds %&gt;% distinct(status_id, .keep_all = TRUE) %&gt;%
