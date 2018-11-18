@@ -96,7 +96,7 @@ data2_raw &lt;- data.table::fread(csvfile,
 <blockquote>
 <p><code>data.table</code> is by light years the fastest method, but <code>read_csv()</code> gives me <code>NA</code>’s without an extra hassle while <code>data.table::fread()</code> seems to be ignoring any patterns for <code>na.strings</code>. Therefore I’ll be working with the data object from <code>read_csv()</code> here. Since <code>read_csv()</code> is rather slow with a <code>CSV</code> this big, you can speed up your exploration if you save the data object as an <code>.rds</code> or <code>.RData</code> file.</p>
 </blockquote>
-<pre class="r"><code>data_path &lt;- here::here(&quot;static&quot;, &quot;data&quot;, &quot;IRA_Tweets&quot;, &quot;/&quot;)
+<pre class="r"><code>data_path &lt;- here::here(&quot;data&quot;, &quot;IRA_Tweets&quot;, &quot;/&quot;)
 # if (!dir.exists(data_path)) dir.create(data_path)
 # saveRDS(data_raw, str_c(data_path, &quot;infoops_data.rds&quot;))
 data_raw &lt;- readRDS(str_c(data_path, &quot;infoops_data.rds&quot;))</code></pre>
@@ -2897,7 +2897,7 @@ NA
 <blockquote>
 <p>This is a good moment in our data preparation cycle to create a hardcopy of our processed <code>data_unique</code> object in a <code>.rds</code> file. This way, we won’t have to redo all the wrangling and recoding we did so far, and can just start with any in-depth analysis by loading the object with <code>data_unique &lt;- readRDS(file)</code>. ANd we can reduce our local in-memory load by <code>rm(data_raw)</code></p>
 </blockquote>
-<pre class="r"><code># data_path &lt;- here::here(&quot;static&quot;, &quot;data&quot;, &quot;IRA_Tweets&quot;, &quot;/&quot;)
+<pre class="r"><code># data_path &lt;- here::here(&quot;data&quot;, &quot;IRA_Tweets&quot;, &quot;/&quot;)
 # if (!dir.exists(data_path)) dir.create(data_path)
 saveRDS(data_unique, str_c(data_path, &quot;infoops_data_processed.rds&quot;))
 rm(data_raw)

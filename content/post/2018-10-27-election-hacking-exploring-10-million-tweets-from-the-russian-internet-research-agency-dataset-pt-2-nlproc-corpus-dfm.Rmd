@@ -87,7 +87,7 @@ library(lubridate)
 Since we've already [pre-processed the Internet Research Agency dataset](/post/election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1), we can just load the exported data object and go on with corpus-building.
 
 ```{r}
-data_path <- here::here("static", "data", "IRA_Tweets", "/")
+data_path <- here::here("data", "IRA_Tweets", "/")
 data_unique <- readRDS(str_c(data_path, "infoops_data_processed.rds"))
 # devtools::install_github("brooke-watson/BRRR")
 BRRR::skrrrahh("flava") # play sound when ready
@@ -313,7 +313,7 @@ rstudioapi::restartSession()
 **load `IRA_corpus` from HDD**
 
 ```{r}
-data_path <- here::here("static", "data", "IRA_Tweets", "/")
+data_path <- here::here("data", "IRA_Tweets", "/")
 IRA_corpus <- readRDS(str_c(data_path, "IRA_corpus_naive.rds"))
 # IRA_corpus <- readRDS(stringr::str_c(data_path, "IRA_corpus_naive_compressed.rds"))
 BRRR::skrrrahh("flava")
@@ -481,7 +481,7 @@ Having said that, here's our **regular strategy**:
 **Naive Corpus**
 
 ```{r eval = FALSE}
-# data_path <- here::here("static", "data", "IRA_Tweets", "/")
+# data_path <- here::here("data", "IRA_Tweets", "/")
 IRA_corpus <- readRDS(stringr::str_c(data_path, "IRA_corpus_naive.rds"))
 ```
 
@@ -555,7 +555,7 @@ gc(full = TRUE, verbose = TRUE)
 # .rs.restartR()
 rstudioapi::restartSession()
 
-data_path <- here::here("static", "data", "IRA_Tweets", "/")
+data_path <- here::here("data", "IRA_Tweets", "/")
 IRA_corpus <- readRDS(str_c(data_path, "IRA_corpus_naive_clean.rds"))
 BRRR::skrrrahh("flava")
 ```
@@ -579,7 +579,7 @@ IRA_corpus <- data_unique %>%
 Instead, we'll load the clean, untouched corpus from our HDD and proceed with `dfm()`
 
 ```{r eval = FALSE}
-data_path <- here::here("static", "data", "IRA_Tweets", "/")
+data_path <- here::here("data", "IRA_Tweets", "/")
 IRA_corpus <- readRDS(str_c(data_path, "IRA_corpus_naive.rds"))
 BRRR::skrrrahh("flava")
 ```
@@ -694,13 +694,13 @@ library(quanteda)
 quanteda_options("threads" = 4) # 4 is the limit on my Laptop
 print(str_c("Threads for Quanteda: ", quanteda_options("threads")))
 library(stm)
-data_path <- here::here("static", "data", "IRA_Tweets", "/")
+data_path <- here::here("data", "IRA_Tweets", "/")
 ```
 
 > Linux: down to 1.3GB RAM load
 
 ```{r}
-data_path <- here::here("static", "data", "IRA_Tweets", "/")
+data_path <- here::here("data", "IRA_Tweets", "/")
 IRA_dfm <- readRDS(str_c(data_path, "IRA_dfm_naive_clean_no_twitter.rds"))
 ```
 

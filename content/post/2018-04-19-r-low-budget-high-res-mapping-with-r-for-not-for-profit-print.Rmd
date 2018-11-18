@@ -107,7 +107,7 @@ Ugh, not so pretty, right? But you have to start somewhere...
 #                                           type = 'countries',
 #                                           category = 'cultural')
 # save(countries10, file = "GIS_NPO_Data/countries10.rda")
-data_path <- here("static","data", "GIS_NPO_Data", "/")
+data_path <- here("data", "GIS_NPO_Data", "/")
 load(str_c(data_path, "countries10.rda"))
 ```
 

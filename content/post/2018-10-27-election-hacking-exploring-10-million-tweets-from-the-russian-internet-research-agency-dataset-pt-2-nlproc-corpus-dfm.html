@@ -107,7 +107,7 @@ print(str_c(&quot;Threads for Quanteda: &quot;, quanteda_options(&quot;threads&q
 <pre class="r"><code>library(stm)
 library(lubridate)</code></pre>
 <p>Since we’ve already <a href="/post/election-hacking-exploring-2-million-tweets-from-the-russian-internet-research-agency-dataset-pt-1">pre-processed the Internet Research Agency dataset</a>, we can just load the exported data object and go on with corpus-building.</p>
-<pre class="r"><code>data_path &lt;- here::here(&quot;static&quot;, &quot;data&quot;, &quot;IRA_Tweets&quot;, &quot;/&quot;)
+<pre class="r"><code>data_path &lt;- here::here(&quot;data&quot;, &quot;IRA_Tweets&quot;, &quot;/&quot;)
 data_unique &lt;- readRDS(str_c(data_path, &quot;infoops_data_processed.rds&quot;))
 # devtools::install_github(&quot;brooke-watson/BRRR&quot;)
 BRRR::skrrrahh(&quot;flava&quot;) # play sound when ready</code></pre>
@@ -697,7 +697,7 @@ rstudioapi::restartSession()</code></pre>
 <p>Linux: down to 1.4 GiB</p>
 </blockquote>
 <p><strong>load <code>IRA_corpus</code> from HDD</strong></p>
-<pre class="r"><code>data_path &lt;- here::here(&quot;static&quot;, &quot;data&quot;, &quot;IRA_Tweets&quot;, &quot;/&quot;)
+<pre class="r"><code>data_path &lt;- here::here(&quot;data&quot;, &quot;IRA_Tweets&quot;, &quot;/&quot;)
 IRA_corpus &lt;- readRDS(str_c(data_path, &quot;IRA_corpus_naive.rds&quot;))
 # IRA_corpus &lt;- readRDS(stringr::str_c(data_path, &quot;IRA_corpus_naive_compressed.rds&quot;))
 BRRR::skrrrahh(&quot;flava&quot;)</code></pre>
@@ -747,111 +747,13 @@ post
 <tbody>
 <tr>
 <td style="text-align:left;">
-Так вот он какой - ФСБшный
+Trump wants this fountain to be in charge of Russia’s
 </td>
 <td style="text-align:left;">
-компромат
+Kompromat
 </td>
 <td style="text-align:left;">
-на Трампа ! https : / / t.co / rZZS8nHsEA
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Хиллари прямо Джеймс-Потрошитель какой-то , убирает без палева весь
-</td>
-<td style="text-align:left;">
-компромат
-</td>
-<td style="text-align:left;">
-с пути . Это уже не первый труп по её
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-у нас никогда не будет нормальных фото , только
-</td>
-<td style="text-align:left;">
-компромат
-</td>
-<td style="text-align:left;">
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Илья Гращенков :
-</td>
-<td style="text-align:left;">
-Компромат
-</td>
-<td style="text-align:left;">
-на Порошенко может заинтересовать Трампа https : / / t.co
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Предисловие к импичменту : панамский
-</td>
-<td style="text-align:left;">
-компромат
-</td>
-<td style="text-align:left;">
-поможет Саакашвили стать президентом Украины https : / / t.co
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-доклада о том , что &quot; российские агенты &quot; собирали
-</td>
-<td style="text-align:left;">
-компромат
-</td>
-<td style="text-align:left;">
-на избранного президент . . . https : / /
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Маркин высмеял прокурора Украины , собирающего &quot;
-</td>
-<td style="text-align:left;">
-компромат
-</td>
-<td style="text-align:left;">
-&quot; на Путина http : / / t.co / WwGrU4LNs7
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-США собирает
-</td>
-<td style="text-align:left;">
-компромат
-</td>
-<td style="text-align:left;">
-против друзей http : / / t.co / x0rLeE7V6V
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Власти Казахстана проверят аккаунты госслужащих в соцсетях на
-</td>
-<td style="text-align:left;">
-компромат
-</td>
-<td style="text-align:left;">
-https : / / t.co / sKzTyFti8v
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-#СМИ : #Запад’у удалось вывезти из Сирии
-</td>
-<td style="text-align:left;">
-компромат
-</td>
-<td style="text-align:left;">
-на Асада . https : / / t.co / nspBqz4zC7
+on him . https : / / t.co / H8P7CMMxzA
 </td>
 </tr>
 </tbody>
@@ -1628,7 +1530,7 @@ who will tell the truth - period . Enlist in
 <li>build topic models with stm() based on variations of the <code>dfm</code></li>
 </ul>
 <p><strong>Naive Corpus</strong></p>
-<pre class="r"><code># data_path &lt;- here::here(&quot;static&quot;, &quot;data&quot;, &quot;IRA_Tweets&quot;, &quot;/&quot;)
+<pre class="r"><code># data_path &lt;- here::here(&quot;data&quot;, &quot;IRA_Tweets&quot;, &quot;/&quot;)
 IRA_corpus &lt;- readRDS(stringr::str_c(data_path, &quot;IRA_corpus_naive.rds&quot;))</code></pre>
 <div id="stopwords" class="section level3">
 <h3><span class="header-section-number">2.4.1</span> Stopwords</h3>
@@ -1699,7 +1601,7 @@ gc(full = TRUE, verbose = TRUE)
 # .rs.restartR()
 rstudioapi::restartSession()
 
-data_path &lt;- here::here(&quot;static&quot;, &quot;data&quot;, &quot;IRA_Tweets&quot;, &quot;/&quot;)
+data_path &lt;- here::here(&quot;data&quot;, &quot;IRA_Tweets&quot;, &quot;/&quot;)
 IRA_corpus &lt;- readRDS(str_c(data_path, &quot;IRA_corpus_naive_clean.rds&quot;))
 BRRR::skrrrahh(&quot;flava&quot;)</code></pre>
 </div>
@@ -1714,7 +1616,7 @@ BRRR::skrrrahh(&quot;flava&quot;)</code></pre>
          compress = FALSE # compression is better for in-memory, but&#39;ll slow down processing  
          )</code></pre>
 <p>Instead, we’ll load the clean, untouched corpus from our HDD and proceed with <code>dfm()</code></p>
-<pre class="r"><code>data_path &lt;- here::here(&quot;static&quot;, &quot;data&quot;, &quot;IRA_Tweets&quot;, &quot;/&quot;)
+<pre class="r"><code>data_path &lt;- here::here(&quot;data&quot;, &quot;IRA_Tweets&quot;, &quot;/&quot;)
 IRA_corpus &lt;- readRDS(str_c(data_path, &quot;IRA_corpus_naive.rds&quot;))
 BRRR::skrrrahh(&quot;flava&quot;)</code></pre>
 <p><strong>Sparse Document-Feature Matrix with <code>quanteda::dfm()</code></strong></p>
@@ -2140,11 +2042,11 @@ quanteda_options(&quot;threads&quot; = 4) # 4 is the limit on my Laptop
 print(str_c(&quot;Threads for Quanteda: &quot;, quanteda_options(&quot;threads&quot;)))</code></pre>
 <pre><code>## [1] &quot;Threads for Quanteda: 4&quot;</code></pre>
 <pre class="r"><code>library(stm)
-data_path &lt;- here::here(&quot;static&quot;, &quot;data&quot;, &quot;IRA_Tweets&quot;, &quot;/&quot;)</code></pre>
+data_path &lt;- here::here(&quot;data&quot;, &quot;IRA_Tweets&quot;, &quot;/&quot;)</code></pre>
 <blockquote>
 <p>Linux: down to 1.3GB RAM load</p>
 </blockquote>
-<pre class="r"><code>data_path &lt;- here::here(&quot;static&quot;, &quot;data&quot;, &quot;IRA_Tweets&quot;, &quot;/&quot;)
+<pre class="r"><code>data_path &lt;- here::here(&quot;data&quot;, &quot;IRA_Tweets&quot;, &quot;/&quot;)
 IRA_dfm &lt;- readRDS(str_c(data_path, &quot;IRA_dfm_naive_clean_no_twitter.rds&quot;))</code></pre>
 <p>Now we can have another look at the top features from our dfm, this time without hashtags.</p>
 <blockquote>

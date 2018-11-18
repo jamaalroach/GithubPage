@@ -84,7 +84,7 @@ data2_raw <- data.table::fread(csvfile,
 > `data.table` is by light years the fastest method, but `read_csv()` gives me `NA`'s without an extra hassle while `data.table::fread()` seems to be ignoring any patterns for `na.strings`. Therefore I'll be working with the data object from `read_csv()` here. Since `read_csv()` is rather slow with a `CSV` this big, you can speed up your exploration if you save the data object as an `.rds` or `.RData` file.
 
 ```{r}
-data_path <- here::here("static", "data", "IRA_Tweets", "/")
+data_path <- here::here("data", "IRA_Tweets", "/")
 # if (!dir.exists(data_path)) dir.create(data_path)
 # saveRDS(data_raw, str_c(data_path, "infoops_data.rds"))
 data_raw <- readRDS(str_c(data_path, "infoops_data.rds"))
@@ -312,7 +312,7 @@ data_recoded <- data_unique %>%
 > This is a good moment in our data preparation cycle to create a hardcopy of our processed `data_unique` object in a `.rds` file. This way, we won't have to redo all the wrangling and recoding we did so far, and can just start with any in-depth analysis by loading the object with `data_unique <- readRDS(file)`. ANd we can reduce our local in-memory load by `rm(data_raw)`
 
 ```{r eval=FALSE}
-# data_path <- here::here("static", "data", "IRA_Tweets", "/")
+# data_path <- here::here("data", "IRA_Tweets", "/")
 # if (!dir.exists(data_path)) dir.create(data_path)
 saveRDS(data_unique, str_c(data_path, "infoops_data_processed.rds"))
 rm(data_raw)
