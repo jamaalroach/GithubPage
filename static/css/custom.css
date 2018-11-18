@@ -550,3 +550,7 @@ figure.hljs.highlight div.line {
 .post .post-content pre {
 	background: #f8f5ec;
 }
+
+.icon-rss {
+	font-weight: 400!important;
+}
