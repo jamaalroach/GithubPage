@@ -1,12 +1,9 @@
 // custom Active-Link function
-
-//  for centered table AND overflow: auto -->
-
 jQuery(function () {
     var page = location.pathname.split('/')[1];
     if (page == "") {page = "home"};
     if (page == "post") {page = "posts"};
-    if (page == "categories") {page = "tags"};
+    if (page == "tags" | page == "categories") {page = "topics"};
     $('nav ul a').each(
       function() {
       if (page == this.id.toLowerCase()) {
