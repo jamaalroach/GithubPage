@@ -139,14 +139,47 @@ h6 {
 	margin: 0 auto;
 }
 
+.align-right {
+	float: right;
+	margin: 0 auto;
+	padding-left: 1em;
+	padding-bottom: 1em;
+	width: 40%;
+}
+
+.align-right > img {
+	max-width: 333px;
+	border-radius: 50%;
+	-webkit-border-radius: 50%; 
+	-moz-border-radius: 50%;
+	object-fit: cover;
+}
+
 @media screen and (max-width: 500px) {
 	.thumbnail-post {
 		height: 100%;
 		width: 100%;
-		max-width: 333px;
+		max-width: 333px!important;
 		margin: 0 auto;
 		padding-right: 0;
 		float: none;
+	}
+
+	.align-right {
+		width: 100%!important;
+		display: block;
+		margin: 1em auto;
+	}
+	
+	.align-right > img {
+		display: block!important;
+		margin: 0  auto;
+		min-width: 200px;
+		max-width: 250px!important;
+		border-radius: 50%;
+		-webkit-border-radius: 50%; 
+		-moz-border-radius: 50%;
+		object-fit: cover;
 	}
 
 	.post-summary {
@@ -243,6 +276,27 @@ h6 {
 		background: #fff;
 		border-top: 1px dashed #c05b4d;
 	} */
+
+	/* picture resiszing on big displays */
+	/*
+	.post .post-content .section .figure > img {
+		display: block;
+		margin: 0 auto;
+		min-width: 261px;
+		max-width: 150%;
+		margin-left: -25%;
+		margin-right: -25%;
+	}
+
+	.post .post-content .section p > img {
+		display: block;
+		margin: 0 auto;
+		min-width: 261px;
+		max-width: 150%;
+		margin-left: -25%;
+		margin-right: -25%;
+	}
+	*/
 }
 
 /* Post-TAGS */
