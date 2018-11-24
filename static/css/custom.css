@@ -608,3 +608,79 @@ figure.hljs.highlight div.line {
 .icon-rss {
 	font-weight: 400!important;
 }
+
+
+/* post theme even 4.0 update */
+/* fixing categories */
+.categories {
+	margin: 2em 0 3em;
+    text-align: center;
+    font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+}
+
+.categories .categories-title {
+    display: inline-block;
+    font-size: 18px;
+    color: #c05b4d;
+    border-bottom: 2px solid #c05b4d;
+}
+
+.categories .categories-tags {
+    margin: 10px 0;
+}
+
+.categories .categories-tags .category-link {
+    display: inline-block;
+    position: relative;
+    margin: 5px 10px;
+    word-wrap: break-word;
+    transition-duration: .2s;
+    transition-property: transform;
+    transition-timing-function: ease-out;
+}
+
+.categories .categories-tags .category-link .category-count {
+    display: inline-block;
+    position: relative;
+    top: -8px;
+    right: -2px;
+    color: #c05b4d;
+    font-size: 12px;
+}
+
+.tag-cloud {
+    margin: 2em 0 3em;
+    text-align: center;
+    font-family: Athelas, STHeiti, Microsoft Yahei, serif;
+}
+
+.tag-cloud .tag-cloud-title {
+    display: inline-block;
+    font-size: 18px;
+    color: #c05b4d;
+    border-bottom: 2px solid #c05b4d;
+}
+
+.tag-cloud .tag-cloud-tags {
+    margin: 10px 0;
+}
+
+.tag-cloud .tag-cloud-tags .tag-link {
+    display: inline-block;
+    position: relative;
+    margin: 5px 10px;
+    word-wrap: break-word;
+    transition-duration: .2s;
+    transition-property: transform;
+    transition-timing-function: ease-out;
+}
+
+.tag-cloud .tag-cloud-tags .tag-link .tag-count {
+    display: inline-block;
+    position: relative;
+    top: -8px;
+    right: -2px;
+    color: #c05b4d;
+    font-size: 12px;
+}
+
