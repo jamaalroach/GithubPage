@@ -14,8 +14,6 @@ publishDir = "../ellocke.github.io/"
 preserveTaxonomyNames = true
 hasCJKLanguage = false     # has chinese/japanese/korean ?
 paginate = 5
-disqusShortname = ""      # disqus_shortname
-googleAnalytics = ""      # UA-XXXXXXXX-X
 copyright = ""            # default: author.name ↓
 
 [author]                  # essential
@@ -25,7 +23,6 @@ copyright = ""            # default: author.name ↓
   changefreq = "weekly"
   priority = 0.5
   filename = "sitemap.xml"
-
 [[menu.main]]             # config your menu
   name = "Home"
   weight = 10
@@ -61,14 +58,13 @@ copyright = ""            # default: author.name ↓
   highlightjsVersion = "9.11.0"
   highlightjsLang = ["r", "yaml"]
   highlightjsTheme = "magula"
-  version = "3.x"           # Used to give a friendly message when you have an incompatible update
-  debug = false             # If true, load `eruda.min.js`. See https://github.com/liriliri/eruda
+  version = "4.x"           # Used to give a friendly message when you have an incompatible update
 
   since = "2018"            # Site creation time
 
   # site info (optional)
   logoTitle = ""        # default: the title value
-  keywords = ["Computational Social Science", "DataViz", "Rstats", "SciComm"]
+  keywords = ["Computational Social Science", "DataViz", "Rstats", "SciComm", "Open Science", "FOSS", "Replication"]
   description = "@fubits GitHub Page made with R, Blogdown, and Hugo theme even"
 
   # paginate of archives, tags and categories
@@ -79,18 +75,6 @@ copyright = ""            # default: author.name ↓
 
   # show word count and read time ?
   moreMeta = true
-
-
-  # Some global options, you can also close or open something in front matter for a single post, see more information from `archetypes/default.md`.
-  toc = false
-  autoCollapseToc = false   # Auto expand and collapse toc
-  fancybox = false           # see https://github.com/fancyapps/fancybox
-  mathjax = false           # see https://www.mathjax.org/
-  mathjaxEnableSingleDollar = false
-  mathjaxEnableAutoNumber = false
-
-  postMetaInFooter = false   # contain author, lastMod, markdown link, license
-  linkToMarkDown = false    # Only effective when hugo will output .md files.
   contentCopyright = '<a rel="license noopener" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a>'
 
   # Link custom CSS and JS assets
@@ -98,19 +82,7 @@ copyright = ""            # default: author.name ↓
   customCSS = ["custom.css"]
   customJS = ["highlight.pack.js", "custom.js"]
 
-  [params.publicCDN]        # load these files from public cdn
-    enable = false
-    jquery = '<script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>'
-    slideout = '<script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>'
-    fancyboxJs = '<script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>'
-    fancyboxCss = '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">'
-    gitmentJS = '<script src="https://cdn.jsdelivr.net/npm/gitment@0.0.3/dist/gitment.browser.min.js" crossorigin="anonymous"></script>'
-    gitmentCSS = '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitment@0.0.3/style/default.min.css" crossorigin="anonymous">'
-    gitalkJS = '<script src="https://cdn.jsdelivr.net/npm/gitalk@1.2.2/dist/gitalk.min.js" integrity="sha256-DcjhdbufsHMHflFjZtKNFnPKOAL2ybOxGcPOR4MtnJg=" crossorigin="anonymous"></script>'
-    gitalkCSS = '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.2.2/dist/gitalk.css" integrity="sha256-rJVe5uyYRXdLM+Kkoj7JtN+9qI0bZTxkYTaNWODpg7U=" crossorigin="anonymous">'
-
    [params.social]
-
     c-twitter = "https://www.twitter.com/fubits/"
     g-github = "https://www.github.com/ellocke/"
    # m-instagram = "https://keybase.com/fubits"

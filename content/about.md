@@ -2,7 +2,6 @@
 title: "About"
 date: 2018-01-01
 weight: 0
-
 ---
 
 # About Me, Myself, and this Site^[[Oxford Comma FTW!](https://www.ft.com/content/bdfb60aa-12ef-11e7-b0c1-37e417ee6c76)]

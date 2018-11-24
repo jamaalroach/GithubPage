@@ -213,7 +213,7 @@ Even._linkToc = function() {
     const headers = document.querySelectorAll('.post-content>h' + num);
     for (let i = 0; i < headers.length; i++) {
       const header = headers[i];
-      header.innerHTML = `<a href="#${header.id}" class="headerlink"></a>${header.innerHTML}`;
+      header.innerHTML = `<a href="#${header.id}" class="headerlink anchor"><i class="iconfont icon-link"></i></a>${header.innerHTML}`;
     }
   }
 };
@@ -263,6 +263,17 @@ Even.sequence = function() {
     diagram.drawSVG(id, window.sequenceDiagramsOptions
         ? window.sequenceDiagramsOptions
         : {theme: 'simple'});
+  }
+};
+
+Even.responsiveTable = function() {
+  const tables = document.querySelectorAll('.post-content > table');
+  for (let i = 0; i < tables.length; i++) {
+    const table = tables[i];
+    const wrapper = document.createElement('div');
+    wrapper.className = 'table-wrapper';
+    table.parentElement.replaceChild(wrapper, table);
+    wrapper.appendChild(table);
   }
 };
 
