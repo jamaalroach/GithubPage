@@ -421,11 +421,12 @@ h6 {
 */
 
 .icon-github2:after {
-	content: "\e606";
+	content: "\E606";
 	position: relative;
 }
 
 .icon-twittr:before {
+	display: inline-block;
 	content: "\E600";
 	position: relative;
 }
@@ -684,7 +685,21 @@ figure.hljs.highlight div.line {
     font-size: 12px;
 }
 
-.tag-cloud .tag-cloud-tags > a:active, a:hover, a:focus {
+.categories .categories-tags > a:active,
+.categories .categories-tags > a:hover,
+.categories .categories-tags > a:focus,
+.tag-cloud .tag-cloud-tags > a:active,
+.tag-cloud .tag-cloud-tags > a:hover,
+.tag-cloud .tag-cloud-tags > a:focus {
 	color: #c05b4d;
 	transform: scale(1.1);
 }
+
+.iconfont {
+	vertical-align: middle;
+}
+
+.footer .iconfont {
+	line-height: 1.5;
+}
+
