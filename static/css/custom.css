@@ -684,3 +684,7 @@ figure.hljs.highlight div.line {
     font-size: 12px;
 }
 
+.tag-cloud .tag-cloud-tags > a:active, a:hover, a:focus {
+	color: #c05b4d;
+	transform: scale(1.1);
+}
