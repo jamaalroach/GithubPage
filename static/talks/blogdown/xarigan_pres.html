@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Best of both Worlds:</title>
+    <meta charset="utf-8">
+    <meta name="author" content="Ilja / @fubits" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
+    <script src="libs/htmlwidgets/htmlwidgets.js"></script>
+    <script src="libs/jquery/jquery.min.js"></script>
+    <link href="libs/leaflet/leaflet.css" rel="stylesheet" />
+    <script src="libs/leaflet/leaflet.js"></script>
+    <link href="libs/leafletfix/leafletfix.css" rel="stylesheet" />
+    <script src="libs/Proj4Leaflet/proj4-compressed.js"></script>
+    <script src="libs/Proj4Leaflet/proj4leaflet.js"></script>
+    <link href="libs/rstudio_leaflet/rstudio_leaflet.css" rel="stylesheet" />
+    <script src="libs/leaflet-binding/leaflet.js"></script>
+    <link rel="stylesheet" href="css\xarigan_slides.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Best of both Worlds:
+## Code-centric Websites with Blogdown &amp; R
+### Ilja / <span class="citation">@fubits</span>
+### Berlin R Users Group MeetUp, 2018/11/29
+
+---
+
+class: inverse 
+
+
+
+# Outline
+.TOC[
+1. Why Blog?
+1. (R) Markdown &amp; Blogdown
+1. Demo / Hands-On
+  * Setup
+  * Write / Code / Publish
+  * Customize
+1. Why Hugo/Static?
+]
+
+---
+class: inverse 
+
+# Why? Portfolio!
+
+--
+
+.pull-left[.quote[
+&gt; “if you don’t have a website nowadays, you don’t exist” ([Scheidegger 2012 via Yihui 2018](https://bookdown.org/yihui/blogdown/))
+
+___
+
+&gt; "While a resume matters, having a portfolio of **public evidence of your data science skills** can do wonders for your job prospects. Even if you have a referral, the ability to show potential employers what you can do instead of just telling them you can do something is important." ([Galarnyk 2018](https://towardsdatascience.com/how-to-build-a-data-science-portfolio-5f566517c79c))
+
+]
+]
+--
+.pull-right[
+![](img/portfolio.jpg)
+
+]
+
+---
+class: inverse 
+
+# Why? Visibility!
+
+.pull-left[.quote[
+&gt; "The most effective strategy for me was doing **public work**. I blogged and did a lot of open source development late in my PhD, and these helped give public evidence of my data science skills." (["@drob" Robinson 2018](https://blog.modeanalytics.com/data-scientists-making-the-leap-academia-to-industry/))
+
+]
+]
+
+.pull-right[.quote[
+&gt; "A well-designed and maintained website can be extremely helpful for other people **to know you**, and you do not need to wait for suitable chances at conferences or other occasions to introduce yourself in person to other people." ([Yihui 2018](https://bookdown.org/yihui/blogdown/))
+
+___
+
+&gt; "On the other hand, a website is also highly useful for yourself to **keep track** of what you have done and thought. Sometimes you may go back to a certain old post of yours to **relearn the tricks or methods** you once mastered in the past but have forgotten." ([Yihui 2018](https://bookdown.org/yihui/blogdown/))
+
+]
+]
+
+---
+class: inverse 
+
+# Why? Open Source, Open Science, Replication
+
+&gt; Sharing is caring!
+
+---
+class: inverse, center
+
+# The Formula
+![](img/Rstudio.png)
++
+![](img/htmlcss.png)
++
+![](img/githubgit.jpg)
+=
+
+?
+
+---
+class: inverse 
+
+# First, there was Markdown
+ 
+--
+### \# Headings (H1-H6)
+
+--
+
+plain text, \[[URL](https://example.com)\]\(https://example.com \)
+
+--
+
+\*\***bold**\*\*, \**italic*\*, \~\~~~strike-through~~\~\~
+
+--
+
+&gt; \&gt; Blockquotes
+
+--
+
+  1. lists
+    + \+ nested lists
+
+--
+
+handy   `inline code` chunks
+
+--
+
+
+```r
+block code chunks
+fun()
+```
+
+--
+
+LaTex-like formulas:
+
+`$$\bar{X}=\frac{1}{n}\sum_{i=1}^nX_i$$`
+---
+class: inverse
+
+# Then there was Base R
+
+![](img/baseR.jpg)
+
+---
+class: inverse
+
+# And then came Yihui Xie
+
+.pull-left[
+![Yihui Xie](img/yihuixie.jpg "Source: https://usesthis.com/images/interviews/yihui.xie/portrait.jpg")]
+
+--
+
+.pull-right[
++ software engineer at RStudio (since 2013)
++ PhD from the Dept. of Statistics, Iowa State University
++ Twitter: [@xieyihui](https://twitter.com/xieyihui)
++ Initiator of Chinese R Conference (in 2008!)
+
+![R China](img/r_china.png "Source: https://usesthis.com/images/interviews/yihui.xie/portrait.jpg")
+]
+
+
+---
+class: inverse
+background-image: url(img/yihuiverse.png)
+background-size: cover
+
+# "YihuiVerse"
+
+[https://github.com/yihui](https://github.com/yihui)
+
+[https://yihui.name/en/](https://yihui.name/en/)
+
+---
+class: inverse, center, middle
+
+## *What would we do without Yihui?*
+
+
+```r
+devtools::install_github("yihui/xaringan")
+```
+
+---
+class: inverse
+
+# R + Markdown = RMarkdown
+
+--
+
+.pull-left[.quote[
+ "With R Markdown, you only need to maintain the **source** documents; all output pages can be automatically generated from source documents. This makes it much easier to maintain a website, especially when the website is related to **data analysis or statistical computing and graphics**.
+___ 
+When the source code is updated (e.g., the model or data is changed), your web pages can be **updated** accordingly and **automatically**. *There is no need to run the code separately and cut-and-paste again*. Besides the convenience, you gain **reproducibility** at the same time." ([Xie 2018](https://bookdown.org/yihui/blogdown/r-markdown.html))
+]
+]
+--
+
+.pull-right[
+![](img/books.png)
+
+]
+
+---
+class: inverse, center, middle
+
+# Documention
+
+![](img/books.png)
+
+---
+class: inverse, center, middle
+
+# Bookdown
+
+![](img/rbooks.png)
+
+
+---
+class: inverse, center
+
+# Blogdown: Setup
+
+--
+
+1. RStudio: New Project
+
+--
+
+2.
+
+
+```r
+install.packages("blogdown")
+blogdown::install_hugo()
+```
+
+--
+
+
+```r
+blogdown::new_site()
+```
+
+---
+class: inverse
+
+# More Features
+
+* Tweets
+* RSS
+* Source!
+* Prettier Syntax Highlighting
+
+---
+class: inverse
+
+# Tips &amp; Tweaks
+
+* set up Hugo properly -&gt; `hugo -v`
+* relocate `/public`
+* use here::here("data"/"path")
+* put the Git Folder in root (255 path length limit)
+* Speed
+* 
+
+---
+class: inverse
+
+# Why Static?
+
+Static &amp; GDPR
+
+---
+class: center, middle
+
+# Thanks!
+
+[@fubits](https://twitter.com/fubits)
+[https://ellocke.github.io/](https://ellocke.github.io/)
+[GitHub](https://twitter.com/fubits)
+
+Slides created via the R package [**xaringan**](https://github.com/yihui/xaringan).
+
+---
+# Test
+
+
+```r
+library(leaflet)
+leaflet() %&gt;% 
+  addTiles() %&gt;% 
+  setView(13.337, 52.525, zoom = 17)
+```
+
+<div id="htmlwidget-1c0940176c58b73585fe" style="width:504px;height:504px;" class="leaflet html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1c0940176c58b73585fe">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"http://openstreetmap.org\">OpenStreetMap<\/a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA<\/a>"}]}],"setView":[[52.525,13.337],17,[]]},"evals":[],"jsHooks":[]}</script>
+    </textarea>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"ratio": "16:9",
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"chakra": "libs/remark-latest.min.js"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function() {
+  var d = document, s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})();</script>
+
+<script>
+(function() {
+  var i, text, code, codes = document.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+})();
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

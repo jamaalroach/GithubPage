@@ -1,0 +1,21 @@
+.quote {
+    line-height: 1.5;
+    font-style: italic;
+}
+
+img {
+    max-width: 80%;
+    object-fit: contain;
+    max-height: 80%;
+}
+
+.TOC ol li, .TOC ul li {
+    font-size: 45px;
+    font-family: 'Yanone Kaffeesatz';
+    font-weight: normal;
+    line-height: 1.25;
+}
+
+li {
+    line-height: 1.5;
+}
