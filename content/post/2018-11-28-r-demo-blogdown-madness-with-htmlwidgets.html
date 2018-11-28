@@ -3,6 +3,7 @@ title: '[R] Demo: Blogdown Madness with htmlwidgets'
 author: Ilja / fubits
 date: '2018-03-01'
 slug: r-demo-blogdown-madness-with-htmlwidgets
+hardslug: 2018-11-28-r-demo-blogdown-madness-with-htmlwidgets
 categories:
   - Rstats
   - WebTech
@@ -18,8 +19,8 @@ output:
     number_sections: yes
     toc: yes
 lastmod: '2018-11-28T13:33:03+01:00'
-description: 'Demo Site. Just testing the embedding of htmlwidgets (i.e. Leaflet, Xarigan Slides, DT::datatable()'
-abstract: 'Demo Site. Just testing the embedding of htmlwidgets (i.e. Leaflet, Xarigan Slides, DT::datatable()'
+description: 'Demo Site. Just testing the embedding of htmlwidgets (i.e. Leaflet, Xarigan Slides, DT::datatable()) in R Blogdown posts'
+abstract: 'Demo Site. Just testing the embedding of htmlwidgets (i.e. Leaflet, Xarigan Slides, DT::datatable() in R Blogdown posts'
 thumbnail: /img/thumbs/rdemo.jpg
 rmdlink: yes
 keywords: []
@@ -46,13 +47,17 @@ mathjaxEnableAutoNumber: no
 
 <div id="TOC">
 <ul>
-<li><a href="#xarigan-slides"><span class="toc-section-number">1</span> Xarigan Slides</a></li>
-<li><a href="#dtdatatable"><span class="toc-section-number">2</span> DT::datatable()</a></li>
+<li><a href="#leaflet"><span class="toc-section-number">1</span> Leaflet</a></li>
+<li><a href="#xarigan-slides"><span class="toc-section-number">2</span> Xarigan Slides</a></li>
+<li><a href="#dtdatatable"><span class="toc-section-number">3</span> DT::datatable()</a></li>
+<li><a href="#conlusion"><span class="toc-section-number">4</span> Conlusion</a></li>
 </ul>
 </div>
 
 <pre class="r"><code>library(tidyverse)
-library(sf)</code></pre>
+# library(sf)</code></pre>
+<div id="leaflet" class="section level1">
+<h1><span class="header-section-number">1</span> Leaflet</h1>
 <pre class="r"><code>dc_crime &lt;- sf::st_read(&quot;https://opendata.arcgis.com/datasets/dc3289eab3d2400ea49c154863312434_8.geojson&quot;, quiet = TRUE)</code></pre>
 <pre class="r"><code>library(leaflet)</code></pre>
 <pre class="r"><code>leaflet() %&gt;% 
@@ -71,22 +76,40 @@ library(sf)</code></pre>
 <pre class="r"><code># install.packages(&#39;widgetframe&#39;)
 library(widgetframe)</code></pre>
 <pre><code>## Lade nötiges Paket: htmlwidgets</code></pre>
+</div>
 <div id="xarigan-slides" class="section level1">
-<h1><span class="header-section-number">1</span> Xarigan Slides</h1>
+<h1><span class="header-section-number">2</span> Xarigan Slides</h1>
 <pre class="r"><code># need to find a solution for local embedding. here::here() does not produce a URL
 knitr::include_url(&quot;https://dadascience.design/talks/rblogdown/rblogdown.html&quot;)</code></pre>
 <iframe src="https://dadascience.design/talks/rblogdown/rblogdown.html" width="100%" height="400px">
 </iframe>
 </div>
 <div id="dtdatatable" class="section level1">
-<h1><span class="header-section-number">2</span> DT::datatable()</h1>
+<h1><span class="header-section-number">3</span> DT::datatable()</h1>
+<blockquote>
+<p>does not work on mobile screens, yet</p>
+</blockquote>
 <pre class="r"><code>DT::datatable(
   head(mtcars, 10),
   fillContainer = FALSE, options = list(pageLength = 8)) %&gt;%
-  frameWidget()</code></pre>
+  frameWidget(width = &quot;100%&quot;, height = &quot;100%&quot;, options = )</code></pre>
 <div id="htmlwidget-3" style="width:100%;height:100%;" class="widgetframe html-widget"></div>
 <script type="application/json" data-for="htmlwidget-3">{"x":{"url":"/post/2018-11-28-r-demo-blogdown-madness-with-htmlwidgets_files/figure-html//widgets/widget_unnamed-chunk-10.html","options":{"xdomain":"*","allowfullscreen":false,"lazyload":false}},"evals":[],"jsHooks":[]}</script>
 <blockquote>
 <p>the robust way (to be tested yet): <a href="https://stackoverflow.com/questions/43594039/dt-package-not-working-with-blogdown-using-hugo-future-imperfect-theme" class="uri" target="_blank">https://stackoverflow.com/questions/43594039/dt-package-not-working-with-blogdown-using-hugo-future-imperfect-theme</a></p>
 </blockquote>
+</div>
+<div id="conlusion" class="section level1">
+<h1><span class="header-section-number">4</span> Conlusion</h1>
+<div class="figure">
+<img src="https://media.giphy.com/media/BmmfETghGOPrW/giphy.gif" />
+
+</div>
+<blockquote>
+<p>Proof-of-concept proven, I guess.</p>
+</blockquote>
+<div class="figure">
+<img src="/img/rdemo/rmagic.jpg" alt="As simple as that." />
+<p class="caption">As simple as that.</p>
+</div>
 </div>

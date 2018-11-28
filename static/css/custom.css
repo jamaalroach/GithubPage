@@ -706,9 +706,10 @@ figure.hljs.highlight div.line {
 	vertical-align: initial;
 }
 
-
-
 .footer > div > span > span {
 	vertical-align: middle;
 }
 
+iframe {
+	overflow-x: scroll;
+}

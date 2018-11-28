@@ -3,6 +3,7 @@ title: '[R] Demo: Blogdown Madness with htmlwidgets'
 author: Ilja / fubits
 date: '2018-03-01'
 slug: r-demo-blogdown-madness-with-htmlwidgets
+hardslug: 2018-11-28-r-demo-blogdown-madness-with-htmlwidgets
 categories:
   - Rstats
   - WebTech
@@ -18,8 +19,8 @@ output:
     number_sections: yes
     toc: yes
 lastmod: '2018-11-28T13:33:03+01:00'
-description: 'Demo Site. Just testing the embedding of htmlwidgets (i.e. Leaflet, Xarigan Slides, DT::datatable()'
-abstract: 'Demo Site. Just testing the embedding of htmlwidgets (i.e. Leaflet, Xarigan Slides, DT::datatable()'
+description: 'Demo Site. Just testing the embedding of htmlwidgets (i.e. Leaflet, Xarigan Slides, DT::datatable()) in R Blogdown posts'
+abstract: 'Demo Site. Just testing the embedding of htmlwidgets (i.e. Leaflet, Xarigan Slides, DT::datatable() in R Blogdown posts'
 thumbnail: /img/thumbs/rdemo.jpg
 rmdlink: yes
 keywords: []
@@ -39,9 +40,10 @@ rmarkdown::render("index.Rmd")
 
 ```{r message=FALSE}
 library(tidyverse)
-library(sf)
+# library(sf)
 ```
 
+# Leaflet
 
 ```{r cache=TRUE}
 dc_crime <- sf::st_read("https://opendata.arcgis.com/datasets/dc3289eab3d2400ea49c154863312434_8.geojson", quiet = TRUE)
@@ -85,12 +87,21 @@ knitr::include_url("https://dadascience.design/talks/rblogdown/rblogdown.html")
 
 # DT::datatable()
 
-```{r out.width = "100%", out.height = "100%"}
+> does not work on mobile screens, yet
+
+```{r results = "asis"}
 DT::datatable(
   head(mtcars, 10),
   fillContainer = FALSE, options = list(pageLength = 8)) %>%
-  frameWidget()
+  frameWidget(width = "100%", height = "100%", options = )
 ```
 
 > the robust way (to be tested yet): [https://stackoverflow.com/questions/43594039/dt-package-not-working-with-blogdown-using-hugo-future-imperfect-theme](https://stackoverflow.com/questions/43594039/dt-package-not-working-with-blogdown-using-hugo-future-imperfect-theme){target="_blank"}
 
+# Conlusion
+
+![](https://media.giphy.com/media/BmmfETghGOPrW/giphy.gif)
+
+> Proof-of-concept proven, I guess.
+
+![As simple as that.](/img/rdemo/rmagic.jpg)
