@@ -1,0 +1,96 @@
+---
+title: '[R] Demo: Blogdown Madness with htmlwidgets'
+author: Ilja / fubits
+date: '2018-03-01'
+slug: r-demo-blogdown-madness-with-htmlwidgets
+categories:
+  - Rstats
+  - WebTech
+tags:
+  - Blogdown
+  - leaflet
+  - GIS
+  - xarigan
+  - data.table
+  - htmlwidgets
+output:
+  blogdown::html_page:
+    number_sections: yes
+    toc: yes
+lastmod: '2018-11-28T13:33:03+01:00'
+description: 'Demo Site. Just testing the embedding of htmlwidgets (i.e. Leaflet, Xarigan Slides, DT::datatable()'
+abstract: 'Demo Site. Just testing the embedding of htmlwidgets (i.e. Leaflet, Xarigan Slides, DT::datatable()'
+thumbnail: /img/thumbs/rdemo.jpg
+rmdlink: yes
+keywords: []
+comment: no
+autoCollapseToc: no
+postMetaInFooter: no
+hiddenFromHomePage: no
+mathjax: no
+mathjaxEnableSingleDollar: no
+mathjaxEnableAutoNumber: no
+---
+
+```{r include=FALSE, eval=FALSE}
+# render magic
+rmarkdown::render("index.Rmd")
+```
+
+```{r message=FALSE}
+library(tidyverse)
+library(sf)
+```
+
+
+```{r cache=TRUE}
+dc_crime <- sf::st_read("https://opendata.arcgis.com/datasets/dc3289eab3d2400ea49c154863312434_8.geojson", quiet = TRUE)
+```
+
+```{r}
+library(leaflet)
+```
+
+```{r out.width = '100%'}
+leaflet() %>% 
+  addTiles() %>% 
+  addCircles(data = dc_crime, color = "#800000")
+```
+
+
+```{r}
+# library(leaflet.extras)
+```
+
+```{r out.width = '100%'}
+leaflet() %>% 
+  addTiles() %>% 
+  setView(13.37, 52.525, zoom = 17)
+```
+
+---
+
+There are two ways. The quick & dirty way is to use the `x` package, which will give us the widget as an `iframe`:
+```{r}
+# install.packages('widgetframe')
+library(widgetframe)
+```
+
+# Xarigan Slides
+
+```{r out.width = '100%', fig.asp=1.77}
+# need to find a solution for local embedding. here::here() does not produce a URL
+knitr::include_url("https://dadascience.design/talks/rblogdown/rblogdown.html")
+```
+
+# DT::datatable()
+
+```{r out.width = "100%", out.height = "100%"}
+DT::datatable(
+  head(mtcars, 10),
+  fillContainer = FALSE, options = list(pageLength = 8)) %>%
+  frameWidget()
+```
+
+> the robust way (to be tested yet): [https://stackoverflow.com/questions/43594039/dt-package-not-working-with-blogdown-using-hugo-future-imperfect-theme](https://stackoverflow.com/questions/43594039/dt-package-not-working-with-blogdown-using-hugo-future-imperfect-theme){target="_blank"}
+

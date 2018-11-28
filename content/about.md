@@ -25,6 +25,18 @@ My biggest **project** so far was being a `Digital Officer` (project-based, 1 ye
 
 <a href="https://projekt.swp-berlin.org/urbaneraeume/">![(**One visual element from the "Urban Spaces" project @ SWP Berlin)**](/img/about/urban_spaces_cover.jpeg "One visual element from the 'Urban Spaces' project @ SWP Berlin")</a>
 
+## Talks
+
+> Beta / just testing, yet
+
++ [Slides](/talks/rblogdown/rblogdown.html)
++ [Test /Static rendering with `R/build.R`](/talks/)
+
+```{r out.width = '100%', fig.asp=1.78}
+knitr::include_url('rblogdown/rblogdown.html')
+```
+
+
 ## Contact
 
 You'll find me on:

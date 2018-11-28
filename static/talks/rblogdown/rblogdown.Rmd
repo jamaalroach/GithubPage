@@ -1,0 +1,314 @@
+---
+title: "Best of both Worlds:"
+subtitle: "Code-centric Websites with Blogdown & R"
+author: "Ilja / @fubits"
+date: "Berlin R Users Group MeetUp, 2018/11/29"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: ["default", "default-fonts", "../css/xarigan_custom.css"]
+    nature:
+      ratio: 16:9
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      chakra: "../libs/remark-latest.min.js"
+---
+class: inverse 
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+```
+
+# Outline
+.TOC[
+1. Why Blog?
+1. (R) Markdown & Blogdown
+1. Demo / Hands-On
+  * Setup
+  * Write / Code / Publish
+  * Customize
+1. Why Hugo/Static?
+]
+
+---
+class: inverse 
+
+# Why? Portfolio!
+
+--
+
+.pull-left[.quote[
+> “if you don’t have a website nowadays, you don’t exist” ([Scheidegger 2012 via Yihui 2018](https://bookdown.org/yihui/blogdown/))
+
+___
+
+> "While a resume matters, having a portfolio of **public evidence of your data science skills** can do wonders for your job prospects. Even if you have a referral, the ability to show potential employers what you can do instead of just telling them you can do something is important." ([Galarnyk 2018](https://towardsdatascience.com/how-to-build-a-data-science-portfolio-5f566517c79c))
+
+]
+]
+--
+.pull-right[
+![](img/portfolio.jpg)
+
+]
+
+---
+class: inverse 
+
+# Why? Visibility!
+
+.pull-left[.quote[
+> "The most effective strategy for me was doing **public work**. I blogged and did a lot of open source development late in my PhD, and these helped give public evidence of my data science skills." (["@drob" Robinson 2018](https://blog.modeanalytics.com/data-scientists-making-the-leap-academia-to-industry/))
+
+]
+]
+
+.pull-right[.quote[
+> "A well-designed and maintained website can be extremely helpful for other people **to know you**, and you do not need to wait for suitable chances at conferences or other occasions to introduce yourself in person to other people." ([Yihui 2018](https://bookdown.org/yihui/blogdown/))
+
+___
+
+> "On the other hand, a website is also highly useful for yourself to **keep track** of what you have done and thought. Sometimes you may go back to a certain old post of yours to **relearn the tricks or methods** you once mastered in the past but have forgotten." ([Yihui 2018](https://bookdown.org/yihui/blogdown/))
+
+]
+]
+
+---
+class: inverse 
+
+# Why? Open Source, Open Science, Replication
+
+> Sharing is caring!
+
+---
+class: inverse, center, 
+
+# The Formula
+
+--
+
+.flex[
+
+(
+
+![](img/RLogo.png)
+
++
+
+![](img/gitgithub.png)
+
+)
+
++
+
+![](img/htmlcss.png)
+
+
+.flex[
+
+=
+
+![](img/question.png)
+
+]
+
+]
+
+---
+class: inverse 
+
+# First, there was Markdown
+ 
+--
+### \# Headings (H1-H6)
+
+--
+
+plain text, \[[URL](https://example.com)\]\(https://example.com \)
+
+--
+
+\*\***bold**\*\*, \**italic*\*, \~\~~~strike-through~~\~\~, H~2~0, R^2^
+
+--
+
+> \> Blockquotes
+
+--
+
+  1. lists
+    + \+ nested lists
+
+--
+
+handy   `inline code` chunks
+
+--
+
+```{r eval=FALSE}
+block code chunks
+fun()
+```
+
+--
+
+LaTex-like formulas:
+
+$$\bar{X}=\frac{1}{n}\sum_{i=1}^nX_i$$
+---
+class: inverse
+
+# Then there was Base R
+
+![](img/baseR.jpg)
+
+---
+class: inverse
+
+# And then came Yihui Xie
+
+.pull-left[
+![Yihui Xie](img/yihuixie.jpg "Source: https://usesthis.com/images/interviews/yihui.xie/portrait.jpg")]
+
+--
+
+.pull-right[
++ software engineer at RStudio (since 2013)
++ PhD from the Dept. of Statistics, Iowa State University
++ Twitter: [@xieyihui](https://twitter.com/xieyihui)
++ Initiator of Chinese R Conference (in 2008!)
+
+![R China](img/r_china.png "Source: https://usesthis.com/images/interviews/yihui.xie/portrait.jpg")
+]
+
+
+---
+class: inverse
+background-image: url(img/yihuiverse.png)
+background-size: cover
+
+# "YihuiVerse"
+
+[https://github.com/yihui](https://github.com/yihui)
+
+[https://yihui.name/en/](https://yihui.name/en/)
+
+---
+class: inverse, center, middle
+
+## *What would we do without Yihui?*
+
+```{r eval=FALSE, tidy=FALSE}
+devtools::install_github("yihui/xaringan")
+```
+
+---
+class: inverse
+
+# R + Markdown = RMarkdown
+
+--
+
+.pull-left[.quote[
+ "With R Markdown, you only need to maintain the **source** documents; all output pages can be automatically generated from source documents. This makes it much easier to maintain a website, especially when the website is related to **data analysis or statistical computing and graphics**.
+___ 
+When the source code is updated (e.g., the model or data is changed), your web pages can be **updated** accordingly and **automatically**. *There is no need to run the code separately and cut-and-paste again*. Besides the convenience, you gain **reproducibility** at the same time." ([Xie 2018](https://bookdown.org/yihui/blogdown/r-markdown.html))
+]
+]
+--
+
+.pull-right[
+![](img/books.png)
+
+]
+
+---
+class: inverse, center, middle
+
+# Documention
+
+![](img/books.png)
+
+---
+class: inverse, center, middle
+
+# Bookdown
+
+![](img/rbooks.png)
+
+
+---
+class: inverse, center
+
+# Blogdown: Setup
+
+--
+
+1. RStudio: New Project
+
+--
+
+2.
+
+```{r eval=FALSE}
+install.packages("blogdown")
+blogdown::install_hugo()
+```
+
+--
+
+```{r eval=FALSE}
+blogdown::new_site()
+```
+
+---
+class: inverse
+
+# More Features
+
+* Tweets
+* RSS
+* Source!
+* Prettier Syntax Highlighting
+
+---
+class: inverse
+
+# Tips & Tweaks
+
+* set up Hugo properly -> `hugo -v`
+* relocate `/public`
+* use here::here("data"/"path")
+* put the Git Folder in root (255 path length limit)
+* Speed
+* 
+
+---
+class: inverse
+
+# Why Static?
+
+Static & GDPR
+
+---
+class: center, middle
+
+# Thanks!
+
+[@fubits](https://twitter.com/fubits)
+[https://ellocke.github.io/](https://ellocke.github.io/)
+[GitHub](https://twitter.com/fubits)
+
+Slides created via the R package [**xaringan**](https://github.com/yihui/xaringan).
+
+---
+# Test
+
+```{r out.width = "100%"}
+library(leaflet)
+leaflet() %>% 
+  addTiles() %>% 
+  setView(13.337, 52.525, zoom = 17)
+```
+
