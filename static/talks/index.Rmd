@@ -32,3 +32,12 @@ knitr::include_url('rblogdown/rblogdown.html')
 
 ___
 
+## GIS / Mapping
+
+> 2018/04/19: Hi-Res Mapping with R for Print - Presented at  [CODE/GEO/GRAPHIC](http://code-geo-graphic.com/)
+
+* [Post / Notebook](https://dadascience.design/post/r-low-budget-high-res-mapping-with-r-for-not-for-profit-print/)
+* [Repo](https://github.com/ellocke/GithubPage/blob/master/content/post/)
+
+___
+
