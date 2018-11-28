@@ -58,7 +58,7 @@ Please see [Twitter pt. 1](/post/r-academic-conference-twitter-pt-1-mining-dvpw1
 **Prepare here()-path to the `.rds` data**
 
 ```{r}
-data_path <- here("static", "data", "ConferenceTweets", "/")
+data_path <- here("data", "ConferenceTweets", "/")
 ```
 
 **Bulk-read the `.rds` files**

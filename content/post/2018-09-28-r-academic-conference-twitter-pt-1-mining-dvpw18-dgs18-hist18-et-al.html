@@ -141,7 +141,7 @@ getTimeString()</code></pre>
 <h2><span class="header-section-number">2.3</span> (Prepare filepath for .rds with <code>here()</code>)</h2>
 <pre class="r"><code># library(here) # https://blogdown-demo.rbind.io/2018/02/27/r-file-paths/
 # blogdown-specific work-around for the `data`-folder
-data_path &lt;- here(&quot;static&quot;, &quot;data&quot;, &quot;ConferenceTweets&quot;, &quot;/&quot;)
+data_path &lt;- here(&quot;data&quot;, &quot;ConferenceTweets&quot;, &quot;/&quot;)
 if (!dir.exists(data_path)) dir.create(data_path)
 # saveRDS(mtcars, str_c(data_path, &quot;test&quot;, &quot;.rds&quot;)) # test filepath
 # readRDS(str_c(data_path, &quot;test&quot;, &quot;.rds&quot;)) # test filepath</code></pre>

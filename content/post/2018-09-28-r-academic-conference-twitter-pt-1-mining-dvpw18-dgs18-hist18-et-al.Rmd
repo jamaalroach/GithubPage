@@ -130,7 +130,7 @@ getTimeString()
 ```{r}
 # library(here) # https://blogdown-demo.rbind.io/2018/02/27/r-file-paths/
 # blogdown-specific work-around for the `data`-folder
-data_path <- here("static", "data", "ConferenceTweets", "/")
+data_path <- here("data", "ConferenceTweets", "/")
 if (!dir.exists(data_path)) dir.create(data_path)
 # saveRDS(mtcars, str_c(data_path, "test", ".rds")) # test filepath
 # readRDS(str_c(data_path, "test", ".rds")) # test filepath

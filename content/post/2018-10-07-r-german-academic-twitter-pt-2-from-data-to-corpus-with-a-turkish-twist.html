@@ -91,7 +91,7 @@ quanteda_options(&quot;threads&quot; = 4)
 <h1><span class="header-section-number">1</span> Import Tweets from <code>.rds</code></h1>
 <p>Please see <a href="/post/r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al/">Twitter pt. 1</a> for Twitter Mining with <code>rtweet</code> and the details of the data handling approach.</p>
 <p><strong>Prepare here()-path to the <code>.rds</code> data</strong></p>
-<pre class="r"><code>data_path &lt;- here(&quot;static&quot;, &quot;data&quot;, &quot;ConferenceTweets&quot;, &quot;/&quot;)</code></pre>
+<pre class="r"><code>data_path &lt;- here(&quot;data&quot;, &quot;ConferenceTweets&quot;, &quot;/&quot;)</code></pre>
 <p><strong>Bulk-read the <code>.rds</code> files</strong></p>
 <pre class="r"><code>dvpw_collection &lt;- dir(path = data_path, pattern = &quot;dvpw_&quot;) %&gt;% 
   str_c(data_path, .) %&gt;% 
@@ -2231,7 +2231,7 @@ joint_corpus &lt;- joint_corpus + mixed_corpus #3,748 docs</code></pre>
 <pre><code>##    ... removed 608 features
 ##    ... created a 3,748 x 15,763 sparse dfm
 ##    ... complete. 
-## Elapsed time: 0.442 seconds.</code></pre>
+## Elapsed time: 0.58 seconds.</code></pre>
 <p>We’re down to 15763 features from 3748 documents (Tweets) and were able to get rid of 608 features with the iteratively refined approach.</p>
 <p>And as we might want to use a grouped dfm for group comparisons (and <code>dfm_group</code> doesn’t seem to work for me here), we’ll create a custom grouped one, too.</p>
 <pre class="r"><code>## not working:
