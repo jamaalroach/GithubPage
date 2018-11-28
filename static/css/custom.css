@@ -18,6 +18,7 @@ header #header {
 	display: inline-block;
 	vertical-align: middle;
 	margin: 10px 0;
+	padding-left: 5px;
 }
 
 #header .logo-wrapper .logo {
@@ -31,6 +32,7 @@ header #header {
 
 body {
 	border: 0;
+	overflow-x: hidden;
 }
 
 .post {
@@ -264,7 +266,7 @@ h6 {
 	}
 
 	#header .site-navbar .menu {
-		padding-right: 0;
+		padding-right: 5px;
 	}
 
 	/*	.footer{
@@ -699,7 +701,14 @@ figure.hljs.highlight div.line {
 	vertical-align: middle;
 }
 
-.footer .iconfont {
+.footer .iconfont:not(.icon-rss) {
 	line-height: 1.5;
+	vertical-align: initial;
+}
+
+
+
+.footer > div > span > span {
+	vertical-align: middle;
 }
 
