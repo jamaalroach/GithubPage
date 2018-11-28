@@ -1,5 +1,5 @@
 ---
-title: 'Test'
+title: 'Beta: Talks'
 author: 'Ilja / @fubits'
 date: '2018-11-29'
 slug: index
@@ -12,7 +12,7 @@ params:
   output_file:"index.html"
 ---
 
-# Beta: Talks
+# Talks
 
 ```{r include=FALSE, eval=FALSE}
 # render magic (manual rendering)
@@ -28,4 +28,7 @@ knitr::include_url('rblogdown/rblogdown.html')
 ```
 
 * [Slides (Xarigan)](https://dadascience.design/talks/rblogdown/rblogdown.html#1)
-* [`.Rmd`](https://dadascience.design/talks/rblogdown/rblogdown.Rmd)
+* [Repo](https://github.com/ellocke/GithubPage/tree/master/static/talks/rblogdown)
+
+___
+
