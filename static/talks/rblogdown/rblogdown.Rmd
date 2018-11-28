@@ -167,7 +167,11 @@ class: inverse
 
 # Then there was Base R / R GUI
 
+.imgblock[
+
 ![](img/baseR.jpg)
+
+]
 
 ---
 class: inverse
@@ -186,6 +190,7 @@ class: inverse
 + Initiator of Chinese R Conference (in 2008!)
 
 ![R China](img/r_china.png "Source: https://usesthis.com/images/interviews/yihui.xie/portrait.jpg")
+
 ]
 
 
@@ -194,20 +199,19 @@ class: inverse
 background-image: url(img/yihuiverse.png)
 background-size: cover
 
-# "YihuiVerse"
+# ~~"YihuiVerse"~~ <br /> R Rmarkdown Ecosystem
 
-[https://github.com/yihui](https://github.com/yihui)
+.pull-left[
+.largest[
 
-[https://yihui.name/en/](https://yihui.name/en/)
+[@xieyihui](https://twitter.com/xieyihui)
 
----
-class: inverse, center, middle
+[yihui.name/en/](https://yihui.name/en/)
 
-## *What would we do without Yihui?*
+[github.com/yihui/](https://github.com/yihui)
 
-```{r eval=FALSE, tidy=FALSE}
-devtools::install_github("yihui/xaringan")
-```
+]
+]
 
 ---
 class: inverse
@@ -225,32 +229,40 @@ When the source code is updated (e.g., the model or data is changed), your web p
 --
 
 .pull-right[
+.larger[
 
-+ Text + Formatting
++ Markdown+ Text
 
-+ Code/Syntax + Output
++ `Code/Syntax` + Output
 
-+ shareable .Rmd
++ shareable `.Rmd`
 
 + Code + Layout are completly separated
 
-+ One Workflow/ a single IDE
++ One Workflow / a single IDE
 
+]
 ]
 
 ---
-class: inverse, center, middle
+class: inverse
 
 # Documention
 
+.imgblock[
+
 ![](img/books.png)
 
+]
+
+.centerblock[
 + [https://bookdown.org/yihui/rmarkdown/](https://bookdown.org/yihui/rmarkdown/)
 + [https://bookdown.org/yihui/bookdown/](https://bookdown.org/yihui/bookdown/)
 + [https://bookdown.org/yihui/blogdown/](https://bookdown.org/yihui/blogdown/)
+]
 
 ---
-class: inverse, center, middle
+class: inverse, center
 
 # Bookdown
 
@@ -264,15 +276,41 @@ Today: Focus on Blogdown
 ---
 class: inverse, center
 
+# The Formula!
+
+--
+.flex[
+
+![](img/Rstudio.png)
+
+&nbsp;\> 
+
+![](img/knitrpandoc.png)
+
+&nbsp;\> 
+
+![](img/hugo.png)
+
+]
+
+---
+class: inverse, center, middle
+
+# = Blogdown
+
+.bigpicture[
+![](img/blogdown_large.png)
+
+]
+
+---
+class: inverse, center
+
 # Blogdown: Setup
 
 --
 
-1. RStudio: New Project
-
---
-
-2.
+### I. Install Blogdown
 
 ```{r eval=FALSE}
 install.packages("blogdown")
@@ -281,31 +319,82 @@ blogdown::install_hugo()
 
 --
 
+### II. Install Hugo
+
+```{r eval=FALSE}
+blogdown::install_hugo()
+```
+
+--
+
+### III. RStudio: New Site
+
+`File -> New Project -> Website using Blogdown`
+
+OR
+
 ```{r eval=FALSE}
 blogdown::new_site()
 ```
+
+---
+class: inverse, center
+
+# Demo
+
+--
+
+### I. Markdown Post
+
+--
+
+### II. Blogdown Post
+
+--
+
+### III. Theme + CSS
+
+--
+.quote[
+“If you do not understand HTML, CSS, or JavaScript, and have no experience with Hugo themes or templates, it may take you about **10 minutes to get started** with your new website, since you have to accept everything you are given (such as the default theme); if you do have the knowledge and experience (and desire to highly customize your site), it may take you **several days** to get started. Hugo is really powerful. Be cautious with power.” ([Xie et al. 2018, Ch. 1.6](https://bookdown.org/yihui/blogdown/other-themes.html))
+]
+
+--
+___
+
+> (cf. [modded theme](https://dadascience.design/) with [source](https://blog.olowolo.com/example-site/))
 
 ---
 class: inverse
 
 # More Features
 
-* Tweets
+.larger[
+* Shortcodes
+* CSS + JS
 * RSS
-* Source!
-* Prettier Syntax Highlighting
+* Source File
+* static/other (i.e. slides for this talk)
+* **[Widgets](https://dadascience.design/post/r-demo-blogdown-madness-with-htmlwidgets/)**
+]
 
 ---
 class: inverse
 
 # Tips & Tweaks
 
-* set up Hugo properly -> `hugo -v`
-* relocate `/public`
-* use here::here("data"/"path")
-* put the Git Folder in root (255 path length limit)
-* Speed
-* 
+.larger[
+* set up Hugo properly -> [`hugo -v`](https://dadascience.design/post/r-troubleshooting-blogdown-hugo-for-windows-dummies/)
+* change `/public` folder
+* use [`here::here("static","data")`](https://github.com/jennybc/here_here#readme)
+* Windows: Dual boot Linux OR put the Project Folder in root (255 path length limit)
+
+* use Git
+
+* save objects with dynamic data (i.e. from API)
+* DO NOT SAVE BIG OBJECTS TO /static/data
+
+]
 
 ---
 class: inverse
@@ -315,23 +404,14 @@ class: inverse
 Static & GDPR
 
 ---
-class: center, middle
+class: inverse, center, middle
 
 # Thanks!
 
+.largest[
+[dadascience.design/talks](https://dadascience.design/talks)
+
 [@fubits](https://twitter.com/fubits)
-[https://ellocke.github.io/](https://ellocke.github.io/)
-[GitHub](https://twitter.com/fubits)
+]
 
 Slides created via the R package [**xaringan**](https://github.com/yihui/xaringan).
-
----
-# Test
-
-```{r out.width = "100%"}
-library(leaflet)
-leaflet() %>% 
-  addTiles() %>% 
-  setView(13.337, 52.525, zoom = 17)
-```
-

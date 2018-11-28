@@ -713,3 +713,7 @@ figure.hljs.highlight div.line {
 iframe {
 	overflow-x: scroll;
 }
+
+#datatableWidget {
+	overflow-x: scroll;
+}

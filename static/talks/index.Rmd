@@ -1,6 +1,6 @@
 ---
 title: 'Test'
-author: ''
+author: 'Ilja / @fubits'
 date: '2018-11-29'
 slug: index
 # output:
@@ -10,71 +10,19 @@ slug: index
 output: html_document
 params:
   output_file:"index.html"
-categories:
-  - R
-  - Blogdown
-tags:
-  - GIS
-  - Leaflet
 ---
+
+# Beta: Talks
 
 ```{r include=FALSE, eval=FALSE}
 # render magic (manual rendering)
 rmarkdown::render("index.Rmd")
 ```
 
-```{r message=FALSE}
-library(tidyverse)
-library(sf)
-```
+## Blogdown
 
-
-```{r cache=TRUE}
-dc_crime <- sf::st_read("https://opendata.arcgis.com/datasets/dc3289eab3d2400ea49c154863312434_8.geojson", quiet = TRUE)
-```
-
-```{r}
-library(leaflet)
-```
-
-```{r out.width = '100%'}
-leaflet() %>% 
-  addTiles() %>% 
-  addCircles(data = dc_crime, color = "#800000")
-```
-
-
-```{r}
-# library(leaflet.extras)
-```
-
-```{r out.width = '100%'}
-leaflet() %>% 
-  addTiles() %>% 
-  setView(13.37, 52.525, zoom = 17)
-```
-
----
-
-There are two ways. The quick & dirty way is to use the `x` package, which will give us the widget as an `iframe`:
-```{r}
-# install.packages('widgetframe')
-library(widgetframe)
-```
-
-# Slides
+> 2018/11/28: Presented at [Berlin R Users Group](https://www.meetup.com/de-DE/Berlin-R-Users-Group/events/256343177/)
 
 ```{r out.width = '100%', fig.asp=1.78}
 knitr::include_url('rblogdown/rblogdown.html')
 ```
-
-# DT::datatable()
-
-```{r out.width = "100%", out.height = "100%"}
-DT::datatable(
-  head(iris, 10),
-  fillContainer = FALSE, options = list(pageLength = 8)) %>% frameWidget()
-```
-
-the robust way: [StackOverflow](https://stackoverflow.com/questions/43594039/dt-package-not-working-with-blogdown-using-hugo-future-imperfect-theme){target="_blank"}
-

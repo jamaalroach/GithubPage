@@ -42,3 +42,36 @@ code {
     background: #f8f8f8;
     padding: 0 5px;
 }
+
+.largest {
+    font-size: xx-large;
+}
+
+.larger {
+    font-size: larger;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin-top: 12px;
+    top: 0;
+}
+
+.flex-top {
+    vertical-align: top;
+}
+
+.bigpicture {
+    max-width: 550px;
+    margin: 0 auto;
+}
+
+.imgblock * {
+    margin: 0 auto;
+    display: block;
+}
+
+.centerblock {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}

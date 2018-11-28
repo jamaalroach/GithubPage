@@ -19,8 +19,8 @@ output:
     number_sections: yes
     toc: yes
 lastmod: '2018-11-28T13:33:03+01:00'
-description: 'Demo Site. Just testing the embedding of HTML widgets (Leaflet, Xarigan Slides, DT::datatable(), Shiny App) in R Blogdown posts'
-abstract: 'Demo Site. Just testing the embedding of HTML widgets (Leaflet, Xarigan Slides, DT::datatable(), Shiny App) in R Blogdown posts'
+description: 'Demo Site. Just testing the embedding of HTML widgets (Leaflet, Xarigan Slides, DT::datatable(), Shiny App) in R Blogdown posts.'
+abstract: 'Demo Site. Just testing the embedding of HTML widgets (Leaflet, Xarigan Slides, DT::datatable(), Shiny App) in R Blogdown posts.'
 thumbnail: /img/thumbs/rdemo.jpg
 rmdlink: yes
 keywords: []
