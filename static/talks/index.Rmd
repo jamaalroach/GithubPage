@@ -26,3 +26,6 @@ rmarkdown::render("index.Rmd")
 ```{r out.width = '100%', fig.asp=1.78}
 knitr::include_url('rblogdown/rblogdown.html')
 ```
+
+* [Slides (Xarigan)](https://dadascience.design/talks/rblogdown/rblogdown.html#1)
+* [`.Rmd`](https://dadascience.design/talks/rblogdown/rblogdown.Rmd)

@@ -13,6 +13,10 @@ header #header {
 	padding-top: 0;
 }
 
+.post-header .iconfont {
+	vertical-align: initial;
+}
+
 #header .logo-wrapper {
 	float: left;
 	display: inline-block;
