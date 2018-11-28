@@ -1,7 +1,7 @@
 ---
-title: '[R] Demo: Blogdown Madness with htmlwidgets'
+title: '[R] Just a Demo: Blogdown Madness with htmlwidgets'
 author: Ilja / fubits
-date: '2018-03-01'
+date: '2018-11-28'
 slug: r-demo-blogdown-madness-with-htmlwidgets
 hardslug: 2018-11-28-r-demo-blogdown-madness-with-htmlwidgets
 categories:
@@ -19,8 +19,8 @@ output:
     number_sections: yes
     toc: yes
 lastmod: '2018-11-28T13:33:03+01:00'
-description: 'Demo Site. Just testing the embedding of htmlwidgets (i.e. Leaflet, Xarigan Slides, DT::datatable()) in R Blogdown posts'
-abstract: 'Demo Site. Just testing the embedding of htmlwidgets (i.e. Leaflet, Xarigan Slides, DT::datatable() in R Blogdown posts'
+description: 'Demo Site. Just testing the embedding of HTML widgets (Leaflet, Xarigan Slides, DT::datatable(), Shiny App) in R Blogdown posts'
+abstract: 'Demo Site. Just testing the embedding of HTML widgets (Leaflet, Xarigan Slides, DT::datatable(), Shiny App) in R Blogdown posts'
 thumbnail: /img/thumbs/rdemo.jpg
 rmdlink: yes
 keywords: []
@@ -50,7 +50,8 @@ mathjaxEnableAutoNumber: no
 <li><a href="#leaflet"><span class="toc-section-number">1</span> Leaflet</a></li>
 <li><a href="#xarigan-slides"><span class="toc-section-number">2</span> Xarigan Slides</a></li>
 <li><a href="#dtdatatable"><span class="toc-section-number">3</span> DT::datatable()</a></li>
-<li><a href="#conlusion"><span class="toc-section-number">4</span> Conlusion</a></li>
+<li><a href="#shiny-app"><span class="toc-section-number">4</span> Shiny App</a></li>
+<li><a href="#conlusion"><span class="toc-section-number">5</span> Conlusion</a></li>
 </ul>
 </div>
 
@@ -71,11 +72,6 @@ mathjaxEnableAutoNumber: no
   setView(13.37, 52.525, zoom = 17)</code></pre>
 <div id="htmlwidget-2" style="width:100%;height:480px;" class="leaflet html-widget"></div>
 <script type="application/json" data-for="htmlwidget-2">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"http://openstreetmap.org\">OpenStreetMap<\/a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA<\/a>"}]}],"setView":[[52.525,13.37],17,[]]},"evals":[],"jsHooks":[]}</script>
-<hr />
-<p>There are two ways. The quick &amp; dirty way is to use the <code>x</code> package, which will give us the widget as an <code>iframe</code>:</p>
-<pre class="r"><code># install.packages(&#39;widgetframe&#39;)
-library(widgetframe)</code></pre>
-<pre><code>## Lade nötiges Paket: htmlwidgets</code></pre>
 </div>
 <div id="xarigan-slides" class="section level1">
 <h1><span class="header-section-number">2</span> Xarigan Slides</h1>
@@ -89,7 +85,12 @@ knitr::include_url(&quot;https://dadascience.design/talks/rblogdown/rblogdown.ht
 <blockquote>
 <p>does not work on mobile screens, yet</p>
 </blockquote>
+<p>There are two ways. The quick &amp; dirty way is to use the <code>x</code> package, which will give us the widget as an <code>iframe</code>:</p>
+<pre class="r"><code># install.packages(&#39;widgetframe&#39;)
+library(widgetframe)</code></pre>
+<pre><code>## Lade nötiges Paket: htmlwidgets</code></pre>
 <pre class="r"><code>DT::datatable(
+  elementId = &quot;datatableWidget&quot;,
   head(mtcars, 10),
   fillContainer = FALSE, options = list(pageLength = 8)) %&gt;%
   frameWidget(width = &quot;100%&quot;, height = &quot;100%&quot;, options = )</code></pre>
@@ -99,8 +100,15 @@ knitr::include_url(&quot;https://dadascience.design/talks/rblogdown/rblogdown.ht
 <p>the robust way (to be tested yet): <a href="https://stackoverflow.com/questions/43594039/dt-package-not-working-with-blogdown-using-hugo-future-imperfect-theme" class="uri" target="_blank">https://stackoverflow.com/questions/43594039/dt-package-not-working-with-blogdown-using-hugo-future-imperfect-theme</a></p>
 </blockquote>
 </div>
+<div id="shiny-app" class="section level1">
+<h1><span class="header-section-number">4</span> Shiny App</h1>
+<pre class="r"><code>knitr::include_app(&quot;https://yihui.shinyapps.io/miniUI/&quot;, 
+  height = &quot;600px&quot;)</code></pre>
+<iframe src="https://yihui.shinyapps.io/miniUI/?showcase=0" width="100%" height="600px">
+</iframe>
+</div>
 <div id="conlusion" class="section level1">
-<h1><span class="header-section-number">4</span> Conlusion</h1>
+<h1><span class="header-section-number">5</span> Conlusion</h1>
 <div class="figure">
 <img src="https://media.giphy.com/media/BmmfETghGOPrW/giphy.gif" />
 

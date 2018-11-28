@@ -36,3 +36,9 @@ li {
     max-width: 25%;
     
 }
+
+code {
+    color: #333;
+    background: #f8f8f8;
+    padding: 0 5px;
+}

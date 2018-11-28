@@ -1,7 +1,7 @@
 ---
-title: '[R] Demo: Blogdown Madness with htmlwidgets'
+title: '[R] Just a Demo: Blogdown Madness with htmlwidgets'
 author: Ilja / fubits
-date: '2018-03-01'
+date: '2018-11-28'
 slug: r-demo-blogdown-madness-with-htmlwidgets
 hardslug: 2018-11-28-r-demo-blogdown-madness-with-htmlwidgets
 categories:
@@ -19,8 +19,8 @@ output:
     number_sections: yes
     toc: yes
 lastmod: '2018-11-28T13:33:03+01:00'
-description: 'Demo Site. Just testing the embedding of htmlwidgets (i.e. Leaflet, Xarigan Slides, DT::datatable()) in R Blogdown posts'
-abstract: 'Demo Site. Just testing the embedding of htmlwidgets (i.e. Leaflet, Xarigan Slides, DT::datatable() in R Blogdown posts'
+description: 'Demo Site. Just testing the embedding of HTML widgets (Leaflet, Xarigan Slides, DT::datatable(), Shiny App) in R Blogdown posts'
+abstract: 'Demo Site. Just testing the embedding of HTML widgets (Leaflet, Xarigan Slides, DT::datatable(), Shiny App) in R Blogdown posts'
 thumbnail: /img/thumbs/rdemo.jpg
 rmdlink: yes
 keywords: []
@@ -43,7 +43,7 @@ library(tidyverse)
 # library(sf)
 ```
 
-# Leaflet
+# Leaflet 
 
 ```{r cache=TRUE}
 dc_crime <- sf::st_read("https://opendata.arcgis.com/datasets/dc3289eab3d2400ea49c154863312434_8.geojson", quiet = TRUE)
@@ -70,13 +70,6 @@ leaflet() %>%
   setView(13.37, 52.525, zoom = 17)
 ```
 
----
-
-There are two ways. The quick & dirty way is to use the `x` package, which will give us the widget as an `iframe`:
-```{r}
-# install.packages('widgetframe')
-library(widgetframe)
-```
 
 # Xarigan Slides
 
@@ -89,14 +82,32 @@ knitr::include_url("https://dadascience.design/talks/rblogdown/rblogdown.html")
 
 > does not work on mobile screens, yet
 
-```{r results = "asis"}
+There are two ways. The quick & dirty way is to use the `x` package, which will give us the widget as an `iframe`:
+
+```{r}
+# install.packages('widgetframe')
+library(widgetframe)
+```
+
+
+```{r out.width = '100%'}
 DT::datatable(
+  elementId = "datatableWidget",
   head(mtcars, 10),
   fillContainer = FALSE, options = list(pageLength = 8)) %>%
   frameWidget(width = "100%", height = "100%", options = )
 ```
 
 > the robust way (to be tested yet): [https://stackoverflow.com/questions/43594039/dt-package-not-working-with-blogdown-using-hugo-future-imperfect-theme](https://stackoverflow.com/questions/43594039/dt-package-not-working-with-blogdown-using-hugo-future-imperfect-theme){target="_blank"}
+
+# Shiny App
+
+```{r out.width = '100%'}
+knitr::include_app("https://yihui.shinyapps.io/miniUI/", 
+  height = "600px")
+```
+
+
 
 # Conlusion
 

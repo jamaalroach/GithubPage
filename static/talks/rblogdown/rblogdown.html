@@ -137,11 +137,8 @@ class: inverse
 
 --
 
-plain text, \[[URL](https://example.com)\]\(https://example.com \)
+plain text, \*\***bold**\*\*, \**italic*\*, \~\~~~strike-through~~\~\~, \[[URL](https://example.com)\]\(https://example.com \)
 
---
-
-\*\***bold**\*\*, \**italic*\*, \~\~~~strike-through~~\~\~, H~2~0, R^2^
 
 --
 
@@ -149,12 +146,12 @@ plain text, \[[URL](https://example.com)\]\(https://example.com \)
 
 --
 
-  1. lists
-    + \+ nested lists
+1. lists
+  + \+ nested lists
 
 --
 
-handy   `inline code` chunks
+pretty `inline code` chunks
 
 --
 
@@ -169,17 +166,18 @@ fun()
 LaTex-like formulas:
 
 `$$\bar{X}=\frac{1}{n}\sum_{i=1}^nX_i$$`
+
 ---
 class: inverse
 
-# Then there was Base R
+# Then there was Base R / R GUI
 
 ![](img/baseR.jpg)
 
 ---
 class: inverse
 
-# And then came Yihui Xie
+# And then came ~~RStudio~~ Yihui Xie
 
 .pull-left[
 ![Yihui Xie](img/yihuixie.jpg "Source: https://usesthis.com/images/interviews/yihui.xie/portrait.jpg")]
@@ -233,7 +231,16 @@ When the source code is updated (e.g., the model or data is changed), your web p
 --
 
 .pull-right[
-![](img/books.png)
+
++ Text + Formatting
+
++ Code/Syntax + Output
+
++ shareable .Rmd
+
++ Code + Layout are completly separated
+
++ One Workflow/ a single IDE
 
 ]
 
@@ -244,6 +251,10 @@ class: inverse, center, middle
 
 ![](img/books.png)
 
++ [https://bookdown.org/yihui/rmarkdown/](https://bookdown.org/yihui/rmarkdown/)
++ [https://bookdown.org/yihui/bookdown/](https://bookdown.org/yihui/bookdown/)
++ [https://bookdown.org/yihui/blogdown/](https://bookdown.org/yihui/blogdown/)
+
 ---
 class: inverse, center, middle
 
@@ -251,6 +262,10 @@ class: inverse, center, middle
 
 ![](img/rbooks.png)
 
+[https://r4ds.had.co.nz/](https://r4ds.had.co.nz/)
+
+???
+Today: Focus on Blogdown
 
 ---
 class: inverse, center
@@ -329,8 +344,8 @@ leaflet() %&gt;%
   setView(13.337, 52.525, zoom = 17)
 ```
 
-<div id="htmlwidget-126c7ef37b66ceb95d89" style="width:100%;height:504px;" class="leaflet html-widget"></div>
-<script type="application/json" data-for="htmlwidget-126c7ef37b66ceb95d89">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"http://openstreetmap.org\">OpenStreetMap<\/a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA<\/a>"}]}],"setView":[[52.525,13.337],17,[]]},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-7318760e72a3cad887d6" style="width:100%;height:504px;" class="leaflet html-widget"></div>
+<script type="application/json" data-for="htmlwidget-7318760e72a3cad887d6">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"http://openstreetmap.org\">OpenStreetMap<\/a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA<\/a>"}]}],"setView":[[52.525,13.337],17,[]]},"evals":[],"jsHooks":[]}</script>
     </textarea>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
 <script>var slideshow = remark.create({

@@ -13,6 +13,14 @@ output:
       highlightLines: true
       countIncrementalSlides: false
       chakra: "../libs/remark-latest.min.js"
+
+# P (presentation mode)
+# C (clone slides to a new window)
+# B (black out)
+# M (mirror the slide)
+# H (help),
+# ???
+# Slide notes
 ---
 class: inverse 
 
@@ -125,11 +133,8 @@ class: inverse
 
 --
 
-plain text, \[[URL](https://example.com)\]\(https://example.com \)
+plain text, \*\***bold**\*\*, \**italic*\*, \~\~~~strike-through~~\~\~, \[[URL](https://example.com)\]\(https://example.com \)
 
---
-
-\*\***bold**\*\*, \**italic*\*, \~\~~~strike-through~~\~\~, H~2~0, R^2^
 
 --
 
@@ -137,12 +142,12 @@ plain text, \[[URL](https://example.com)\]\(https://example.com \)
 
 --
 
-  1. lists
-    + \+ nested lists
+1. lists
+  + \+ nested lists
 
 --
 
-handy   `inline code` chunks
+pretty `inline code` chunks
 
 --
 
@@ -156,17 +161,18 @@ fun()
 LaTex-like formulas:
 
 $$\bar{X}=\frac{1}{n}\sum_{i=1}^nX_i$$
+
 ---
 class: inverse
 
-# Then there was Base R
+# Then there was Base R / R GUI
 
 ![](img/baseR.jpg)
 
 ---
 class: inverse
 
-# And then came Yihui Xie
+# And then came ~~RStudio~~ Yihui Xie
 
 .pull-left[
 ![Yihui Xie](img/yihuixie.jpg "Source: https://usesthis.com/images/interviews/yihui.xie/portrait.jpg")]
@@ -219,7 +225,16 @@ When the source code is updated (e.g., the model or data is changed), your web p
 --
 
 .pull-right[
-![](img/books.png)
+
++ Text + Formatting
+
++ Code/Syntax + Output
+
++ shareable .Rmd
+
++ Code + Layout are completly separated
+
++ One Workflow/ a single IDE
 
 ]
 
@@ -230,6 +245,10 @@ class: inverse, center, middle
 
 ![](img/books.png)
 
++ [https://bookdown.org/yihui/rmarkdown/](https://bookdown.org/yihui/rmarkdown/)
++ [https://bookdown.org/yihui/bookdown/](https://bookdown.org/yihui/bookdown/)
++ [https://bookdown.org/yihui/blogdown/](https://bookdown.org/yihui/blogdown/)
+
 ---
 class: inverse, center, middle
 
@@ -237,6 +256,10 @@ class: inverse, center, middle
 
 ![](img/rbooks.png)
 
+[https://r4ds.had.co.nz/](https://r4ds.had.co.nz/)
+
+???
+Today: Focus on Blogdown
 
 ---
 class: inverse, center
