@@ -75,3 +75,20 @@ h1, h2, h3, h4, h5, h6 {
     margin-right: auto;
     text-align: center;
 }
+
+.source-right {
+    text-align: right;
+    vertical-align: bottom;
+    
+}
+
+.source {
+    vertical-align: bottom;
+    bottom: 0;
+}
+
+.bigpicture-source {
+    max-width: 900px;
+    max-height: 600px;
+    margin: 0 auto;
+}

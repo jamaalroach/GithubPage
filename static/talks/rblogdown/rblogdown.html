@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Best of both Worlds:</title>
+    <title>Code-centric Websites with Blogdown &amp; R</title>
     <meta charset="utf-8">
     <meta name="author" content="Ilja / @fubits" />
     <link href="libs/remark-css/default.css" rel="stylesheet" />
@@ -12,8 +12,8 @@
     <textarea id="source">
 class: center, middle, inverse, title-slide
 
-# Best of both Worlds:
-## Code-centric Websites with Blogdown &amp; R
+# Code-centric Websites with Blogdown &amp; R
+## Best of both Worlds
 ### Ilja / <span class="citation">@fubits</span>
 ### Berlin R Users Group MeetUp, 2018/11/29
 
@@ -24,6 +24,7 @@ class: inverse
 
 
 # Outline
+
 .TOC[
 1. Why Blog?
 1. (R) Markdown &amp; Blogdown
@@ -34,6 +35,8 @@ class: inverse
 1. Why Hugo/Static?
 ]
 
+???
+Questionaire!
 ---
 class: inverse 
 
@@ -42,18 +45,22 @@ class: inverse
 --
 
 .pull-left[.quote[
-&gt; “if you don’t have a website nowadays, you don’t exist” ([Scheidegger 2012 via Yihui 2018](https://bookdown.org/yihui/blogdown/))
+&gt; “if you don’t have a website nowadays, you don’t exist” ([Scheidegger 2012 via Xie 2018](https://bookdown.org/yihui/blogdown/))
 
 ___
+
 
 &gt; "While a resume matters, having a portfolio of **public evidence of your data science skills** can do wonders for your job prospects. Even if you have a referral, the ability to show potential employers what you can do instead of just telling them you can do something is important." ([Galarnyk 2018](https://towardsdatascience.com/how-to-build-a-data-science-portfolio-5f566517c79c))
 
 ]
 ]
+
 --
+
 .pull-right[
 ![](img/portfolio.jpg)
 
+([Galarnyk 2018: How to Build a Data Science Portfolio](https://towardsdatascience.com/how-to-build-a-data-science-portfolio-5f566517c79c))
 ]
 
 ---
@@ -67,22 +74,43 @@ class: inverse
 ]
 ]
 
+--
+
 .pull-right[.quote[
-&gt; "A well-designed and maintained website can be extremely helpful for other people **to know you**, and you do not need to wait for suitable chances at conferences or other occasions to introduce yourself in person to other people." ([Yihui 2018](https://bookdown.org/yihui/blogdown/))
+&gt; "A well-designed and maintained website can be extremely helpful for other people **to know you**, and you do not need to wait for suitable chances at conferences or other occasions to introduce yourself in person to other people." ([Xie 2018](https://bookdown.org/yihui/blogdown/))
 
 ___
 
-&gt; "On the other hand, a website is also highly useful for yourself to **keep track** of what you have done and thought. Sometimes you may go back to a certain old post of yours to **relearn the tricks or methods** you once mastered in the past but have forgotten." ([Yihui 2018](https://bookdown.org/yihui/blogdown/))
+&gt; "On the other hand, a website is also highly useful for yourself to **keep track** of what you have done and thought. Sometimes you may go back to a certain old post of yours to **relearn the tricks or methods** you once mastered in the past but have forgotten." ([Xie 2018](https://bookdown.org/yihui/blogdown/))
 
 ]
 ]
 
 ---
-class: inverse 
+class: inverse, center
 
-# Why? Open Source, Open Science, Replication
+# Why? Open Source, Open Science, Replication!
 
-&gt; Sharing is caring!
+
+### Sharing is caring!
+
+--
+
+.imgblock[
+![](img/openscience.png)
+
+]
+
+.source[
+
+(Source: &lt;a href="//commons.wikimedia.org/wiki/User:Gegensystem" title="User:Gegensystem"&gt;Andreas E. Neuhold&lt;/a&gt;, &lt;a href="https://creativecommons.org/licenses/by/3.0" title="Creative Commons Attribution 3.0"&gt;CC BY 3.0&lt;/a&gt;, &lt;a href="https://commons.wikimedia.org/w/index.php?curid=33542838"&gt;Link&lt;/a&gt;)
+
+]
+
+---
+class: inverse, center
+
+![](img/github_issue.jpg)
 
 ---
 class: inverse, center, 
@@ -95,7 +123,7 @@ class: inverse, center,
 
 (
 
-![](img/RLogo.png)
+![](img/Rlogo.png)
 
 +
 
@@ -174,6 +202,8 @@ class: inverse
 
 # And then came ~~RStudio~~ Yihui Xie
 
+--
+
 .pull-left[
 ![Yihui Xie](img/yihuixie.jpg "Source: https://usesthis.com/images/interviews/yihui.xie/portrait.jpg")]
 
@@ -200,15 +230,12 @@ background-size: cover
 .pull-left[
 .largest[
 
-[@xieyihui](https://twitter.com/xieyihui)
-
 [yihui.name/en/](https://yihui.name/en/)
 
 [github.com/yihui/](https://github.com/yihui)
 
 ]
 ]
-
 ---
 class: inverse
 
@@ -235,13 +262,26 @@ When the source code is updated (e.g., the model or data is changed), your web p
 
 + Code + Layout are completly separated
 
-+ One Workflow / a single IDE
++ One Workflow / a single source / a single IDE
+
++ Portability
+
++ Version control
 
 ]
 ]
 
 ---
-class: inverse
+class: inverse, center
+
+.bigpicture-source[
+![](img/rmarkdowncs.jpg)
+]
+
+[RStudio: R Markdown Cheat Sheet](https://www.rstudio.com/resources/cheatsheets/)
+
+---
+class: inverse, center
 
 # Documention
 
@@ -285,7 +325,7 @@ class: inverse, center
 
 &amp;nbsp;\&gt; 
 
-![](img/hugo.png)
+![[gohugo.io](https://gohugo.io)*](img/hugo.png)
 
 ]
 
@@ -311,7 +351,6 @@ class: inverse, center
 
 ```r
 install.packages("blogdown")
-blogdown::install_hugo()
 ```
 
 --
@@ -335,6 +374,31 @@ OR
 ```r
 blogdown::new_site()
 ```
+
+--
+
+* There are tons of excellent how-to's, i.e. by [Tyler Clavelle](https://tclavelle.github.io/blog/blogdown_github/)
+
+---
+class: inverse
+
+# 2+1 Commands To Rule Them All
+
+--
+
+### I. Preview locally with/out visibility in local network
+`blogdown::serve_site(host = '0.0.0.0')` / `blogdown::serve_site()`
+
+--
+
+### II. Build to /public
+`blogdown::hugo_build()`
+
+--
+___
+
+### III. (Publish)
+`git commit -m "updated Twitter Post"` / `git push`
 
 ---
 class: inverse, center
@@ -369,11 +433,20 @@ class: inverse
 # More Features
 
 .larger[
-* Shortcodes
+* Shortcodes (i.e. `{{&lt; tweet 989470885475008512 &gt;}}`)
+
 * CSS + JS
+
 * RSS
+
 * Source File
-* static/other (i.e. slides for this talk)
+
+* `static/other`
+  + i.e. [slides](https://dadascience.design/talks/rblogdown/rblogdown.html#1) for this talk
+  + `R/build.R` from `/static/talks/index.Rmd`
+
+___
+
 * **[Widgets](https://dadascience.design/post/r-demo-blogdown-madness-with-htmlwidgets/)**
 ]
 
@@ -384,14 +457,18 @@ class: inverse
 
 .larger[
 * set up Hugo properly -&gt; [`hugo -v`](https://dadascience.design/post/r-troubleshooting-blogdown-hugo-for-windows-dummies/)
-* change `/public` folder
+
+* change `/public` folder (cf. [Blogdown Book](https://bookdown.org/yihui/blogdown/configuration.html#options))
+
 * use [`here::here("static","data")`](https://github.com/jennybc/here_here#readme)
-* Windows: Dual boot Linux OR put the Project Folder in root (255 path length limit)
+
+* Windows: Dual boot Linux OR put the Project Folder in root (255 path length limit!)
 
 * use Git
 
-* save objects with dynamic data (i.e. from API)
-* DO NOT SAVE BIG OBJECTS TO /static/data
+* save objects with dynamic data (i.e. from API) locally
+
+* DO NOT SAVE LARGE OBJECTS TO `/static/data`
 
 ]
 
@@ -400,7 +477,22 @@ class: inverse
 
 # Why Static?
 
-Static &amp; GDPR
+.larger[
+
+* [Benefits of Static Site Generators](https://gohugo.io/about/benefits/)
+
+* Ownership + Portability
+
+* no DB &amp; no Services (PHP et al.)
+
+* no CMS + local building &amp; testing
+
+* Security (+2FA GitHub)
+
+* GDPR compliance (i.e. DB, external CDN) (see [Hugo-specific discussion](https://discourse.gohugo.io/t/hugo-vs-the-general-data-protection-regulations-gdpr-in-eu-eea/11526) &amp; [implementation](https://gohugo.io/about/hugo-and-gdpr/))
+
+
+]
 
 ---
 class: inverse, center, middle
@@ -412,6 +504,10 @@ class: inverse, center, middle
 
 [@fubits](https://twitter.com/fubits)
 ]
+
+___
+
+[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)
 
 Slides created via the R package [**xaringan**](https://github.com/yihui/xaringan).
     </textarea>
