@@ -36,7 +36,6 @@ My biggest **project** so far was being a `Digital Officer` (project-based, 1 ye
 knitr::include_url('rblogdown/rblogdown.html')
 ```
 
-
 ## Contact
 
 You'll find me on:
@@ -44,6 +43,7 @@ You'll find me on:
   + https://twitter.com/fubits
   + https://medium.com/@Fubits
   + https://keybase.io/fubits
+  + Mail: ilja_s ( at ) pm.me
 
 Feel free to drop me a line any time.
 
