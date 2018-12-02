@@ -1,0 +1,660 @@
+---
+title: "Collection of Blogdown Shortcuts and Tweaks"
+author: Ilja @fubits
+date: '2018-11-30'
+slug: shortcuts
+categories:
+  - Rstats
+tags:
+  - Blogdown
+lastmod: '2018-11-30T16:52:11+02:00'
+keywords: []
+description: 'Collection of Blogdown Shortcuts & Tweaks'
+rmdlink: TRUE
+output:
+  blogdown::html_page:
+    number_sections: FALSE
+    toc: TRUE
+comment: no
+autoCollapseToc: no
+postMetaInFooter: no
+hiddenFromHomePage: no
+contentCopyright: no
+reward: no
+mathjax: no
+mathjaxEnableSingleDollar: no
+mathjaxEnableAutoNumber: no
+hideHeaderAndFooter: no
+flowchartDiagrams:
+  enable: no
+  options: ''
+sequenceDiagrams:
+  enable: no
+  options: ''
+---
+
+
+<div id="TOC">
+<ul>
+<li><a href="#blogdown-handling">Blogdown Handling</a></li>
+<li><a href="#default-settings-.rprofile">Default Settings (<code>.Rprofile</code>)</a></li>
+<li><a href="#formula">Formula</a></li>
+<li><a href="#links">Links</a></li>
+<li><a href="#data">Data</a></li>
+<li><a href="#sourcing">Sourcing</a></li>
+<li><a href="#play-sound-after-task">Play Sound after Task</a></li>
+<li><a href="#pictures">Pictures</a></li>
+<li><a href="#emojis">Emojis</a></li>
+<li><a href="#undocumented">Undocumented</a><ul>
+<li><a href="#skimr">Skimr</a></li>
+<li><a href="#tweets">Tweets</a></li>
+</ul></li>
+<li><a href="#widgets">Widgets</a></li>
+</ul>
+</div>
+
+<h1>
+Some frequently used functions for working with Blogdown/Hugo
+</h1>
+<blockquote>
+<p>Undocumented; just a collection of helpful functions, yet.</p>
+</blockquote>
+<div id="blogdown-handling" class="section level2">
+<h2>Blogdown Handling</h2>
+<p><strong>Render with visibility in local network</strong></p>
+<pre><code>blogdown::serve_site(host = &#39;0.0.0.0&#39;)</code></pre>
+<p><strong>regular preview</strong></p>
+<pre><code>blogdown::serve_site()</code></pre>
+<p><strong>Stop Server &amp; restart R-Session if needed</strong></p>
+<pre><code>blogdown::stop_server()</code></pre>
+<pre><code>.rs.restartR()</code></pre>
+<p><strong>Publishing</strong></p>
+<pre><code>blogdown::hugo_build()</code></pre>
+</div>
+<div id="default-settings-.rprofile" class="section level2">
+<h2>Default Settings (<code>.Rprofile</code>)</h2>
+<blockquote>
+<p>put these options in your <code>.Rprofile</code> (user or project)+ newline \n (a la git)</p>
+</blockquote>
+<pre><code>file.edit(&quot;~/.Rprofile&quot;)</code></pre>
+<pre><code>options(servr.daemon = TRUE)
+options(blogdown.author = &quot;Ilja / fubits&quot;)
+options(blogdown.ext = &quot;.Rmd&quot;)
+options(blogdown.widgetsID = TRUE)</code></pre>
+<p><strong>as per Yihui: possible Speed improvements</strong></p>
+<pre><code>(install.packages(&quot;processx&quot;))
+options(blogdown.generator.server = TRUE) # see serve_site() docs</code></pre>
+<p><strong>jump to changes, when previewing</strong></p>
+<pre><code>options(blogdown.hugo.server = c(&quot;-D&quot;, &quot;-F&quot;, &quot;--navigateToChanged&quot;))</code></pre>
+</div>
+<div id="formula" class="section level2">
+<h2>Formula</h2>
+<pre><code>$A = \pi*r^{2}$</code></pre>
+</div>
+<div id="links" class="section level2">
+<h2>Links</h2>
+<p><strong>external</strong></p>
+<pre><code>[Text](URL){target=&quot;_blank&quot;}</code></pre>
+<p><strong>relative links</strong></p>
+<pre><code>[Text](/post/slug)
+[Text](#anchor)</code></pre>
+</div>
+<div id="data" class="section level2">
+<h2>Data</h2>
+<p><strong>(deprecated)</strong></p>
+<pre><code>../../data/</code></pre>
+<p><strong>elegant with <code>here()</code></strong></p>
+<pre><code>data_path &lt;- here::here(&quot;data&quot;, &quot;IRA_Tweets&quot;, &quot;/&quot;)</code></pre>
+</div>
+<div id="sourcing" class="section level2">
+<h2>Sourcing</h2>
+<pre><code>\```{r setup}
+knitr::read_chunk(&quot;example.R&quot;)
+\```</code></pre>
+<p>add chunk marker in the sourced file <code>example.R</code> (<code>## ---- chunk</code>)</p>
+<pre><code>## ---- chunk
+1 + 1</code></pre>
+</div>
+<div id="play-sound-after-task" class="section level2">
+<h2>Play Sound after Task</h2>
+<pre><code>BRRR::skrrrahh(&quot;flava&quot;)</code></pre>
+</div>
+<div id="pictures" class="section level2">
+<h2>Pictures</h2>
+<p><strong>with <em>italic</em> formatting and Link</strong></p>
+<pre><code>![*(Screenshot of the GitLab Dashboard for the GitHub Importer on June 4th; [Source](https://monitor.gitlab.net/dashboard/db/github-importer?orgId=1&amp;from=1528041600000&amp;to=now))*](/img/GitLab_JSON/gitlab_dashboard.jpg &quot;alt-text&quot;)</code></pre>
+<div class="figure">
+<img src="/img/GitLab_JSON/gitlab_dashboard.jpg" title="alt-text" alt="(Screenshot of the GitLab Dashboard for the GitHub Importer on June 4th; Source)" />
+<p class="caption"><em>(Screenshot of the GitLab Dashboard for the GitHub Importer on June 4th; <a href="https://monitor.gitlab.net/dashboard/db/github-importer?orgId=1&amp;from=1528041600000&amp;to=now">Source</a>)</em></p>
+</div>
+<p><strong>Formatting and Alt-text</strong></p>
+<pre><code>![*(73 Topics, K auto-induced with t-SNE/PCA, modelled with the stm()-package )*](/img/GitLab_JSON/gitlab_dom2.jpg &quot;alt-text&quot;)</code></pre>
+<div class="figure">
+<img src="/img/GitLab_JSON/gitlab_dom2.jpg" title="alt-text" alt="(73 Topics, K auto-induced with t-SNE/PCA, modelled with the stm()-package )" />
+<p class="caption"><em>(73 Topics, K auto-induced with t-SNE/PCA, modelled with the stm()-package )</em></p>
+</div>
+</div>
+<div id="emojis" class="section level2">
+<h2>Emojis</h2>
+<p>As inline <code>😄</code> (full list: <a href="https://github.com/hadley/emo" class="uri">https://github.com/hadley/emo</a>)</p>
+</div>
+<div id="undocumented" class="section level2">
+<h2>Undocumented</h2>
+<div id="skimr" class="section level3">
+<h3>Skimr</h3>
+<pre class="r"><code># options(knitr.table.format = &quot;html&quot;) OR
+skimr::skim_to_wide(mtcars) %&gt;% knitr::kable(&quot;html&quot;, 2)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+type
+</th>
+<th style="text-align:left;">
+variable
+</th>
+<th style="text-align:left;">
+missing
+</th>
+<th style="text-align:left;">
+complete
+</th>
+<th style="text-align:left;">
+n
+</th>
+<th style="text-align:left;">
+mean
+</th>
+<th style="text-align:left;">
+sd
+</th>
+<th style="text-align:left;">
+p0
+</th>
+<th style="text-align:left;">
+p25
+</th>
+<th style="text-align:left;">
+p50
+</th>
+<th style="text-align:left;">
+p75
+</th>
+<th style="text-align:left;">
+p100
+</th>
+<th style="text-align:left;">
+hist
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+numeric
+</td>
+<td style="text-align:left;">
+am
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+32
+</td>
+<td style="text-align:left;">
+32
+</td>
+<td style="text-align:left;">
+0.41
+</td>
+<td style="text-align:left;">
+0.5
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+▇▁▁▁▁▁▁▆
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+numeric
+</td>
+<td style="text-align:left;">
+carb
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+32
+</td>
+<td style="text-align:left;">
+32
+</td>
+<td style="text-align:left;">
+2.81
+</td>
+<td style="text-align:left;">
+1.62
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+4
+</td>
+<td style="text-align:left;">
+8
+</td>
+<td style="text-align:left;">
+▆▇▂▇▁▁▁▁
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+numeric
+</td>
+<td style="text-align:left;">
+cyl
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+32
+</td>
+<td style="text-align:left;">
+32
+</td>
+<td style="text-align:left;">
+6.19
+</td>
+<td style="text-align:left;">
+1.79
+</td>
+<td style="text-align:left;">
+4
+</td>
+<td style="text-align:left;">
+4
+</td>
+<td style="text-align:left;">
+6
+</td>
+<td style="text-align:left;">
+8
+</td>
+<td style="text-align:left;">
+8
+</td>
+<td style="text-align:left;">
+▆▁▁▃▁▁▁▇
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+numeric
+</td>
+<td style="text-align:left;">
+disp
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+32
+</td>
+<td style="text-align:left;">
+32
+</td>
+<td style="text-align:left;">
+230.72
+</td>
+<td style="text-align:left;">
+123.94
+</td>
+<td style="text-align:left;">
+71.1
+</td>
+<td style="text-align:left;">
+120.83
+</td>
+<td style="text-align:left;">
+196.3
+</td>
+<td style="text-align:left;">
+326
+</td>
+<td style="text-align:left;">
+472
+</td>
+<td style="text-align:left;">
+▇▆▁▂▅▃▁▂
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+numeric
+</td>
+<td style="text-align:left;">
+drat
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+32
+</td>
+<td style="text-align:left;">
+32
+</td>
+<td style="text-align:left;">
+3.6
+</td>
+<td style="text-align:left;">
+0.53
+</td>
+<td style="text-align:left;">
+2.76
+</td>
+<td style="text-align:left;">
+3.08
+</td>
+<td style="text-align:left;">
+3.7
+</td>
+<td style="text-align:left;">
+3.92
+</td>
+<td style="text-align:left;">
+4.93
+</td>
+<td style="text-align:left;">
+▃▇▁▅▇▂▁▁
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+numeric
+</td>
+<td style="text-align:left;">
+gear
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+32
+</td>
+<td style="text-align:left;">
+32
+</td>
+<td style="text-align:left;">
+3.69
+</td>
+<td style="text-align:left;">
+0.74
+</td>
+<td style="text-align:left;">
+3
+</td>
+<td style="text-align:left;">
+3
+</td>
+<td style="text-align:left;">
+4
+</td>
+<td style="text-align:left;">
+4
+</td>
+<td style="text-align:left;">
+5
+</td>
+<td style="text-align:left;">
+▇▁▁▆▁▁▁▂
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+numeric
+</td>
+<td style="text-align:left;">
+hp
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+32
+</td>
+<td style="text-align:left;">
+32
+</td>
+<td style="text-align:left;">
+146.69
+</td>
+<td style="text-align:left;">
+68.56
+</td>
+<td style="text-align:left;">
+52
+</td>
+<td style="text-align:left;">
+96.5
+</td>
+<td style="text-align:left;">
+123
+</td>
+<td style="text-align:left;">
+180
+</td>
+<td style="text-align:left;">
+335
+</td>
+<td style="text-align:left;">
+▃▇▃▅▂▃▁▁
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+numeric
+</td>
+<td style="text-align:left;">
+mpg
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+32
+</td>
+<td style="text-align:left;">
+32
+</td>
+<td style="text-align:left;">
+20.09
+</td>
+<td style="text-align:left;">
+6.03
+</td>
+<td style="text-align:left;">
+10.4
+</td>
+<td style="text-align:left;">
+15.43
+</td>
+<td style="text-align:left;">
+19.2
+</td>
+<td style="text-align:left;">
+22.8
+</td>
+<td style="text-align:left;">
+33.9
+</td>
+<td style="text-align:left;">
+▃▇▇▇▃▂▂▂
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+numeric
+</td>
+<td style="text-align:left;">
+qsec
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+32
+</td>
+<td style="text-align:left;">
+32
+</td>
+<td style="text-align:left;">
+17.85
+</td>
+<td style="text-align:left;">
+1.79
+</td>
+<td style="text-align:left;">
+14.5
+</td>
+<td style="text-align:left;">
+16.89
+</td>
+<td style="text-align:left;">
+17.71
+</td>
+<td style="text-align:left;">
+18.9
+</td>
+<td style="text-align:left;">
+22.9
+</td>
+<td style="text-align:left;">
+▃▂▇▆▃▃▁▁
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+numeric
+</td>
+<td style="text-align:left;">
+vs
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+32
+</td>
+<td style="text-align:left;">
+32
+</td>
+<td style="text-align:left;">
+0.44
+</td>
+<td style="text-align:left;">
+0.5
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+▇▁▁▁▁▁▁▆
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+numeric
+</td>
+<td style="text-align:left;">
+wt
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+32
+</td>
+<td style="text-align:left;">
+32
+</td>
+<td style="text-align:left;">
+3.22
+</td>
+<td style="text-align:left;">
+0.98
+</td>
+<td style="text-align:left;">
+1.51
+</td>
+<td style="text-align:left;">
+2.58
+</td>
+<td style="text-align:left;">
+3.33
+</td>
+<td style="text-align:left;">
+3.61
+</td>
+<td style="text-align:left;">
+5.42
+</td>
+<td style="text-align:left;">
+▃▃▃▇▆▁▁▂
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="tweets" class="section level3">
+<h3>Tweets</h3>
+<p><strong>Shortcode</strong></p>
+<p>{{&lt; tweet 981532034106576901 &gt;}}</p>
+<p><strong>R Markdown / Chunk</strong></p>
+<pre class="r"><code># {r echo=FALSE}
+blogdown::shortcode(&#39;tweet&#39;, &#39;852205086956818432&#39;)</code></pre>
+</div>
+</div>
+<div id="widgets" class="section level2">
+<h2>Widgets</h2>
+<blockquote>
+<p>See <a href="/post/r-demo-blogdown-madness-with-htmlwidgets/">“Demo: Blogdown Madness with htmlwidgets”</a></p>
+</blockquote>
+</div>

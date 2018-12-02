@@ -1,0 +1,209 @@
+---
+title: "Collection of Blogdown Shortcuts and Tweaks"
+author: Ilja @fubits
+date: '2018-11-30'
+slug: shortcuts
+categories:
+  - Rstats
+tags:
+  - Blogdown
+lastmod: '2018-11-30T16:52:11+02:00'
+keywords: []
+description: 'Collection of Blogdown Shortcuts & Tweaks'
+rmdlink: TRUE
+output:
+  blogdown::html_page:
+    number_sections: FALSE
+    toc: TRUE
+comment: no
+autoCollapseToc: no
+postMetaInFooter: no
+hiddenFromHomePage: no
+contentCopyright: no
+reward: no
+mathjax: no
+mathjaxEnableSingleDollar: no
+mathjaxEnableAutoNumber: no
+hideHeaderAndFooter: no
+flowchartDiagrams:
+  enable: no
+  options: ''
+sequenceDiagrams:
+  enable: no
+  options: ''
+---
+
+<h1>Some frequently used functions for working with Blogdown/Hugo</h1>
+
+> Undocumented; just a collection of helpful functions, yet.
+
+```{r echo=FALSE, message=FALSE}
+library(tidyverse)
+```
+
+
+## Blogdown Handling
+
+**Render with visibility in local network**
+
+```
+blogdown::serve_site(host = '0.0.0.0')
+```
+
+**regular preview**
+
+```
+blogdown::serve_site()
+```
+
+**Stop Server & restart R-Session if needed**
+
+```
+blogdown::stop_server()
+```
+
+```
+.rs.restartR()
+```
+
+**Publishing**
+
+```
+blogdown::hugo_build()
+```
+
+## Default Settings (`.Rprofile`)
+
+> put these options in your `.Rprofile` (user or project)\r\n\+ newline \\n (a la git)
+
+```
+file.edit("~/.Rprofile")
+```
+
+```
+options(servr.daemon = TRUE)
+options(blogdown.author = "Ilja / fubits")
+options(blogdown.ext = ".Rmd")
+options(blogdown.widgetsID = TRUE)
+```
+
+**as per Yihui: possible Speed improvements**
+
+```
+(install.packages("processx"))
+options(blogdown.generator.server = TRUE) # see serve_site() docs
+```
+
+**jump to changes, when previewing**
+```
+options(blogdown.hugo.server = c("-D", "-F", "--navigateToChanged"))
+```
+
+
+
+## Formula
+
+```
+$A = \pi*r^{2}$
+```
+
+
+
+## Links
+
+**external**
+
+```
+[Text](URL){target="_blank"}
+```
+
+**relative links**
+
+```
+[Text](/post/slug)
+[Text](#anchor)
+```
+
+## Data
+
+**(deprecated)**
+
+```
+../../data/
+```
+
+**elegant with `here()`**
+
+```
+data_path <- here::here("data", "IRA_Tweets", "/")
+```
+
+## Sourcing
+
+```
+\```{r setup}
+knitr::read_chunk("example.R")
+\```
+```
+
+add chunk marker in the sourced file `example.R` (`## ---- chunk`)
+
+```  
+## ---- chunk
+1 + 1
+```  
+
+## Play Sound after Task
+
+```
+BRRR::skrrrahh("flava")
+```
+
+## Pictures
+
+**with *italic* formatting and Link**
+
+```
+![*(Screenshot of the GitLab Dashboard for the GitHub Importer on June 4th; [Source](https://monitor.gitlab.net/dashboard/db/github-importer?orgId=1&from=1528041600000&to=now))*](/img/GitLab_JSON/gitlab_dashboard.jpg "alt-text")
+```
+![*(Screenshot of the GitLab Dashboard for the GitHub Importer on June 4th; [Source](https://monitor.gitlab.net/dashboard/db/github-importer?orgId=1&from=1528041600000&to=now))*](/img/GitLab_JSON/gitlab_dashboard.jpg "alt-text")
+
+**Formatting and Alt-text**
+```
+![*(73 Topics, K auto-induced with t-SNE/PCA, modelled with the stm()-package )*](/img/GitLab_JSON/gitlab_dom2.jpg "alt-text")
+```
+![*(73 Topics, K auto-induced with t-SNE/PCA, modelled with the stm()-package )*](/img/GitLab_JSON/gitlab_dom2.jpg "alt-text")
+
+
+## Emojis
+
+As inline ` `r emo::ji("smile")` ` (full list: [https://github.com/hadley/emo](https://github.com/hadley/emo))
+
+## Undocumented
+
+### Skimr
+
+```{r}
+# options(knitr.table.format = "html") OR
+skimr::skim_to_wide(mtcars) %>% knitr::kable("html", 2)
+```
+
+### Tweets
+
+**Shortcode**
+
+{{< tweet 981532034106576901 >}}
+
+
+**R Markdown / Chunk**
+
+
+```{r eval=FALSE}
+# {r echo=FALSE}
+blogdown::shortcode('tweet', '852205086956818432')
+```
+
+## Widgets
+
+> See ["Demo: Blogdown Madness with htmlwidgets"](/post/r-demo-blogdown-madness-with-htmlwidgets/)
+
