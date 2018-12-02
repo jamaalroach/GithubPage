@@ -27,14 +27,7 @@ My biggest **project** so far was being a `Digital Officer` (project-based, 1 ye
 
 ## Talks
 
-> Beta / just testing, yet
-
-+ [Slides](/talks/rblogdown/rblogdown.html)
-+ [Test /Static rendering with `R/build.R`](/talks/)
-
-```{r out.width = '100%', fig.asp=1.78}
-knitr::include_url('rblogdown/rblogdown.html')
-```
+> See the [Talks](/talks/) page for my talks, slides, and workshop materials.
 
 ## Contact
 
