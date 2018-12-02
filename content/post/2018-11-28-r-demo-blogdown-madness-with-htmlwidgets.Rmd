@@ -109,7 +109,7 @@ knitr::include_app("https://yihui.shinyapps.io/miniUI/",
 
 
 
-# Conlusion
+# Conclusion
 
 ![](https://media.giphy.com/media/BmmfETghGOPrW/giphy.gif)
 
