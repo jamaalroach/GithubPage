@@ -13,7 +13,8 @@ output:
       highlightLines: true
       countIncrementalSlides: false
       chakra: "../libs/remark-latest.min.js"
-
+  #  self_contained: true
+## Shortcuts ##
 # P (presentation mode)
 # C (clone slides to a new window)
 # B (black out)
@@ -26,6 +27,19 @@ class: inverse
 
 ```{r setup, include=FALSE}
 options(htmltools.dir.version = FALSE)
+```
+
+```{r include=FALSE, eval=FALSE}
+# Slides to PDF
+library(webshot)
+# install_phantomjs() # rendering engine
+# download & install fonts from Xarigan::default_CSS
+webshot("rblogdown.html", 
+        "rblogdown.pdf",
+        vwidth = 1920,
+        vheight = 1080, 
+        selector = ".remark-slide", # when xarigan
+        zoom = 0.50)
 ```
 
 # Outline
