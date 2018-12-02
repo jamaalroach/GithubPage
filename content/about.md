@@ -17,7 +17,7 @@ Currently, I'm working for the Berlin-based <a href="https://www.hiig.de" target
 
 ## This Site
 
-~~Mostly, I'll be writing about solving problems you didn't know you had or won't ever have since you're not using Windows 10.~~ My current **focus** is on creating stuff with R (SNA, NLP, DataViz, Maps, Publishing/Writing/Blogging) --- including this very kind of code-centric reporting / blogging as demonstrated with this website ---, and thereby exploring/prototyping the potential of R, RStudio, and Markdown/Blogdown/Bookdown based workflows for **replication-friendly, data-driven, <a href="https://en.wikipedia.org/wiki/Free_and_open-source_software" target="_blank">FOSS</a>-based Open Science**.
+~~Mostly, I'll be writing about solving problems you didn't know you had or won't ever have since you're not using Windows 10.~~ My current **focus** is on creating stuff with R (SNA, NLP, DataViz, Maps, Publishing/Writing/Blogging) --- including this very kind of code-centric reporting / blogging as demonstrated with this website ---, and thereby exploring/prototyping the potential of R, RStudio, and Markdown/Blogdown/Bookdown based workflows for **replication-friendly, data-driven, <a href="https://en.wikipedia.org/wiki/Free_and_open-source_software" target="_blank">FOSS</a>-based Open Science** - academic or not.
 
 ## Projects
 
@@ -27,7 +27,7 @@ My biggest **project** so far was being a `Digital Officer` (project-based, 1 ye
 
 ## Talks
 
-> See the [Talks](/talks/) page for my talks, slides, and workshop materials.
+> See the [Talks](/talks/) page for slides, and workshop materials.
 
 ## Contact
 
