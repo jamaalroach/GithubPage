@@ -36,15 +36,17 @@ mathjaxEnableAutoNumber: no
 
 <div id="TOC">
 <ul>
-<li><a href="#basemap-three-ways"><span class="toc-section-number">1</span> Basemap: Three ways</a><ul>
-<li><a href="#bounding-box-object"><span class="toc-section-number">1.1</span> Bounding Box: Object</a></li>
+<li><a href="#basic-workflows"><span class="toc-section-number">1</span> Basic Workflows</a><ul>
+<li><a href="#basemap-area-three-ways"><span class="toc-section-number">1.1</span> Basemap Area: Three ways</a><ul>
+<li><a href="#bounding-box-object-based"><span class="toc-section-number">1.1.1</span> Bounding Box: Object-based</a></li>
+</ul></li>
 <li><a href="#bbox-from-data"><span class="toc-section-number">1.2</span> BBOX from data</a></li>
 </ul></li>
 </ul>
 </div>
 
-<p>To be honest, my R “career” actually only gained traction when I was asked to create a low-budget yet hi-res <a href="">map for print</a> by a colleague almost one and a half years ago. This particular use case gave me enough insights into the awesomeness of the Rstats / FOSS-minded community, the holistic potential of R re: all things <code>data</code>, and in particular the <a href="https://www.twitter.com/#GIStribe" target="_blank">GIStribe</a>’s continuous efforts to improve spatial processing with R. And this was</p>
-<p>I did a similar but far more extensive freelance gig recently and discovered so many really helpful / effective / efficient / cool packages, methods and tools that I decided to write another GIS/mapping post. It’s imply time to give something back to the community (and to create a useful reference work for my future self).</p>
+<p>To be fair, my R “career” actually only gained traction when I was asked to create a low-budget yet hi-res <a href="">map for print</a> by a colleague almost one and a half years ago. This particular use case gave me enough insights into the awesomeness of the Rstats / FOSS-minded community, the holistic potential of R re: all things <code>data</code>, and in particular the <a href="https://www.twitter.com/#GIStribe" target="_blank">#GIStribe</a>’s continuous efforts to improve spatial processing with R. And this was</p>
+<p>Recently, I did a similar but far more extensive freelance gig and discovered so many really helpful / effective / efficient / cool packages, methods and tools that I decided to write another GIS/mapping post. It’s simply time to give something back to the community (and to create a useful reference entry for my future self).</p>
 <p>In this post, we’re going to take a tour through several highly performant and versatile spatial packages for R. As a use case, we’re going to visualise aggregated crime data (district-level; yearly) for my hometown Berlin, Germany.</p>
 <p>This post is not about basic geo-computation / GIS / cartography concepts. For this, there already are plenty of excellent up-to-date resources such as Lovelace/Novosad 2018, or Jesse Adler’s solid series on R for Digital Humanities.</p>
 <p>This post is more like a glossary for all the magical things / hacks.</p>
@@ -55,23 +57,19 @@ raster
 osmdata
 mapview
 mapedit</code></pre>
+<p>Not strictly GIS, but still highy recommended for any workflow:</p>
+<pre><code>here</code></pre>
 <pre class="r"><code>library(tidyverse)</code></pre>
-<pre><code>## -- Attaching packages --------------------- tidyverse 1.2.1 --</code></pre>
-<pre><code>## v ggplot2 3.1.0     v purrr   0.3.0
-## v tibble  2.0.1     v dplyr   0.7.8
-## v tidyr   0.8.2     v stringr 1.3.1
-## v readr   1.3.1     v forcats 0.3.0</code></pre>
-<pre><code>## -- Conflicts ------------------------ tidyverse_conflicts() --
-## x dplyr::filter() masks stats::filter()
-## x dplyr::lag()    masks stats::lag()</code></pre>
-<div id="basemap-three-ways" class="section level1">
-<h1><span class="header-section-number">1</span> Basemap: Three ways</h1>
+<div id="basic-workflows" class="section level1">
+<h1><span class="header-section-number">1</span> Basic Workflows</h1>
+<div id="basemap-area-three-ways" class="section level2">
+<h2><span class="header-section-number">1.1</span> Basemap Area: Three ways</h2>
 <p>First of all, we’ll need to read in the crime data and decide on the extent of the basemap. Since this is a recurrent task but with varying parameters, I’’m offering three different approaches based</p>
 <pre><code>a) on the bounding box (BBOX) of a spatial object (i.e. a Federal state)
 b) on the bounding box of spatial data (i.e. the geocoded crime data)
 c) a hand-drawn rectangle turned into a BBOX</code></pre>
-<div id="bounding-box-object" class="section level2">
-<h2><span class="header-section-number">1.1</span> Bounding Box: Object</h2>
+<div id="bounding-box-object-based" class="section level3">
+<h3><span class="header-section-number">1.1.1</span> Bounding Box: Object-based</h3>
 <p>First, we need our spatial object of reference. I prefer to work with Open Access / Public Domain data, so let’s fetch some vector data from the Natural Earth project - but as Simple Features instead of Esri’s propiertary (and not tidyverse-friendly) shapefile format.</p>
 <blockquote>
 <p>For your use case, consult the vignette for <code>rnaturaleath::ne_download()</code> and the <a href="https://www.naturalearthdata.com/downloads/" target="_blank">Natural Earth website</a></p>
@@ -80,8 +78,9 @@ c) a hand-drawn rectangle turned into a BBOX</code></pre>
 saveRDS(berlin_sf, file = str_c(here::here(&quot;data&quot;, &quot;GIS_Berlin_Crime&quot;, &quot;/&quot;), &quot;substates10.rds&quot;))</code></pre>
 <p>Now, we’ll use the amazing Simple Feature’s package to fetch Berlin’s spatial bounding box.</p>
 <pre class="r"><code>berlin_bbox &lt;- sf::st_bbox(berlin_sf)</code></pre>
-<p>So… wanna have a quick glipmse at Berlin’s bounding box? Here’s all that it takes:</p>
-<pre class="r"><code>berlin_bbox %&gt;% sf::st_as_sfc() %&gt;% mapview::mapview()</code></pre>
+<p>So… wanna have a quick glipmse at Berlin’s bounding box? Here’s all that it takes with the <code>mapview</code> package:</p>
+<pre class="r"><code>berlin_bbox %&gt;% mapview::mapview()</code></pre>
+</div>
 </div>
 <div id="bbox-from-data" class="section level2">
 <h2><span class="header-section-number">1.2</span> BBOX from data</h2>
