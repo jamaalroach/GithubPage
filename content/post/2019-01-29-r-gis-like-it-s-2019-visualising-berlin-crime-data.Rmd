@@ -82,12 +82,12 @@ saveRDS(subsates10, file = str_c(here::here("data", "GIS_Berlin_Crime", "/"), "s
 ```
 
 ```{r echo=FALSE, cache=TRUE}
-subsates10 <- readRDS(file = str_c(here::here("data", "GIS_Berlin_Crime"), "/", "substates10.rds"))
+substates10 <- readRDS(file = str_c(here::here("data", "GIS_Berlin_Crime"), "/", "substates10.rds"))
 ```
 
 ```{r}
 #berlin_sf <- 
-berlin_sf <- subsates10 %>% filter(name == "Berlin")
+berlin_sf <- substates10 %>% filter(name == "Berlin")
 ```
 
 
@@ -97,10 +97,22 @@ Now, we'll use the amazing Simple Feature's package to fetch Berlin's spatial bo
 berlin_bbox <- sf::st_bbox(berlin_sf)
 ```
 
-So... wanna have a quick glipmse at Berlin's bounding box? Here's all that it takes with the `mapview` package
+So... wanna have a quick glipmse at Berlin's bounding box? Here's all that it takes with the `mapview` package:
 
 ```{r}
 berlin_bbox %>% mapview::mapview()
+```
+
+Since the coordinates in the `bbox` are stored as named numeric vector (c(xmin, ymin, xmax, ymax)), we can easily expand the `bbox` by providing another vector of length = 4 and see if the extent is better immediatly:
+
+```{r}
+(berlin_bbox + c(-0.1, -0.1, 0.1, 0.1)) %>% mapview::mapview()
+```
+
+That seems generous enough. So let's keep this box.
+
+```{r}
+berlin_bbox <- berlin_bbox + c(-0.1, -0.1, 0.1, 0.1)
 ```
 
 > Caveat: In order to make this work with `blogdown`, we need to save this chunk's output as a `htmlwidget`.
@@ -115,3 +127,11 @@ widgetframe::frameWidget(berlin_bbox_map$map)
 ```
 
 ## BBOX from data
+
+Another approach to get a reasonable boundig box to display and work with, is to calculate the bbox based on your geodata.
+
+```{r}
+FIS_URL <- "http://fbinter.stadt-berlin.de/fb/wfs/geometry/senstadt/re_direktion"
+sf::st_read_db(conn = FIS_URL)
+```
+
