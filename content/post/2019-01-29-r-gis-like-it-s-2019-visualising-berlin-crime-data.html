@@ -39,17 +39,22 @@ mathjaxEnableAutoNumber: no
 <li><a href="#basic-workflows"><span class="toc-section-number">1</span> Basic Workflows</a><ul>
 <li><a href="#basemap-area-three-ways"><span class="toc-section-number">1.1</span> Basemap Area: Three ways</a><ul>
 <li><a href="#bounding-box-object-based"><span class="toc-section-number">1.1.1</span> Bounding Box: Object-based</a></li>
+<li><a href="#bbox-from-data"><span class="toc-section-number">1.1.2</span> BBOX from data</a></li>
+<li><a href="#hand-drawn-bbox-with-mapedit"><span class="toc-section-number">1.1.3</span> Hand-drawn BBOX with <code>mapedit</code></a></li>
 </ul></li>
-<li><a href="#bbox-from-data"><span class="toc-section-number">1.2</span> BBOX from data</a></li>
+<li><a href="#basemap-contents"><span class="toc-section-number">1.2</span> Basemap Contents</a><ul>
+<li><a href="#quick-natural-earth"><span class="toc-section-number">1.2.1</span> Quick: Natural Earth</a></li>
+<li><a href="#custom-osm-with-osmdata"><span class="toc-section-number">1.2.2</span> Custom: OSM with <code>osmdata</code></a></li>
+</ul></li>
 </ul></li>
 </ul>
 </div>
 
-<p>To be fair, my R “career” actually only gained traction when I was asked to create a low-budget yet hi-res <a href="">map for print</a> by a colleague almost one and a half years ago. This particular use case gave me enough insights into the awesomeness of the Rstats / FOSS-minded community, the holistic potential of R re: all things <code>data</code>, and in particular the <a href="https://www.twitter.com/#GIStribe" target="_blank">#GIStribe</a>’s continuous efforts to improve spatial processing with R. And this was</p>
+<p>To be fair, my R “career” actually only gained traction when I was asked to create a low-budget hi-res <a href="">map for print</a> by a colleague almost one and a half years ago. This particular use case gave me enough insights into the awesomeness of the Rstats / FOSS-minded community, the holistic potential of R re: all things <code>data</code>, and in particular the <a href="https://www.twitter.com/#GIStribe" target="_blank">#GIStribe</a>’s continuous efforts to improve spatial processing with R.</p>
 <p>Recently, I did a similar but far more extensive freelance gig and discovered so many really helpful / effective / efficient / cool packages, methods and tools that I decided to write another GIS/mapping post. It’s simply time to give something back to the community (and to create a useful reference entry for my future self).</p>
-<p>In this post, we’re going to take a tour through several highly performant and versatile spatial packages for R. As a use case, we’re going to visualise aggregated crime data (district-level; yearly) for my hometown Berlin, Germany.</p>
-<p>This post is not about basic geo-computation / GIS / cartography concepts. For this, there already are plenty of excellent up-to-date resources such as Lovelace/Novosad 2018, or Jesse Adler’s solid series on R for Digital Humanities.</p>
-<p>This post is more like a glossary for all the magical things / hacks.</p>
+<p>In this post, we’re going to take a tour through several highly versatile spatial packages for R. As a use case, we’re going to visualise aggregated crime data (district-level; yearly) for my hometown Berlin, Germany.</p>
+<p>This post is not about basic geo-computation / GIS / cartography concepts. For this, there already are plenty of excellent up-to-date resources such as Lovelace/Novosad 2018, Jesse Adler’s solid series on R for Digital Humanities, or <a href="https://statnmap.com/2018-07-14-introduction-to-mapping-with-sf-and-co/" class="uri">https://statnmap.com/2018-07-14-introduction-to-mapping-with-sf-and-co/</a></p>
+<p>This post is more like my own glossary for all the magical things / hacks.</p>
 <p>In order to focus on the specific packages and functions, I’m going to load <code>tidyverse</code> only. Everything else will be called by `package::function()’. However, you might want to install the following packages:</p>
 <pre><code>rnaturalearth
 sf
@@ -59,7 +64,8 @@ mapview
 mapedit</code></pre>
 <p>Not strictly GIS, but still highy recommended for any workflow:</p>
 <pre><code>here</code></pre>
-<pre class="r"><code>library(tidyverse)</code></pre>
+<pre class="r"><code>library(tidyverse)
+library(sf)</code></pre>
 <div id="basic-workflows" class="section level1">
 <h1><span class="header-section-number">1</span> Basic Workflows</h1>
 <div id="basemap-area-three-ways" class="section level2">
@@ -74,15 +80,49 @@ c) a hand-drawn rectangle turned into a BBOX</code></pre>
 <blockquote>
 <p>For your use case, consult the vignette for <code>rnaturaleath::ne_download()</code> and the <a href="https://www.naturalearthdata.com/downloads/" target="_blank">Natural Earth website</a></p>
 </blockquote>
-<pre class="r"><code>berlin_sf &lt;- rnaturalearth::ne_download(scale = 10, type = &quot;admin_1_states_provinces&quot;, category = &quot;cultural&quot;, returnclass = &quot;sf&quot;)
-saveRDS(berlin_sf, file = str_c(here::here(&quot;data&quot;, &quot;GIS_Berlin_Crime&quot;, &quot;/&quot;), &quot;substates10.rds&quot;))</code></pre>
+<pre class="r"><code>substates10 &lt;- rnaturalearth::ne_download(scale = 10, type = &quot;admin_1_states_provinces&quot;, category = &quot;cultural&quot;, returnclass = &quot;sf&quot;)
+saveRDS(substates10, file = str_c(here::here(&quot;data&quot;, &quot;GIS_Berlin_Crime&quot;, &quot;/&quot;), &quot;substates10.rds&quot;))</code></pre>
+<pre class="r"><code>berlin_sf &lt;- substates10 %&gt;% filter(name == &quot;Berlin&quot;)</code></pre>
 <p>Now, we’ll use the amazing Simple Feature’s package to fetch Berlin’s spatial bounding box.</p>
 <pre class="r"><code>berlin_bbox &lt;- sf::st_bbox(berlin_sf)</code></pre>
 <p>So… wanna have a quick glipmse at Berlin’s bounding box? Here’s all that it takes with the <code>mapview</code> package:</p>
 <pre class="r"><code>berlin_bbox %&gt;% mapview::mapview()</code></pre>
+<blockquote>
+<p>Caveat: In order to make this work with <code>blogdown</code>, we need to save this chunk’s output as a <code>htmlwidget</code>.</p>
+</blockquote>
+<p>And since <code>mapview()</code> is cool, we clan plot inspect our Berlin polygon and the BBOX. For this we’re going to convert the BBOX object into a regular simple feature object with <code>sf::st_as_sfc</code> on the fly:</p>
+<pre class="r"><code>mapview::mapview(list(sf::st_as_sfc(berlin_bbox), berlin_sf))</code></pre>
+<p>Since the coordinates in the <code>bbox</code> are stored as named numeric vector (c(xmin, ymin, xmax, ymax)), we can easily expand the <code>bbox</code> by providing another vector of length = 4 and see if the extent is better immediatly:</p>
+<pre class="r"><code>{berlin_bbox + c(-0.1, -0.1, 0.1, 0.1)} %&gt;%
+  mapview::mapview()</code></pre>
+<p>That seems generous enough. So let’s keep this box.</p>
+<pre class="r"><code>berlin_bbox &lt;- berlin_bbox + c(-0.1, -0.1, 0.1, 0.1)</code></pre>
+</div>
+<div id="bbox-from-data" class="section level3">
+<h3><span class="header-section-number">1.1.2</span> BBOX from data</h3>
+<p>Another approach to get a reasonable boundig box to display and work with, is to calculate the bbox based on your geodata.</p>
+<p>Berlin-based <em>Tagespiegel</em> did</p>
+<pre class="r"><code>berlin_bike &lt;- sf::st_read(&quot;https://github.com/tagesspiegel/radmesser/blob/master/opendata/detailnetz_ueberholvorgaenge.geo.json?raw=true&quot;)
+saveRDS(berlin_bike, file = str_c(here::here(&quot;data&quot;, &quot;GIS_Berlin_Crime&quot;, &quot;/&quot;), &quot;berlin_bike.rds&quot;))</code></pre>
+<pre class="r"><code>mapview::mapview(berlin_bike)</code></pre>
+<pre class="r"><code>berlin_bike_bbox &lt;- sf::st_bbox(berlin_bike)</code></pre>
+<pre class="r"><code>mapview::mapview(list(st_as_sfc(berlin_bike_bbox), berlin_bike))</code></pre>
+</div>
+<div id="hand-drawn-bbox-with-mapedit" class="section level3">
+<h3><span class="header-section-number">1.1.3</span> Hand-drawn BBOX with <code>mapedit</code></h3>
+<pre class="r"><code>(berlin_custom &lt;- mapview::mapview(berlin_sf) %&gt;% mapedit::drawFeatures())
+saveRDS(berlin_custom, file = str_c(here::here(&quot;data&quot;, &quot;GIS_Berlin_Crime&quot;, &quot;/&quot;), &quot;berlin_custom.rds&quot;))</code></pre>
+<pre class="r"><code>berlin_custom_bbox &lt;- sf::st_bbox(berlin_custom)</code></pre>
+<pre class="r"><code>mapview::mapview(list(sf::st_as_sfc(berlin_custom_bbox), berlin_bike))</code></pre>
 </div>
 </div>
-<div id="bbox-from-data" class="section level2">
-<h2><span class="header-section-number">1.2</span> BBOX from data</h2>
+<div id="basemap-contents" class="section level2">
+<h2><span class="header-section-number">1.2</span> Basemap Contents</h2>
+<div id="quick-natural-earth" class="section level3">
+<h3><span class="header-section-number">1.2.1</span> Quick: Natural Earth</h3>
+</div>
+<div id="custom-osm-with-osmdata" class="section level3">
+<h3><span class="header-section-number">1.2.2</span> Custom: OSM with <code>osmdata</code></h3>
+</div>
 </div>
 </div>
