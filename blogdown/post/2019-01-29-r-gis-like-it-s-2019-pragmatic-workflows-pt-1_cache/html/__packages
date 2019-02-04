@@ -9,8 +9,8 @@ dplyr
 stringr
 forcats
 sf
-bindrcpp
 mapview
 mapedit
 rnaturalearth
 osmdata
+bindrcpp

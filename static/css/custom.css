@@ -14,18 +14,24 @@
 	border-top: 1px solid #c05b4d!important;
 }
 
-.caption em {
+.caption {
 	font-style: italic;
 	font-size: smaller;
 }
 
-.caption em::before {
+.caption::before {
 	content: "(";
 }
 
-.caption em::after {
+.caption::after {
 	content: ")";
 }
+
+/*
+.section p::first-letter {
+	font-size: x-large;
+}
+*/
 
 /* Header */
 

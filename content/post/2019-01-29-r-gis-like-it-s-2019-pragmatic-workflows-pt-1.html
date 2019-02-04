@@ -1,0 +1,398 @@
+---
+title: "[R] GIS like it's 2019: Pragmatic Workflows for Vector and Raster Data, Pt. 1"
+author: Ilja / fubits
+date: '2019-01-29'
+slug: r-gis-like-it-s-2019-pragmatic-workflows-pt-1
+categories:
+  - GIS
+  - Mapping
+  - Open Data
+tags:
+  - sf
+  - raster
+  - mapview
+  - mapedit
+  - osmdata
+output:
+  blogdown::html_page:
+    number_sections: yes
+    toc: yes
+lastmod: '2019-01-29T21:21:12+01:00'
+description: 'GIS with R is beyond powerful. This is part 1 of a collection of up-to-date workflows for processing spatial data of all kinds with R. The collection involves sf, mapview, mapedit, osmdata, raster, stars, rnaturalearth and other packages combined with straight-forward recipes.'
+abstract: ''
+draft: FALSE
+thumbnail: /img/thumbs/gis_workflows_1.jpg
+rmdlink: yes
+keywords: []
+comment: no
+autoCollapseToc: no
+postMetaInFooter: no
+hiddenFromHomePage: no
+mathjax: no
+mathjaxEnableSingleDollar: no
+mathjaxEnableAutoNumber: no
+---
+
+
+<div id="TOC">
+<ul>
+<li><a href="#a-bit-of-a-context"><span class="toc-section-number">1</span> A Bit of a Context</a></li>
+<li><a href="#basic-workflows---vector"><span class="toc-section-number">2</span> Basic Workflows - Vector</a><ul>
+<li><a href="#basemap-bounding-box-three-approaches"><span class="toc-section-number">2.1</span> Basemap Bounding Box: Three Approaches</a><ul>
+<li><a href="#bounding-box-object-based"><span class="toc-section-number">2.1.1</span> Bounding Box: Object-based</a></li>
+<li><a href="#bbox-from-data"><span class="toc-section-number">2.1.2</span> BBOX from data</a></li>
+<li><a href="#hand-drawn-bbox-with-mapedit"><span class="toc-section-number">2.1.3</span> Hand-drawn BBOX with <code>mapedit</code></a></li>
+</ul></li>
+<li><a href="#basemap-contents"><span class="toc-section-number">2.2</span> Basemap Contents</a><ul>
+<li><a href="#quick-natural-earth"><span class="toc-section-number">2.2.1</span> Quick: Natural Earth</a></li>
+<li><a href="#custom-osm-with-osmdata-and-all-the-above"><span class="toc-section-number">2.2.2</span> Custom: OSM with <code>osmdata</code> (and all the above)</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</div>
+
+<div id="a-bit-of-a-context" class="section level1">
+<h1><span class="header-section-number">1</span> A Bit of a Context</h1>
+<blockquote>
+<p>If you’re just here for the code / hacks, feel free to skip this intro and jump directly to the <a href="#basic-workflows---vector">hands-on part</a>.</p>
+</blockquote>
+<p>To be precise, my R “career” only started to gain traction when I was asked to create a <a href="/r-low-budget-high-res-mapping-with-r-for-not-for-profit-print/">low-budget CC0 print map</a> by a colleague almost one and a half years ago. This particular use case gave me enough of an impression of the awesomeness of the Rstats / FOSS-minded community, the holistic potential of R re: all things <code>data</code>, and in particular the <a href="https://twitter.com/hashtag/gistribe" target="_blank">#GIStribe</a>’s continuous efforts to make spatial processing with R accessible to everyone. What I did <strong>not</strong> know back then (among maaaaany other things) was that there was already existing a dual system of Base R and Tidy / Tidy-fied R - even for spatial…</p>
+<div class="figure">
+<img src="/img/GIS_workflow/r2vr_McBain.jpg" alt="Screenshot of Miles McBain’s r2vr demo" />
+<p class="caption">Screenshot of <a href="https://milesmcbain.xyz/r2vr3-shading-meshes-in-webvr/" target="_blank">Miles McBain’s r2vr demo</a></p>
+</div>
+<p>If you consider that <a href="https://mdsumner.github.io/2017/01/10/spatial-r-2017.html" target="_blank">this post</a> by <a href="https://mdsumner.github.io/2017/01/10/spatial-r-2017.html" target="_blank">@mdsumner</a> was written already two years ago, and R users potentially have been able to do stuff such as to <em>“colour a WebVR mesh by shading using a raster layer”</em> (cf. screenshot above; <a href="https://milesmcbain.xyz/r2vr3-shading-meshes-in-webvr/" target="_blank">McBain 2018</a>) with the <code>r2vr</code> package <strong>in R</strong> for more than half a year now, I think this quote by Michael D. Sumner just perfectly sums up what’s the status quo and the potential of “spatial / GIS with R”:</p>
+<blockquote>
+<p>“GIS itself needs what we can already do in R, it’s not a target we are aspiring to[,] it’s the other way around.” (<a href="https://mdsumner.github.io/2017/01/10/spatial-r-2017.html" target="_blank">Sumner 2017</a>)</p>
+</blockquote>
+<p>I mean, this <code>rayshader</code> output (pictured below; click on the image to see the full GIF in action) by the package’s developer <a href="https://twitter.com/tylermorganwall" target="_blank">Tyler Morgan-Wall</a> is not just a proof-of-concept. It’s out there on CRAN, it’s one technique already available for everyone with just a basic understanding of R and/or GIS.</p>
+<div class="figure">
+<img src="/img/GIS_workflow/rayshader.jpg" alt="Screenshot of Tyler Morgan-Wall’s rayshader demo. Click this link to see the GIF in action." />
+<p class="caption">Screenshot of Tyler Morgan-Wall’s rayshader demo. <a href="https://www.rayshader.com/" target="_blank">Click this link to see the GIF in action.</a></p>
+</div>
+<p>Or have a look at what Michael D. Sumner has been working on with the <a href="https://hypertidy.github.io/quadmesh/" target="_blank">quadmesh package</a>, which will allow us - among other things - to take <code>raster</code> to another level. Same for <a href="https://www.r-spatial.org/r/2017/11/23/stars1.html" target="_blank">Edzer Pebesma’s<code>stars</code> package</a> with regards to its potential for tidy spatiotemporal data.</p>
+<p>In short, GIS with R is efficient, effective, performative, <strong>affordable</strong>, and <del>Shiny</del> shiny and complex enough to serve as <em>the</em> domain for showcasing R and as a exhaustive use case for new R users (or their supervisors).</p>
+<hr />
+<p>Recently, I did another but far more extensive freelance gig involving custom mapping and real-world geodata, and thereby discovered so many really helpful / effective / efficient / cool packages, methods, tools and workflows that I decided to write another GIS/mapping post. It’s simply time to give something back to the community (and to create a useful reference entry for my future self).</p>
+<p>In this post, we’re going to take a tour through several versatile spatial packages for R. As a use case, we’re going to visualize <del>aggregated crime data (district-level; yearly)</del> for my hometown Berlin, Germany.</p>
+<p>This post is not about basic geocomputation / GIS / cartography concepts. Regarding this, there already are plenty of excellent up-to-date resources such as Lovelace/Novosad 2018, Jesse Adler’s solid series on R for Digital Humanities, or <a href="https://statnmap.com/2018-07-14-introduction-to-mapping-with-sf-and-co/" class="uri">https://statnmap.com/2018-07-14-introduction-to-mapping-with-sf-and-co/</a>.</p>
+<p>Rather, this post is more like my own glossary for all the magical things / hacks.</p>
+<p>If there’s a single really helpful thing to have present in mind for now, it’s this common basic representation of GIS’ data layers:</p>
+<div class="figure">
+<img src="/img/GIS_workflow/gis_layers.gif" alt="Source: National Coastal Data Development Centre (NCDDC), National Oceanic and Atmospheric Administration (NOAA), USA" />
+<p class="caption">Source: National Coastal Data Development Centre (NCDDC), National Oceanic and Atmospheric Administration (NOAA), USA</p>
+</div>
+<pre class="r"><code>library(tidyverse)
+library(sf)
+library(mapview)
+library(mapedit)
+library(rnaturalearth)
+library(osmdata)
+# library(raster) # I prefer to use raster::fun() since raster::select() masks dplyr::select()</code></pre>
+</div>
+<div id="basic-workflows---vector" class="section level1">
+<h1><span class="header-section-number">2</span> Basic Workflows - Vector</h1>
+<p>Let’s assume that we want to make some kind of a map, be it because we actually need a map (i.e. for a <a href="https://www.amazon.de/Krieg-vor-Haustür-Europas-Nachbarschaft/dp/3801205487/ref=sr_1_1?ie=UTF8&amp;qid=1549128023" target="_blank">great book on European foreign policy</a>), or maybe just to give some spatial data some kind of a cognitive canvas. As geodata tends to take up non-trivial amounts of resources (bandwidth, memory, CPU), it could be useful to focus on only a particular geographic extent. This is where I learned to love the concept of a bounding box (BBOX). Instead of literally downloading the whole world (thereby straining someone else’s bandwidth / server capacity) and then running costly query/filter operations, we can easily define bounds first.</p>
+<p>If you’re spatially literate and therefore easily can spot whether you need Lat/Lon or Lon/Lat, or what projection / CRS your favourite BBOX-providing workflow offers, you probably can skip this and just define your BBOX manually with something like <code>bbox &lt;- c(xmin, ymin, xmax, ymax)</code>. I tend to struggle with this (even when using web tools such as <a href="http://bboxfinder.com" target="_blank">http://bboxfinder.com</a>), because I either mix up Lat/Lon or underestimate the spatial extent of my geodata or whatever. This is why I think that these three approaches below might be helpful to others, too.</p>
+<div id="basemap-bounding-box-three-approaches" class="section level2">
+<h2><span class="header-section-number">2.1</span> Basemap Bounding Box: Three Approaches</h2>
+<p>So first of all we want to decide on the extent of the basemap. Since this is a recurrent task but with varying parameters, I’m offering three different approaches, based on</p>
+<ul>
+<li><ol style="list-style-type: lower-alpha">
+<li>the bounding box (BBOX) of a spatial object (i.e. Admin 1 level Federal state|s)</li>
+</ol></li>
+<li><ol start="2" style="list-style-type: lower-alpha">
+<li>the bounding box of spatial data (i.e. the geocoded cycling data)</li>
+</ol></li>
+<li><ol start="3" style="list-style-type: lower-alpha">
+<li>a hand-drawn rectangle turned into a BBOX</li>
+</ol></li>
+</ul>
+<div id="bounding-box-object-based" class="section level3">
+<h3><span class="header-section-number">2.1.1</span> Bounding Box: Object-based</h3>
+<p>Here, we start with our spatial object of reference. I prefer to work with Open Access / Public Domain data (and not Google Maps / Bing et al.), so let’s fetch some vector data from the Natural Earth project - but as <code>class = Simple Feature</code> instead of Esri’s proprietary (and less tidyverse-friendly) <code>Shapefile</code> format.</p>
+<blockquote>
+<p>For your use case, consult the vignette for <code>rnaturaleath::ne_download()</code> and the <a href="https://www.naturalearthdata.com/downloads/" target="_blank">Natural Earth website</a>.
+For the sake of resource efficiency I also recommend to download the data once and then to store it locally with <code>save</code>/<code>saveRDS</code> for future use. As I work a lot with Natural Earth data, I have mounted a network folder <code>D:/GIS/</code> with all the raster and vector data I’ve downloaded so far.However<em>, I do not recommend download the “Download all X themes” file, since this gives you a) shapefiles instead of Simple Features, and b) </em>UTF-8 encoding issues* for the feauture labels, depending on when the particular theme was parsed the last time.</p>
+</blockquote>
+<pre class="r"><code>substates10 &lt;- rnaturalearth::ne_download(scale = 10, type = &quot;admin_1_states_provinces&quot;, category = &quot;cultural&quot;, returnclass = &quot;sf&quot;)
+
+# saveRDS(substates10, file = str_c(here::here(&quot;data&quot;, &quot;GIS_workflows&quot;, &quot;/&quot;), &quot;substates10.rds&quot;))
+# substates10 &lt;- readRDS(file = str_c(here::here(&quot;data&quot;, &quot;GIS_workflows&quot;), &quot;/&quot;, &quot;substates10.rds&quot;))</code></pre>
+<pre class="r"><code>berlin_sf &lt;- substates10 %&gt;% filter(name == &quot;Berlin&quot;)</code></pre>
+<p>Next, we’ll use the amazing <code>sf</code> package to fetch Berlin’s bounding box.</p>
+<pre class="r"><code>berlin_bbox &lt;- sf::st_bbox(berlin_sf)</code></pre>
+<p>So… wanna have a quick glimpse at Berlin’s bounding box? Here’s all that it takes with the game-changing <code>mapview</code> package by <a href="https://r-spatial.github.io/mapview/index.html" target="_blank">Tim Appelhans et al.</a>:</p>
+<pre class="r"><code>berlin_bbox %&gt;% mapview::mapview()</code></pre>
+<blockquote>
+<p>Caveat: To keep memory and CPU load low for everyone browsing this post, I mostly will display the output of interactive widgets as <code>.jpg</code>.</p>
+</blockquote>
+<blockquote>
+<p>If you want to set the “CartoDB Dark Matter” basemap as your default (or any other of the <a href="http://leaflet-extras.github.io/leaflet-providers/preview/" target="_blank">themes supported by Leaflet</a> ), you might want to add this setting to your <code>.Rprofile</code>:</p>
+</blockquote>
+<pre><code>mapviewOptions(basemaps = c(&quot;CartoDB.DarkMatter&quot;, &quot;CartoDB.Positron&quot;, &quot;Esri.WorldImagery&quot;, &quot;OpenStreetMap&quot;, &quot;OpenTopoMap&quot;))</code></pre>
+<p>And since <code>mapview()</code> is cool, we clan plot and inspect our Berlin object and the BBOX at the same time. For this we’re going to convert the BBOX object into a regular simple feature object with <code>sf::st_as_sfc</code> on the fly:</p>
+<pre class="r"><code>mapview::mapview(list(sf::st_as_sfc(berlin_bbox), berlin_sf))</code></pre>
+<p><img src="/img/GIS_workflow/mapview_bbox.jpg" /></p>
+<p>This box would probably be too narrow for further static editing (i.e. for a print map), so it would be cool if we could simply increase the BBOX’s extent. Since the coordinates in the <code>bbox</code> are stored as a numeric vector <code>c(xmin, ymin, xmax, ymax)</code>, we can easily expand the <code>bbox</code> by providing another vector of length = 4 and see if the extent is better on the fly:</p>
+<pre class="r"><code>(berlin_bbox + c(-0.1, -0.1, 0.1, 0.1)) %&gt;%
+  # sf::st_as_sfc() %&gt;% 
+  mapview::mapview()</code></pre>
+<p><img src="/img/GIS_workflow/mapview_bbox_plus.jpg" /></p>
+<p>That seems generous enough. So let’s preserve this box for later.</p>
+<pre class="r"><code>berlin_bbox &lt;- berlin_bbox + c(-0.1, -0.1, 0.1, 0.1)</code></pre>
+</div>
+<div id="bbox-from-data" class="section level3">
+<h3><span class="header-section-number">2.1.2</span> BBOX from data</h3>
+<p>Another approach to get a reasonable bounding box is to calculate the BBOX based on your geodata.</p>
+<p>As mentioned above, I’m going to use the freshly released cycling data from the Berlin-based <em>Tagespiegel</em> DDJ / Innovation Lab for the final use case. The data has been collected as part of the sensor-based #radmesser project, where Lab leader <a href="https://twitter.com/plateauton" target="&quot;_blank">Hendrik Lehmann</a>’s team of journalists and developers equipped 100 (!) cyclists with close-range sensors to measure the distance of passing-by cars and trucks on Berlin’s roads. Goal: Demonstrate the at-risk status of cyclists in Germany’s capital.</p>
+<blockquote>
+<p>Make sure to check out the award-winning <a href="https://interaktiv.tagesspiegel.de/radmesser/" target="_blank">project’s website</a> and the <a href="https://github.com/tagesspiegel/radmesser/tree/master/opendata" target="_blank">project’s repo</a>.</p>
+</blockquote>
+<p>It’s probably worth the remark that getting the data into R is as simple as <code>sf::st_read(URL)</code>…</p>
+<pre class="r"><code># License: ODC-By v1.0/Tagesspiegel Radmesser/https://radmesser.de
+# cf. https://github.com/tagesspiegel/radmesser/blob/master/opendata/LICENSE.md
+berlin_bike &lt;- sf::st_read(&quot;https://github.com/tagesspiegel/radmesser/blob/master/opendata/detailnetz_ueberholvorgaenge.geo.json?raw=true&quot;)
+
+# saveRDS(berlin_bike, file = str_c(here::here(&quot;data&quot;, &quot;GIS_workflows&quot;, &quot;/&quot;), &quot;berlin_bike.rds&quot;))
+# berlin_bike &lt;- readRDS(file = str_c(here::here(&quot;data&quot;, &quot;GIS_workflows&quot;), &quot;/&quot;, &quot;berlin_bike.rds&quot;))</code></pre>
+<blockquote>
+<p>However, st_read silently drops the “stats” field (which is legit, since a GeoJSON feature is defined as <code>geometry + properties</code> only) which contains the single measurements. Or rather: I have no 1-liner idea how to preserve it, be it in QGIS, with <code>jsonlite</code>, or by transforming with <a href="" target="_blank">http://geojson.io</a>. Fortunatly, the Radmesser-team also provides a CSV with the measurements and a column with the respective streets key. So we can adress this later.</p>
+</blockquote>
+<p>Nonetheless, we can quickly have a look at the traced roads where the 15K+ measurements where taken, and also visualise the road class.</p>
+<pre class="r"><code>mapview::mapview(berlin_bike, zcol =&quot;STRKLASSE1&quot;)</code></pre>
+<p><img src="/img/GIS_workflow/bikedata2.jpg" /></p>
+<p>And now the data-based BBOX:</p>
+<pre class="r"><code>berlin_bike_bbox &lt;- sf::st_bbox(berlin_bike)</code></pre>
+<pre class="r"><code>mapview::mapview(list(st_as_sfc(berlin_bike_bbox), berlin_bike))</code></pre>
+<p>Easy, right?</p>
+</div>
+<div id="hand-drawn-bbox-with-mapedit" class="section level3">
+<h3><span class="header-section-number">2.1.3</span> Hand-drawn BBOX with <code>mapedit</code></h3>
+<p>If neither the feature/object-based nor the geodata-based BBOX is sufficient for you (i.e. because you need a custom extent not matching the data), we can literally draw the box with the super-handy <code>mapedit</code> package. For this, we’ll take the cycling data just to add context, and then will interactivly draw a rectangle polygon and store the output in an object.</p>
+<blockquote>
+<p>Don’t forget to click the “Done” button to finish editing.</p>
+</blockquote>
+<pre class="r"><code>(berlin_custom &lt;- mapview::mapview(berlin_bike) %&gt;% mapedit::drawFeatures())
+
+# saveRDS(berlin_custom, file = str_c(here::here(&quot;data&quot;, &quot;GIS_workflows&quot;, &quot;/&quot;), &quot;berlin_custom.rds&quot;))
+# berlin_custom &lt;- readRDS(file = str_c(here::here(&quot;data&quot;, &quot;GIS_workflows&quot;), &quot;/&quot;, &quot;berlin_custom.rds&quot;))</code></pre>
+<p><img src="/img/GIS_workflow/mapedit.jpg" /></p>
+<p>The resulting object is not a BBOX, obviously, but we can just fetch the object’s BBOX, and voila - <em>habemus BBOX</em>.</p>
+<pre class="r"><code>berlin_custom_bbox &lt;- sf::st_bbox(berlin_custom)</code></pre>
+<p>Let’s double-check our custom BBOX with the cycling data and the Berlin feature object.</p>
+<pre class="r"><code>mapview::mapview(list(sf::st_as_sfc(berlin_custom_bbox), berlin_sf, berlin_bike))</code></pre>
+<p><img src="/img/GIS_workflow/mapedit2.jpg" /></p>
+<p>Dammit, I messed up the lower-right corner by ommiting a piece of Berlin’s south-east (if the use case were to include all of Berlin). But we can easiliy re-draw the box with <code>mapedit</code> or use the <code>bbox &lt;- bbox + vector</code> hack from above.</p>
+<pre class="r"><code>berlin_custom_bbox</code></pre>
+<pre><code>##     xmin     ymin     xmax     ymax 
+## 13.02704 52.35716 13.79334 52.67722</code></pre>
+<p>We’re after <code>ymin</code> in this case, so we could either do <code>berlin_custom_bbox["ymin"] &lt;- newValue</code> or manipulate the value with <code>berlin_custom_bbox["ymin"] - 0.1</code>.</p>
+<p>Ok, enough BBOXing for today. Next: How to get any vector data we want into R.</p>
+</div>
+</div>
+<div id="basemap-contents" class="section level2">
+<h2><span class="header-section-number">2.2</span> Basemap Contents</h2>
+<p>For creating custom map / visualisation you might want to have as much control of what’s displayed on the basemap level as possible. Depending on the resolution / zoom-level of your map, 1:10m vector data from Natural Earth might already be sufficient. For more detail and features (esp. to play around with when you have a certain Gestalt concept and/or want to map below regional level), querying OpenStreetMap data is probably the gold standard. We’ll look into both approaches in this Chapter.</p>
+<div id="quick-natural-earth" class="section level3">
+<h3><span class="header-section-number">2.2.1</span> Quick: Natural Earth</h3>
+<p>For the regional level, 1:10m vector data might already be sufficient. Let’s look at a Berlin map built from roads, rivers and lakes (and borders, of course). I’m going to load the data from my <code>D:/GIS</code> folder, but you could download everything as described above. Europe is priveledged, so there’s supplemental data offered by Natural Earth for lakes and rivers (cf. <a href="https://www.naturalearthdata.com/downloads/10m-physical-vectors/10m-rivers-lake-centerlines/" target="_blank">Natural Earth: Rivers</a> for more detail and licensing), <del>so I’m going to use it here</del>. However, the lakes data does not offer any objects in or around Berlin, so I’m sticking to the regular lakes data instead. For rivers, we get 3 results, but we might want to double-check with the base rivers data. Cause we can ;) And because inspecting your data before working with it is a core skill anyways, GIS or not.</p>
+<p>But see for yourself:</p>
+<div class="figure">
+<img src="/img/GIS_workflow/europe_lakes_rivers.jpg" alt="Supplemental data for European lakes (on the left) and rivers (on the right) from Natural Earth. Displayed with mapview of course!" />
+<p class="caption">Supplemental data for European lakes (on the left) and rivers (on the right) from Natural Earth. Displayed with <code>mapview</code> of course!</p>
+</div>
+<p>So let’s fetch roads, lakes, and rivers from Natural Earth.</p>
+<pre class="r"><code>roads10 &lt;- rnaturalearth::ne_download(scale = 10, type = &quot;roads&quot;, category = &quot;cultural&quot;, returnclass = &quot;sf&quot;)
+
+# basic lakes data
+lakes10 &lt;- rnaturalearth::ne_download(scale = 10, type = &quot;lakes&quot;, category = &quot;physical&quot;, returnclass = &quot;sf&quot;)
+
+# supplemental lakes data for Europe
+# lakes10 &lt;- rnaturalearth::ne_download(scale = 10, type = &quot;lakes_europe&quot;, category = &quot;physical&quot;, returnclass = &quot;sf&quot;)
+# saveRDS(lakes10, file = str_c(here::here(&quot;data&quot;, &quot;GIS_workflows&quot;, &quot;/&quot;), &quot;lakes10_europe.rds&quot;))
+# lakes10 &lt;- readRDS(file = str_c(here::here(&quot;data&quot;, &quot;GIS_workflows&quot;), &quot;/&quot;, &quot;lakes10_europe.rds&quot;))
+
+# basic river data
+rivers10_base &lt;- rnaturalearth::ne_download(scale = 10, type = &quot;rivers_lake_centerlines&quot;, category = &quot;physical&quot;, returnclass = &quot;sf&quot;)
+
+# supplemental river data for Europe
+rivers10_europe &lt;- rnaturalearth::ne_download(scale = 10, type = &quot;rivers_europe&quot;, category = &quot;physical&quot;, returnclass = &quot;sf&quot;)
+# saveRDS(rivers10, file = str_c(here::here(&quot;data&quot;, &quot;GIS_workflows&quot;, &quot;/&quot;), &quot;rivers10_europe.rds&quot;))
+# rivers10 &lt;- readRDS(file = str_c(here::here(&quot;data&quot;, &quot;GIS_workflows&quot;), &quot;/&quot;, &quot;rivers10_europe.rds&quot;))</code></pre>
+<pre class="r"><code>load(&quot;D:/GIS/vector/sf/roads10.RData&quot;)
+load(&quot;D:/GIS/vector/sf/lakes10.RData&quot;)
+load(&quot;D:/GIS/vector/sf/rivers10.RData&quot;)</code></pre>
+<p>Now we’ll only pick those features which are needed aka are contained within our BBOX. There are a couple of approaches (i.e. by subsetting with a toponym, filtering by <a href="https://github.com/rugbyprof/4553-Spatial-DS/wiki/Topological-Relationships" target="_blank">topological relation between two features (i.e. X within Y, intersects with)</a>, or the brute way of cropping with a BBOX).</p>
+<p>But before we procedd, let’s inspect the lakes and rivers (base and Europe) objects, as we’re interested in finding out what we got:</p>
+<pre class="r"><code>mapview::mapview(list(rivers10_base, rivers10_europe, lakes10))</code></pre>
+<div class="figure">
+<img src="/img/GIS_workflow/europe_lakes_rivers.jpg" alt="Comparison of base and supplemental rivers data for European. Mapview is just awesome for this kind of exploratory tasks." />
+<p class="caption">Comparison of base and supplemental rivers data for European. Mapview is just awesome for this kind of exploratory tasks.</p>
+</div>
+<blockquote>
+<p>See how handy <code>mapview + sf</code> is? We can visually compare two different sets of geometric features with the same easiness / usability and elegance as we do our usual <a href="https://www.littlemissdata.com/blog/simple-eda" target="_blank">exploratory data analysis</a> of <em>numeric</em> data with <code>summary()</code>, <code>visdat</code>, <code>skimr</code>, <code>ggplot()</code> and so on.</p>
+</blockquote>
+<p>Anyways, we can see from our visual exploration that <code>rivers10_base</code> does not offer any rivers near or in Berlin. We can ignore this object.</p>
+<p>Let’s look into subsetting the rest.</p>
+<div id="subsetting-by-toponym-property" class="section level4">
+<h4><span class="header-section-number">2.2.1.1</span> Subsetting by Toponym / Property</h4>
+<p>We did this already: We’ve subsetted the <code>berlin_sf</code> object from <code>substates10</code> with <code>filter(name == "Berlin")</code>. That’s pretty straighforward if your data is clearly subsetable with an adressable object or explicit property (such as <code>type = "highway"</code>). However, that’s usually a bit trickier for cross-boarder features such as roads or rivers.</p>
+<p>Deciding on whether to <em>filter</em> (or rather: <em>query</em>) <strong>or</strong> to <em>crop</em> depends on the size of the set you’re working with. And in practice, a combination of <em>filter</em> <strong>and</strong> <em>crop</em> is probably the most effective way. Our <code>roads10</code> object contains 56K features, while lakes and rivers combined are around 3K. Even if 56K is non that much in 2019, you’ll still notice that it takes some time to compute the query (Big <em>O</em> calling!). If you have a dozen or so geometric objects to subset, you’ll quickly realise that size matters and that a clever query/crop/filter approach might save you resources.</p>
+<p>Let’s look at <code>sf::st_crop</code> and then at <code>filter(sf::st_intersection())</code>, which probably is not that intuitive when you’re new to GIS/spatial with R.</p>
+</div>
+<div id="subsetting-by-cropping-sfst_crop" class="section level4">
+<h4><span class="header-section-number">2.2.1.2</span> Subsetting by Cropping: <code>sf::st_crop</code></h4>
+<p>Cropping is straight-forward. We take our BBOX object (or any other feature from which <code>st_crop</code> can derive a BBOX) and then literally cut off all elements that extent beyond the BBOX.</p>
+<pre class="r"><code>lakes_berlin &lt;- lakes10 %&gt;% sf::st_crop(berlin_custom_bbox)</code></pre>
+<pre><code>## although coordinates are longitude/latitude, st_intersection assumes that they are planar</code></pre>
+<pre><code>## Warning: attribute variables are assumed to be spatially constant
+## throughout all geometries</code></pre>
+<pre class="r"><code>rivers_berlin &lt;- rivers10_europe %&gt;% sf::st_crop(berlin_custom_bbox)</code></pre>
+<pre><code>## although coordinates are longitude/latitude, st_intersection assumes that they are planar</code></pre>
+<pre><code>## Warning: attribute variables are assumed to be spatially constant
+## throughout all geometries</code></pre>
+<p>Now we can simply use <code>mapview</code> or plot the resulting object with <code>ggplot</code> and <code>geom_sf</code>.</p>
+<pre class="r"><code>mapview::mapview(list(sf::st_as_sfc(berlin_custom_bbox), lakes_berlin, rivers_berlin))</code></pre>
+<div class="figure">
+<img src="/img/GIS_workflow/berlin_rivers.jpg" alt="BBOX + cropped rivers and lakes" />
+<p class="caption">BBOX + cropped rivers and lakes</p>
+</div>
+<p>And now let’s plot the result with <code>ggplot</code> and <code>berlin_sf</code> as the background and use an equal-area projection for Berlin with <code>crs = 3068</code> with is equivalent to <code>crs = sf::st_crs(3068)</code></p>
+<blockquote>
+<p>If you need a particular CRS for your use case, <a href="https://epsg.io/" target="_blank">https://epsg.io/</a> might come in handy.</p>
+</blockquote>
+<pre class="r"><code>ggplot() +
+  geom_sf(data = berlin_sf, fill = &quot;lightgrey&quot;, color = &quot;black&quot;) +
+  geom_sf(data = lakes_berlin, fill = &quot;blue&quot;) +
+  geom_sf(data = rivers_berlin, aes(size = strokeweig), color = &quot;blue&quot;) +
+  geom_sf_label(data = rivers_berlin, aes(label = name)) +
+  scale_size(range = c(0.5,2)) +
+  theme_minimal() +
+  guides(size = FALSE) +
+  xlab(&quot;&quot;) +
+  ylab(&quot;&quot;) +
+  coord_sf(crs = 3068)</code></pre>
+<p><img src="/post/2019-01-29-r-gis-like-it-s-2019-pragmatic-workflows-pt-1_files/figure-html/unnamed-chunk-26-1.png" width="672" /></p>
+</div>
+<div id="subsetting-by-topological-relation" class="section level4">
+<h4><span class="header-section-number">2.2.1.3</span> Subsetting by Topological Relation</h4>
+<p>This is as accurate as it gets, but you might need to take some time to understand the basic set of geometric operations. (Actually, I just understood <code>sf::st_intersection</code> while writing this paragraph… .) Just as a handy example, let’s say that we want to reduce our (world) <code>roads10</code> object to Berlin’s <strong>shape</strong>. This a regular geocomputational operation, and we’re going to use <code>sf::st_intersection()</code>. This is not the same as <code>sf::st_within()</code>, which will be used next.</p>
+<p>As we already know that the result cannot extent beyond Berlin’s BBOX, we should first crop the <code>roads10</code> object with Berlin’s BBOX in order to reduce the computational cost of this operation. Mind the <code>.</code> placement.</p>
+<pre class="r"><code>roads_berlin_sf &lt;- roads10 %&gt;% 
+  sf::st_crop(berlin_custom_bbox) %&gt;% 
+  sf::st_intersection(berlin_sf)</code></pre>
+<pre><code>## although coordinates are longitude/latitude, st_intersection assumes that they are planar</code></pre>
+<pre><code>## Warning: attribute variables are assumed to be spatially constant
+## throughout all geometries</code></pre>
+<pre><code>## although coordinates are longitude/latitude, st_intersection assumes that they are planar</code></pre>
+<pre><code>## Warning: attribute variables are assumed to be spatially constant
+## throughout all geometries</code></pre>
+<p>Here’s the result (and Kudos to <a href="https://ryanpeek.github.io/2017-11-05-mapping-with-sf-Part-2/" target="_blank">Ryan Peek</a> “clip object to shape” lingo):</p>
+<pre class="r"><code>ggplot() +
+  geom_sf(data = berlin_sf) +
+  geom_sf(data = sf::st_as_sfc(berlin_custom_bbox), alpha = 0.3) +
+  geom_sf(data = roads_berlin_sf, aes(color = type)) +
+  theme_minimal() +
+  coord_sf(expand = FALSE, clip = &quot;on&quot;)</code></pre>
+<p><img src="/post/2019-01-29-r-gis-like-it-s-2019-pragmatic-workflows-pt-1_files/figure-html/unnamed-chunk-28-1.png" width="672" /></p>
+<p>I guess it’s pretty obvious how powerful the <code>sf</code> package and geom_sf() are. But let’s not forget about <code>mapview()</code>!</p>
+<pre class="r"><code>mapview::mapview(list(berlin_sf, roads_berlin_sf))</code></pre>
+<div class="figure">
+<img src="/img/GIS_workflow/berlin_roads.jpg" alt="BBOX + cropped rivers and lakes" />
+<p class="caption">BBOX + cropped rivers and lakes</p>
+</div>
+<p>Now let’s look at <code>sf::st_within()</code> which calls for a different subsetting logic. The operation returns a binary predicate {0,1}, so we need to filter <code>lengths() &gt; 0</code>. No idea :) Just read `sf``s <a href="https://cran.r-project.org/web/packages/sf/vignettes/sf1.html#geometrical_operations" target="_blank">Vignette</a>. Whatever works, works. In this example, we only keep those roads, which are fully contained within Berlin’s border.</p>
+<pre class="r"><code>roads_berlin_sf &lt;- roads10 %&gt;% 
+  sf::st_crop(berlin_custom_bbox) %&gt;% 
+  filter(lengths(st_within(., berlin_sf)) &gt; 0)</code></pre>
+<pre><code>## although coordinates are longitude/latitude, st_intersection assumes that they are planar</code></pre>
+<pre><code>## Warning: attribute variables are assumed to be spatially constant
+## throughout all geometries</code></pre>
+<pre><code>## although coordinates are longitude/latitude, st_within assumes that they are planar</code></pre>
+<pre class="r"><code>ggplot() +
+  geom_sf(data = berlin_sf) +
+  geom_sf(data = sf::st_as_sfc(berlin_custom_bbox), alpha = 0.3) +
+  geom_sf(data = roads_berlin_sf, aes(color = type)) +
+  theme_minimal() +
+  coord_sf(expand = FALSE, clip = &quot;on&quot;)</code></pre>
+<p><img src="/post/2019-01-29-r-gis-like-it-s-2019-pragmatic-workflows-pt-1_files/figure-html/unnamed-chunk-30-1.png" width="672" /></p>
+<p>Of course, at this level of resolution the 1:10m data from Natural Earth does not offer enough granularity (i.e. to represent Berlin solely based on the signatures of Berlin’s roads). Let’s escalate with <a href="" target="_blank">OpenStreetMaps</a>.</p>
+</div>
+</div>
+<div id="custom-osm-with-osmdata-and-all-the-above" class="section level3">
+<h3><span class="header-section-number">2.2.2</span> Custom: OSM with <code>osmdata</code> (and all the above)</h3>
+<blockquote>
+<p>TBD</p>
+</blockquote>
+<p>Multiple non-developer ways to get there:</p>
+<ul>
+<li><a href="https://taginfo.openstreetmap.org" target="_blank">https://taginfo.openstreetmap.org</a></li>
+<li><a href="https://www.openstreetmap.org" target="_blank">https://www.openstreetmap.org</a></li>
+<li><a href="https://overpass-turbo.eu/" target="_blank">https://overpass-turbo.eu</a> to export as JSON + <a href="https://mapshaper.org/" target="_blank">https://mapshaper.org</a> to turn the JSON layers in question into a condensed shapefile (and simplify the features with a GUI, if necessary)</li>
+</ul>
+<p>Here’s a simple query as an example:</p>
+<pre class="r"><code>berlin_osm_roads &lt;- osmdata::opq(bbox = &quot;berlin&quot;) %&gt;% # alternative: bbox = osmdata::bbox_to_string(berlin_bbox)
+  # osmdata::add_osm_feature(key = &quot;highway&quot;) %&gt;% 
+  osmdata::add_osm_feature(key = &quot;highway&quot;, value = c(&quot;primary&quot;, &quot;trunk&quot;, &quot;motorway&quot;, &quot;secondary&quot;, &quot;tertiary&quot;)) %&gt;%
+  # osmdata::add_osm_feature(key = &quot;highway&quot;, value = &quot;primary&quot;) %&gt;% 
+  osmdata::osmdata_sf()
+# saveRDS(berlin_osm_roads, file = str_c(here::here(&quot;data&quot;, &quot;GIS_workflows&quot;, &quot;/&quot;), &quot;berlin_osm_roads.rds&quot;))
+# berlin_osm_roads &lt;- readRDS(file = str_c(here::here(&quot;data&quot;, &quot;GIS_workflows&quot;), &quot;/&quot;, &quot;berlin_osm_roads.rds&quot;))</code></pre>
+<p>The returning object is a bit messy. It’s a list of lists of simple features (since we used <code>osmdata::osmdata_sf()</code>)</p>
+<pre class="r"><code>berlin_osm_roads %&gt;% names()</code></pre>
+<pre><code>## [1] &quot;bbox&quot;              &quot;overpass_call&quot;     &quot;meta&quot;             
+## [4] &quot;osm_points&quot;        &quot;osm_lines&quot;         &quot;osm_polygons&quot;     
+## [7] &quot;osm_multilines&quot;    &quot;osm_multipolygons&quot;</code></pre>
+<p>As we are interested in roads and our query only called for roads as feature, we should focus on <code>osm_lines</code> and <code>osm_multilines</code>.</p>
+<pre class="r"><code>berlin_osm_roads$osm_lines %&gt;% count(highway) %&gt;% arrange(desc(n))</code></pre>
+<pre><code>## Simple feature collection with 15 features and 2 fields
+## geometry type:  GEOMETRY
+## dimension:      XY
+## bbox:           xmin: 13.1191 ymin: 52.34377 xmax: 13.56479 ymax: 52.68006
+## epsg (SRID):    4326
+## proj4string:    +proj=longlat +datum=WGS84 +no_defs
+## # A tibble: 15 x 3
+##    highway          n                                              geometry
+##    &lt;fct&gt;        &lt;int&gt;                                       &lt;GEOMETRY [Â°]&gt;
+##  1 secondary     5918 MULTILINESTRING ((13.2694 52.35693, 13.26932 52.3571~
+##  2 tertiary      3171 MULTILINESTRING ((13.41056 52.3576, 13.41102 52.3573~
+##  3 primary       2515 MULTILINESTRING ((13.45034 52.36172, 13.45075 52.361~
+##  4 motorway       678 MULTILINESTRING ((13.5479 52.36141, 13.54799 52.3608~
+##  5 motorway_li~   626 MULTILINESTRING ((13.54776 52.36409, 13.54754 52.363~
+##  6 trunk          165 MULTILINESTRING ((13.28164 52.35378, 13.28111 52.354~
+##  7 secondary_l~   147 MULTILINESTRING ((13.37566 52.40907, 13.37564 52.409~
+##  8 primary_link   125 MULTILINESTRING ((13.36314 52.37029, 13.36333 52.370~
+##  9 trunk_link      91 MULTILINESTRING ((13.26929 52.3575, 13.26908 52.3575~
+## 10 residential     52 MULTILINESTRING ((13.42551 52.47918, 13.42567 52.479~
+## 11 tertiary_li~    47 MULTILINESTRING ((13.51811 52.36478, 13.51822 52.364~
+## 12 service         10 MULTILINESTRING ((13.484 52.51135, 13.48426 52.51132~
+## 13 unclassified     8 MULTILINESTRING ((13.19101 52.51405, 13.19117 52.514~
+## 14 living_stre~     2 MULTILINESTRING ((13.50144 52.51034, 13.50148 52.510~
+## 15 path             1 LINESTRING (13.39146 52.50093, 13.3915 52.50065, 13.~</code></pre>
+<pre class="r"><code>berlin_osm_roads$osm_multilines %&gt;% count(highway) %&gt;% arrange(desc(n))</code></pre>
+<pre><code>## Simple feature collection with 2 features and 2 fields
+## geometry type:  MULTILINESTRING
+## dimension:      XY
+## bbox:           xmin: 13.1191 ymin: 52.45264 xmax: 13.50482 ymax: 52.529
+## epsg (SRID):    4326
+## proj4string:    +proj=longlat +datum=WGS84 +no_defs
+## # A tibble: 2 x 3
+##   highway       n                                                  geometry
+##   &lt;fct&gt;     &lt;int&gt;                                    &lt;MULTILINESTRING [Â°]&gt;
+## 1 primary       4 ((13.38425 52.45346, 13.38427 52.45337, 13.38436 52.4528~
+## 2 secondary     3 ((13.43335 52.46403, 13.43357 52.46372, 13.43387 52.4633~</code></pre>
+<pre class="r"><code>berlin_osm_roads_crop &lt;- berlin_osm_roads$osm_lines %&gt;% sf::st_intersection(berlin_sf)</code></pre>
+<pre><code>## although coordinates are longitude/latitude, st_intersection assumes that they are planar</code></pre>
+<pre><code>## Warning: attribute variables are assumed to be spatially constant
+## throughout all geometries</code></pre>
+<pre class="r"><code># berlin_osm_roads_crop2 &lt;- berlin_osm_roads$osm_multilines %&gt;% sf::st_intersection(., berlin_sf)</code></pre>
+<p>Just to give you an idea: this is the level of granularity (and memory-intense granular vector data) we get:</p>
+<pre class="r"><code>plot(berlin_osm_roads_crop[&quot;highway&quot;])</code></pre>
+<p><img src="/post/2019-01-29-r-gis-like-it-s-2019-pragmatic-workflows-pt-1_files/figure-html/unnamed-chunk-37-1.png" width="672" /></p>
+<blockquote>
+<p>To be continued…</p>
+</blockquote>
+</div>
+</div>
+</div>
