@@ -103,7 +103,7 @@ So first of all we want to decide on the extent of the basemap. Since this is a 
 Here, we start with our spatial object of reference. I prefer to work with Open Access / Public Domain data (and not Google Maps / Bing et al.), so let's fetch some vector data from the Natural Earth project - but as `class = Simple Feature` instead of Esri's proprietary (and less tidyverse-friendly) `Shapefile` format. 
 
 > For your use case, consult the vignette for `rnaturaleath::ne_download()` and the [Natural Earth website](https://www.naturalearthdata.com/downloads/){target="_blank"}.
-For the sake of resource efficiency I also recommend to download the data once and then to store it locally with `save`/`saveRDS` for future use. As I work a lot with Natural Earth data, I have mounted a network folder `D:/GIS/` with all the raster and vector data I've downloaded so far. *However*, I do not recommend downloading the "Download all X themes" files, since this gives you a) shapefiles instead of Simple Features, and b) *UTF-8 encoding issues* for the feauture labels, depending on when the particular theme was compiled the last time. 
+For the sake of resource efficiency I also recommend to download the data once and then to store it locally with `save`/`saveRDS` for future use. As I work a lot with Natural Earth data, I have mounted a network folder `D:/GIS/` with all the raster and vector data I've downloaded so far. *However*, I do not recommend downloading the "Download all X themes" files, since this gives you a) shapefiles instead of Simple Features, and b) *UTF-8 encoding issues* for the feature labels, depending on when the particular theme was compiled the last time. 
 
 **Download a certain Natural Earth feature set ("theme"): world-wide substates / Admin-1 level**
 
@@ -189,14 +189,14 @@ berlin_bike <- sf::st_read("https://github.com/tagesspiegel/radmesser/blob/maste
 # berlin_bike <- readRDS(file = str_c(here::here("data", "GIS_workflows"), "/", "berlin_bike.rds"))
 ```
 
-> However, st_read silently drops the "stats" field (which is legit, since a GeoJSON feature is defined as `geometry + properties` only) which contains the single measurements. Or rather: I have no 1-liner idea how to preserve it, be it in QGIS, with `jsonlite`, or by transforming with [http://geojson.io](){target="_blank"}. Fortunatly, the Radmesser-team also provides a CSV with the measurements and a column with the respective streets key. So we can adress this later (in Pt. 2 of this series). FYI, this is what the structure of this GeoJSON file looks like, so feel free to hit me on [Twitter]
+> However, st_read silently drops the "stats" field (which is legit, since a GeoJSON feature is defined as `geometry + properties` only) which contains the single measurements. Or rather: I have no 1-liner idea how to preserve it, be it in QGIS, with `jsonlite`, or by transforming with [http://geojson.io](){target="_blank"}. Fortunately, the Radmesser-team also provides a CSV with the measurements and a column with the respective streets key. So we can address this later (in Pt. 2 of this series). FYI, this is what the structure of this GeoJSON file looks like, so feel free to hit me on [Twitter]
 (){target="_blank"} if you know a solution:
 
 ![Help! How to preserve the *stats* field!?]((/img/GIS_workflow/tagesspiegel_geojson.jpg)
 
-Nonetheless, we can quickly have a look at the traced roads where the **15K+ indivudal measurements** where taken, and also visualise the road class with `zcol = "variable"`.
+Nonetheless, we can quickly have a look at the traced roads where the **15K+ individual measurements** where taken, and also visualize the road class with `zcol = "variable"`.
 
-```{r echo=FALSE, cache=TRUE}
+```{r echo=FALSE}
 berlin_bike <- readRDS(file = str_c(here::here("data", "GIS_workflows"), "/", "berlin_bike.rds"))
 ```
 
@@ -220,7 +220,7 @@ Easy, right?
 
 ### Hand-drawn BBOX with `mapedit`
 
-If neither the feature/object-based nor the geodata-based BBOX is sufficient for you (i.e. because you need a custom extent not matching the data), we can literally draw the box with the super-handy `mapedit` package. For this, we'll take the cycling data just to add some context, and then will interactivly draw a rectangle polygon and store the output in new object.
+If neither the feature/object-based nor the geodata-based BBOX is sufficient for you (i.e. because you need a custom extent not matching the data), we can literally draw the box with the super-handy `mapedit` package. For this, we'll take the cycling data just to add some context, and then will interactively draw a rectangle polygon and store the output in new object.
 
 > Don't forget to click the "Done" button to finish editing.
 
@@ -252,7 +252,7 @@ mapview::mapview(list(sf::st_as_sfc(berlin_custom_bbox), berlin_sf, berlin_bike)
 
 ![](/img/GIS_workflow/mapedit2.jpg)
 
-Dammit, I messed up the lower-right corner by ommiting a piece of Berlin's south-east (if the use case were to include all of Berlin). But we can easiliy re-draw the box with `mapedit` or use the `bbox <- bbox + vector` hack from above. 
+Dammit, I messed up the lower-right corner by omitting a piece of Berlin's south-east (if the use case were to include all of Berlin). But we can easily re-draw the box with `mapedit` or use the `bbox <- bbox + vector` hack from above. 
 
 ```{r}
 berlin_custom_bbox
@@ -264,11 +264,11 @@ Ok, enough BBOXing for today. Next: How to get any vector data we want into R.
 
 ## Basemap Contents
 
-For creating a custom map / visualisation you might want to have as much control of what's displayed on the basemap level as possible. Depending on the resolution / zoom-level of your map, 1:10m vector data from Natural Earth might already be sufficient. For more detail and features (esp. to play around with when you have a certain *Gestalt* concept and/or want to map below regional level), querying OpenStreetMap data is probably the gold standard. We'll look into both approaches in this Chapter.
+For creating a custom map / visualization you might want to have as much control of what's displayed on the basemap level as possible. Depending on the resolution / zoom-level of your map, 1:10m vector data from Natural Earth might already be sufficient. For more detail and features (esp. to play around with when you have a certain *Gestalt* concept and/or want to map below regional level), querying OpenStreetMap data is probably the gold standard. We'll look into both approaches in this Chapter.
 
 ### Quick: Natural Earth
 
-For the regional level, 1:10m vector data might already be sufficient. Let's look at a Berlin map built from roads, rivers and lakes (and borders, of course). I'm going to `load()` the Natural Earth vector data from my local `D:/GIS` folder, but you could download everything as described above and below. Europe is priveledged, so there's supplemental data offered by Natural Earth for lakes and rivers (cf. [Natural Earth: Rivers](https://www.naturalearthdata.com/downloads/10m-physical-vectors/10m-rivers-lake-centerlines/){target="_blank"} for more detail and licensing), ~~so I'm going to use it here~~. However, the lakes data does not offer any objects in or around Berlin, so I'm sticking to the regular lakes data instead. For rivers, we get 3 results, but we might want to double-check with the base rivers data. Cause we can ;) And because inspecting your data before working with it is a core data science skill anyways - spatial or not.
+For the regional level, 1:10m vector data might already be sufficient. Let's look at a Berlin map built from roads, rivers and lakes (and borders, of course). I'm going to `load()` the Natural Earth vector data from my local `D:/GIS` folder, but you could download everything as described above and below. Europe is privileged, so there's supplemental data offered by Natural Earth for lakes and rivers (cf. [Natural Earth: Rivers](https://www.naturalearthdata.com/downloads/10m-physical-vectors/10m-rivers-lake-centerlines/){target="_blank"} for more detail and licensing), ~~so I'm going to use it here~~. However, the lakes data does not offer any objects in or around Berlin, so I'm sticking to the regular lakes data instead. For rivers, we get 3 results, but we might want to double-check with the base rivers data. Cause we can ;) And because inspecting your data before working with it is a core data science skill anyways - spatial or not.
 
 But see for yourself:
 
@@ -308,7 +308,7 @@ rivers10_europe <- readRDS(file = str_c(here::here("data", "GIS_workflows"), "/"
 
 Now we'll only pick those features which are needed aka are contained within our BBOX. There are a couple of approaches (i.e. by subsetting with a toponym, filtering by [topological relation between two features (i.e. X within Y, intersects with)](https://github.com/rugbyprof/4553-Spatial-DS/wiki/Topological-Relationships){target="_blank"}, or the brute way of cropping with a BBOX).
 
-But before we procedd, let's inspect the lakes and rivers (base and Europe) objects, as we're interested in finding out what we got:
+But before we proceed, let's inspect the lakes and rivers (base and Europe) objects, as we're interested in finding out what we got:
 
 ```{r eval=FALSE}
 mapview::mapview(list(rivers10_base, rivers10_europe, lakes10))
@@ -324,9 +324,9 @@ Let's look into subsetting the rest.
 
 #### Subsetting by Toponym / Property
 
-We did this already: We've subsetted the `berlin_sf` object from `substates10` with `filter(name == "Berlin")`. That's pretty straighforward if your data is clearly subsetable with an adressable object or explicit property (such as `type = "highway"`). However, that's usually a bit trickier for cross-boarder features such as roads or rivers.
+We did this already: We've subsetted the `berlin_sf` object from `substates10` with `filter(name == "Berlin")`. That's pretty straightforward if your data is clearly subsetable with an addressable object or explicit property (such as `type = "highway"`). However, that's usually a bit trickier for cross-boarder features such as roads or rivers.
 
-Deciding on whether to *filter* (or rather: *query*) **or** to *crop* depends on the size of the set you're working with. And in practice, a combination of *filter* **and** *crop* is probably the most effective way. Our `roads10` object contains 56K features, while lakes and rivers combined are around 3K. Even if 56K is not that much in 2019, you'll still notice that it takes some time to compute the query (Big *O* calling!). If you have a dozen or so geometric objects to subset, you'll quickly realise that size matters and that a clever query/crop/filter approach might save you resources. 
+Deciding on whether to *filter* (or rather: *query*) **or** to *crop* depends on the size of the set you're working with. And in practice, a combination of *filter* **and** *crop* is probably the most effective way. Our `roads10` object contains 56K features, while lakes and rivers combined are around 3K. Even if 56K is not that much in 2019, you'll still notice that it takes some time to compute the query (Big *O* calling!). If you have a dozen or so geometric objects to subset, you'll quickly realize that size matters and that a clever query/crop/filter approach might save you resources. 
 
 Let's look at `sf::st_crop()`, the mighty `filter(sf::st_intersection())`, and `filter(sf::st_within())` which involves filtering `lengths() > 0` and probably is not that intuitive when you're new to GIS/spatial with R. At least that was the case for me.
 
@@ -351,7 +351,7 @@ And now let's plot the result with `ggplot` and `berlin_sf` as the background an
 
 > If you need a particular CRS for your use case, [https://epsg.io/](https://epsg.io/){target="_blank"} might come in handy.
 
-```{r cache=TRUE}
+```{r}
 ggplot() +
   geom_sf(data = berlin_sf, fill = "lightgrey", color = "black") +
   geom_sf(data = lakes_berlin, fill = "blue") +
@@ -367,7 +367,7 @@ ggplot() +
 
 #### Subsetting by Topological Relation: `sf::st_operation()`
 
-This is as accurate as it gets, but you might need to take some time to understand the [basic set of geometric operations implemented in the `sf()` package](https://github.com/rstudio/cheatsheets/raw/master/sf.pdf){target="_blank"}. (Actually, I only understood `sf::st_intersection` while writing this paragraph... .) Just as a handy example, let's say that we want to reduce our (world) `roads10` object to Berlin's **shape**. This a regular geocomputational operation, and we're going to use `sf::st_intersection()`. Notice that this is a different kind of operation as `sf::st_within()`, which will be used next. `st_intersection()` returnes a transformed object, while `sf::st_within()` is more of a binary query which returns TRUE/FALSE results, in the first place.
+This is as accurate as it gets, but you might need to take some time to understand the [basic set of geometric operations implemented in the `sf()` package](https://github.com/rstudio/cheatsheets/raw/master/sf.pdf){target="_blank"}. (Actually, I only understood `sf::st_intersection` while writing this paragraph... .) Just as a handy example, let's say that we want to reduce our (world) `roads10` object to Berlin's **shape**. This a regular geocomputational operation, and we're going to use `sf::st_intersection()`. Notice that this is a different kind of operation as `sf::st_within()`, which will be used next. `st_intersection()` returns a transformed object, while `sf::st_within()` is more of a binary query which returns TRUE/FALSE results, in the first place.
 
 Since we already can assume that the result cannot extent beyond Berlin's BBOX, we should first crop the (global) `roads10` object with Berlin's BBOX in order to reduce the computational cost of this operation.
 
@@ -422,7 +422,7 @@ OpenStreetMap data is just a treasure trove for any mapper. It's Open Data, it's
 There are multiple non-developer ways to figure out how to get what you want, but all methods involve querying an OSM API (i.e. [https://overpass-turbo.eu](https://overpass-turbo.eu/){target="_blank"}) for `key=value` assets such as `highway=primary`:
 
   + [https://taginfo.openstreetmap.org](https://taginfo.openstreetmap.org){target="_blank"} - quantified overview of all OSM key/value combinations
-  + [https://www.openstreetmap.org](https://www.openstreetmap.org){target="_blank"} - regular OSM frontend which includes  a handy item picker tool if you struggle with ID'ing a particular object's key/value pair
+  + [https://www.openstreetmap.org](https://www.openstreetmap.org){target="_blank"} - regular OSM front-end which includes  a handy item picker tool if you struggle with ID'ing a particular object's key/value pair
   + [https://overpass-turbo.eu](https://overpass-turbo.eu/){target="_blank"} - query from a front-end (incl. a wizard) and then to export as JSON and proceed with:
   + [https://mapshaper.org](https://mapshaper.org/){target="_blank"} - turn the JSON layers in question into a condensed shapefile (and simplify the features with a GUI, if necessary) 
 
@@ -453,7 +453,7 @@ berlin_osm_roads %>% names()
 
 As we are interested in roads and our query only queried for roads ("highway") as features, we should focus on `osm_lines` and `osm_multilines`.
 
-```{r cache=TRUE}
+```{r}
 berlin_osm_roads$osm_lines %>% 
   count(highway) %>% 
   arrange(desc(n)) %>% 
@@ -467,20 +467,20 @@ berlin_osm_roads$osm_lines %>%
 berlin_osm_roads$osm_multilines %>% count(highway) %>% arrange(desc(n))
 ```
 
-```{r warning=FALSE, message=FALSE, cache=TRUE}
+```{r warning=FALSE, message=FALSE}
 berlin_osm_roads_crop <- berlin_osm_roads$osm_lines %>% sf::st_intersection(berlin_sf)
 # berlin_osm_roads_crop2 <- berlin_osm_roads$osm_multilines %>% sf::st_intersection(., berlin_sf)
 ```
 
 Just to give you an idea: this is the level of granularity (and memory-intense granular vector data) we get:
 
-```{r cache=TRUE}
+```{r}
 plot(berlin_osm_roads_crop["highway"])
 ```
 
 Or plotted with `ggplot`:
 
-```{r cache=TRUE}
+```{r}
 ggplot() +
   geom_sf(data = berlin_osm_roads_crop, aes(color = highway)) +
   # scale_size_discrete(c(0.1,2)) +
