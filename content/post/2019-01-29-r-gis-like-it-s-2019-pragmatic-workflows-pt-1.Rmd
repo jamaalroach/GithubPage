@@ -124,7 +124,7 @@ berlin_bbox <- sf::st_bbox(berlin_sf)
 
 So... wanna have a quick glimpse at Berlin's bounding box? Here's all that it takes with the game-changing `mapview` package by [Tim Appelhans et al.](https://r-spatial.github.io/mapview/index.html){target="_blank"}:
 
-```{r out.width='100%', eval=FALSE}
+```{r out.width='100%'}
 berlin_bbox %>% mapview::mapview()
 ```
 
@@ -200,7 +200,7 @@ And now the data-based BBOX:
 berlin_bike_bbox <- sf::st_bbox(berlin_bike)
 ```
 
-```{r eval=FALSE}
+```{r out.width='100%'}
 mapview::mapview(list(st_as_sfc(berlin_bike_bbox), berlin_bike))
 ```
 
@@ -302,7 +302,7 @@ But before we procedd, let's inspect the lakes and rivers (base and Europe) obje
 mapview::mapview(list(rivers10_base, rivers10_europe, lakes10))
 ```
 
-![Comparison of base and supplemental rivers data for European. Mapview is just awesome for this kind of exploratory tasks.](/img/GIS_workflow/europe_lakes_rivers.jpg)
+![Comparison of base and supplemental rivers data for European. Mapview is just awesome for this kind of exploratory tasks.](/img/GIS_workflow/europe_lakes_rivers2.jpg)
 
 > See how handy `mapview + sf` is? We can visually compare two different sets of geometric features with the same easiness / usability and elegance as we do our usual [exploratory data analysis](https://www.littlemissdata.com/blog/simple-eda){target="_blank"} of *numeric* data with `summary()`, `visdat`, `skimr`, `ggplot()` and so on.
 
