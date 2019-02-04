@@ -180,7 +180,7 @@ berlin_bike <- sf::st_read("https://github.com/tagesspiegel/radmesser/blob/maste
 # berlin_bike <- readRDS(file = str_c(here::here("data", "GIS_workflows"), "/", "berlin_bike.rds"))
 ```
 
-> However, st_read silently drops the "stats" field (which is legit, since a GeoJSON feature is defined as `geometry + properties` only) which contains the single measurements. Or rather: I have no 1-liner idea how to preserve it, be it in QGIS, with `jsonlite`, or by transforming with [http://geojson.io](){target="_blank"}. Fortunatly, the Radmesser-team also provides a CSV with the measurements and a column with the respective streets key. So we can adress this later.
+> However, st_read silently drops the "stats" field (which is legit, since a GeoJSON feature is defined as `geometry + properties` only) which contains the single measurements. Or rather: I have no 1-liner idea how to preserve it, be it in QGIS, with `jsonlite`, or by transforming with [http://geojson.io](){target="_blank"}. Fortunatly, the Radmesser-team also provides a CSV with the measurements and a column with the respective streets key. So we can adress this later (in Pt. 2 of this series).
 
 Nonetheless, we can quickly have a look at the traced roads where the 15K+ measurements where taken, and also visualise the road class.
 
@@ -256,7 +256,7 @@ For creating custom map / visualisation you might want to have as much control o
 
 ### Quick: Natural Earth
 
-For the regional level, 1:10m vector data might already be sufficient. Let's look at a Berlin map built from roads, rivers and lakes (and borders, of course). I'm going to load the data from my `D:/GIS` folder, but you could download everything as described above. Europe is priveledged, so there's supplemental data offered by Natural Earth for lakes and rivers (cf. [Natural Earth: Rivers](https://www.naturalearthdata.com/downloads/10m-physical-vectors/10m-rivers-lake-centerlines/){target="_blank"} for more detail and licensing), ~~so I'm going to use it here~~. However, the lakes data does not offer any objects in or around Berlin, so I'm sticking to the regular lakes data instead. For rivers, we get 3 results, but we might want to double-check with the base rivers data. Cause we can ;) And because inspecting your data before working with it is a core skill anyways, GIS or not.
+For the regional level, 1:10m vector data might already be sufficient. Let's look at a Berlin map built from roads, rivers and lakes (and borders, of course). I'm going to load the data from my `D:/GIS` folder, but you could download everything as described above. Europe is priveledged, so there's supplemental data offered by Natural Earth for lakes and rivers (cf. [Natural Earth: Rivers](https://www.naturalearthdata.com/downloads/10m-physical-vectors/10m-rivers-lake-centerlines/){target="_blank"} for more detail and licensing), ~~so I'm going to use it here~~. However, the lakes data does not offer any objects in or around Berlin, so I'm sticking to the regular lakes data instead. For rivers, we get 3 results, but we might want to double-check with the base rivers data. Cause we can ;) And because inspecting your data before working with it is a core data science skill anyways - spatial or not.
 
 But see for yourself:
 
@@ -316,13 +316,13 @@ We did this already: We've subsetted the `berlin_sf` object from `substates10` w
 
 Deciding on whether to *filter* (or rather: *query*) **or** to *crop* depends on the size of the set you're working with. And in practice, a combination of *filter* **and** *crop* is probably the most effective way. Our `roads10` object contains 56K features, while lakes and rivers combined are around 3K. Even if 56K is non that much in 2019, you'll still notice that it takes some time to compute the query (Big *O* calling!). If you have a dozen or so geometric objects to subset, you'll quickly realise that size matters and that a clever query/crop/filter approach might save you resources. 
 
-Let's look at `sf::st_crop` and then at `filter(sf::st_intersection())`, which probably is not that intuitive when you're new to GIS/spatial with R.
+Let's look at `sf::st_crop`, the mighty `filter(sf::st_intersection())`, and `filter(sf::st_within())` which involves filtering `lengths() > 0` and probably is not that intuitive when you're new to GIS/spatial with R.
 
 #### Subsetting by Cropping: `sf::st_crop`
 
 Cropping is straight-forward. We take our BBOX object (or any other feature from which `st_crop` can derive a BBOX) and then literally cut off all elements that extent beyond the BBOX.
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 lakes_berlin <- lakes10 %>% sf::st_crop(berlin_custom_bbox)
 rivers_berlin <- rivers10_europe %>% sf::st_crop(berlin_custom_bbox)
 ```
@@ -353,13 +353,13 @@ ggplot() +
   coord_sf(crs = 3068)
 ```
 
-#### Subsetting by Topological Relation
+#### Subsetting by Topological Relation: `sf::st_operation()`
 
-This is as accurate as it gets, but you might need to take some time to understand the basic set of geometric operations. (Actually, I just understood `sf::st_intersection` while writing this paragraph... .) Just as a handy example, let's say that we want to reduce our (world) `roads10` object to Berlin's **shape**. This a regular geocomputational operation, and we're going to use `sf::st_intersection()`. This is not the same as `sf::st_within()`, which will be used next.
+This is as accurate as it gets, but you might need to take some time to understand the basic set of geometric operations. (Actually, I just understood `sf::st_intersection` while writing this paragraph... .) Just as a handy example, let's say that we want to reduce our (world) `roads10` object to Berlin's **shape**. This a regular geocomputational operation, and we're going to use `sf::st_intersection()`. This is not the same principle as `sf::st_within()`, which will be used next.
 
 As we already know that the result cannot extent beyond Berlin's BBOX, we should first crop the `roads10` object with Berlin's BBOX in order to reduce the computational cost of this operation. Mind the `.` placement.
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 roads_berlin_sf <- roads10 %>% 
   sf::st_crop(berlin_custom_bbox) %>% 
   sf::st_intersection(berlin_sf)
@@ -386,7 +386,7 @@ mapview::mapview(list(berlin_sf, roads_berlin_sf))
 
 Now let's look at `sf::st_within()` which calls for a different subsetting logic. The operation returns a binary predicate {0,1}, so we need to filter `lengths() > 0`. No idea :) Just read `sf``s [Vignette](https://cran.r-project.org/web/packages/sf/vignettes/sf1.html#geometrical_operations){target="_blank"}. Whatever works, works. In this example, we only keep those roads, which are fully contained within Berlin's border. 
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 roads_berlin_sf <- roads10 %>% 
   sf::st_crop(berlin_custom_bbox) %>% 
   filter(lengths(st_within(., berlin_sf)) > 0)
@@ -414,7 +414,8 @@ Multiple non-developer ways to get there:
 Here's a simple query as an example:
 
 ```{r eval=FALSE}
-berlin_osm_roads <- osmdata::opq(bbox = "berlin") %>% # alternative: bbox = osmdata::bbox_to_string(berlin_bbox)
+# berlin_osm_roads <- osmdata::opq(bbox = "berlin") %>% # alternative A
+berlin_osm_roads <- osmdata::opq(bbox = berlin_bbox) %>% #  alternative B
   # osmdata::add_osm_feature(key = "highway") %>% 
   osmdata::add_osm_feature(key = "highway", value = c("primary", "trunk", "motorway", "secondary", "tertiary")) %>%
   # osmdata::add_osm_feature(key = "highway", value = "primary") %>% 
@@ -435,8 +436,11 @@ berlin_osm_roads %>% names()
 
 As we are interested in roads and our query only called for roads as feature, we should focus on `osm_lines` and `osm_multilines`.
 
-```{r}
-berlin_osm_roads$osm_lines %>% count(highway) %>% arrange(desc(n))
+```{r cache=TRUE}
+berlin_osm_roads$osm_lines %>% 
+  count(highway) %>% 
+  arrange(desc(n)) %>% 
+  select(highway,n, -geometry)
 ```
 
 ```{r}
@@ -452,6 +456,17 @@ Just to give you an idea: this is the level of granularity (and memory-intense g
 
 ```{r cache=TRUE}
 plot(berlin_osm_roads_crop["highway"])
+```
+
+Or plotted with `ggplot`:
+
+```{r cache=TRUE}
+ggplot() +
+  geom_sf(data = berlin_osm_roads_crop, aes(color = highway)) +
+  # scale_size_discrete(c(0.1,2)) +
+  coord_sf(datum = NA) +
+  ggthemes::theme_map() +
+  guides(color = FALSE)
 ```
 
 > To be continued...
