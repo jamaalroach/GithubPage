@@ -1,5 +1,5 @@
 ---
-title: "[R] GIS like it's 2019: Pragmatic Workflows for Vector and Raster Data, Pt. 1"
+title: "[R] GIS like it's 2019: Pragmatic Workflows for Spatial Data, Pt. 1"
 author: Ilja / fubits
 date: '2019-01-29'
 slug: r-gis-like-it-s-2019-pragmatic-workflows-pt-1
@@ -14,15 +14,19 @@ tags:
   - mapedit
   - osmdata
   - rnaturalearth
+  - tmap
+  - mapdeck
+  - leafgl
+  - geojson
 output:
   blogdown::html_page:
     number_sections: yes
     toc: yes
-lastmod: '2019-01-29T21:21:12+01:00'
+lastmod: '2019-02-09T00:00:00+01:00'
 description: 'GIS with R is far beyond powerful. This is part 1 of a collection of up-to-date workflows for processing spatial data of all kinds with R. The collection involves sf, mapview, mapedit, osmdata, raster, stars, rnaturalearth and other packages combined with straight-forward recipes.'
-abstract: ''
+abstract: 'GIS with R is far beyond powerful. This is part 1 of a collection of up-to-date workflows for processing spatial data of all kinds with R. The collection involves sf, mapview, mapedit, osmdata, raster, stars, rnaturalearth and other packages combined with straight-forward recipes.'
 draft: FALSE
-thumbnail: /img/thumbs/gis_workflows_1.jpg
+thumbnail: "/img/thumbs/gis_workflows_1.jpg"
 rmdlink: yes
 keywords: []
 comment: no
@@ -34,9 +38,11 @@ mathjaxEnableSingleDollar: no
 mathjaxEnableAutoNumber: no
 ---
 
-# A Bit of a Context
+# A Bit of a Context: Spatial *Tour d’Horizon*
 
-> If you're just here for the code / hacks, feel free to skip this intro and jump directly to the [hands-on part](#basic-workflows---vector).
+> **Update**: added `mapdeck`, `leafgl`, and `tmap` to the *Tour d’Horizon*
+
+> **TL;DR**: If you're just here for the code / hacks, feel free to skip this intro and jump directly to the [hands-on part](#packages).
 
 To be precise, my R "career" only started to gain traction when I was asked to create a [low-budget CC0 print map](/post/r-low-budget-high-res-mapping-with-r-for-not-for-profit-print/) by a colleague almost one and a half years ago. This particular use case gave me enough of an impression of the awesomeness of the Rstats / FOSS-minded community, the holistic potential of R re: all things `data`, and in particular the [#GIStribe](https://twitter.com/hashtag/gistribe){target="_blank"}'s continuous efforts to make spatial processing with R accessible to everyone. What I did **not** know back then (among maaaaany other things) was that there had already existed a dual system of Base R and Tidy / Tidy-fied R - even for spatial...
 
@@ -52,7 +58,36 @@ I mean, this `rayshader` output (pictured below; *click on the image to see the 
 
 Or have a look at what Michael D. Sumner has been working on with the [quadmesh package](https://hypertidy.github.io/quadmesh/){target="_blank"}, which will allow us - among other things - to take `raster` to another level. Same for [Edzer Pebesma's`stars` package](https://www.r-spatial.org/r/2017/11/23/stars1.html){target="_blank"} with regards to its potential for tidy spatiotemporal data.
 
-In short, GIS with R is efficient, effective, performative, **affordable**, ~~Shiny~~ shiny, and complex enough to serve as *the* domain for showcasing R and as an exhaustive use case for new R users (or their supervisors).
+> **Update**: [\@timsalabim3](https://twitter.com/TimSalabim3/status/1092525416546533377){target="_blank"} and [\@ozjimbob](https://twitter.com/ozjimbob/status/1092689490584395777){target="_blank"} reminded me of other prominent spatial packages I should have had mentioned here, but didn't do so as I don't have worked with them yet:
+
+Ever heard of Uber's `{WebGL + Mapbox}` based framework [deck.gl](https://deck.gl/){target="_blank"} for rendering really **large** datasets, XYZ data, and so on? [\@symbolixAU](https://twitter.com/symbolixau){target="_blank"} has you covered with the [mapdeck package](https://github.com/SymbolixAU/mapdeck){target="_blank"} for R:
+
+![](/img/GIS_workflow/mapdeck_top.gif)
+![](/img/GIS_workflow/mapdeck_bottom.gif)
+*(Mapdeck madness! Courtesy of [SymbolixAU/mapdeck](https://symbolixau.github.io/mapdeck/articles/layers.html){target="_blank"}.)*
+
+Prefer `Leaflet`over `Mapbox` but still need to display 100K+ points on a map? [\@timsalabim3 / Team r-spatial](https://github.com/r-spatial/leafgl){target="_blank"} have ported something for ya':
+
+![Source: [https://github.com/r-spatial/leafgl](https://github.com/r-spatial/leafgl){target="_blank"}](/img/GIS_workflow/rspatial_leafgl.png)
+
+And if you need to make thematic maps and/or don't want to plot your spatial objects with `ggplot`, have a look at Martijn Tennekes's `tmap`, which is also very well covered by Lovelace 2018 [Lovelace/Nowosad/Muenchow 2018](https://geocompr.robinlovelace.net/adv-map.html#tmap-basics), and gives you a lot with very few lines:
+
+```{r out.width="100%", message=FALSE, warning=FALSE}
+# from tmap vignette
+# https://cran.r-project.org/web/packages/tmap/vignettes/tmap-changes-v2.html#tm_tiles
+library(tmap)
+data(World, metro)
+tmap_mode("view")
+
+tm_basemap(leaflet::providers$CartoDB.PositronNoLabels, group = "CartoDB basemap") +
+tm_shape(World) +
+    tm_polygons("HPI", group = "Countries") +
+tm_tiles(leaflet::providers$CartoDB.PositronOnlyLabels, group = "CartoDB labels") +
+tm_shape(metro) +
+    tm_dots(col = "red", group = "Metropolitan areas")
+```
+
+> In short, GIS with R is efficient, effective, **affordable**, ~~Shiny~~ shiny, and complex enough to serve as *the* domain for showcasing R and as an exhaustive use case for new R users (or their supervisors). Let us look into that claim now.
 
 <hr />
 
@@ -92,11 +127,11 @@ If you're spatially literate and therefore easily can spot whether you need Lat/
 
 So first of all we want to decide on the extent of the basemap. Since this is a recurrent task but with varying parameters, I'm offering three different approaches, based on
 
-  + a) the bounding box (BBOX) of a spatial object (i.e. Admin 1 level Federal state|s)
+  + the bounding box (BBOX) of a spatial object (i.e. Admin 1 level Federal state|s)
     
-  + b) the bounding box of spatial data (i.e. the geocoded cycling data)
+  + the bounding box of spatial data (i.e. the geocoded cycling data)
     
-  + c) a hand-drawn rectangle turned into a BBOX
+  + a hand-drawn rectangle turned into a BBOX
     
 ### Bounding Box: Object-based
 
@@ -120,14 +155,14 @@ substates10 <- readRDS(file = str_c(here::here("data", "GIS_workflows"), "/", "s
 
 **Subset the Federal State of Berlin**
 
-```{r}
+```{r cache=TRUE}
 berlin_sf <- substates10 %>% filter(name == "Berlin")
 ```
 
 
 Next, we'll use the amazing `sf` package to fetch Berlin's **bounding box** (BBOX).
 
-```{r}
+```{r cache=TRUE}
 berlin_bbox <- sf::st_bbox(berlin_sf)
 ```
 
@@ -189,10 +224,9 @@ berlin_bike <- sf::st_read("https://github.com/tagesspiegel/radmesser/blob/maste
 # berlin_bike <- readRDS(file = str_c(here::here("data", "GIS_workflows"), "/", "berlin_bike.rds"))
 ```
 
-> However, st_read silently drops the "stats" field (which is legit, since a GeoJSON feature is defined as `geometry + properties` only) which contains the single measurements. Or rather: I have no 1-liner idea how to preserve it, be it in QGIS, with `jsonlite`, or by transforming with [http://geojson.io](){target="_blank"}. Fortunately, the Radmesser-team also provides a CSV with the measurements and a column with the respective streets key. So we can address this later (in Pt. 2 of this series). FYI, this is what the structure of this GeoJSON file looks like, so feel free to hit me on [Twitter]
-(){target="_blank"} if you know a solution:
+> However, st_read silently drops the "stats" field (which is legit, since a GeoJSON feature is defined as `geometry + properties` only) which contains the single measurements. Or rather: I have no 1-liner idea how to preserve it, be it in QGIS, with `jsonlite`, or by transforming with [http://geojson.io](){target="_blank"}. Fortunately, the Radmesser-team also provides a CSV with the measurements and a column with the respective streets key. So we can address this later (in Pt. 2 of this series). FYI, this is what the structure of this GeoJSON file looks like, so feel free to hit me up on [Twitter](https://twitter.com/fubits){target="_blank"} if you know a solution:
 
-![Help! How to preserve the *stats* field!?]((/img/GIS_workflow/tagesspiegel_geojson.jpg)
+![Help! How to preserve the **stats** field!?](/img/GIS_workflow/tagesspiegel_geojson.jpg)
 
 Nonetheless, we can quickly have a look at the traced roads where the **15K+ individual measurements** where taken, and also visualize the road class with `zcol = "variable"`.
 
@@ -314,7 +348,7 @@ But before we proceed, let's inspect the lakes and rivers (base and Europe) obje
 mapview::mapview(list(rivers10_base, rivers10_europe, lakes10))
 ```
 
-![Comparison of base and supplemental rivers data for European. Mapview is just awesome for this kind of exploratory tasks.](/img/GIS_workflow/europe_lakes_rivers2.jpg)
+![Comparison of base and supplemental data for rivers in Europe. Mapview is just awesome for this kind of exploratory tasks.](/img/GIS_workflow/europe_lakes_rivers2.jpg)
 
 > See how handy `mapview + sf` is? We can visually compare two different sets of geometric features with the same easiness / usability and elegance as we do our usual [exploratory data analysis](https://www.littlemissdata.com/blog/simple-eda){target="_blank"} of *numeric* data with `summary()`, `visdat`, `skimr`, `ggplot()` and so on.
 
@@ -334,7 +368,7 @@ Let's look at `sf::st_crop()`, the mighty `filter(sf::st_intersection())`, and `
 
 Cropping is straight-forward. We take our BBOX object (or any other feature from which `st_crop` can derive a BBOX) and then literally cut off all elements that extent beyond the BBOX.
 
-```{r message=FALSE, warning=FALSE}
+```{r message=FALSE, warning=FALSE, cache=TRUE}
 lakes_berlin <- lakes10 %>% sf::st_crop(berlin_custom_bbox)
 rivers_berlin <- rivers10_europe %>% sf::st_crop(berlin_custom_bbox)
 ```
@@ -351,7 +385,7 @@ And now let's plot the result with `ggplot` and `berlin_sf` as the background an
 
 > If you need a particular CRS for your use case, [https://epsg.io/](https://epsg.io/){target="_blank"} might come in handy.
 
-```{r}
+```{r cache=TRUE}
 ggplot() +
   geom_sf(data = berlin_sf, fill = "lightgrey", color = "black") +
   geom_sf(data = lakes_berlin, fill = "blue") +
@@ -371,7 +405,7 @@ This is as accurate as it gets, but you might need to take some time to understa
 
 Since we already can assume that the result cannot extent beyond Berlin's BBOX, we should first crop the (global) `roads10` object with Berlin's BBOX in order to reduce the computational cost of this operation.
 
-```{r message=FALSE, warning=FALSE}
+```{r message=FALSE, warning=FALSE, cache=TRUE}
 roads_berlin_sf <- roads10 %>% 
   sf::st_crop(berlin_custom_bbox) %>% 
   sf::st_intersection(berlin_sf)
@@ -379,7 +413,7 @@ roads_berlin_sf <- roads10 %>%
 
 Here's the result (and Kudos to [Ryan Peek](https://ryanpeek.github.io/2017-11-05-mapping-with-sf-Part-2/){target="_blank"} for using the Google-friendly "clip object to shape" lingo):
 
-```{r}
+```{r cache=TRUE}
 ggplot() +
   geom_sf(data = berlin_sf) +
   geom_sf(data = sf::st_as_sfc(berlin_custom_bbox), alpha = 0.3) +
@@ -400,7 +434,7 @@ Now let's look at `sf::st_within()` which calls for a different subsetting logic
 
 In this example, we only want those roads, which are fully contained within Berlin's border. 
 
-```{r message=FALSE, warning=FALSE}
+```{r message=FALSE, warning=FALSE, cache=TRUE}
 roads_berlin_sf <- roads10 %>% 
   sf::st_crop(berlin_custom_bbox) %>% 
   filter(lengths(st_within(., berlin_sf)) > 0)
@@ -453,7 +487,7 @@ berlin_osm_roads %>% names()
 
 As we are interested in roads and our query only queried for roads ("highway") as features, we should focus on `osm_lines` and `osm_multilines`.
 
-```{r}
+```{r cache=TRUE}
 berlin_osm_roads$osm_lines %>% 
   count(highway) %>% 
   arrange(desc(n)) %>% 
@@ -463,24 +497,24 @@ berlin_osm_roads$osm_lines %>%
 
 > We're talking about 13.5K road fragments here - and this is just road level 1 -3... That's a bit different than Natural Earth 1:10m data. 
 
-```{r}
+```{r cache=TRUE}
 berlin_osm_roads$osm_multilines %>% count(highway) %>% arrange(desc(n))
 ```
 
-```{r warning=FALSE, message=FALSE}
+```{r warning=FALSE, message=FALSE, cache=TRUE}
 berlin_osm_roads_crop <- berlin_osm_roads$osm_lines %>% sf::st_intersection(berlin_sf)
 # berlin_osm_roads_crop2 <- berlin_osm_roads$osm_multilines %>% sf::st_intersection(., berlin_sf)
 ```
 
 Just to give you an idea: this is the level of granularity (and memory-intense granular vector data) we get:
 
-```{r}
-plot(berlin_osm_roads_crop["highway"])
+```{r cache=TRUE}
+plot(berlin_osm_roads_crop["highway"], key.pos = NULL)
 ```
 
 Or plotted with `ggplot`:
 
-```{r}
+```{r cache=TRUE}
 ggplot() +
   geom_sf(data = berlin_osm_roads_crop, aes(color = highway)) +
   # scale_size_discrete(c(0.1,2)) +
@@ -489,4 +523,4 @@ ggplot() +
   guides(color = FALSE)
 ```
 
-> To be continued...
+> To be continued (`GeoJSON; Raster`)...
