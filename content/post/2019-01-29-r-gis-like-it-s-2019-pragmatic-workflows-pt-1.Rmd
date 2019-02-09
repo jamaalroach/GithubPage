@@ -70,7 +70,7 @@ Prefer `Leaflet`over `Mapbox` but still need to display 100K+ points on a map? [
 
 ![Source: [https://github.com/r-spatial/leafgl](https://github.com/r-spatial/leafgl){target="_blank"}](/img/GIS_workflow/rspatial_leafgl.png)
 
-And if you need to make thematic maps and/or don't want to plot your spatial objects with `ggplot`, have a look at Martijn Tennekes's `tmap`, which is also very well covered by Lovelace 2018 [Lovelace/Nowosad/Muenchow 2018](https://geocompr.robinlovelace.net/adv-map.html#tmap-basics), and gives you a lot with very few lines:
+And if you need to make thematic maps and/or don't want to plot your spatial objects with `ggplot`, have a look at Martijn Tennekes's `tmap`, which is also very well covered by [Lovelace/Nowosad/Muenchow 2018](https://geocompr.robinlovelace.net/adv-map.html#tmap-basics), and gives you a lot with very few lines:
 
 ```{r out.width="100%", message=FALSE, warning=FALSE}
 # from tmap vignette
