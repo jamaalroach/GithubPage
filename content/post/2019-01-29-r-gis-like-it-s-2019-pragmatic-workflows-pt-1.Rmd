@@ -37,12 +37,11 @@ mathjax: no
 mathjaxEnableSingleDollar: no
 mathjaxEnableAutoNumber: no
 ---
-
-# A Bit of a Context: Spatial *Tour d’Horizon*
-
 > **Update**: added `mapdeck`, `leafgl`, and `tmap` to the *Tour d’Horizon*
 
 > **TL;DR**: If you're just here for the code / hacks, feel free to skip this intro and jump directly to the [hands-on part](#packages).
+
+# A Bit of a Context: Spatial *Tour d’Horizon*
 
 To be precise, my R "career" only started to gain traction when I was asked to create a [low-budget CC0 print map](/post/r-low-budget-high-res-mapping-with-r-for-not-for-profit-print/) by a colleague almost one and a half years ago. This particular use case gave me enough of an impression of the awesomeness of the Rstats / FOSS-minded community, the holistic potential of R re: all things `data`, and in particular the [#GIStribe](https://twitter.com/hashtag/gistribe){target="_blank"}'s continuous efforts to make spatial processing with R accessible to everyone. What I did **not** know back then (among maaaaany other things) was that there had already existed a dual system of Base R and Tidy / Tidy-fied R - even for spatial...
 

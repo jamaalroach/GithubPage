@@ -92,7 +92,7 @@ sequenceDiagrams:
 </ul>
 <p>How hard could that be, right?</p>
 <div class="figure">
-<img src="/img/mapping_talk/monkeyuser_everytime.png" title="#Everytime" alt="(c) Monkey User" style="width:100.0%" />
+<img src="/img/mapping_talk/monkeyuser_everytime.png" title="#Everytime" alt="(c) Monkey User" />
 <p class="caption">(c) Monkey User</p>
 </div>
 <div id="packages" class="section level2">
@@ -111,7 +111,7 @@ library(here)
 <div id="geodata-world-map-data-from-natural-earth" class="section level2">
 <h2><span class="header-section-number">2.2</span> Geodata: World Map Data from Natural Earth</h2>
 <blockquote>
-<p><em>“Natural Earth is a public domain map dataset available at 1:10m, 1:50m, and 1:110 million scales. Featuring tightly integrated vector and raster data, with Natural Earth you can make a variety of visually pleasing, well-crafted maps with cartography or GIS software.”</em> <a href="http://www.naturalearthdata.com/">(Link to Natural Earth)</a></p>
+<p><em>“Natural Earth is a public domain map dataset available at 1:10m, 1:50m, and 1:110 million scales. Featuring tightly integrated vector and raster data, with Natural Earth you can make a variety of visually pleasing, well-crafted maps with cartography or GIS software.”</em> <a href="http://www.naturalearthdata.com/" target="_blank">(Natural Earth)</a></p>
 </blockquote>
 <p><strong>Base Map (Admin-0 Level)</strong></p>
 <p>Let’s first import the geodata and check the basemap.</p>
@@ -182,7 +182,8 @@ asia_censouth$category &lt;- &quot;B&quot;
 plot(asia_censouth)</code></pre>
 <p><img src="/post/2018-04-19-r-low-budget-high-res-mapping-with-r-for-not-for-profit-print_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
 <blockquote>
-<p><strong>Why Russia, why?</strong> (cf. <a href="https://twitter.com/HalukaMB/status/974674444970020867">Thread</a> &amp; <a href="https://twitter.com/HalukaMB/status/982306518522527744">Solution for QGIS</a> by <a href="https://twitter.com/HalukaMB">Haluka</a> )</p>
+<p><strong>Why Russia, why?</strong> (cf. <a href="https://twitter.com/HalukaMB/status/974674444970020867">Thread</a> &amp; <a href="https://twitter.com/HalukaMB/status/982306518522527744">Solution for QGIS</a> by <a href="https://twitter.com/HalukaMB">Haluka</a>
+)</p>
 </blockquote>
 <p><strong>Solution: Set left <code>BBOX</code>-Border to clip off Russia’s overlapping Tail</strong></p>
 <pre class="r"><code>leftBorder &lt;- 25
@@ -218,188 +219,17 @@ plot(asia_rest)</code></pre>
 <div id="convert-spatial-dataframe-to-tidy-dataframe" class="section level2">
 <h2><span class="header-section-number">2.4</span> Convert Spatial Dataframe to Tidy Dataframe</h2>
 <blockquote>
-<p>(This was done before <a href="http://ggplot2.tidyverse.org/reference/ggsf.html"><code>geom_sf</code> / <code>ggsf</code></a> were introduced to <a href="http://ggplot2.tidyverse.org/index.html">ggplot2</a>. There might exist a far more efficient solution right now, esp. with <code>ggplot2</code>.)</p>
+<p>(This was done before <a href="http://ggplot2.tidyverse.org/reference/ggsf.html"><code>geom_sf</code> / <code>ggsf</code></a> were introduced to <a href="http://ggplot2.tidyverse.org/index.html">ggplot2</a>. There might exist a far more efficient solution right now, esp. with <code>ggplot2</code>.)</p>
+</blockquote>
+<blockquote>
+<p>2019 Update: There exists a <a href="post/r-gis-like-it-s-2019-pragmatic-workflows-pt-1/">far more efficient solution</a>, esp. with <code>{sf, mapview, geom_sf, ... }</code></p>
 </blockquote>
 <p><strong>Tidy the Vector Data</strong></p>
 <pre class="r"><code>asia_core@data$id &lt;- row.names(asia_core@data)
 Singapore@data$id &lt;- row.names(Singapore@data)
 Guam@data$id &lt;- row.names(Guam@data)
-asia_main &lt;- broom::tidy(asia_core)</code></pre>
-<pre><code>## Warning in bind_rows_(x, .id): Unequal factor levels: coercing to character</code></pre>
-<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector</code></pre>
-<pre><code>## Warning in bind_rows_(x, .id): Unequal factor levels: coercing to character</code></pre>
-<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector
-
-## Warning in bind_rows_(x, .id): binding character and factor vector,
-## coercing into character vector</code></pre>
-<pre class="r"><code>asia_main &lt;- dplyr::left_join(asia_main, asia_core@data, by = &#39;id&#39;)
+asia_main &lt;- broom::tidy(asia_core)
+asia_main &lt;- dplyr::left_join(asia_main, asia_core@data, by = &#39;id&#39;)
 head(asia_main, 1)</code></pre>
 <pre><code>## # A tibble: 1 x 71
 ##    long   lat order hole  piece group id    scalerank featurecla labelrank
@@ -606,10 +436,12 @@ plot(map)</code></pre>
 <div id="final-processing-of-output-svg-in-affinity-photo-designer" class="section level2">
 <h2><span class="header-section-number">3.4</span> Final Processing of Output SVG in Affinity Photo / Designer</h2>
 <div class="figure">
-<img src="/img/mapping_talk/map_affinity.jpg" title="Processing the SVG" alt="Processing the SVG in Affinity" style="width:100.0%" />
+<img src="/img/mapping_talk/map_affinity.jpg" title="Processing the SVG" alt="“Processing the SVG in Affinity”" style="width:100.0%" />
 <p class="caption"><em>“Processing the SVG in Affinity”</em></p>
 </div>
-<p>Basically, I just scaled the SVG to 300 dpi, changed the fonts, moved the labels and slightly readjusted the alpha levels of the regions. That’s it. We’re done here. (PS: We’re not, since someone has to blog about it and maybe even hold it as a lighting talk at a cool workshop)</p>
+<p>Basically, I just scaled the SVG to 300 dpi, changed the fonts, moved the labels and slightly readjusted the alpha levels of the regions.
+That’s it. We’re done here.
+(PS: We’re not, since someone has to blog about it and maybe even hold it as a lighting talk at a cool workshop)</p>
 </div>
 </div>
 <div id="lessons-learned" class="section level1">
@@ -637,7 +469,7 @@ plot(map)</code></pre>
 </ul>
 <p><strong>Thanks for reading!</strong></p>
 <div class="figure">
-<img src="/img/mapping_talk/sheldon_maps.jpg" title="Fun with ~~flags~~ **maps**" alt="Fun with flags maps" style="width:100.0%" />
+<img src="/img/mapping_talk/sheldon_maps.jpg" title="Fun with ~~flags~~ **maps**" alt="“Fun with flags maps”" style="width:100.0%" />
 <p class="caption"><em>“Fun with <del>flags</del> <strong>maps</strong>”</em></p>
 </div>
 </div>
