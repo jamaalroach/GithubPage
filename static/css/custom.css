@@ -157,6 +157,10 @@ h6 {
 	font-size: 26px;
 }
 
+#TOC > ul {
+	list-style: none;
+}
+
 /* Thumbnails */
 
 .thumbnail-post {
@@ -308,6 +312,10 @@ h6 {
 		background: #fff;
 		border-top: 1px dashed #c05b4d;
 	} */
+
+	.post .post-content div.figure {
+		text-align: center;
+	}
 
 	/* picture resiszing on big displays */
 	/*
