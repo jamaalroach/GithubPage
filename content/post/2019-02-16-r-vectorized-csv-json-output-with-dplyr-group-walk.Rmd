@@ -1,27 +1,29 @@
 ---
-title: '[R} Vectorized CSV & JSON output with dplyr::group_walk()'
+title: '[R] Vectorized CSV & JSON output with dplyr::group_walk()'
 author: Ilja / fubits
 date: '2019-02-16'
-slug: r-vectorized-csv-json-output-with-dplyr-group-walk
 categories:
-  - Rstats
   - Output
+  - Rstats
 tags:
+  - CSV
+  - dplyr
   - JSON
   - jsonlite
-  - dplyr
-  - CSV
-draft: FALSE
+slug: r-vectorized-csv-json-output-with-dplyr-group-walk
 output:
   blogdown::html_page:
     number_sections: yes
     toc: yes
 lastmod: '2019-02-16T18:48:31+01:00'
-description: 'Dplyr 0.8 has been released and comes with a surpise: group_walk(). This post demonstrates how to parse grouped data into several CSV and/or JSON files with only a few lines of tidy code and purrr(e) logic.'
-abstract: 'Dplyr 0.8 has been released and comes with a surpise: group_walk(). This post demonstrates how to parse grouped data into several CSV and/or JSON files with only a few lines of tidy code and purrr(e) logic.'
+description: 'Dplyr 0.8 has been released and comes with a surpise: group_walk().
+  This post demonstrates how to parse grouped data into several CSV and/or JSON files
+  with only a few lines of tidy code and purrr(e) logic.'
+abstract: 'Dplyr 0.8 has been released and comes with a surpise: group_walk(). This
+  post demonstrates how to parse grouped data into several CSV and/or JSON files with
+  only a few lines of tidy code and purrr(e) logic.'
 thumbnail: "/img/thumbs/json_output.jpg"
 rmdlink: yes
-keywords: []
 comment: no
 autoCollapseToc: no
 postMetaInFooter: no
@@ -47,7 +49,7 @@ blogdown::shortcode('tweet', '1096725838211567616')
 
 > Just see for yourself in Hadley's [Slides](https://speakerdeck.com/hadley/welcome-to-the-tidyverse?slide=7){target="_blank"} and maybe archive the slide as a screenshot... From now on, no one can ever blame me for using `->`!
 
-  2. But **far more important**: the freshly released `dplyr 0.8` includes a whole bunch of new `group_verb` functions such as `group_split()`, `group_map()`, and `group_walk()`. See the full [changelog](https://github.com/tidyverse/dplyr/blob/master/NEWS.md#dplyr-080-2019-02-14){target="_blank"} for all the new goodies and fixes.
+  2. But **far more important**: the freshly released `dplyr 0.8` includes a whole bunch of new `group_verb()` functions such as `group_split()`, `group_map()`, and `group_walk()`. See the full [changelog](https://github.com/tidyverse/dplyr/blob/master/NEWS.md#dplyr-080-2019-02-14){target="_blank"} for all the new goodies and fixes.
 
 At that moment I was already soooo tempted to write a script which splits a huge `df` into several CSV files (legit use case at work; JSON would be a nice extra). Basically, I already used `purrr::map_dfr()` once to [read in a whole bunch](/post/r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al/) of `.rds` files, so there should exist a method for doing the reverse. But then – rather by incident – I discovered the `group_map()` vignette being linked at the bottom of the `group_split()` vignette, which also happened to include `group_walk()` AND the basic recipe for a CSV output function... Serendipity indeed.
 

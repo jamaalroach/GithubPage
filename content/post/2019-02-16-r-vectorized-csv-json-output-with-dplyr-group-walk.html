@@ -2,26 +2,28 @@
 title: '[R} Vectorized CSV & JSON output with dplyr::group_walk()'
 author: Ilja / fubits
 date: '2019-02-16'
-slug: r-vectorized-csv-json-output-with-dplyr-group-walk
 categories:
-  - Rstats
   - Output
+  - Rstats
 tags:
+  - CSV
+  - dplyr
   - JSON
   - jsonlite
-  - dplyr
-  - CSV
-draft: yes
+slug: r-vectorized-csv-json-output-with-dplyr-group-walk
 output:
   blogdown::html_page:
     number_sections: yes
     toc: yes
 lastmod: '2019-02-16T18:48:31+01:00'
-description: 'Dplyr 0.8 has been released and comes with a surpise: group_walk(). This post demonstrates how to parse grouped data into several CSV and/or JSON files with only a few lines of tidy code and purrr(e) logic.'
-abstract: 'Dplyr 0.8 has been released and comes with a surpise: group_walk(). This post demonstrates how to parse grouped data into several CSV and/or JSON files with only a few lines of tidy code and purrr(e) logic.'
+description: 'Dplyr 0.8 has been released and comes with a surpise: group_walk().
+  This post demonstrates how to parse grouped data into several CSV and/or JSON files
+  with only a few lines of tidy code and purrr(e) logic.'
+abstract: 'Dplyr 0.8 has been released and comes with a surpise: group_walk(). This
+  post demonstrates how to parse grouped data into several CSV and/or JSON files with
+  only a few lines of tidy code and purrr(e) logic.'
 thumbnail: "/img/thumbs/json_output.jpg"
 rmdlink: yes
-keywords: []
 comment: no
 autoCollapseToc: no
 postMetaInFooter: no
@@ -53,7 +55,7 @@ mathjaxEnableAutoNumber: no
 <p>Just see for yourself in Hadley’s <a href="https://speakerdeck.com/hadley/welcome-to-the-tidyverse?slide=7" target="_blank">Slides</a> and maybe archive the slide as a screenshot… From now on, no one can ever blame me for using <code>-&gt;</code>!</p>
 </blockquote>
 <ol start="2" style="list-style-type: decimal">
-<li>But <strong>far more important</strong>: the freshly released <code>dplyr 0.8</code> includes a whole bunch of new <code>group_verb</code> functions such as <code>group_split()</code>, <code>group_map()</code>, and <code>group_walk()</code>. See the full <a href="https://github.com/tidyverse/dplyr/blob/master/NEWS.md#dplyr-080-2019-02-14" target="_blank">changelog</a> for all the new goodies and fixes.</li>
+<li>But <strong>far more important</strong>: the freshly released <code>dplyr 0.8</code> includes a whole bunch of new <code>group_verb()</code> functions such as <code>group_split()</code>, <code>group_map()</code>, and <code>group_walk()</code>. See the full <a href="https://github.com/tidyverse/dplyr/blob/master/NEWS.md#dplyr-080-2019-02-14" target="_blank">changelog</a> for all the new goodies and fixes.</li>
 </ol>
 <p>At that moment I was already soooo tempted to write a script which splits a huge <code>df</code> into several CSV files (legit use case at work; JSON would be a nice extra). Basically, I already used <code>purrr::map_dfr()</code> once to <a href="/post/r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al/">read in a whole bunch</a> of <code>.rds</code> files, so there should exist a method for doing the reverse. But then – rather by incident – I discovered the <code>group_map()</code> vignette being linked at the bottom of the <code>group_split()</code> vignette, which also happened to include <code>group_walk()</code> AND the basic recipe for a CSV output function… Serendipity indeed.</p>
 <p>All it took me from there was to “tidify” the syntax a little and add a fix for the dropped grouping variable. I posted the result of my excitement on Twitter, and added a <code>jsonlite</code> solution for <code>JSON</code> output. The post went micro-viral, and <a href="https://twitter.com/dreznik/status/1096850367609032705" target="_blank">@dreznik</a> suggested further improvements:</p>
