@@ -50,6 +50,10 @@ sequenceDiagrams:
 <li><a href="#tweets">Tweets</a></li>
 </ul></li>
 <li><a href="#widgets">Widgets</a></li>
+<li><a href="#debugging">Debugging</a><ul>
+<li><a href="#call-hugo-directly-on-win10">call Hugo directly on Win10</a></li>
+<li><a href="#measure-rendering-time">measure rendering time</a></li>
+</ul></li>
 </ul>
 </div>
 
@@ -136,7 +140,7 @@ knitr::read_chunk(&quot;example.R&quot;)
 </div>
 <div id="emojis" class="section level2">
 <h2>Emojis</h2>
-<p>As inline <code>😄</code> (full list: <a href="https://github.com/hadley/emo" class="uri">https://github.com/hadley/emo</a>)</p>
+<p>As inline <code>😄</code> (full list: <a href="https://github.com/hadley/emo">https://github.com/hadley/emo</a>)</p>
 </div>
 <div id="undocumented" class="section level2">
 <h2>Undocumented</h2>
@@ -657,4 +661,17 @@ blogdown::shortcode(&#39;tweet&#39;, &#39;852205086956818432&#39;)</code></pre>
 <blockquote>
 <p>See <a href="/post/r-demo-blogdown-madness-with-htmlwidgets/">“Demo: Blogdown Madness with htmlwidgets”</a></p>
 </blockquote>
+</div>
+<div id="debugging" class="section level2">
+<h2>Debugging</h2>
+<div id="call-hugo-directly-on-win10" class="section level3">
+<h3>call Hugo directly on Win10</h3>
+<p><code>%APPDATA%\Hugo\hugo</code></p>
+</div>
+<div id="measure-rendering-time" class="section level3">
+<h3>measure rendering time</h3>
+<p><code>hugo --templateMetrics</code></p>
+<p>OR</p>
+<p><code>blogdown::hugo_cmd("--templateMetrics")</code></p>
+</div>
 </div>

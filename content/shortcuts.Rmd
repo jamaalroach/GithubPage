@@ -207,3 +207,16 @@ blogdown::shortcode('tweet', '852205086956818432')
 
 > See ["Demo: Blogdown Madness with htmlwidgets"](/post/r-demo-blogdown-madness-with-htmlwidgets/)
 
+## Debugging
+
+### call Hugo directly on Win10
+
+`%APPDATA%\Hugo\hugo`
+
+### measure rendering time
+
+`hugo --templateMetrics`
+
+OR
+
+`blogdown::hugo_cmd("--templateMetrics")`

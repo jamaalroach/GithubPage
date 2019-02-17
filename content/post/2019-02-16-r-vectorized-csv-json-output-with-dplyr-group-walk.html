@@ -1,0 +1,957 @@
+---
+title: '[R] Vectorized CSV & JSON output with dplyr::group_walk()'
+author: Ilja / fubits
+date: '2019-02-16'
+categories:
+  - Output
+  - Rstats
+tags:
+  - CSV
+  - dplyr
+  - JSON
+  - jsonlite
+slug: r-vectorized-csv-json-output-with-dplyr-group-walk
+output:
+  blogdown::html_page:
+    number_sections: yes
+    toc: yes
+lastmod: '2019-02-16T18:48:31+01:00'
+description: 'dplyr 0.8 has been released and comes with a surprise: group_walk().
+  This post demonstrates how to parse grouped data into several CSV and/or JSON files
+  with only a few lines of tidy code and purrr(e) logic.'
+abstract: 'dplyr 0.8 has been released and comes with a surprise: group_walk(). This
+  post demonstrates how to parse grouped data into several CSV and/or JSON files with
+  only a few lines of tidy code and purrr(e) logic.'
+thumbnail: "/img/thumbs/json_output.jpg"
+rmdlink: yes
+comment: no
+autoCollapseToc: no
+postMetaInFooter: no
+hiddenFromHomePage: no
+mathjax: no
+mathjaxEnableSingleDollar: no
+mathjaxEnableAutoNumber: no
+---
+
+
+<div id="TOC">
+<ul>
+<li><a href="#intro-dplyrgroup_walk"><span class="toc-section-number">1</span> Intro: dplyr::group_walk()</a></li>
+<li><a href="#vectorized-csv-output"><span class="toc-section-number">2</span> Vectorized CSV Output</a></li>
+<li><a href="#vectorized-json-output"><span class="toc-section-number">3</span> Vectorized JSON Output</a></li>
+<li><a href="#last-but-not-least-the-data.table-way"><span class="toc-section-number">4</span> Last but not least: the data.table way</a></li>
+</ul>
+</div>
+
+<div id="intro-dplyrgroup_walk" class="section level1">
+<h1><span class="header-section-number">1</span> Intro: dplyr::group_walk()</h1>
+{{% tweet "1096790455826767872" %}}
+<p>Earlier today I stumbled upon a <a href="https://twitter.com/coolbutuseless/status/1096687122642292736" target="_blank">Tweet by mikefc/@coolbutuseless</a> which led to two serendipitous findings:</p>
+<ol style="list-style-type: decimal">
+<li>It is now proven that Hadley Wickham <strong>does use</strong> the controversial <em>reverse assignment</em> <code>-&gt;</code>.</li>
+</ol>
+{{% tweet "1096725838211567616" %}}
+<blockquote>
+<p>Just see for yourself in Hadley’s <a href="https://speakerdeck.com/hadley/welcome-to-the-tidyverse?slide=7" target="_blank">Slides</a> and maybe archive the slide as a screenshot… From now on, no one can ever blame me for using <code>-&gt;</code>!</p>
+</blockquote>
+<ol start="2" style="list-style-type: decimal">
+<li>But <strong>far more important</strong>: the freshly released <code>dplyr 0.8</code> includes a whole bunch of new <code>group_verb()</code> functions such as <code>group_split()</code>, <code>group_map()</code>, and <code>group_walk()</code>. See the full <a href="https://github.com/tidyverse/dplyr/blob/master/NEWS.md#dplyr-080-2019-02-14" target="_blank">changelog</a> for all the new goodies and fixes.</li>
+</ol>
+<p>At that moment I was already soooo tempted to write a script which splits a huge <code>df</code> into several CSV files (legit use case at work; JSON would be a nice extra). Basically, I already used <code>purrr::map_dfr()</code> once to <a href="/post/r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al/">read in a whole bunch</a> of <code>.rds</code> files, so there should exist a method for doing the reverse. But then – rather by incident – I discovered the <code>group_map()</code> vignette being linked at the bottom of the <code>group_split()</code> vignette, which also happened to include <code>group_walk()</code> AND the basic recipe for a CSV output function… Serendipity indeed.</p>
+<p>All it took me from there was to “tidify” the syntax a little and add a fix for the dropped grouping variable. I posted the result of my excitement on Twitter, and added a <code>jsonlite</code> solution for <code>JSON</code> output. The post went micro-viral, and <a href="https://twitter.com/dreznik/status/1096850367609032705" target="_blank">@dreznik</a> suggested further improvements:</p>
+{{% tweet "1096850367609032705" %}}
+<p>So here we go:</p>
+<pre class="r"><code>library(tidyverse)
+library(gapminder) # data for the demo</code></pre>
+<p>Here’s what the gapminder data looks like. It’s a regular <code>df</code> with 1704 observations for 142 countries.</p>
+<pre class="r"><code>gapminder %&gt;% head() %&gt;% knitr::kable(&quot;html&quot;)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+country
+</th>
+<th style="text-align:left;">
+continent
+</th>
+<th style="text-align:right;">
+year
+</th>
+<th style="text-align:right;">
+lifeExp
+</th>
+<th style="text-align:right;">
+pop
+</th>
+<th style="text-align:right;">
+gdpPercap
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Afghanistan
+</td>
+<td style="text-align:left;">
+Asia
+</td>
+<td style="text-align:right;">
+1952
+</td>
+<td style="text-align:right;">
+28.801
+</td>
+<td style="text-align:right;">
+8425333
+</td>
+<td style="text-align:right;">
+779.4453
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Afghanistan
+</td>
+<td style="text-align:left;">
+Asia
+</td>
+<td style="text-align:right;">
+1957
+</td>
+<td style="text-align:right;">
+30.332
+</td>
+<td style="text-align:right;">
+9240934
+</td>
+<td style="text-align:right;">
+820.8530
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Afghanistan
+</td>
+<td style="text-align:left;">
+Asia
+</td>
+<td style="text-align:right;">
+1962
+</td>
+<td style="text-align:right;">
+31.997
+</td>
+<td style="text-align:right;">
+10267083
+</td>
+<td style="text-align:right;">
+853.1007
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Afghanistan
+</td>
+<td style="text-align:left;">
+Asia
+</td>
+<td style="text-align:right;">
+1967
+</td>
+<td style="text-align:right;">
+34.020
+</td>
+<td style="text-align:right;">
+11537966
+</td>
+<td style="text-align:right;">
+836.1971
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Afghanistan
+</td>
+<td style="text-align:left;">
+Asia
+</td>
+<td style="text-align:right;">
+1972
+</td>
+<td style="text-align:right;">
+36.088
+</td>
+<td style="text-align:right;">
+13079460
+</td>
+<td style="text-align:right;">
+739.9811
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Afghanistan
+</td>
+<td style="text-align:left;">
+Asia
+</td>
+<td style="text-align:right;">
+1977
+</td>
+<td style="text-align:right;">
+38.438
+</td>
+<td style="text-align:right;">
+14880372
+</td>
+<td style="text-align:right;">
+786.1134
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>gapminder %&gt;% skimr::skim_to_wide() %&gt;% knitr::kable(&quot;html&quot;)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+type
+</th>
+<th style="text-align:left;">
+variable
+</th>
+<th style="text-align:left;">
+missing
+</th>
+<th style="text-align:left;">
+complete
+</th>
+<th style="text-align:left;">
+n
+</th>
+<th style="text-align:left;">
+n_unique
+</th>
+<th style="text-align:left;">
+top_counts
+</th>
+<th style="text-align:left;">
+ordered
+</th>
+<th style="text-align:left;">
+mean
+</th>
+<th style="text-align:left;">
+sd
+</th>
+<th style="text-align:left;">
+p0
+</th>
+<th style="text-align:left;">
+p25
+</th>
+<th style="text-align:left;">
+p50
+</th>
+<th style="text-align:left;">
+p75
+</th>
+<th style="text-align:left;">
+p100
+</th>
+<th style="text-align:left;">
+hist
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+factor
+</td>
+<td style="text-align:left;">
+continent
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+1704
+</td>
+<td style="text-align:left;">
+1704
+</td>
+<td style="text-align:left;">
+5
+</td>
+<td style="text-align:left;">
+Afr: 624, Asi: 396, Eur: 360, Ame: 300
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+factor
+</td>
+<td style="text-align:left;">
+country
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+1704
+</td>
+<td style="text-align:left;">
+1704
+</td>
+<td style="text-align:left;">
+142
+</td>
+<td style="text-align:left;">
+Afg: 12, Alb: 12, Alg: 12, Ang: 12
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+integer
+</td>
+<td style="text-align:left;">
+pop
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+1704
+</td>
+<td style="text-align:left;">
+1704
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+3e+07
+</td>
+<td style="text-align:left;">
+1.1e+08
+</td>
+<td style="text-align:left;">
+60011
+</td>
+<td style="text-align:left;">
+2793664
+</td>
+<td style="text-align:left;">
+7e+06
+</td>
+<td style="text-align:left;">
+2e+07
+</td>
+<td style="text-align:left;">
+1.3e+09
+</td>
+<td style="text-align:left;">
+▇▁▁▁▁▁▁▁
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+integer
+</td>
+<td style="text-align:left;">
+year
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+1704
+</td>
+<td style="text-align:left;">
+1704
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+1979.5
+</td>
+<td style="text-align:left;">
+17.27
+</td>
+<td style="text-align:left;">
+1952
+</td>
+<td style="text-align:left;">
+1965.75
+</td>
+<td style="text-align:left;">
+1979.5
+</td>
+<td style="text-align:left;">
+1993.25
+</td>
+<td style="text-align:left;">
+2007
+</td>
+<td style="text-align:left;">
+▇▃▇▃▃▇▃▇
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+numeric
+</td>
+<td style="text-align:left;">
+gdpPercap
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+1704
+</td>
+<td style="text-align:left;">
+1704
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+7215.33
+</td>
+<td style="text-align:left;">
+9857.45
+</td>
+<td style="text-align:left;">
+241.17
+</td>
+<td style="text-align:left;">
+1202.06
+</td>
+<td style="text-align:left;">
+3531.85
+</td>
+<td style="text-align:left;">
+9325.46
+</td>
+<td style="text-align:left;">
+113523.13
+</td>
+<td style="text-align:left;">
+▇▁▁▁▁▁▁▁
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+numeric
+</td>
+<td style="text-align:left;">
+lifeExp
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+1704
+</td>
+<td style="text-align:left;">
+1704
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+59.47
+</td>
+<td style="text-align:left;">
+12.92
+</td>
+<td style="text-align:left;">
+23.6
+</td>
+<td style="text-align:left;">
+48.2
+</td>
+<td style="text-align:left;">
+60.71
+</td>
+<td style="text-align:left;">
+70.85
+</td>
+<td style="text-align:left;">
+82.6
+</td>
+<td style="text-align:left;">
+▁▂▅▅▅▅▇▃
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="vectorized-csv-output" class="section level1">
+<h1><span class="header-section-number">2</span> Vectorized CSV Output</h1>
+<p><strong>path for the output folder</strong></p>
+<p>First, we check if the desired output folder exists, and create the folder if that’s not the case. Note that I’m using <code>here::here()</code> to create a relative path for my <code>blogdown</code> website’s data folder. You could stick to the uncommented <code>"output_csv"</code> line without creating a <code>csv_path</code> object if you wish.</p>
+<pre class="r"><code>csv_path &lt;- here::here(&quot;data&quot;, &quot;output_csv&quot;)
+# if(!dir.exists(&quot;output_csv&quot;)) {dir.create(&quot;output_csv&quot;)}
+if(!dir.exists(csv_path)) {dir.create(csv_path)}</code></pre>
+<p>We could also use the tidier <code>fs</code> methods for file-system access (again, per <a href="https://twitter.com/dreznik/status/1096852422075564033" target="_blank">@dreznik</a>), but I guess it’s also ok to stick to some comfy <code>Base R</code> habits:</p>
+{{% tweet "1096852422075564033" %}}
+<p>Now we group the gapminder data by the <code>country</code> variable (remember: 142 unique countries), <strong>add an additional</strong> <code>country_name</code> column to preserve the country names (<em>they get dropped</em> during <code>group_walk()</code>, and <code>keep=TRUE</code> does not work for this verb), place the new <code>country_name</code> to the front and write the groups as <code>CSV</code>s to our <code>csv_path</code>. Again, kudos to <a href="https://twitter.com/dreznik/status/1096850367609032705" target="_blank">@dreznik</a> for the more robust <code>.y[["country"]]</code> evaluation hint!</p>
+<pre class="r"><code>gapminder %&gt;%
+  group_by(country) %&gt;%
+  mutate(country_name = country) %&gt;% # to preserve country name in csv object...
+  select(country_name, everything()) %&gt;% # ... which is somehow dropped by group_walk()
+  group_walk(~ write_csv(.x, path = fs::path(csv_path, .y[[&quot;country&quot;]], ext = &quot;csv&quot;)))</code></pre>
+<p>Let’s check the output:</p>
+<pre class="r"><code>list.files(csv_path, pattern = &quot;csv$&quot;) %&gt;% head(20)</code></pre>
+<pre><code>##  [1] &quot;Afghanistan.csv&quot;            &quot;Albania.csv&quot;               
+##  [3] &quot;Algeria.csv&quot;                &quot;Angola.csv&quot;                
+##  [5] &quot;Argentina.csv&quot;              &quot;Australia.csv&quot;             
+##  [7] &quot;Austria.csv&quot;                &quot;Bahrain.csv&quot;               
+##  [9] &quot;Bangladesh.csv&quot;             &quot;Belgium.csv&quot;               
+## [11] &quot;Benin.csv&quot;                  &quot;Bolivia.csv&quot;               
+## [13] &quot;Bosnia and Herzegovina.csv&quot; &quot;BosniaandHerzegovina.csv&quot;  
+## [15] &quot;Botswana.csv&quot;               &quot;Brazil.csv&quot;                
+## [17] &quot;Bulgaria.csv&quot;               &quot;Burkina Faso.csv&quot;          
+## [19] &quot;BurkinaFaso.csv&quot;            &quot;Burundi.csv&quot;</code></pre>
+<pre class="r"><code>read_csv(fs::path(csv_path, &quot;Afghanistan.csv&quot;)) %&gt;% head() %&gt;% knitr::kable(&quot;html&quot;)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+country_name
+</th>
+<th style="text-align:left;">
+continent
+</th>
+<th style="text-align:right;">
+year
+</th>
+<th style="text-align:right;">
+lifeExp
+</th>
+<th style="text-align:right;">
+pop
+</th>
+<th style="text-align:right;">
+gdpPercap
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Afghanistan
+</td>
+<td style="text-align:left;">
+Asia
+</td>
+<td style="text-align:right;">
+1952
+</td>
+<td style="text-align:right;">
+28.801
+</td>
+<td style="text-align:right;">
+8425333
+</td>
+<td style="text-align:right;">
+779.4453
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Afghanistan
+</td>
+<td style="text-align:left;">
+Asia
+</td>
+<td style="text-align:right;">
+1957
+</td>
+<td style="text-align:right;">
+30.332
+</td>
+<td style="text-align:right;">
+9240934
+</td>
+<td style="text-align:right;">
+820.8530
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Afghanistan
+</td>
+<td style="text-align:left;">
+Asia
+</td>
+<td style="text-align:right;">
+1962
+</td>
+<td style="text-align:right;">
+31.997
+</td>
+<td style="text-align:right;">
+10267083
+</td>
+<td style="text-align:right;">
+853.1007
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Afghanistan
+</td>
+<td style="text-align:left;">
+Asia
+</td>
+<td style="text-align:right;">
+1967
+</td>
+<td style="text-align:right;">
+34.020
+</td>
+<td style="text-align:right;">
+11537966
+</td>
+<td style="text-align:right;">
+836.1971
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Afghanistan
+</td>
+<td style="text-align:left;">
+Asia
+</td>
+<td style="text-align:right;">
+1972
+</td>
+<td style="text-align:right;">
+36.088
+</td>
+<td style="text-align:right;">
+13079460
+</td>
+<td style="text-align:right;">
+739.9811
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Afghanistan
+</td>
+<td style="text-align:left;">
+Asia
+</td>
+<td style="text-align:right;">
+1977
+</td>
+<td style="text-align:right;">
+38.438
+</td>
+<td style="text-align:right;">
+14880372
+</td>
+<td style="text-align:right;">
+786.1134
+</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><a href="https://twitter.com/ameisen_strasse" target="_blank">frie /@ameisen_strasse</a> rightly pointed out that these file names contain white space, so we might want to parse <code>.y[["country"]]</code> with <code>stringr::str_replace_all()</code>. This way we can either replace all the white spaces with <code>_</code> or CamelCase the file names. Also, have a look at Congo and Congo DR. We might want account for that too.</p>
+</blockquote>
+<pre class="r"><code>gapminder::gapminder %&gt;% filter(str_detect(country, &quot;Congo&quot;)) %&gt;% distinct(country)</code></pre>
+<pre><code>## # A tibble: 2 x 1
+##   country         
+##   &lt;fct&gt;           
+## 1 Congo, Dem. Rep.
+## 2 Congo, Rep.</code></pre>
+<p>Here’s the " | . | , " to CamelCase workaround. We can use the explicit <code>" |\\.|,"</code> pattern. But of course, we might want to use something more sophisticated such as <code>[:punct:]|[:blank:]</code> or even the super.strict <code>[^a-zA-Z]</code>:</p>
+<pre class="r"><code>gapminder %&gt;%
+  group_by(country) %&gt;%
+  mutate(country_name = country) %&gt;% # to preserve country name in csv object...
+  select(country_name, everything()) %&gt;% # ... which is somehow dropped by group_walk()
+  group_walk(~ write_csv(.x, path = fs::path(csv_path, str_replace_all(.y[[&quot;country&quot;]], &quot;[^a-zA-Z]&quot;, &quot;&quot;), ext = &quot;csv&quot;)))</code></pre>
+<p>Nice! But what if we want … <code>JSON</code> files!?</p>
+</div>
+<div id="vectorized-json-output" class="section level1">
+<h1><span class="header-section-number">3</span> Vectorized JSON Output</h1>
+<p><code>jsonlite</code> is already part of the tidyverse, so let’s see how that works:</p>
+<pre class="r"><code>library(jsonlite)</code></pre>
+<p><strong>same procedure, different path</strong></p>
+<pre class="r"><code>json_path &lt;- here::here(&quot;data&quot;, &quot;output_json&quot;)
+# if(!dir.exists(&quot;output_csv&quot;)) {dir.create(&quot;output_csv&quot;)}
+if(!dir.exists(json_path)) {dir.create(json_path)}</code></pre>
+<p>Seriously. All we need to do is to replace <code>readr::write_csv()</code> with <code>jsonlite::write_json()</code> and add <code>pretty=TRUE</code> for a nicely indented JSON output.</p>
+<pre class="r"><code>gapminder %&gt;%
+  group_by(country) %&gt;%
+  mutate(country_name = country) %&gt;% # to preserve country name in json object...
+  select(country_name, everything()) %&gt;% # ... which is somehow dropped by group_walk()
+  group_walk(~ write_json(.x, pretty = TRUE, path = fs::path(json_path, str_replace_all(.y[[&quot;country&quot;]], &quot;[^a-zA-Z]&quot;, &quot;&quot;), ext = &quot;json&quot;)))</code></pre>
+<p><strong>inspect the folder</strong></p>
+<pre class="r"><code>list.files(json_path, pattern = &quot;json$&quot;) %&gt;% head(20)</code></pre>
+<pre><code>##  [1] &quot;Afghanistan.json&quot;          &quot;Albania.json&quot;             
+##  [3] &quot;Algeria.json&quot;              &quot;Angola.json&quot;              
+##  [5] &quot;Argentina.json&quot;            &quot;Australia.json&quot;           
+##  [7] &quot;Austria.json&quot;              &quot;Bahrain.json&quot;             
+##  [9] &quot;Bangladesh.json&quot;           &quot;Belgium.json&quot;             
+## [11] &quot;Benin.json&quot;                &quot;Bolivia.json&quot;             
+## [13] &quot;BosniaandHerzegovina.json&quot; &quot;Botswana.json&quot;            
+## [15] &quot;Brazil.json&quot;               &quot;Bulgaria.json&quot;            
+## [17] &quot;BurkinaFaso.json&quot;          &quot;Burundi.json&quot;             
+## [19] &quot;Cambodia.json&quot;             &quot;Cameroon.json&quot;</code></pre>
+<p><strong>inspect the JSON output read in as</strong> <code>df</code></p>
+<pre class="r"><code>AFG_JSON &lt;- read_json(fs::path(json_path, &quot;Afghanistan.json&quot;), simplifyVector = TRUE)
+AFG_JSON %&gt;% head() %&gt;% knitr::kable(&quot;html&quot;)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+country_name
+</th>
+<th style="text-align:left;">
+continent
+</th>
+<th style="text-align:right;">
+year
+</th>
+<th style="text-align:right;">
+lifeExp
+</th>
+<th style="text-align:right;">
+pop
+</th>
+<th style="text-align:right;">
+gdpPercap
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Afghanistan
+</td>
+<td style="text-align:left;">
+Asia
+</td>
+<td style="text-align:right;">
+1952
+</td>
+<td style="text-align:right;">
+28.801
+</td>
+<td style="text-align:right;">
+8425333
+</td>
+<td style="text-align:right;">
+779.4453
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Afghanistan
+</td>
+<td style="text-align:left;">
+Asia
+</td>
+<td style="text-align:right;">
+1957
+</td>
+<td style="text-align:right;">
+30.332
+</td>
+<td style="text-align:right;">
+9240934
+</td>
+<td style="text-align:right;">
+820.8530
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Afghanistan
+</td>
+<td style="text-align:left;">
+Asia
+</td>
+<td style="text-align:right;">
+1962
+</td>
+<td style="text-align:right;">
+31.997
+</td>
+<td style="text-align:right;">
+10267083
+</td>
+<td style="text-align:right;">
+853.1007
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Afghanistan
+</td>
+<td style="text-align:left;">
+Asia
+</td>
+<td style="text-align:right;">
+1967
+</td>
+<td style="text-align:right;">
+34.020
+</td>
+<td style="text-align:right;">
+11537966
+</td>
+<td style="text-align:right;">
+836.1971
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Afghanistan
+</td>
+<td style="text-align:left;">
+Asia
+</td>
+<td style="text-align:right;">
+1972
+</td>
+<td style="text-align:right;">
+36.088
+</td>
+<td style="text-align:right;">
+13079460
+</td>
+<td style="text-align:right;">
+739.9811
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Afghanistan
+</td>
+<td style="text-align:left;">
+Asia
+</td>
+<td style="text-align:right;">
+1977
+</td>
+<td style="text-align:right;">
+38.438
+</td>
+<td style="text-align:right;">
+14880372
+</td>
+<td style="text-align:right;">
+786.1134
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>And finally, JSON as pretty JSON</strong></p>
+<pre class="r"><code>toJSON(AFG_JSON[1,], pretty = TRUE) # first observation</code></pre>
+<pre><code>## [
+##   {
+##     &quot;country_name&quot;: &quot;Afghanistan&quot;,
+##     &quot;continent&quot;: &quot;Asia&quot;,
+##     &quot;year&quot;: 1952,
+##     &quot;lifeExp&quot;: 28.801,
+##     &quot;pop&quot;: 8425333,
+##     &quot;gdpPercap&quot;: 779.4453
+##   }
+## ]</code></pre>
+<p>That’s it. Those two methods are going to be very helpful to me, and I hope that they will as useful to others. And be it just for didactic reasons, esp. because as in many other cases I only ended up playing with the new <code>dplyr</code> verbs after seeing an interesting example on Twitter.</p>
+{{% tweet "1096852611599261696" %}}
+</div>
+<div id="last-but-not-least-the-data.table-way" class="section level1">
+<h1><span class="header-section-number">4</span> Last but not least: the data.table way</h1>
+<p>Short after my initial Tweet, <a href="https://twitter.com/michael_chirico/status/1096817367470882818" target="_blank">@michael_chirico</a> suggested to me to take a look at his <code>data.table</code> solution. I prefer the tidy grammar over performance (at least for smaller data sets), but this looks very pragmatic:</p>
+{{% tweet "1096817367470882818" %}}
+</div>

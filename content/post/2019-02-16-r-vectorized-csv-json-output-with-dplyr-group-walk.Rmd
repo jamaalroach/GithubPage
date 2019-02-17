@@ -1,0 +1,195 @@
+---
+title: '[R] Vectorized CSV & JSON output with dplyr::group_walk()'
+author: Ilja / fubits
+date: '2019-02-16'
+categories:
+  - Output
+  - Rstats
+tags:
+  - CSV
+  - dplyr
+  - JSON
+  - jsonlite
+slug: r-vectorized-csv-json-output-with-dplyr-group-walk
+output:
+  blogdown::html_page:
+    number_sections: yes
+    toc: yes
+lastmod: '2019-02-16T18:48:31+01:00'
+description: 'dplyr 0.8 has been released and comes with a surprise: group_walk().
+  This post demonstrates how to parse grouped data into several CSV and/or JSON files
+  with only a few lines of tidy code and purrr(e) logic.'
+abstract: 'dplyr 0.8 has been released and comes with a surprise: group_walk(). This
+  post demonstrates how to parse grouped data into several CSV and/or JSON files with
+  only a few lines of tidy code and purrr(e) logic.'
+thumbnail: "/img/thumbs/json_output.jpg"
+rmdlink: yes
+comment: no
+autoCollapseToc: no
+postMetaInFooter: no
+hiddenFromHomePage: no
+mathjax: no
+mathjaxEnableSingleDollar: no
+mathjaxEnableAutoNumber: no
+---
+
+# Intro: dplyr::group_walk()
+
+```{r echo=FALSE}
+blogdown::shortcode('tweet', '1096790455826767872')
+```
+
+Earlier today I stumbled upon a [Tweet by mikefc/\@coolbutuseless](https://twitter.com/coolbutuseless/status/1096687122642292736){target="_blank"} which led to two serendipitous findings:
+
+  1. It is now proven that Hadley Wickham **does use** the controversial *reverse assignment* `->`. 
+
+```{r echo=FALSE}
+blogdown::shortcode('tweet', '1096725838211567616')
+```
+
+> Just see for yourself in Hadley's [Slides](https://speakerdeck.com/hadley/welcome-to-the-tidyverse?slide=7){target="_blank"} and maybe archive the slide as a screenshot... From now on, no one can ever blame me for using `->`!
+
+  2. But **far more important**: the freshly released `dplyr 0.8` includes a whole bunch of new `group_verb()` functions such as `group_split()`, `group_map()`, and `group_walk()`. See the full [changelog](https://github.com/tidyverse/dplyr/blob/master/NEWS.md#dplyr-080-2019-02-14){target="_blank"} for all the new goodies and fixes.
+
+At that moment I was already soooo tempted to write a script which splits a huge `df` into several CSV files (legit use case at work; JSON would be a nice extra). Basically, I already used `purrr::map_dfr()` once to [read in a whole bunch](/post/r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al/) of `.rds` files, so there should exist a method for doing the reverse. But then – rather by incident – I discovered the `group_map()` vignette being linked at the bottom of the `group_split()` vignette, which also happened to include `group_walk()` AND the basic recipe for a CSV output function... Serendipity indeed.
+
+All it took me from there was to "tidify" the syntax a little and add a fix for the dropped grouping variable. I posted the result of my excitement on Twitter, and added a `jsonlite` solution for `JSON` output. The post went micro-viral, and [\@dreznik](https://twitter.com/dreznik/status/1096850367609032705){target="_blank"} suggested further improvements:
+
+```{r echo=FALSE}
+blogdown::shortcode('tweet', '1096850367609032705')
+```
+
+
+So here we go:
+
+```{r message=FALSE}
+library(tidyverse)
+library(gapminder) # data for the demo
+```
+
+Here's what the gapminder data looks like. It's a regular `df` with `r nrow(gapminder)` observations for `r n_distinct(gapminder$country)` countries.
+
+```{r}
+gapminder %>% head() %>% knitr::kable("html")
+```
+
+```{r}
+gapminder %>% skimr::skim_to_wide() %>% knitr::kable("html")
+```
+
+# Vectorized CSV Output
+
+**path for the output folder**
+
+First, we check if the desired output folder exists, and create the folder if that's not the case. Note that I'm using `here::here()` to create a relative path for my `blogdown` website's data folder. You could stick to the uncommented `"output_csv"` line without creating a `csv_path` object if you wish.
+
+```{r}
+csv_path <- here::here("data", "output_csv")
+# if(!dir.exists("output_csv")) {dir.create("output_csv")}
+if(!dir.exists(csv_path)) {dir.create(csv_path)}
+```
+
+We could also use the tidier `fs` methods for file-system access (again, per [\@dreznik](https://twitter.com/dreznik/status/1096852422075564033){target="_blank"}), but I guess it's also ok to stick to some comfy `Base R` habits:
+
+```{r echo=FALSE}
+blogdown::shortcode('tweet', '1096852422075564033')
+```
+
+Now we group the gapminder data by the `country` variable (remember: `r n_distinct(gapminder$country)` unique countries), **add an additional** `country_name` column to preserve the country names (*they get dropped* during `group_walk()`, and `keep=TRUE` does not work for this verb), place the new `country_name` to the front and write the groups as `CSV`s to our `csv_path`. Again, kudos to [\@dreznik](https://twitter.com/dreznik/status/1096850367609032705){target="_blank"} for the more robust `.y[["country"]]` evaluation hint!
+
+```{r}
+gapminder %>%
+  group_by(country) %>%
+  mutate(country_name = country) %>% # to preserve country name in csv object...
+  select(country_name, everything()) %>% # ... which is somehow dropped by group_walk()
+  group_walk(~ write_csv(.x, path = fs::path(csv_path, .y[["country"]], ext = "csv")))
+```
+
+Let's check the output:
+
+```{r}
+list.files(csv_path, pattern = "csv$") %>% head(20)
+```
+
+```{r message=FALSE}
+read_csv(fs::path(csv_path, "Afghanistan.csv")) %>% head() %>% knitr::kable("html")
+```
+
+> [frie /\@ameisen_strasse](https://twitter.com/ameisen_strasse){target="_blank"} rightly pointed out that these file names contain white space, so we might want to parse `.y[["country"]]` with `stringr::str_replace_all()`. This way we can either replace all the white spaces with `_` or CamelCase the file names. Also, have a look at Congo and Congo DR. We might want account for that too.
+
+```{r}
+gapminder::gapminder %>% filter(str_detect(country, "Congo")) %>% distinct(country)
+```
+
+Here's the " | . | , " to CamelCase workaround. We can use the explicit `" |\\.|,"` pattern. But of course, we might want to use something more sophisticated such as `[:punct:]|[:blank:]` or even the super.strict `[^a-zA-Z]`:
+
+```{r}
+gapminder %>%
+  group_by(country) %>%
+  mutate(country_name = country) %>% # to preserve country name in csv object...
+  select(country_name, everything()) %>% # ... which is somehow dropped by group_walk()
+  group_walk(~ write_csv(.x, path = fs::path(csv_path, str_replace_all(.y[["country"]], "[^a-zA-Z]", ""), ext = "csv")))
+```
+
+
+Nice! But what if we want ... `JSON` files!? 
+
+# Vectorized JSON Output
+
+`jsonlite` is already part of the tidyverse, so let's see how that works:
+
+```{r message=FALSE}
+library(jsonlite)
+```
+
+**same procedure, different path**
+
+```{r}
+json_path <- here::here("data", "output_json")
+# if(!dir.exists("output_csv")) {dir.create("output_csv")}
+if(!dir.exists(json_path)) {dir.create(json_path)}
+```
+
+Seriously. All we need to do is to replace `readr::write_csv()` with `jsonlite::write_json()` and add `pretty=TRUE` for a nicely indented JSON output.
+
+```{r}
+gapminder %>%
+  group_by(country) %>%
+  mutate(country_name = country) %>% # to preserve country name in json object...
+  select(country_name, everything()) %>% # ... which is somehow dropped by group_walk()
+  group_walk(~ write_json(.x, pretty = TRUE, path = fs::path(json_path, str_replace_all(.y[["country"]], "[^a-zA-Z]", ""), ext = "json")))
+```
+
+**inspect the folder**
+
+```{r}
+list.files(json_path, pattern = "json$") %>% head(20)
+```
+
+**inspect the JSON output read in as** `df`
+
+```{r}
+AFG_JSON <- read_json(fs::path(json_path, "Afghanistan.json"), simplifyVector = TRUE)
+AFG_JSON %>% head() %>% knitr::kable("html")
+```
+
+**And finally, JSON as pretty JSON**
+
+```{r}
+toJSON(AFG_JSON[1,], pretty = TRUE) # first observation
+```
+
+That's it. Those two methods are going to be very helpful to me, and I hope that they will as useful to others. And be it just for didactic reasons, esp. because as in many other cases I only ended up playing with the new `dplyr` verbs after seeing an interesting example on Twitter.
+
+```{r echo=FALSE}
+blogdown::shortcode('tweet', '1096852611599261696')
+```
+
+# Last but not least: the data.table way
+
+Short after my initial Tweet, [\@michael_chirico](https://twitter.com/michael_chirico/status/1096817367470882818){target="_blank"} suggested to me to take a look at his `data.table` solution. I prefer the tidy grammar over performance (at least for smaller data sets), but this looks very pragmatic:
+
+```{r echo=FALSE}
+blogdown::shortcode('tweet', '1096817367470882818')
+```
+
