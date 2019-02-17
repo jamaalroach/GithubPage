@@ -44,7 +44,7 @@ Earlier today I stumbled upon a [Tweet by mikefc/\@coolbutuseless](https://twitt
   1. It is now proven that Hadley Wickham **does use** the controversial *reverse assignment* `->`. 
 
 ```{r echo=FALSE}
-blogdown::shortcode('tweet', '1096725838211567616')
+blogdown::shortcode('tweet-noreply', '1096725838211567616')
 ```
 
 > Just see for yourself in Hadley's [Slides](https://speakerdeck.com/hadley/welcome-to-the-tidyverse?slide=7){target="_blank"} and maybe archive the slide as a screenshot... From now on, no one can ever blame me for using `->`!
@@ -56,9 +56,8 @@ At that moment I was already soooo tempted to write a script which splits a huge
 All it took me from there was to "tidify" the syntax a little and add a fix for the dropped grouping variable. I posted the result of my excitement on Twitter, and added a `jsonlite` solution for `JSON` output. The post went micro-viral, and [\@dreznik](https://twitter.com/dreznik/status/1096850367609032705){target="_blank"} suggested further improvements:
 
 ```{r echo=FALSE}
-blogdown::shortcode('tweet', '1096850367609032705')
+blogdown::shortcode('tweet-noreply', '1096850367609032705')
 ```
-
 
 So here we go:
 
@@ -86,13 +85,13 @@ First, we check if the desired output folder exists, and create the folder if th
 ```{r}
 csv_path <- here::here("data", "output_csv")
 # if(!dir.exists("output_csv")) {dir.create("output_csv")}
-if(!dir.exists(csv_path)) {dir.create(csv_path)}
+if (!dir.exists(csv_path)) {dir.create(csv_path)}
 ```
 
-We could also use the tidier `fs` methods for file-system access (again, per [\@dreznik](https://twitter.com/dreznik/status/1096852422075564033){target="_blank"}), but I guess it's also ok to stick to some comfy `Base R` habits:
+We could also use the tidier `fs` methods for file-system access (again, per [\@dreznik](https://twitter.com/dreznik/status/1096852422075564033){target="_blank"}), but I guess it's also ok to stick to some comfy `Base R` habits.
 
 ```{r echo=FALSE}
-blogdown::shortcode('tweet', '1096852422075564033')
+blogdown::shortcode('tweet-noreply', '1096852422075564033')
 ```
 
 Now we group the gapminder data by the `country` variable (remember: `r n_distinct(gapminder$country)` unique countries), **add an additional** `country_name` column to preserve the country names (*they get dropped* during `group_walk()`, and `keep=TRUE` does not work for this verb), place the new `country_name` to the front and write the groups as `CSV`s to our `csv_path`. Again, kudos to [\@dreznik](https://twitter.com/dreznik/status/1096850367609032705){target="_blank"} for the more robust `.y[["country"]]` evaluation hint!
@@ -111,19 +110,21 @@ Let's check the output:
 list.files(csv_path, pattern = "csv$") %>% head(20)
 ```
 
+> A Shocker for later: `fs::dir_map(csv_path, read.csv)`...
+
 ```{r message=FALSE}
 read_csv(fs::path(csv_path, "Afghanistan.csv")) %>% head() %>% knitr::kable("html")
 ```
 
-> [frie /\@ameisen_strasse](https://twitter.com/ameisen_strasse){target="_blank"} rightly pointed out that these file names contain white space, so we might want to parse `.y[["country"]]` with `stringr::str_replace_all()`. This way we can either replace all the white spaces with `_` or CamelCase the file names. Also, have a look at Congo and Congo DR. We might want account for that too.
+> [frie /\@ameisen_strasse](https://twitter.com/ameisen_strasse){target="_blank"} rightly pointed out that these file names contain white space, so we might want to parse `.y[["country"]]` with `stringr::str_replace_all()`. This way we can either replace all the white spaces with `_` or CamelCase the file names. Also, have a look at Congo and Congo DR. We might want to account for that naming pattern too.
 
 ```{r}
 gapminder::gapminder %>% filter(str_detect(country, "Congo")) %>% distinct(country)
 ```
 
-Here's the " | . | , " to CamelCase workaround. We can use the explicit `" |\\.|,"` pattern. But of course, we might want to use something more sophisticated such as `[:punct:]|[:blank:]` or even the super.strict `[^a-zA-Z]`:
+Here's the " | . | , " to CamelCase workaround. We can use the explicit `" |\\.|,"` pattern. But of course, we might want to use something more sophisticated such as `[:punct:]|[:blank:]` or even the super strict `[^a-zA-Z]`:
 
-```{r}
+```{r eval=FALSE}
 gapminder %>%
   group_by(country) %>%
   mutate(country_name = country) %>% # to preserve country name in csv object...
@@ -131,6 +132,7 @@ gapminder %>%
   group_walk(~ write_csv(.x, path = fs::path(csv_path, str_replace_all(.y[["country"]], "[^a-zA-Z]", ""), ext = "csv")))
 ```
 
+> And have you already heard of the new `stringr::str_squish()` method which collapses multiple white spaces into a single white space (which we then can `str_replace_all(., "[^a-zA-Z]", "_")` to `any_pretty_file_name.csv`)!?
 
 Nice! But what if we want ... `JSON` files!? 
 
@@ -147,7 +149,7 @@ library(jsonlite)
 ```{r}
 json_path <- here::here("data", "output_json")
 # if(!dir.exists("output_csv")) {dir.create("output_csv")}
-if(!dir.exists(json_path)) {dir.create(json_path)}
+if (!dir.exists(json_path)) {dir.create(json_path)}
 ```
 
 Seriously. All we need to do is to replace `readr::write_csv()` with `jsonlite::write_json()` and add `pretty=TRUE` for a nicely indented JSON output.
@@ -182,7 +184,7 @@ toJSON(AFG_JSON[1,], pretty = TRUE) # first observation
 That's it. Those two methods are going to be very helpful to me, and I hope that they will as useful to others. And be it just for didactic reasons, esp. because as in many other cases I only ended up playing with the new `dplyr` verbs after seeing an interesting example on Twitter.
 
 ```{r echo=FALSE}
-blogdown::shortcode('tweet', '1096852611599261696')
+blogdown::shortcode('tweet-noreply', '1096852611599261696')
 ```
 
 # Last but not least: the data.table way
@@ -190,6 +192,6 @@ blogdown::shortcode('tweet', '1096852611599261696')
 Short after my initial Tweet, [\@michael_chirico](https://twitter.com/michael_chirico/status/1096817367470882818){target="_blank"} suggested to me to take a look at his `data.table` solution. I prefer the tidy grammar over performance (at least for smaller data sets), but this looks very pragmatic:
 
 ```{r echo=FALSE}
-blogdown::shortcode('tweet', '1096817367470882818')
+blogdown::shortcode('tweet-noreply', '1096817367470882818')
 ```
 

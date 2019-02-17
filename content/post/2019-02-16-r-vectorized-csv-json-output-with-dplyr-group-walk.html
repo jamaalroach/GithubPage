@@ -50,7 +50,7 @@ mathjaxEnableAutoNumber: no
 <ol style="list-style-type: decimal">
 <li>It is now proven that Hadley Wickham <strong>does use</strong> the controversial <em>reverse assignment</em> <code>-&gt;</code>.</li>
 </ol>
-{{% tweet "1096725838211567616" %}}
+{{% tweet-noreply "1096725838211567616" %}}
 <blockquote>
 <p>Just see for yourself in Hadley’s <a href="https://speakerdeck.com/hadley/welcome-to-the-tidyverse?slide=7" target="_blank">Slides</a> and maybe archive the slide as a screenshot… From now on, no one can ever blame me for using <code>-&gt;</code>!</p>
 </blockquote>
@@ -59,7 +59,7 @@ mathjaxEnableAutoNumber: no
 </ol>
 <p>At that moment I was already soooo tempted to write a script which splits a huge <code>df</code> into several CSV files (legit use case at work; JSON would be a nice extra). Basically, I already used <code>purrr::map_dfr()</code> once to <a href="/post/r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al/">read in a whole bunch</a> of <code>.rds</code> files, so there should exist a method for doing the reverse. But then – rather by incident – I discovered the <code>group_map()</code> vignette being linked at the bottom of the <code>group_split()</code> vignette, which also happened to include <code>group_walk()</code> AND the basic recipe for a CSV output function… Serendipity indeed.</p>
 <p>All it took me from there was to “tidify” the syntax a little and add a fix for the dropped grouping variable. I posted the result of my excitement on Twitter, and added a <code>jsonlite</code> solution for <code>JSON</code> output. The post went micro-viral, and <a href="https://twitter.com/dreznik/status/1096850367609032705" target="_blank">@dreznik</a> suggested further improvements:</p>
-{{% tweet "1096850367609032705" %}}
+{{% tweet-noreply "1096850367609032705" %}}
 <p>So here we go:</p>
 <pre class="r"><code>library(tidyverse)
 library(gapminder) # data for the demo</code></pre>
@@ -575,9 +575,9 @@ NA
 <p>First, we check if the desired output folder exists, and create the folder if that’s not the case. Note that I’m using <code>here::here()</code> to create a relative path for my <code>blogdown</code> website’s data folder. You could stick to the uncommented <code>"output_csv"</code> line without creating a <code>csv_path</code> object if you wish.</p>
 <pre class="r"><code>csv_path &lt;- here::here(&quot;data&quot;, &quot;output_csv&quot;)
 # if(!dir.exists(&quot;output_csv&quot;)) {dir.create(&quot;output_csv&quot;)}
-if(!dir.exists(csv_path)) {dir.create(csv_path)}</code></pre>
-<p>We could also use the tidier <code>fs</code> methods for file-system access (again, per <a href="https://twitter.com/dreznik/status/1096852422075564033" target="_blank">@dreznik</a>), but I guess it’s also ok to stick to some comfy <code>Base R</code> habits:</p>
-{{% tweet "1096852422075564033" %}}
+if (!dir.exists(csv_path)) {dir.create(csv_path)}</code></pre>
+<p>We could also use the tidier <code>fs</code> methods for file-system access (again, per <a href="https://twitter.com/dreznik/status/1096852422075564033" target="_blank">@dreznik</a>), but I guess it’s also ok to stick to some comfy <code>Base R</code> habits.</p>
+{{% tweet-noreply "1096852422075564033" %}}
 <p>Now we group the gapminder data by the <code>country</code> variable (remember: 142 unique countries), <strong>add an additional</strong> <code>country_name</code> column to preserve the country names (<em>they get dropped</em> during <code>group_walk()</code>, and <code>keep=TRUE</code> does not work for this verb), place the new <code>country_name</code> to the front and write the groups as <code>CSV</code>s to our <code>csv_path</code>. Again, kudos to <a href="https://twitter.com/dreznik/status/1096850367609032705" target="_blank">@dreznik</a> for the more robust <code>.y[["country"]]</code> evaluation hint!</p>
 <pre class="r"><code>gapminder %&gt;%
   group_by(country) %&gt;%
@@ -592,10 +592,13 @@ if(!dir.exists(csv_path)) {dir.create(csv_path)}</code></pre>
 ##  [7] &quot;Austria.csv&quot;                &quot;Bahrain.csv&quot;               
 ##  [9] &quot;Bangladesh.csv&quot;             &quot;Belgium.csv&quot;               
 ## [11] &quot;Benin.csv&quot;                  &quot;Bolivia.csv&quot;               
-## [13] &quot;Bosnia and Herzegovina.csv&quot; &quot;BosniaandHerzegovina.csv&quot;  
-## [15] &quot;Botswana.csv&quot;               &quot;Brazil.csv&quot;                
-## [17] &quot;Bulgaria.csv&quot;               &quot;Burkina Faso.csv&quot;          
-## [19] &quot;BurkinaFaso.csv&quot;            &quot;Burundi.csv&quot;</code></pre>
+## [13] &quot;Bosnia and Herzegovina.csv&quot; &quot;Botswana.csv&quot;              
+## [15] &quot;Brazil.csv&quot;                 &quot;Bulgaria.csv&quot;              
+## [17] &quot;Burkina Faso.csv&quot;           &quot;Burundi.csv&quot;               
+## [19] &quot;Cambodia.csv&quot;               &quot;Cameroon.csv&quot;</code></pre>
+<blockquote>
+<p>A Shocker for later: <code>fs::dir_map(csv_path, read.csv)</code>…</p>
+</blockquote>
 <pre class="r"><code>read_csv(fs::path(csv_path, &quot;Afghanistan.csv&quot;)) %&gt;% head() %&gt;% knitr::kable(&quot;html&quot;)</code></pre>
 <table>
 <thead>
@@ -744,7 +747,7 @@ Asia
 </tbody>
 </table>
 <blockquote>
-<p><a href="https://twitter.com/ameisen_strasse" target="_blank">frie /@ameisen_strasse</a> rightly pointed out that these file names contain white space, so we might want to parse <code>.y[["country"]]</code> with <code>stringr::str_replace_all()</code>. This way we can either replace all the white spaces with <code>_</code> or CamelCase the file names. Also, have a look at Congo and Congo DR. We might want account for that too.</p>
+<p><a href="https://twitter.com/ameisen_strasse" target="_blank">frie /@ameisen_strasse</a> rightly pointed out that these file names contain white space, so we might want to parse <code>.y[["country"]]</code> with <code>stringr::str_replace_all()</code>. This way we can either replace all the white spaces with <code>_</code> or CamelCase the file names. Also, have a look at Congo and Congo DR. We might want to account for that naming pattern too.</p>
 </blockquote>
 <pre class="r"><code>gapminder::gapminder %&gt;% filter(str_detect(country, &quot;Congo&quot;)) %&gt;% distinct(country)</code></pre>
 <pre><code>## # A tibble: 2 x 1
@@ -752,12 +755,15 @@ Asia
 ##   &lt;fct&gt;           
 ## 1 Congo, Dem. Rep.
 ## 2 Congo, Rep.</code></pre>
-<p>Here’s the " | . | , " to CamelCase workaround. We can use the explicit <code>" |\\.|,"</code> pattern. But of course, we might want to use something more sophisticated such as <code>[:punct:]|[:blank:]</code> or even the super.strict <code>[^a-zA-Z]</code>:</p>
+<p>Here’s the " | . | , " to CamelCase workaround. We can use the explicit <code>" |\\.|,"</code> pattern. But of course, we might want to use something more sophisticated such as <code>[:punct:]|[:blank:]</code> or even the super strict <code>[^a-zA-Z]</code>:</p>
 <pre class="r"><code>gapminder %&gt;%
   group_by(country) %&gt;%
   mutate(country_name = country) %&gt;% # to preserve country name in csv object...
   select(country_name, everything()) %&gt;% # ... which is somehow dropped by group_walk()
   group_walk(~ write_csv(.x, path = fs::path(csv_path, str_replace_all(.y[[&quot;country&quot;]], &quot;[^a-zA-Z]&quot;, &quot;&quot;), ext = &quot;csv&quot;)))</code></pre>
+<blockquote>
+<p>And have you already heard of the new <code>stringr::str_squish()</code> method which collapses multiple white spaces into a single white space (which we then can <code>str_replace_all(., "[^a-zA-Z]", "_")</code> to <code>any_pretty_file_name.csv</code>)!?</p>
+</blockquote>
 <p>Nice! But what if we want … <code>JSON</code> files!?</p>
 </div>
 <div id="vectorized-json-output" class="section level1">
@@ -767,7 +773,7 @@ Asia
 <p><strong>same procedure, different path</strong></p>
 <pre class="r"><code>json_path &lt;- here::here(&quot;data&quot;, &quot;output_json&quot;)
 # if(!dir.exists(&quot;output_csv&quot;)) {dir.create(&quot;output_csv&quot;)}
-if(!dir.exists(json_path)) {dir.create(json_path)}</code></pre>
+if (!dir.exists(json_path)) {dir.create(json_path)}</code></pre>
 <p>Seriously. All we need to do is to replace <code>readr::write_csv()</code> with <code>jsonlite::write_json()</code> and add <code>pretty=TRUE</code> for a nicely indented JSON output.</p>
 <pre class="r"><code>gapminder %&gt;%
   group_by(country) %&gt;%
@@ -948,10 +954,10 @@ Asia
 ##   }
 ## ]</code></pre>
 <p>That’s it. Those two methods are going to be very helpful to me, and I hope that they will as useful to others. And be it just for didactic reasons, esp. because as in many other cases I only ended up playing with the new <code>dplyr</code> verbs after seeing an interesting example on Twitter.</p>
-{{% tweet "1096852611599261696" %}}
+{{% tweet-noreply "1096852611599261696" %}}
 </div>
 <div id="last-but-not-least-the-data.table-way" class="section level1">
 <h1><span class="header-section-number">4</span> Last but not least: the data.table way</h1>
 <p>Short after my initial Tweet, <a href="https://twitter.com/michael_chirico/status/1096817367470882818" target="_blank">@michael_chirico</a> suggested to me to take a look at his <code>data.table</code> solution. I prefer the tidy grammar over performance (at least for smaller data sets), but this looks very pragmatic:</p>
-{{% tweet "1096817367470882818" %}}
+{{% tweet-noreply "1096817367470882818" %}}
 </div>
