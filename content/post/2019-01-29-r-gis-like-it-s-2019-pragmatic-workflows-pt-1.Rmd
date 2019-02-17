@@ -154,14 +154,14 @@ substates10 <- readRDS(file = str_c(here::here("data", "GIS_workflows"), "/", "s
 
 **Subset the Federal State of Berlin**
 
-```{r cache=TRUE}
+```{r}
 berlin_sf <- substates10 %>% filter(name == "Berlin")
 ```
 
 
 Next, we'll use the amazing `sf` package to fetch Berlin's **bounding box** (BBOX).
 
-```{r cache=TRUE}
+```{r}
 berlin_bbox <- sf::st_bbox(berlin_sf)
 ```
 
@@ -367,7 +367,7 @@ Let's look at `sf::st_crop()`, the mighty `filter(sf::st_intersection())`, and `
 
 Cropping is straight-forward. We take our BBOX object (or any other feature from which `st_crop` can derive a BBOX) and then literally cut off all elements that extent beyond the BBOX.
 
-```{r message=FALSE, warning=FALSE, cache=TRUE}
+```{r message=FALSE, warning=FALSE}
 lakes_berlin <- lakes10 %>% sf::st_crop(berlin_custom_bbox)
 rivers_berlin <- rivers10_europe %>% sf::st_crop(berlin_custom_bbox)
 ```
@@ -384,7 +384,7 @@ And now let's plot the result with `ggplot` and `berlin_sf` as the background an
 
 > If you need a particular CRS for your use case, [https://epsg.io/](https://epsg.io/){target="_blank"} might come in handy.
 
-```{r cache=TRUE}
+```{r}
 ggplot() +
   geom_sf(data = berlin_sf, fill = "lightgrey", color = "black") +
   geom_sf(data = lakes_berlin, fill = "blue") +
@@ -404,7 +404,7 @@ This is as accurate as it gets, but you might need to take some time to understa
 
 Since we already can assume that the result cannot extent beyond Berlin's BBOX, we should first crop the (global) `roads10` object with Berlin's BBOX in order to reduce the computational cost of this operation.
 
-```{r message=FALSE, warning=FALSE, cache=TRUE}
+```{r message=FALSE, warning=FALSE}
 roads_berlin_sf <- roads10 %>% 
   sf::st_crop(berlin_custom_bbox) %>% 
   sf::st_intersection(berlin_sf)
@@ -412,7 +412,7 @@ roads_berlin_sf <- roads10 %>%
 
 Here's the result (and Kudos to [Ryan Peek](https://ryanpeek.github.io/2017-11-05-mapping-with-sf-Part-2/){target="_blank"} for using the Google-friendly "clip object to shape" lingo):
 
-```{r cache=TRUE}
+```{r}
 ggplot() +
   geom_sf(data = berlin_sf) +
   geom_sf(data = sf::st_as_sfc(berlin_custom_bbox), alpha = 0.3) +
@@ -433,7 +433,7 @@ Now let's look at `sf::st_within()` which calls for a different subsetting logic
 
 In this example, we only want those roads, which are fully contained within Berlin's border. 
 
-```{r message=FALSE, warning=FALSE, cache=TRUE}
+```{r message=FALSE, warning=FALSE}
 roads_berlin_sf <- roads10 %>% 
   sf::st_crop(berlin_custom_bbox) %>% 
   filter(lengths(st_within(., berlin_sf)) > 0)
@@ -486,7 +486,7 @@ berlin_osm_roads %>% names()
 
 As we are interested in roads and our query only queried for roads ("highway") as features, we should focus on `osm_lines` and `osm_multilines`.
 
-```{r cache=TRUE}
+```{r}
 berlin_osm_roads$osm_lines %>% 
   count(highway) %>% 
   arrange(desc(n)) %>% 
@@ -496,24 +496,24 @@ berlin_osm_roads$osm_lines %>%
 
 > We're talking about 13.5K road fragments here - and this is just road level 1 -3... That's a bit different than Natural Earth 1:10m data. 
 
-```{r cache=TRUE}
+```{r}
 berlin_osm_roads$osm_multilines %>% count(highway) %>% arrange(desc(n))
 ```
 
-```{r warning=FALSE, message=FALSE, cache=TRUE}
+```{r warning=FALSE, message=FALSE}
 berlin_osm_roads_crop <- berlin_osm_roads$osm_lines %>% sf::st_intersection(berlin_sf)
 # berlin_osm_roads_crop2 <- berlin_osm_roads$osm_multilines %>% sf::st_intersection(., berlin_sf)
 ```
 
 Just to give you an idea: this is the level of granularity (and memory-intense granular vector data) we get:
 
-```{r cache=TRUE}
+```{r}
 plot(berlin_osm_roads_crop["highway"], key.pos = NULL)
 ```
 
 Or plotted with `ggplot`:
 
-```{r cache=TRUE}
+```{r}
 ggplot() +
   geom_sf(data = berlin_osm_roads_crop, aes(color = highway)) +
   # scale_size_discrete(c(0.1,2)) +
