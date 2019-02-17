@@ -11,7 +11,7 @@ tags:
   - jsonlite
   - dplyr
   - CSV
-draft: yes
+draft: false
 output:
   blogdown::html_page:
     number_sections: yes
