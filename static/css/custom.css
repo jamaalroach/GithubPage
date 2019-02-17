@@ -96,6 +96,54 @@ body {
 
 twitterwidget {
 	margin: 10px auto;
+	font-size: smaller!important;
+}
+
+twitter-widget {
+	margin: 10px auto;
+	font-size: smaller!important;
+}
+
+.Tweet-text {
+	font-size: smaller!important;
+}
+
+.post .post-content blockquote.twitter-tweet {
+	border-left-color: dodgerblue;
+	background-color: aliceblue;
+	max-width: 300px;
+	margin-left: auto;
+	margin-right: auto;
+	padding-right: 10px;
+	font-size: smaller;
+}
+
+.post .post-content blockquote.twitter-tweet::before {
+	font-family: iconfont;
+	font-style: normal;
+	font-size: 2em;
+	-webkit-font-smoothing: antialiased;
+	-webkit-text-stroke-width: .2px;
+	-moz-osx-font-smoothing: grayscale;
+	content: "\E600";
+	text-align: center;
+	vertical-align: middle;
+	position: absolute;
+	left: -48px;
+	top: 5px;
+}
+
+
+.post .post-content blockquote.twitter-tweet p::before {
+	content: "\"";
+}
+
+.post .post-content blockquote.twitter-tweet p::after {
+	content: "\"";
+}
+
+#content li {
+	padding-left: 0.5em;
 }
 
 /* Posts Index.html */
@@ -358,6 +406,15 @@ h6 {
 	background-color: yellow;
 }
 
+/* START mobile style */
+
+@media screen and (max-width:500px) {
+
+	.post .post-content blockquote.twitter-tweet::before {
+		content: "";
+	}
+}
+
 @media screen and (max-width:800px) {
 	#header .logo-wrapper {
 		display: none
@@ -398,7 +455,10 @@ h6 {
 		position: relative;
 		width: 100%
 	} */
+
 }
+
+/* END mobile style */
 
 /* set by id="menu-active" */
 
