@@ -1,0 +1,199 @@
+---
+title: '[R} Vectorized CSV & JSON output with dplyr::group_walk()'
+author: Ilja / fubits
+date: '2019-02-16'
+slug: r-vectorized-csv-json-output-with-dplyr-group-walk
+categories:
+  - Rstats
+  - Output
+tags:
+  - JSON
+  - jsonlite
+  - dplyr
+  - CSV
+draft: yes
+output:
+  blogdown::html_page:
+    number_sections: yes
+    toc: yes
+lastmod: '2019-02-16T18:48:31+01:00'
+description: 'Dplyr 0.8 has been released and comes with a surpise: group_walk(). This post demonstrates how to parse grouped data into several CSV and/or JSON files with only a few lines of tidy code and purrr(e) logic.'
+abstract: 'Dplyr 0.8 has been released and comes with a surpise: group_walk(). This post demonstrates how to parse grouped data into several CSV and/or JSON files with only a few lines of tidy code and purrr(e) logic.'
+thumbnail: "/img/thumbs/json_output.jpg"
+rmdlink: yes
+keywords: []
+comment: no
+autoCollapseToc: no
+postMetaInFooter: no
+hiddenFromHomePage: no
+mathjax: no
+mathjaxEnableSingleDollar: no
+mathjaxEnableAutoNumber: no
+---
+
+
+<div id="TOC">
+<ul>
+<li><a href="#intro-dplyrgroup_walk"><span class="toc-section-number">1</span> Intro: dplyr::group_walk()</a></li>
+<li><a href="#vectorized-csv-output"><span class="toc-section-number">2</span> Vectorized CSV Output</a></li>
+<li><a href="#vectorized-json-output"><span class="toc-section-number">3</span> Vectorized JSON Output</a></li>
+<li><a href="#last-but-not-least-the-data.table-way"><span class="toc-section-number">4</span> Last but not least: the data.table way</a></li>
+</ul>
+</div>
+
+<div id="intro-dplyrgroup_walk" class="section level1">
+<h1><span class="header-section-number">1</span> Intro: dplyr::group_walk()</h1>
+{{% tweet "1096790455826767872" %}}
+<p>Earlier today I stumbled upon a <a href="https://twitter.com/coolbutuseless/status/1096687122642292736" target="_blank">Tweet by mikefc/@coolbutuseless</a> which led to two serendipitous findings:</p>
+<ol style="list-style-type: decimal">
+<li>It is now proven that Hadley Wickham <strong>does use</strong> the controversial <em>reverse assignment</em> <code>-&gt;</code>.</li>
+</ol>
+{{% tweet "1096725838211567616" %}}
+<blockquote>
+<p>Just see for yourself in Hadley’s <a href="https://speakerdeck.com/hadley/welcome-to-the-tidyverse?slide=7" target="_blank">Slides</a> and maybe archive the slide as a screenshot… From now on, no one can ever blame me for using <code>-&gt;</code>!</p>
+</blockquote>
+<ol start="2" style="list-style-type: decimal">
+<li>But <strong>far more important</strong>: the freshly released <code>dplyr 0.8</code> includes a whole bunch of new <code>group_verb</code> functions such as <code>group_split()</code>, <code>group_map()</code>, and <code>group_walk()</code>. See the full <a href="https://github.com/tidyverse/dplyr/blob/master/NEWS.md#dplyr-080-2019-02-14" target="_blank">changelog</a> for all the new goodies and fixes.</li>
+</ol>
+<p>At that moment I was already soooo tempted to write a script which splits a huge <code>df</code> into several CSV files (legit use case at work; JSON would be a nice extra). Basically, I already used <code>purrr::map_dfr()</code> once to <a href="/post/r-academic-conference-twitter-pt-1-mining-dvpw18-dgs18-hist18-et-al/">read in a whole bunch</a> of <code>.rds</code> files, so there should exist a method for doing the reverse. But then – rather by incident – I discovered the <code>group_map()</code> vignette being linked at the bottom of the <code>group_split()</code> vignette, which also happened to include <code>group_walk()</code> AND the basic recipe for a CSV output function… Serendipity indeed.</p>
+<p>All it took me from there was to “tidify” the syntax a little and add a fix for the dropped grouping variable. I posted the result of my excitement on Twitter, and added a <code>jsonlite</code> solution for <code>JSON</code> output. The post went micro-viral, and <a href="https://twitter.com/dreznik/status/1096850367609032705" target="_blank">@dreznik</a> suggested further improvements:</p>
+{{% tweet "1096850367609032705" %}}
+<p>So here we go:</p>
+<pre class="r"><code>library(tidyverse)
+library(gapminder) # data for the demo</code></pre>
+<p>Here’s what the gapminder data looks like. It’s a regular <code>df</code> with 1704 observations for 142 countries.</p>
+<pre class="r"><code>gapminder %&gt;% head()</code></pre>
+<pre><code>## # A tibble: 6 x 6
+##   country     continent  year lifeExp      pop gdpPercap
+##   &lt;fct&gt;       &lt;fct&gt;     &lt;int&gt;   &lt;dbl&gt;    &lt;int&gt;     &lt;dbl&gt;
+## 1 Afghanistan Asia       1952    28.8  8425333      779.
+## 2 Afghanistan Asia       1957    30.3  9240934      821.
+## 3 Afghanistan Asia       1962    32.0 10267083      853.
+## 4 Afghanistan Asia       1967    34.0 11537966      836.
+## 5 Afghanistan Asia       1972    36.1 13079460      740.
+## 6 Afghanistan Asia       1977    38.4 14880372      786.</code></pre>
+<pre class="r"><code>gapminder %&gt;% skimr::skim()</code></pre>
+<pre><code>## Skim summary statistics
+##  n obs: 1704 
+##  n variables: 6 
+## 
+## -- Variable type:factor --------------------------------------------------
+##   variable missing complete    n n_unique
+##  continent       0     1704 1704        5
+##    country       0     1704 1704      142
+##                              top_counts ordered
+##  Afr: 624, Asi: 396, Eur: 360, Ame: 300   FALSE
+##      Afg: 12, Alb: 12, Alg: 12, Ang: 12   FALSE
+## 
+## -- Variable type:integer -------------------------------------------------
+##  variable missing complete    n    mean       sd    p0        p25     p50
+##       pop       0     1704 1704 3e+07    1.1e+08 60011 2793664    7e+06  
+##      year       0     1704 1704  1979.5 17.27     1952    1965.75  1979.5
+##       p75       p100     hist
+##  2e+07       1.3e+09 &lt;U+2587&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;
+##   1993.25 2007       &lt;U+2587&gt;&lt;U+2583&gt;&lt;U+2587&gt;&lt;U+2583&gt;&lt;U+2583&gt;&lt;U+2587&gt;&lt;U+2583&gt;&lt;U+2587&gt;
+## 
+## -- Variable type:numeric -------------------------------------------------
+##   variable missing complete    n    mean      sd     p0     p25     p50
+##  gdpPercap       0     1704 1704 7215.33 9857.45 241.17 1202.06 3531.85
+##    lifeExp       0     1704 1704   59.47   12.92  23.6    48.2    60.71
+##      p75      p100     hist
+##  9325.46 113523.13 &lt;U+2587&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;&lt;U+2581&gt;
+##    70.85     82.6  &lt;U+2581&gt;&lt;U+2582&gt;&lt;U+2585&gt;&lt;U+2585&gt;&lt;U+2585&gt;&lt;U+2585&gt;&lt;U+2587&gt;&lt;U+2583&gt;</code></pre>
+</div>
+<div id="vectorized-csv-output" class="section level1">
+<h1><span class="header-section-number">2</span> Vectorized CSV Output</h1>
+<p><strong>path for the output folder</strong></p>
+<p>First, we check if the desired output folder exists, and create the folder if that’s not the case. Note that I’m using <code>here::here()</code> to create a relative path for my <code>blogdown</code> website’s data folder. You could stick to the uncommented <code>"output_csv"</code> line without creating a <code>csv_path</code> object if you wish.</p>
+<pre class="r"><code>csv_path &lt;- here::here(&quot;data&quot;, &quot;output_csv&quot;)
+# if(!dir.exists(&quot;output_csv&quot;)) {dir.create(&quot;output_csv&quot;)}
+if(!dir.exists(csv_path)) {dir.create(csv_path)}</code></pre>
+<p>We could also use the tidier <code>fs</code> methods for file-system access (again, per <a href="https://twitter.com/dreznik/status/1096852422075564033" target="_blank">@dreznik</a>), but I guess it’s also ok to stick to some comfy <code>Base R</code> habits:</p>
+{{% tweet "1096852422075564033" %}}
+<p>Now we group the gapminder data by the <code>country</code> variable (remember: 142 unique countries), <strong>add an additional</strong> <code>country_name</code> column to preserve the country names (<em>they get dropped</em> during <code>group_walk()</code> and <code>keep=TRUE</code> does not work for this verb), place the new <code>country_name</code> to the front and write the groups as <code>CSV</code>s to our <code>csv_path</code>. Again, kudos to <a href="https://twitter.com/dreznik/status/1096850367609032705" target="_blank">@dreznik</a> for the more robust <code>.y[["country"]]</code> evaluation hint!</p>
+<pre class="r"><code>gapminder %&gt;%
+  group_by(country) %&gt;%
+  mutate(country_name = country) %&gt;% # to preserve country name in csv object...
+  select(country_name, everything()) %&gt;% # ... which is somehow dropped by group_walk()
+  group_walk(~ write_csv(.x, path = fs::path(csv_path, .y[[&quot;country&quot;]], ext = &quot;csv&quot;)))</code></pre>
+<p>Let’s check the output:</p>
+<pre class="r"><code>list.files(csv_path, pattern = &quot;csv$&quot;) %&gt;% head(20)</code></pre>
+<pre><code>##  [1] &quot;Afghanistan.csv&quot;            &quot;Albania.csv&quot;               
+##  [3] &quot;Algeria.csv&quot;                &quot;Angola.csv&quot;                
+##  [5] &quot;Argentina.csv&quot;              &quot;Australia.csv&quot;             
+##  [7] &quot;Austria.csv&quot;                &quot;Bahrain.csv&quot;               
+##  [9] &quot;Bangladesh.csv&quot;             &quot;Belgium.csv&quot;               
+## [11] &quot;Benin.csv&quot;                  &quot;Bolivia.csv&quot;               
+## [13] &quot;Bosnia and Herzegovina.csv&quot; &quot;Botswana.csv&quot;              
+## [15] &quot;Brazil.csv&quot;                 &quot;Bulgaria.csv&quot;              
+## [17] &quot;Burkina Faso.csv&quot;           &quot;Burundi.csv&quot;               
+## [19] &quot;Cambodia.csv&quot;               &quot;Cameroon.csv&quot;</code></pre>
+<pre class="r"><code>read_csv(fs::path(csv_path, &quot;Afghanistan.csv&quot;)) %&gt;% head()</code></pre>
+<pre><code>## # A tibble: 6 x 6
+##   country_name continent  year lifeExp      pop gdpPercap
+##   &lt;chr&gt;        &lt;chr&gt;     &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+## 1 Afghanistan  Asia       1952    28.8  8425333      779.
+## 2 Afghanistan  Asia       1957    30.3  9240934      821.
+## 3 Afghanistan  Asia       1962    32.0 10267083      853.
+## 4 Afghanistan  Asia       1967    34.0 11537966      836.
+## 5 Afghanistan  Asia       1972    36.1 13079460      740.
+## 6 Afghanistan  Asia       1977    38.4 14880372      786.</code></pre>
+<p>Nice! But what if we want … <code>JSON</code> files!?</p>
+</div>
+<div id="vectorized-json-output" class="section level1">
+<h1><span class="header-section-number">3</span> Vectorized JSON Output</h1>
+<p><code>jsonlite</code> is already part of the tidyverse, so let’s see how that works:</p>
+<pre class="r"><code>library(jsonlite)</code></pre>
+<p><strong>same procedure, different path</strong></p>
+<pre class="r"><code>json_path &lt;- here::here(&quot;data&quot;, &quot;output_json&quot;)
+# if(!dir.exists(&quot;output_csv&quot;)) {dir.create(&quot;output_csv&quot;)}
+if(!dir.exists(json_path)) {dir.create(json_path)}</code></pre>
+<p>Seriously. All we need to do is to replace <code>readr::write_csv()</code> with <code>jsonlite::write_json()</code> and add <code>pretty=TRUE</code> for an intended JSON output.</p>
+<pre class="r"><code>gapminder %&gt;%
+  group_by(country) %&gt;%
+  mutate(country_name = country) %&gt;% # to preserve country name in json object...
+  select(country_name, everything()) %&gt;% # ... which is somehow dropped by group_walk()
+  group_walk(~ write_json(.x, pretty = TRUE, path = fs::path(json_path, .y[[&quot;country&quot;]], ext = &quot;json&quot;)))</code></pre>
+<p><strong>inspect the folder</strong></p>
+<pre class="r"><code>list.files(json_path, pattern = &quot;json$&quot;) %&gt;% head(20)</code></pre>
+<pre><code>##  [1] &quot;Afghanistan.json&quot;            &quot;Albania.json&quot;               
+##  [3] &quot;Algeria.json&quot;                &quot;Angola.json&quot;                
+##  [5] &quot;Argentina.json&quot;              &quot;Australia.json&quot;             
+##  [7] &quot;Austria.json&quot;                &quot;Bahrain.json&quot;               
+##  [9] &quot;Bangladesh.json&quot;             &quot;Belgium.json&quot;               
+## [11] &quot;Benin.json&quot;                  &quot;Bolivia.json&quot;               
+## [13] &quot;Bosnia and Herzegovina.json&quot; &quot;Botswana.json&quot;              
+## [15] &quot;Brazil.json&quot;                 &quot;Bulgaria.json&quot;              
+## [17] &quot;Burkina Faso.json&quot;           &quot;Burundi.json&quot;               
+## [19] &quot;Cambodia.json&quot;               &quot;Cameroon.json&quot;</code></pre>
+<p><strong>inspect the JSON output read in as</strong> <code>df</code></p>
+<pre class="r"><code>AFG_JSON &lt;- read_json(fs::path(json_path, &quot;Afghanistan.json&quot;), simplifyVector = TRUE)
+AFG_JSON %&gt;% head()</code></pre>
+<pre><code>##   country_name continent year lifeExp      pop gdpPercap
+## 1  Afghanistan      Asia 1952  28.801  8425333  779.4453
+## 2  Afghanistan      Asia 1957  30.332  9240934  820.8530
+## 3  Afghanistan      Asia 1962  31.997 10267083  853.1007
+## 4  Afghanistan      Asia 1967  34.020 11537966  836.1971
+## 5  Afghanistan      Asia 1972  36.088 13079460  739.9811
+## 6  Afghanistan      Asia 1977  38.438 14880372  786.1134</code></pre>
+<p><strong>And finally, JSON as pretty JSON</strong></p>
+<pre class="r"><code>toJSON(AFG_JSON[1,], pretty = TRUE) # first observation</code></pre>
+<pre><code>## [
+##   {
+##     &quot;country_name&quot;: &quot;Afghanistan&quot;,
+##     &quot;continent&quot;: &quot;Asia&quot;,
+##     &quot;year&quot;: 1952,
+##     &quot;lifeExp&quot;: 28.801,
+##     &quot;pop&quot;: 8425333,
+##     &quot;gdpPercap&quot;: 779.4453
+##   }
+## ]</code></pre>
+<p>That’s it. Those two methods are going to be very helpful to me, and I hope that they will as useful to others. And be it just for didactic reasons, esp. because as in many other cases I only ended up playing with the new <code>dplyr</code> verbs after seeing an interesting example on Twitter.</p>
+{{% tweet "1096852611599261696" %}}
+</div>
+<div id="last-but-not-least-the-data.table-way" class="section level1">
+<h1><span class="header-section-number">4</span> Last but not least: the data.table way</h1>
+<p>Short after my initial Tweet, <a href="https://twitter.com/michael_chirico/status/1096817367470882818" target="_blank">@michael_chirico</a> suggested to me to take a look at his <code>data.table</code> solution. I prefer the tidy grammar over performance (at least for smaller data sets), but this looks very pragmatic:</p>
+<pre class="r"><code>blogdown::shortcode(&#39;tweet&#39;, &#39;1096817367470882818&#39;)</code></pre>
+{{% tweet "1096817367470882818" %}}
+</div>
