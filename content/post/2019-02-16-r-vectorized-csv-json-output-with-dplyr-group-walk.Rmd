@@ -16,10 +16,10 @@ output:
     number_sections: yes
     toc: yes
 lastmod: '2019-02-16T18:48:31+01:00'
-description: 'Dplyr 0.8 has been released and comes with a surpise: group_walk().
+description: 'dplyr 0.8 has been released and comes with a surprise: group_walk().
   This post demonstrates how to parse grouped data into several CSV and/or JSON files
   with only a few lines of tidy code and purrr(e) logic.'
-abstract: 'Dplyr 0.8 has been released and comes with a surpise: group_walk(). This
+abstract: 'dplyr 0.8 has been released and comes with a surprise: group_walk(). This
   post demonstrates how to parse grouped data into several CSV and/or JSON files with
   only a few lines of tidy code and purrr(e) logic.'
 thumbnail: "/img/thumbs/json_output.jpg"
@@ -70,11 +70,11 @@ library(gapminder) # data for the demo
 Here's what the gapminder data looks like. It's a regular `df` with `r nrow(gapminder)` observations for `r n_distinct(gapminder$country)` countries.
 
 ```{r}
-gapminder %>% head()
+gapminder %>% head() %>% knitr::kable("html")
 ```
 
 ```{r}
-gapminder %>% skimr::skim()
+gapminder %>% skimr::skim_to_wide() %>% knitr::kable("html")
 ```
 
 # Vectorized CSV Output
@@ -95,7 +95,7 @@ We could also use the tidier `fs` methods for file-system access (again, per [\@
 blogdown::shortcode('tweet', '1096852422075564033')
 ```
 
-Now we group the gapminder data by the `country` variable (remember: `r n_distinct(gapminder$country)` unique countries), **add an additional** `country_name` column to preserve the country names (*they get dropped* during `group_walk()` and `keep=TRUE` does not work for this verb), place the new `country_name` to the front and write the groups as `CSV`s to our `csv_path`. Again, kudos to [\@dreznik](https://twitter.com/dreznik/status/1096850367609032705){target="_blank"} for the more robust `.y[["country"]]` evaluation hint!
+Now we group the gapminder data by the `country` variable (remember: `r n_distinct(gapminder$country)` unique countries), **add an additional** `country_name` column to preserve the country names (*they get dropped* during `group_walk()`, and `keep=TRUE` does not work for this verb), place the new `country_name` to the front and write the groups as `CSV`s to our `csv_path`. Again, kudos to [\@dreznik](https://twitter.com/dreznik/status/1096850367609032705){target="_blank"} for the more robust `.y[["country"]]` evaluation hint!
 
 ```{r}
 gapminder %>%
@@ -112,8 +112,25 @@ list.files(csv_path, pattern = "csv$") %>% head(20)
 ```
 
 ```{r message=FALSE}
-read_csv(fs::path(csv_path, "Afghanistan.csv")) %>% head()
+read_csv(fs::path(csv_path, "Afghanistan.csv")) %>% head() %>% knitr::kable("html")
 ```
+
+> [frie /\@ameisen_strasse](https://twitter.com/ameisen_strasse){target="_blank"} rightly pointed out that these file names contain white space, so we might want to parse `.y[["country"]]` with `stringr::str_replace_all()`. This way we can either replace all the white spaces with `_` or CamelCase the file names. Also, have a look at Congo and Congo DR. We might want account for that too.
+
+```{r}
+gapminder::gapminder %>% filter(str_detect(country, "Congo")) %>% distinct(country)
+```
+
+Here's the " | . | , " to CamelCase workaround. We can use the explicit `" |\\.|,"` pattern. But of course, we might want to use something more sophisticated such as `[:punct:]|[:blank:]` or even the super.strict `[^a-zA-Z]`:
+
+```{r}
+gapminder %>%
+  group_by(country) %>%
+  mutate(country_name = country) %>% # to preserve country name in csv object...
+  select(country_name, everything()) %>% # ... which is somehow dropped by group_walk()
+  group_walk(~ write_csv(.x, path = fs::path(csv_path, str_replace_all(.y[["country"]], "[^a-zA-Z]", ""), ext = "csv")))
+```
+
 
 Nice! But what if we want ... `JSON` files!? 
 
@@ -133,14 +150,14 @@ json_path <- here::here("data", "output_json")
 if(!dir.exists(json_path)) {dir.create(json_path)}
 ```
 
-Seriously. All we need to do is to replace `readr::write_csv()` with `jsonlite::write_json()` and add `pretty=TRUE` for an intended JSON output.
+Seriously. All we need to do is to replace `readr::write_csv()` with `jsonlite::write_json()` and add `pretty=TRUE` for a nicely indented JSON output.
 
 ```{r}
 gapminder %>%
   group_by(country) %>%
   mutate(country_name = country) %>% # to preserve country name in json object...
   select(country_name, everything()) %>% # ... which is somehow dropped by group_walk()
-  group_walk(~ write_json(.x, pretty = TRUE, path = fs::path(json_path, .y[["country"]], ext = "json")))
+  group_walk(~ write_json(.x, pretty = TRUE, path = fs::path(json_path, str_replace_all(.y[["country"]], "[^a-zA-Z]", ""), ext = "json")))
 ```
 
 **inspect the folder**
@@ -153,7 +170,7 @@ list.files(json_path, pattern = "json$") %>% head(20)
 
 ```{r}
 AFG_JSON <- read_json(fs::path(json_path, "Afghanistan.json"), simplifyVector = TRUE)
-AFG_JSON %>% head()
+AFG_JSON %>% head() %>% knitr::kable("html")
 ```
 
 **And finally, JSON as pretty JSON**
@@ -172,7 +189,7 @@ blogdown::shortcode('tweet', '1096852611599261696')
 
 Short after my initial Tweet, [\@michael_chirico](https://twitter.com/michael_chirico/status/1096817367470882818){target="_blank"} suggested to me to take a look at his `data.table` solution. I prefer the tidy grammar over performance (at least for smaller data sets), but this looks very pragmatic:
 
-```{r}
+```{r echo=FALSE}
 blogdown::shortcode('tweet', '1096817367470882818')
 ```
 
