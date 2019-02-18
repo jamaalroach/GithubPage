@@ -164,20 +164,37 @@ BRRR::skrrrahh("flava")
 **with *italic* formatting and Link**
 
 ```
-![*(Screenshot of the GitLab Dashboard for the GitHub Importer on June 4th; [Source](https://monitor.gitlab.net/dashboard/db/github-importer?orgId=1&from=1528041600000&to=now))*](/img/GitLab_JSON/gitlab_dashboard.jpg "alt-text")
+![*Screenshot of the GitLab Dashboard for the GitHub Importer on June 4th; [Source](https://monitor.gitlab.net/dashboard/db/github-importer?orgId=1&from=1528041600000&to=now){target="_blank"}*](/img/GitLab_JSON/gitlab_dashboard.jpg "alt-text")
 ```
-![*(Screenshot of the GitLab Dashboard for the GitHub Importer on June 4th; [Source](https://monitor.gitlab.net/dashboard/db/github-importer?orgId=1&from=1528041600000&to=now))*](/img/GitLab_JSON/gitlab_dashboard.jpg "alt-text")
+![*Screenshot of the GitLab Dashboard for the GitHub Importer on June 4th; [Source](https://monitor.gitlab.net/dashboard/db/github-importer?orgId=1&from=1528041600000&to=now){target="_blank"}*](/img/GitLab_JSON/gitlab_dashboard.jpg "alt-text")
 
 **Formatting and Alt-text**
 ```
-![*(73 Topics, K auto-induced with t-SNE/PCA, modelled with the stm()-package )*](/img/GitLab_JSON/gitlab_dom2.jpg "alt-text")
+![*73 Topics, K auto-induced with t-SNE/PCA, modelled with the stm()-package*](/img/GitLab_JSON/gitlab_dom2.jpg "alt-text")
 ```
-![*(73 Topics, K auto-induced with t-SNE/PCA, modelled with the stm()-package )*](/img/GitLab_JSON/gitlab_dom2.jpg "alt-text")
+![*73 Topics, K auto-induced with t-SNE/PCA, modelled with the stm()-package*](/img/GitLab_JSON/gitlab_dom2.jpg "alt-text")
+
+**Custom Caption with class .caption**
+
+```
+[![](/img/GIS_workflow/gppi_syria_1200px.jpg "Selected visuals from the Nowhere to Hide study on the use of Chemical Weapons in Syria.")](https://www.gppi.net/2019/02/17/the-logic-of-chemical-weapons-use-in-syria){target="_blank"}
+
+<p><figcaption class="caption">Selected visuals from the "Nowhere to Hide" study on the use of Chemical Weapons in Syria. Read the [full report on GPPi's website](https://www.gppi.net/2019/02/17/the-logic-of-chemical-weapons-use-in-syria){target="_blank"}. Almost all maps are CC-licensed.</figcaption></p>
+```
+[![](/img/GIS_workflow/gppi_syria_1200px.jpg "Selected visuals from the Nowhere to Hide study on the use of Chemical Weapons in Syria.")](https://www.gppi.net/2019/02/17/the-logic-of-chemical-weapons-use-in-syria){target="_blank"}
+
+<p><figcaption class="caption">Selected visuals from the "Nowhere to Hide" study on the use of Chemical Weapons in Syria. Read the [full report on GPPi's website](https://www.gppi.net/2019/02/17/the-logic-of-chemical-weapons-use-in-syria){target="_blank"}. Almost all maps are CC-licensed.</figcaption></p>
 
 
 ## Emojis
 
-As inline ` `r emo::ji("smile")` ` (full list: [https://github.com/hadley/emo](https://github.com/hadley/emo))
+```{r}
+emo::ji("smile")
+```
+
+As inline `` 'r emo::ji("smile")' ``
+
+(full list: [https://github.com/hadley/emo](https://github.com/hadley/emo))
 
 ## Undocumented
 
@@ -186,6 +203,15 @@ As inline ` `r emo::ji("smile")` ` (full list: [https://github.com/hadley/emo](h
 ```{r}
 # options(knitr.table.format = "html") OR
 skimr::skim_to_wide(mtcars) %>% knitr::kable("html", 2)
+```
+
+### Better Skimr
+
+```{r}
+gapminder::gapminder %>% 
+  skimr::skim_to_wide() %>%
+  select(-top_counts, -(p0:p100)) %>% 
+  knitr::kable("html", 1)
 ```
 
 ### Tweets
@@ -198,7 +224,7 @@ skimr::skim_to_wide(mtcars) %>% knitr::kable("html", 2)
 **R Markdown / Chunk**
 
 
-```{r eval=FALSE}
+```{r}
 # {r echo=FALSE}
 blogdown::shortcode('tweet', '852205086956818432')
 ```
@@ -207,7 +233,8 @@ blogdown::shortcode('tweet', '852205086956818432')
 
 Cf. https://www.mgasch.com/post/shortcodes/
 
-```{r echo=FALSE}
+```{r}
+# {r echo=FALSE}
 blogdown::shortcode('tweet-noreply', '1096850367609032705')
 ```
 

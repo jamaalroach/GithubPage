@@ -17,6 +17,7 @@
 .caption {
 	font-style: italic;
 	font-size: smaller;
+	text-align: center
 }
 
 .caption::before {

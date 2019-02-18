@@ -25,7 +25,6 @@ output:
 lastmod: '2019-02-09T00:00:00+01:00'
 description: 'GIS with R is far beyond powerful. This is part 1 of a collection of up-to-date workflows for processing spatial data of all kinds with R. The collection involves sf, mapview, mapedit, osmdata, raster, stars, rnaturalearth and other packages combined with straight-forward recipes.'
 abstract: 'GIS with R is far beyond powerful. This is part 1 of a collection of up-to-date workflows for processing spatial data of all kinds with R. The collection involves sf, mapview, mapedit, osmdata, raster, stars, rnaturalearth and other packages combined with straight-forward recipes.'
-draft: FALSE
 thumbnail: "/img/thumbs/gis_workflows_1.jpg"
 rmdlink: yes
 keywords: []
@@ -63,7 +62,7 @@ Ever heard of Uber's `{WebGL + Mapbox}` based framework [deck.gl](https://deck.g
 
 ![](/img/GIS_workflow/mapdeck_top.gif)
 ![](/img/GIS_workflow/mapdeck_bottom.gif)
-*(Mapdeck madness! Courtesy of [SymbolixAU/mapdeck](https://symbolixau.github.io/mapdeck/articles/layers.html){target="_blank"}.)*
+<p class="caption">Mapdeck madness! Courtesy of [SymbolixAU/mapdeck](https://symbolixau.github.io/mapdeck/articles/layers.html){target="_blank"}.</p>
 
 Prefer `Leaflet`over `Mapbox` but still need to display 100K+ points on a map? [\@timsalabim3 / Team r-spatial](https://github.com/r-spatial/leafgl){target="_blank"} have ported something for ya':
 
@@ -83,14 +82,29 @@ tm_shape(World) +
     tm_polygons("HPI", group = "Countries") +
 tm_tiles(leaflet::providers$CartoDB.PositronOnlyLabels, group = "CartoDB labels") +
 tm_shape(metro) +
-    tm_dots(col = "red", group = "Metropolitan areas")
+    tm_dots(col = "red", group = "Metropolitan areas") +
+tm_view(set.view = 1)  
 ```
 
 > In short, GIS with R is efficient, effective, **affordable**, ~~Shiny~~ shiny, and complex enough to serve as *the* domain for showcasing R and as an exhaustive use case for new R users (or their supervisors). Let us look into that claim now.
 
 <hr />
 
+# Use Case
+
 Recently, I did another but far more extensive freelance gig involving custom mapping of real-world geodata, and thereby discovered so many really helpful / effective / efficient / cool packages, methods, tools and workflows that I decided to write another GIS/mapping post. It's simply time to give something back to the community (and to create a useful reference entry for my future self).
+
+<hr />
+
+> **Update**: The study on "**The Logic of Chemical Weapons Use in Syria**" [has now been published](https://www.gppi.net/2019/02/17/the-logic-of-chemical-weapons-use-in-syria){target="_blank"} during the *Munich Security Conference 2019*. It's an acribic piece of research by [Tobias Schneider](https://twitter.com/tobiaschneider){target="_blank"} and [Theresa Lütkefend](https://twitter.com/tluetkefend){target="_blank"} from the Berlin-based *Global Public Policy Institute (GPPi)*. The study examines and explains the logic behind **336 chemical weapons attacks** (98% by regime) during the Syrian Civil War. I had the challenging honour to help visualise the overall extent and the attack patterns in a few selected case studies:
+
+[![](/img/GIS_workflow/gppi_syria_1200px.jpg "Selected visuals from the Nowhere to Hide study on the use of Chemical Weapons in Syria.")](https://www.gppi.net/2019/02/17/the-logic-of-chemical-weapons-use-in-syria){target="_blank"}
+
+<p class="caption">Selected visuals from the "Nowhere to Hide" study on the use of Chemical Weapons in Syria. Read the [full report on GPPi's website](https://www.gppi.net/2019/02/17/the-logic-of-chemical-weapons-use-in-syria){target="_blank"}. Almost all maps are CC-licensed.</p>
+
+All maps / visuals (including the spatial event data) where preprocessed and rendered with R and are based on vector data from Natural Earth and OpenStreetMap. Final polishing for print/pdf/web was done with Affinity Designer.
+
+<hr />
 
 In this post, we're going to take a tour through several versatile spatial packages for R. As a use case, we're going to visualize cycling data from Berlin-based *Tagesspiegel*'s DDJ [#radmesser-project](https://interaktiv.tagesspiegel.de/radmesser/){target="_blank"} for my hometown Berlin, Germany.
 
@@ -154,7 +168,7 @@ substates10 <- readRDS(file = str_c(here::here("data", "GIS_workflows"), "/", "s
 
 **Subset the Federal State of Berlin**
 
-```{r}
+```{r cache=TRUE}
 berlin_sf <- substates10 %>% filter(name == "Berlin")
 ```
 
@@ -246,7 +260,7 @@ berlin_bike_bbox <- sf::st_bbox(berlin_bike)
 ```
 
 ```{r out.width='100%'}
-mapview::mapview(list(st_as_sfc(berlin_bike_bbox), berlin_bike))
+mapview::mapview(list(berlin_bike, st_as_sfc(berlin_bike_bbox)))
 ```
 
 Easy, right?
@@ -367,7 +381,7 @@ Let's look at `sf::st_crop()`, the mighty `filter(sf::st_intersection())`, and `
 
 Cropping is straight-forward. We take our BBOX object (or any other feature from which `st_crop` can derive a BBOX) and then literally cut off all elements that extent beyond the BBOX.
 
-```{r message=FALSE, warning=FALSE}
+```{r message=FALSE, warning=FALSE, cache=TRUE}
 lakes_berlin <- lakes10 %>% sf::st_crop(berlin_custom_bbox)
 rivers_berlin <- rivers10_europe %>% sf::st_crop(berlin_custom_bbox)
 ```
@@ -384,7 +398,7 @@ And now let's plot the result with `ggplot` and `berlin_sf` as the background an
 
 > If you need a particular CRS for your use case, [https://epsg.io/](https://epsg.io/){target="_blank"} might come in handy.
 
-```{r}
+```{r cache=TRUE}
 ggplot() +
   geom_sf(data = berlin_sf, fill = "lightgrey", color = "black") +
   geom_sf(data = lakes_berlin, fill = "blue") +
@@ -404,7 +418,7 @@ This is as accurate as it gets, but you might need to take some time to understa
 
 Since we already can assume that the result cannot extent beyond Berlin's BBOX, we should first crop the (global) `roads10` object with Berlin's BBOX in order to reduce the computational cost of this operation.
 
-```{r message=FALSE, warning=FALSE}
+```{r message=FALSE, warning=FALSE, cache=TRUE}
 roads_berlin_sf <- roads10 %>% 
   sf::st_crop(berlin_custom_bbox) %>% 
   sf::st_intersection(berlin_sf)
@@ -412,7 +426,7 @@ roads_berlin_sf <- roads10 %>%
 
 Here's the result (and Kudos to [Ryan Peek](https://ryanpeek.github.io/2017-11-05-mapping-with-sf-Part-2/){target="_blank"} for using the Google-friendly "clip object to shape" lingo):
 
-```{r}
+```{r cache=TRUE}
 ggplot() +
   geom_sf(data = berlin_sf) +
   geom_sf(data = sf::st_as_sfc(berlin_custom_bbox), alpha = 0.3) +
@@ -433,7 +447,7 @@ Now let's look at `sf::st_within()` which calls for a different subsetting logic
 
 In this example, we only want those roads, which are fully contained within Berlin's border. 
 
-```{r message=FALSE, warning=FALSE}
+```{r message=FALSE, warning=FALSE, cache=TRUE}
 roads_berlin_sf <- roads10 %>% 
   sf::st_crop(berlin_custom_bbox) %>% 
   filter(lengths(st_within(., berlin_sf)) > 0)
@@ -472,7 +486,7 @@ berlin_osm_roads <- osmdata::opq(bbox = berlin_bbox) %>% #  alternative B
 # berlin_osm_roads <- readRDS(file = str_c(here::here("data", "GIS_workflows"), "/", "berlin_osm_roads.rds"))
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE, cache=TRUE}
 berlin_osm_roads <- readRDS(file = str_c(here::here("data", "GIS_workflows"), "/", "berlin_osm_roads.rds"))
 ```
 
@@ -486,7 +500,7 @@ berlin_osm_roads %>% names()
 
 As we are interested in roads and our query only queried for roads ("highway") as features, we should focus on `osm_lines` and `osm_multilines`.
 
-```{r}
+```{r cache=TRUE}
 berlin_osm_roads$osm_lines %>% 
   count(highway) %>% 
   arrange(desc(n)) %>% 
@@ -500,20 +514,20 @@ berlin_osm_roads$osm_lines %>%
 berlin_osm_roads$osm_multilines %>% count(highway) %>% arrange(desc(n))
 ```
 
-```{r warning=FALSE, message=FALSE}
+```{r warning=FALSE, message=FALSE, cache=TRUE}
 berlin_osm_roads_crop <- berlin_osm_roads$osm_lines %>% sf::st_intersection(berlin_sf)
 # berlin_osm_roads_crop2 <- berlin_osm_roads$osm_multilines %>% sf::st_intersection(., berlin_sf)
 ```
 
 Just to give you an idea: this is the level of granularity (and memory-intense granular vector data) we get:
 
-```{r}
+```{r cache=TRUE}
 plot(berlin_osm_roads_crop["highway"], key.pos = NULL)
 ```
 
 Or plotted with `ggplot`:
 
-```{r}
+```{r cache=TRUE}
 ggplot() +
   geom_sf(data = berlin_osm_roads_crop, aes(color = highway)) +
   # scale_size_discrete(c(0.1,2)) +

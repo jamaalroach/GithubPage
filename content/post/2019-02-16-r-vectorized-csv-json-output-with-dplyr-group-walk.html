@@ -211,7 +211,10 @@ Asia
 </tr>
 </tbody>
 </table>
-<pre class="r"><code>gapminder %&gt;% skimr::skim_to_wide() %&gt;% knitr::kable(&quot;html&quot;)</code></pre>
+<pre class="r"><code>gapminder %&gt;% 
+  skimr::skim_to_wide() %&gt;%
+  select(-top_counts, -(p0:p100)) %&gt;% 
+  knitr::kable(&quot;html&quot;, 1)</code></pre>
 <table>
 <thead>
 <tr>
@@ -234,9 +237,6 @@ n
 n_unique
 </th>
 <th style="text-align:left;">
-top_counts
-</th>
-<th style="text-align:left;">
 ordered
 </th>
 <th style="text-align:left;">
@@ -244,21 +244,6 @@ mean
 </th>
 <th style="text-align:left;">
 sd
-</th>
-<th style="text-align:left;">
-p0
-</th>
-<th style="text-align:left;">
-p25
-</th>
-<th style="text-align:left;">
-p50
-</th>
-<th style="text-align:left;">
-p75
-</th>
-<th style="text-align:left;">
-p100
 </th>
 <th style="text-align:left;">
 hist
@@ -286,25 +271,7 @@ continent
 5
 </td>
 <td style="text-align:left;">
-Afr: 624, Asi: 396, Eur: 360, Ame: 300
-</td>
-<td style="text-align:left;">
 FALSE
-</td>
-<td style="text-align:left;">
-NA
-</td>
-<td style="text-align:left;">
-NA
-</td>
-<td style="text-align:left;">
-NA
-</td>
-<td style="text-align:left;">
-NA
-</td>
-<td style="text-align:left;">
-NA
 </td>
 <td style="text-align:left;">
 NA
@@ -336,25 +303,7 @@ country
 142
 </td>
 <td style="text-align:left;">
-Afg: 12, Alb: 12, Alg: 12, Ang: 12
-</td>
-<td style="text-align:left;">
 FALSE
-</td>
-<td style="text-align:left;">
-NA
-</td>
-<td style="text-align:left;">
-NA
-</td>
-<td style="text-align:left;">
-NA
-</td>
-<td style="text-align:left;">
-NA
-</td>
-<td style="text-align:left;">
-NA
 </td>
 <td style="text-align:left;">
 NA
@@ -389,28 +338,10 @@ NA
 NA
 </td>
 <td style="text-align:left;">
-NA
-</td>
-<td style="text-align:left;">
 3e+07
 </td>
 <td style="text-align:left;">
 1.1e+08
-</td>
-<td style="text-align:left;">
-60011
-</td>
-<td style="text-align:left;">
-2793664
-</td>
-<td style="text-align:left;">
-7e+06
-</td>
-<td style="text-align:left;">
-2e+07
-</td>
-<td style="text-align:left;">
-1.3e+09
 </td>
 <td style="text-align:left;">
 ▇▁▁▁▁▁▁▁
@@ -439,28 +370,10 @@ NA
 NA
 </td>
 <td style="text-align:left;">
-NA
-</td>
-<td style="text-align:left;">
 1979.5
 </td>
 <td style="text-align:left;">
 17.27
-</td>
-<td style="text-align:left;">
-1952
-</td>
-<td style="text-align:left;">
-1965.75
-</td>
-<td style="text-align:left;">
-1979.5
-</td>
-<td style="text-align:left;">
-1993.25
-</td>
-<td style="text-align:left;">
-2007
 </td>
 <td style="text-align:left;">
 ▇▃▇▃▃▇▃▇
@@ -489,28 +402,10 @@ NA
 NA
 </td>
 <td style="text-align:left;">
-NA
-</td>
-<td style="text-align:left;">
 7215.33
 </td>
 <td style="text-align:left;">
 9857.45
-</td>
-<td style="text-align:left;">
-241.17
-</td>
-<td style="text-align:left;">
-1202.06
-</td>
-<td style="text-align:left;">
-3531.85
-</td>
-<td style="text-align:left;">
-9325.46
-</td>
-<td style="text-align:left;">
-113523.13
 </td>
 <td style="text-align:left;">
 ▇▁▁▁▁▁▁▁
@@ -539,28 +434,10 @@ NA
 NA
 </td>
 <td style="text-align:left;">
-NA
-</td>
-<td style="text-align:left;">
 59.47
 </td>
 <td style="text-align:left;">
 12.92
-</td>
-<td style="text-align:left;">
-23.6
-</td>
-<td style="text-align:left;">
-48.2
-</td>
-<td style="text-align:left;">
-60.71
-</td>
-<td style="text-align:left;">
-70.85
-</td>
-<td style="text-align:left;">
-82.6
 </td>
 <td style="text-align:left;">
 ▁▂▅▅▅▅▇▃
@@ -578,13 +455,15 @@ NA
 if (!dir.exists(csv_path)) {dir.create(csv_path)}</code></pre>
 <p>We could also use the tidier <code>fs</code> methods for file-system access (again, per <a href="https://twitter.com/dreznik/status/1096852422075564033" target="_blank">@dreznik</a>), but I guess it’s also ok to stick to some comfy <code>Base R</code> habits.</p>
 {{% tweet-noreply "1096852422075564033" %}}
+<p><strong>CSVs</strong></p>
 <p>Now we group the gapminder data by the <code>country</code> variable (remember: 142 unique countries), <strong>add an additional</strong> <code>country_name</code> column to preserve the country names (<em>they get dropped</em> during <code>group_walk()</code>, and <code>keep=TRUE</code> does not work for this verb), place the new <code>country_name</code> to the front and write the groups as <code>CSV</code>s to our <code>csv_path</code>. Again, kudos to <a href="https://twitter.com/dreznik/status/1096850367609032705" target="_blank">@dreznik</a> for the more robust <code>.y[["country"]]</code> evaluation hint!</p>
 <pre class="r"><code>gapminder %&gt;%
   group_by(country) %&gt;%
   mutate(country_name = country) %&gt;% # to preserve country name in csv object...
   select(country_name, everything()) %&gt;% # ... which is somehow dropped by group_walk()
   group_walk(~ write_csv(.x, path = fs::path(csv_path, .y[[&quot;country&quot;]], ext = &quot;csv&quot;)))</code></pre>
-<p>Let’s check the output:</p>
+<p><strong>Output</strong></p>
+<p>Let’s inspect the output folder:</p>
 <pre class="r"><code>list.files(csv_path, pattern = &quot;csv$&quot;) %&gt;% head(20)</code></pre>
 <pre><code>##  [1] &quot;Afghanistan.csv&quot;            &quot;Albania.csv&quot;               
 ##  [3] &quot;Algeria.csv&quot;                &quot;Angola.csv&quot;                
@@ -599,6 +478,7 @@ if (!dir.exists(csv_path)) {dir.create(csv_path)}</code></pre>
 <blockquote>
 <p>A Shocker for later: <code>fs::dir_map(csv_path, read.csv)</code>…</p>
 </blockquote>
+<p>And now a single CSV file:</p>
 <pre class="r"><code>read_csv(fs::path(csv_path, &quot;Afghanistan.csv&quot;)) %&gt;% head() %&gt;% knitr::kable(&quot;html&quot;)</code></pre>
 <table>
 <thead>

@@ -47,9 +47,11 @@ sequenceDiagrams:
 <li><a href="#emojis">Emojis</a></li>
 <li><a href="#undocumented">Undocumented</a><ul>
 <li><a href="#skimr">Skimr</a></li>
+<li><a href="#better-skimr">Better Skimr</a></li>
 <li><a href="#tweets">Tweets</a></li>
 <li><a href="#own-reply-only-tweet-shortcode">Own reply-only Tweet shortcode</a></li>
 </ul></li>
+<li><a href="#widgets">Widgets</a></li>
 <li><a href="#debugging">Debugging</a><ul>
 <li><a href="#call-hugo-directly-on-win10">call Hugo directly on Win10</a></li>
 <li><a href="#measure-rendering-time">measure rendering time</a></li>
@@ -126,21 +128,34 @@ knitr::read_chunk(&quot;example.R&quot;)
 <div id="pictures" class="section level2">
 <h2>Pictures</h2>
 <p><strong>with <em>italic</em> formatting and Link</strong></p>
-<pre><code>![*(Screenshot of the GitLab Dashboard for the GitHub Importer on June 4th; [Source](https://monitor.gitlab.net/dashboard/db/github-importer?orgId=1&amp;from=1528041600000&amp;to=now))*](/img/GitLab_JSON/gitlab_dashboard.jpg &quot;alt-text&quot;)</code></pre>
+<pre><code>![*Screenshot of the GitLab Dashboard for the GitHub Importer on June 4th; [Source](https://monitor.gitlab.net/dashboard/db/github-importer?orgId=1&amp;from=1528041600000&amp;to=now){target=&quot;_blank&quot;}*](/img/GitLab_JSON/gitlab_dashboard.jpg &quot;alt-text&quot;)</code></pre>
 <div class="figure">
-<img src="/img/GitLab_JSON/gitlab_dashboard.jpg" title="alt-text" alt="(Screenshot of the GitLab Dashboard for the GitHub Importer on June 4th; Source)" />
-<p class="caption"><em>(Screenshot of the GitLab Dashboard for the GitHub Importer on June 4th; <a href="https://monitor.gitlab.net/dashboard/db/github-importer?orgId=1&amp;from=1528041600000&amp;to=now">Source</a>)</em></p>
+<img src="/img/GitLab_JSON/gitlab_dashboard.jpg" title="alt-text" alt="Screenshot of the GitLab Dashboard for the GitHub Importer on June 4th; Source" />
+<p class="caption"><em>Screenshot of the GitLab Dashboard for the GitHub Importer on June 4th; <a href="https://monitor.gitlab.net/dashboard/db/github-importer?orgId=1&amp;from=1528041600000&amp;to=now" target="_blank">Source</a></em></p>
 </div>
 <p><strong>Formatting and Alt-text</strong></p>
-<pre><code>![*(73 Topics, K auto-induced with t-SNE/PCA, modelled with the stm()-package )*](/img/GitLab_JSON/gitlab_dom2.jpg &quot;alt-text&quot;)</code></pre>
+<pre><code>![*73 Topics, K auto-induced with t-SNE/PCA, modelled with the stm()-package*](/img/GitLab_JSON/gitlab_dom2.jpg &quot;alt-text&quot;)</code></pre>
 <div class="figure">
-<img src="/img/GitLab_JSON/gitlab_dom2.jpg" title="alt-text" alt="(73 Topics, K auto-induced with t-SNE/PCA, modelled with the stm()-package )" />
-<p class="caption"><em>(73 Topics, K auto-induced with t-SNE/PCA, modelled with the stm()-package )</em></p>
+<img src="/img/GitLab_JSON/gitlab_dom2.jpg" title="alt-text" alt="73 Topics, K auto-induced with t-SNE/PCA, modelled with the stm()-package" />
+<p class="caption"><em>73 Topics, K auto-induced with t-SNE/PCA, modelled with the stm()-package</em></p>
 </div>
+<p><strong>Custom Caption with class .caption</strong></p>
+<pre><code>[![](/img/GIS_workflow/gppi_syria_1200px.jpg &quot;Selected visuals from the Nowhere to Hide study on the use of Chemical Weapons in Syria.&quot;)](https://www.gppi.net/2019/02/17/the-logic-of-chemical-weapons-use-in-syria){target=&quot;_blank&quot;}
+
+&lt;p&gt;&lt;figcaption class=&quot;caption&quot;&gt;Selected visuals from the &quot;Nowhere to Hide&quot; study on the use of Chemical Weapons in Syria. Read the [full report on GPPi&#39;s website](https://www.gppi.net/2019/02/17/the-logic-of-chemical-weapons-use-in-syria){target=&quot;_blank&quot;}. Almost all maps are CC-licensed.&lt;/figcaption&gt;&lt;/p&gt;</code></pre>
+<p><a href="https://www.gppi.net/2019/02/17/the-logic-of-chemical-weapons-use-in-syria" target="_blank"><img src="/img/GIS_workflow/gppi_syria_1200px.jpg" title="Selected visuals from the Nowhere to Hide study on the use of Chemical Weapons in Syria." /></a></p>
+<p>
+<figcaption class="caption">
+Selected visuals from the “Nowhere to Hide” study on the use of Chemical Weapons in Syria. Read the <a href="https://www.gppi.net/2019/02/17/the-logic-of-chemical-weapons-use-in-syria" target="_blank">full report on GPPi’s website</a>. Almost all maps are CC-licensed.
+</figcaption>
+</p>
 </div>
 <div id="emojis" class="section level2">
 <h2>Emojis</h2>
-<p>As inline <code>😄</code> (full list: <a href="https://github.com/hadley/emo">https://github.com/hadley/emo</a>)</p>
+<pre class="r"><code>emo::ji(&quot;smile&quot;)</code></pre>
+<pre><code>## &lt;U+0001F604&gt;</code></pre>
+<p>As inline <code>'r emo::ji("smile")'</code></p>
+<p>(full list: <a href="https://github.com/hadley/emo">https://github.com/hadley/emo</a>)</p>
 </div>
 <div id="undocumented" class="section level2">
 <h2>Undocumented</h2>
@@ -647,6 +662,243 @@ wt
 </tbody>
 </table>
 </div>
+<div id="better-skimr" class="section level3">
+<h3>Better Skimr</h3>
+<pre class="r"><code>gapminder::gapminder %&gt;% 
+  skimr::skim_to_wide() %&gt;%
+  select(-top_counts, -(p0:p100)) %&gt;% 
+  knitr::kable(&quot;html&quot;, 1)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+type
+</th>
+<th style="text-align:left;">
+variable
+</th>
+<th style="text-align:left;">
+missing
+</th>
+<th style="text-align:left;">
+complete
+</th>
+<th style="text-align:left;">
+n
+</th>
+<th style="text-align:left;">
+n_unique
+</th>
+<th style="text-align:left;">
+ordered
+</th>
+<th style="text-align:left;">
+mean
+</th>
+<th style="text-align:left;">
+sd
+</th>
+<th style="text-align:left;">
+hist
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+factor
+</td>
+<td style="text-align:left;">
+continent
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+1704
+</td>
+<td style="text-align:left;">
+1704
+</td>
+<td style="text-align:left;">
+5
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+factor
+</td>
+<td style="text-align:left;">
+country
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+1704
+</td>
+<td style="text-align:left;">
+1704
+</td>
+<td style="text-align:left;">
+142
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+integer
+</td>
+<td style="text-align:left;">
+pop
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+1704
+</td>
+<td style="text-align:left;">
+1704
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+3e+07
+</td>
+<td style="text-align:left;">
+1.1e+08
+</td>
+<td style="text-align:left;">
+▇▁▁▁▁▁▁▁
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+integer
+</td>
+<td style="text-align:left;">
+year
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+1704
+</td>
+<td style="text-align:left;">
+1704
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+1979.5
+</td>
+<td style="text-align:left;">
+17.27
+</td>
+<td style="text-align:left;">
+▇▃▇▃▃▇▃▇
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+numeric
+</td>
+<td style="text-align:left;">
+gdpPercap
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+1704
+</td>
+<td style="text-align:left;">
+1704
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+7215.33
+</td>
+<td style="text-align:left;">
+9857.45
+</td>
+<td style="text-align:left;">
+▇▁▁▁▁▁▁▁
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+numeric
+</td>
+<td style="text-align:left;">
+lifeExp
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+1704
+</td>
+<td style="text-align:left;">
+1704
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+59.47
+</td>
+<td style="text-align:left;">
+12.92
+</td>
+<td style="text-align:left;">
+▁▂▅▅▅▅▇▃
+</td>
+</tr>
+</tbody>
+</table>
+</div>
 <div id="tweets" class="section level3">
 <h3>Tweets</h3>
 <p><strong>Shortcode</strong></p>
@@ -654,16 +906,21 @@ wt
 <p><strong>R Markdown / Chunk</strong></p>
 <pre class="r"><code># {r echo=FALSE}
 blogdown::shortcode(&#39;tweet&#39;, &#39;852205086956818432&#39;)</code></pre>
+{{% tweet "852205086956818432" %}}
 </div>
 <div id="own-reply-only-tweet-shortcode" class="section level3">
 <h3>Own reply-only Tweet shortcode</h3>
 <p>Cf. <a href="https://www.mgasch.com/post/shortcodes/" class="uri">https://www.mgasch.com/post/shortcodes/</a></p>
-<p>&lt;{% tweet-noreply "1096850367609032705" %}}<
-## Widgets</p>
+<pre class="r"><code># {r echo=FALSE}
+blogdown::shortcode(&#39;tweet-noreply&#39;, &#39;1096850367609032705&#39;)</code></pre>
+{{% tweet-noreply "1096850367609032705" %}}
+</div>
+</div>
+<div id="widgets" class="section level2">
+<h2>Widgets</h2>
 <blockquote>
 <p>See <a href="/post/r-demo-blogdown-madness-with-htmlwidgets/">“Demo: Blogdown Madness with htmlwidgets”</a></p>
 </blockquote>
-</div>
 </div>
 <div id="debugging" class="section level2">
 <h2>Debugging</h2>

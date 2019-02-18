@@ -73,7 +73,10 @@ gapminder %>% head() %>% knitr::kable("html")
 ```
 
 ```{r}
-gapminder %>% skimr::skim_to_wide() %>% knitr::kable("html")
+gapminder %>% 
+  skimr::skim_to_wide() %>%
+  select(-top_counts, -(p0:p100)) %>% 
+  knitr::kable("html", 1)
 ```
 
 # Vectorized CSV Output
@@ -94,6 +97,8 @@ We could also use the tidier `fs` methods for file-system access (again, per [\@
 blogdown::shortcode('tweet-noreply', '1096852422075564033')
 ```
 
+**CSVs**
+
 Now we group the gapminder data by the `country` variable (remember: `r n_distinct(gapminder$country)` unique countries), **add an additional** `country_name` column to preserve the country names (*they get dropped* during `group_walk()`, and `keep=TRUE` does not work for this verb), place the new `country_name` to the front and write the groups as `CSV`s to our `csv_path`. Again, kudos to [\@dreznik](https://twitter.com/dreznik/status/1096850367609032705){target="_blank"} for the more robust `.y[["country"]]` evaluation hint!
 
 ```{r}
@@ -104,13 +109,17 @@ gapminder %>%
   group_walk(~ write_csv(.x, path = fs::path(csv_path, .y[["country"]], ext = "csv")))
 ```
 
-Let's check the output:
+**Output**
+
+Let's inspect the output folder:
 
 ```{r}
 list.files(csv_path, pattern = "csv$") %>% head(20)
 ```
 
 > A Shocker for later: `fs::dir_map(csv_path, read.csv)`...
+
+And now a single CSV file:
 
 ```{r message=FALSE}
 read_csv(fs::path(csv_path, "Afghanistan.csv")) %>% head() %>% knitr::kable("html")
