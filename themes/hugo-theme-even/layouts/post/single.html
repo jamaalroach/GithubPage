@@ -14,14 +14,14 @@
           </div>
         {{- end }}
         {{- if .Site.Params.moreMeta }}
+        <!--
         <span class="more-meta"> {{ T "wordCount" .WordCount }} </span>
-        <span class="more-meta"> {{ T "readingTime" .ReadingTime }} </span>
-                        
+        <span class="more-meta"> {{ T "readingTime" .ReadingTime }} </span>-->
             {{- if .Params.rmdlink }}
               {{- if .Params.hardslug }}
                 <span class="more-meta"><a href="https://github.com/ellocke/GithubPage/blob/master/content/post/{{ .Params.hardslug }}.Rmd" target="_blank">&nbsp;<code>Rmd</code><span class="iconfont icon-github2">&nbsp;</span></a></span>
                 {{- else -}}
-                <span class="more-meta"><a href="https://github.com/ellocke/GithubPage/blob/master/content/post/{{ .Date.Format (.Site.Params.dateFormatToUse | default "2006-01-02") }}-{{ .Params.slug }}.Rmd" target="_blank">&nbsp;<code>Rmd</code><span class="iconfont icon-github2">&nbsp;</span></a></span>
+                <span class="more-meta"><a href="https://github.com/ellocke/GithubPage/blob/master/content/post/{{ .Date.Format (.Site.Params.dateFormatToUse | default "2006-01-02") }}-{{ .Params.slug }}.Rmd" target="_blank">&nbsp;<code>Rmd&nbsp;<span class="iconfont icon-github2">&nbsp;</span></code></a></span>
               {{- end }}
             {{- end }}
         {{- end }}
