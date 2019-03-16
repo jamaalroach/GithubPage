@@ -101,7 +101,7 @@ blogdown::shortcode('tweet-noreply', '1096852422075564033')
 
 Now we group the gapminder data by the `country` variable (remember: `r n_distinct(gapminder$country)` unique countries), **add an additional** `country_name` column to preserve the country names (*they get dropped* during `group_walk()`, and `keep=TRUE` does not work for this verb), place the new `country_name` to the front and write the groups as `CSV`s to our `csv_path`. Again, kudos to [\@dreznik](https://twitter.com/dreznik/status/1096850367609032705){target="_blank"} for the more robust `.y[["country"]]` evaluation hint!
 
-```{r}
+```{r eval=FALSE}
 gapminder %>%
   group_by(country) %>%
   mutate(country_name = country) %>% # to preserve country name in csv object...
@@ -163,7 +163,7 @@ if (!dir.exists(json_path)) {dir.create(json_path)}
 
 Seriously. All we need to do is to replace `readr::write_csv()` with `jsonlite::write_json()` and add `pretty=TRUE` for a nicely indented JSON output.
 
-```{r}
+```{r eval=FALSE}
 gapminder %>%
   group_by(country) %>%
   mutate(country_name = country) %>% # to preserve country name in json object...

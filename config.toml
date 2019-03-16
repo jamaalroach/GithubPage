@@ -55,7 +55,7 @@ copyright = ""            # default: author.name ↓
   url = "/portfolio/"
 [[menu.main]]
   name = "About"
-  weight = 0
+  weight = 40
   identifier = "about"
   url = "/about/"
 

@@ -1,7 +1,7 @@
 ---
 title: "About"
-date: 2018-01-01
-weight: 0
+date: 2019-03-01
+weight: 99
 ---
 
 # About Me, Myself, and this Site^[[Oxford Comma FTW!](https://www.ft.com/content/bdfb60aa-12ef-11e7-b0c1-37e417ee6c76)]
@@ -17,13 +17,19 @@ Currently, I'm working for the Berlin-based <a href="https://www.hiig.de" target
 
 ## This Site
 
-~~Mostly, I'll be writing about solving problems you didn't know you had or won't ever have since you're not using Windows 10.~~ My current **focus** is on creating stuff with R (SNA, NLP, DataViz, Maps, Publishing/Writing/Blogging) --- including this very kind of code-centric reporting / blogging as demonstrated with this website ---, and thereby exploring/prototyping the potential of R, RStudio, and Markdown/Blogdown/Bookdown based workflows for **replication-friendly, data-driven, <a href="https://en.wikipedia.org/wiki/Free_and_open-source_software" target="_blank">FOSS</a>-based Open Science** - academic or not.
+My current **focus** is on creating stuff with R (SNA, NLP, DataViz, GIS/Maps, Publishing/Writing/Blogging) --- including this very kind of code-centric reporting / blogging as demonstrated with this website ---, and thereby exploring/prototyping the potential of Code + Markdown + JS based workflows for **replication-friendly, data-driven, <a href="https://en.wikipedia.org/wiki/Free_and_open-source_software" target="_blank">FOSS</a>-based Open Science** - academic or not.
 
 ## Projects
 
 My biggest **project** so far was being a `Digital Officer` (project-based, 1 year) for a big German think tank's shot at digital publishing, digitally supported research, and digitized science communication. I also wrote a bit on the [methodology](https://projekt.swp-berlin.org/urbaneraeume/kapitel/zur-methode/#aufbau-konzept-und-tools-der-webseite) (in German) re: `digital tools` & the makings of the project's `website`. You can find out more [here](https://medium.com/@Fubits/urbane-r%C3%A4ume-proteste-weltpolitik-21f05d512cc4) (in German) or have your own look at the results [here](https://projekt.swp-berlin.org/urbaneraeume/kapitel/blacklivesmatter/#chronologie-blacklivesmatter).
 
 <a href="https://projekt.swp-berlin.org/urbaneraeume/">![(**One visual element from the "Urban Spaces" project @ SWP Berlin)**](/img/about/urban_spaces_cover.jpeg "One visual element from the 'Urban Spaces' project @ SWP Berlin")</a>
+
+## Freelancing
+
+From time to time, I'm exploring ways to help not-for-profit organisations advance their mission. I create maps, data visualisations, or interactive stand-alone web apps with a low-dependency & low-maintainance stack (i.e. static web site renderer with LTS JS framework versions & CC-based templates). Check out my [portofolio](/portfolio) for a visual impression.
+
+![My Portfolio](/img/about/portoflio.jpg "My Portfolio")
 
 ## Talks
 
@@ -37,8 +43,6 @@ You'll find me on:
   + https://medium.com/@Fubits
   + https://keybase.io/fubits
   + Mail: ilja_s ( at ) pm.me
-
-Feel free to drop me a line any time.
 
 # GPDR, Data Protection, Privacy
 
