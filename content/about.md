@@ -1,6 +1,11 @@
 ---
-title: "About"
-date: 2019-03-01
+title: About
+author: Ilja / fubits
+date: '2019-03-01'
+categories:
+  - Meta
+tags:
+  - Fubits
 weight: 99
 ---
 
