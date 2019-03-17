@@ -7,7 +7,7 @@ enableEmoji = true
 theme = "hugo-theme-even"
 relativeurls = true
 
-ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$", "\\.csv$", "\\.rda$", "\\.tif$", "\\.rds$", "\\.md$", "\\.RData$"]
+ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$", "\\.csv$", "\\.rda$", "\\.tif$", "\\.rds$", "\\.RData$"]
 
 publishDir = "../ellocke.github.io/"
 
@@ -33,21 +33,6 @@ copyright = ""            # default: author.name ↓
   weight = 20
   identifier = "posts"
   url = "/post/"
-#[[menu.main]]
-#  name = "Topics"
-#  weight = 30
-#  identifier = "topics"
-#  url = "/topics/"
-#[[menu.main]]
-#  name = "Categories"
-#  weight = 30
-#  identifier = "categories"
-#  url = "/categories/"
-# [[menu.main]]
-#   name = "Topics"
-#   weight = 35
-#   identifier = "tags"
-#   url = "/tags/"
 [[menu.main]]
   name = "Portfolio"
   weight = 35
