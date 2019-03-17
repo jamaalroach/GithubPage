@@ -35,7 +35,7 @@ My biggest **project** so far was being a `Digital Officer` (project-based, 1 ye
 
 From time to time, I'm exploring ways to help not-for-profit organisations advance their mission. I create maps, data visualisations, or interactive stand-alone web apps with a low-dependency & low-maintainance stack (i.e. static web site renderer with LTS JS framework versions & CC-based templates). Check out my [portofolio](/portfolio) for a visual impression.
 
-![My Portfolio](/img/about/portoflio.jpg "My Portfolio")
+![My Portfolio](/img/about/portfolio.jpg "My Portfolio")
 
 ## Talks
 
