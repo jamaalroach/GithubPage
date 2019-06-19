@@ -4,7 +4,7 @@ defaultContentLanguage = "en"
 title = "fubits@git"
 enableRobotsTXT = true
 enableEmoji = true
-theme = "even-mod"
+theme = "even-fubits-mod-submodule"
 relativeurls = true
 
 ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_files$", "_cache$", "\\.csv$", "\\.rda$", "\\.tif$", "\\.rds$", "\\.RData$"]

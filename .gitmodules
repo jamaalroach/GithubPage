@@ -1,0 +1,4 @@
+[submodule "themes/even-fubits-mod-submodule"]
+	path = themes/even-fubits-mod-submodule
+	url = https://github.com/ellocke/hugo-theme-even
+	branch = fubits-mod
