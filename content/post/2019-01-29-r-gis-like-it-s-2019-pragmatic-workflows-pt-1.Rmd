@@ -70,7 +70,7 @@ Prefer `Leaflet`over `Mapbox` but still need to display 100K+ points on a map? [
 
 And if you need to make thematic maps and/or don't want to plot your spatial objects with `ggplot`, have a look at Martijn Tennekes's `tmap`, which is also very well covered by [Lovelace/Nowosad/Muenchow 2018](https://geocompr.robinlovelace.net/adv-map.html#tmap-basics), and gives you a lot with very few lines:
 
-```{r out.width="100%", message=FALSE, warning=FALSE}
+```{r out.width="100%", message=FALSE, warning=FALSE, cache=TRUE}
 # from tmap vignette
 # https://cran.r-project.org/web/packages/tmap/vignettes/tmap-changes-v2.html#tm_tiles
 library(tmap)
@@ -162,7 +162,7 @@ substates10 <- rnaturalearth::ne_download(scale = 10, type = "admin_1_states_pro
 # substates10 <- readRDS(file = str_c(here::here("data", "GIS_workflows"), "/", "substates10.rds"))
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE, cache=TRUE}
 substates10 <- readRDS(file = str_c(here::here("data", "GIS_workflows"), "/", "substates10.rds"))
 ```
 
@@ -181,7 +181,7 @@ berlin_bbox <- sf::st_bbox(berlin_sf)
 
 So... wanna have a quick glimpse at Berlin's bounding box? Here's all that it takes with the game-changing `mapview` package by [Tim Appelhans et al.](https://r-spatial.github.io/mapview/index.html){target="_blank"}:
 
-```{r out.width='100%'}
+```{r out.width='100%', cache=TRUE}
 berlin_bbox %>% mapview::mapview()
 ```
 
@@ -243,7 +243,7 @@ berlin_bike <- sf::st_read("https://github.com/tagesspiegel/radmesser/blob/maste
 
 Nonetheless, we can quickly have a look at the traced roads where the **15K+ individual measurements** where taken, and also visualize the road class with `zcol = "variable"`.
 
-```{r echo=FALSE}
+```{r echo=FALSE, cache=TRUE}
 berlin_bike <- readRDS(file = str_c(here::here("data", "GIS_workflows"), "/", "berlin_bike.rds"))
 ```
 
@@ -259,7 +259,7 @@ And now the data-based BBOX:
 berlin_bike_bbox <- sf::st_bbox(berlin_bike)
 ```
 
-```{r out.width='100%'}
+```{r out.width='100%', cache=TRUE}
 mapview::mapview(list(berlin_bike, st_as_sfc(berlin_bike_bbox)))
 ```
 
@@ -281,7 +281,7 @@ If neither the feature/object-based nor the geodata-based BBOX is sufficient for
 ![](/img/GIS_workflow/mapedit.jpg)
 
 
-```{r echo=FALSE}
+```{r echo=FALSE, cache=TRUE}
 berlin_custom <- readRDS(file = str_c(here::here("data", "GIS_workflows"), "/", "berlin_custom.rds"))
 ```
 
@@ -323,7 +323,7 @@ But see for yourself:
 
 So let's fetch roads, lakes, and rivers from Natural Earth.
 
-```{r eval=FALSE}
+```{r eval=FALSE, cache=TRUE}
 roads10 <- rnaturalearth::ne_download(scale = 10, type = "roads", category = "cultural", returnclass = "sf")
 
 # basic lakes data
@@ -349,7 +349,7 @@ load("D:/GIS/vector/sf/lakes10.RData")
 load("D:/GIS/vector/sf/rivers10.RData")
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE, cache=TRUE}
 rivers10_europe <- readRDS(file = str_c(here::here("data", "GIS_workflows"), "/", "rivers10_europe.rds"))
 ```
 
@@ -508,7 +508,7 @@ berlin_osm_roads$osm_lines %>%
   head(10)
 ```
 
-> We're talking about 13.5K road fragments here - and this is just road level 1 -3... That's a bit different than Natural Earth 1:10m data. 
+> We're talking about **13.5K** road fragments here - and this is just road level 1 -3... That's a bit different than Natural Earth 1:10m data. 
 
 ```{r}
 berlin_osm_roads$osm_multilines %>% count(highway) %>% arrange(desc(n))
