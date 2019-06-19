@@ -15,7 +15,7 @@ weight: 99
 
 ## Me
 
-{{% right %}}![fubits](/img/about/about_me.jpg "fubits"){{% /right %}}
+{{% right %}} ![fubits](/img/about/about_me.jpg "fubits") {{% /right %}}
 
 I'm&nbsp;a&nbsp;Combat&nbsp;Veteran^[Army / Mechanized Infantry] turned Accidental Academic / Social Scientist^[Communication Science and Political Science, B.A. thesis on ["Fifty Shades of Data"](https://www.authorea.com/users/168476/articles/196592-fifty-shades-of-data-ba-thesis-eprint)] turned PR Assistant / [SciComm Aficionado](https://medium.com/@Fubits/urbane-r%C3%A4ume-proteste-weltpolitik-21f05d512cc4) turned `Computational Social Scientist`^[(My Master's degree is literally just Political Science as a major and (Applied) Computer Science as a "minor", rooted in my own little epistemology for data-driven "(arti)facts". My upcoming thesis will be focussed on ~~predicting crises with geodata and deep learning~~ exploring the potential of {UI|UX|HCI} research methods for prototyping computational social science as a practice], based in Berlin, Germany.
 
