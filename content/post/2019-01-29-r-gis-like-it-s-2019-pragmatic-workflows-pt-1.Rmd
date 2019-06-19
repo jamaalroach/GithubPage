@@ -22,6 +22,7 @@ output:
   blogdown::html_page:
     number_sections: yes
     toc: yes
+    self_contained: false
 lastmod: '2019-02-09T00:00:00+01:00'
 description: 'GIS with R is far beyond powerful. This is part 1 of a collection of up-to-date workflows for processing spatial data of all kinds with R. The collection involves sf, mapview, mapedit, osmdata, raster, stars, rnaturalearth and other packages combined with straight-forward recipes.'
 abstract: 'GIS with R is far beyond powerful. This is part 1 of a collection of up-to-date workflows for processing spatial data of all kinds with R. The collection involves sf, mapview, mapedit, osmdata, raster, stars, rnaturalearth and other packages combined with straight-forward recipes.'
@@ -70,7 +71,7 @@ Prefer `Leaflet`over `Mapbox` but still need to display 100K+ points on a map? [
 
 And if you need to make thematic maps and/or don't want to plot your spatial objects with `ggplot`, have a look at Martijn Tennekes's `tmap`, which is also very well covered by [Lovelace/Nowosad/Muenchow 2018](https://geocompr.robinlovelace.net/adv-map.html#tmap-basics), and gives you a lot with very few lines:
 
-```{r out.width="100%", message=FALSE, warning=FALSE, cache=TRUE}
+```{r out.width="100%", message=FALSE, warning=FALSE}
 # from tmap vignette
 # https://cran.r-project.org/web/packages/tmap/vignettes/tmap-changes-v2.html#tm_tiles
 library(tmap)
@@ -158,17 +159,17 @@ For the sake of resource efficiency I also recommend to download the data once a
 ```{r eval=FALSE}
 substates10 <- rnaturalearth::ne_download(scale = 10, type = "admin_1_states_provinces", category = "cultural", returnclass = "sf")
 
-# saveRDS(substates10, file = str_c(here::here("data", "GIS_workflows", "/"), "substates10.rds"))
-# substates10 <- readRDS(file = str_c(here::here("data", "GIS_workflows"), "/", "substates10.rds"))
+# saveRDS(substates10, file = str_c(here::here("static", "data", "GIS_workflows", "/"), "substates10.rds"))
+# substates10 <- readRDS(file = str_c(here::here("static", "data", "GIS_workflows"), "/", "substates10.rds"))
 ```
 
-```{r echo=FALSE, cache=TRUE}
-substates10 <- readRDS(file = str_c(here::here("data", "GIS_workflows"), "/", "substates10.rds"))
+```{r echo=FALSE}
+substates10 <- readRDS(file = str_c(here::here("static", "data", "GIS_workflows"), "/", "substates10.rds"))
 ```
 
 **Subset the Federal State of Berlin**
 
-```{r cache=TRUE}
+```{r }
 berlin_sf <- substates10 %>% filter(name == "Berlin")
 ```
 
@@ -181,7 +182,7 @@ berlin_bbox <- sf::st_bbox(berlin_sf)
 
 So... wanna have a quick glimpse at Berlin's bounding box? Here's all that it takes with the game-changing `mapview` package by [Tim Appelhans et al.](https://r-spatial.github.io/mapview/index.html){target="_blank"}:
 
-```{r out.width='100%', cache=TRUE}
+```{r out.width='100%'}
 berlin_bbox %>% mapview::mapview()
 ```
 
@@ -233,8 +234,8 @@ It's probably worth the remark that getting the data into R is as simple as `sf:
 # cf. https://github.com/tagesspiegel/radmesser/blob/master/opendata/LICENSE.md
 berlin_bike <- sf::st_read("https://github.com/tagesspiegel/radmesser/blob/master/opendata/detailnetz_ueberholvorgaenge.geo.json?raw=true")
 
-# saveRDS(berlin_bike, file = str_c(here::here("data", "GIS_workflows", "/"), "berlin_bike.rds"))
-# berlin_bike <- readRDS(file = str_c(here::here("data", "GIS_workflows"), "/", "berlin_bike.rds"))
+# saveRDS(berlin_bike, file = str_c(here::here("static", "data", "GIS_workflows", "/"), "berlin_bike.rds"))
+# berlin_bike <- readRDS(file = str_c(here::here("static", "data", "GIS_workflows"), "/", "berlin_bike.rds"))
 ```
 
 > However, st_read silently drops the "stats" field (which is legit, since a GeoJSON feature is defined as `geometry + properties` only) which contains the single measurements. Or rather: I have no 1-liner idea how to preserve it, be it in QGIS, with `jsonlite`, or by transforming with [http://geojson.io](){target="_blank"}. Fortunately, the Radmesser-team also provides a CSV with the measurements and a column with the respective streets key. So we can address this later (in Pt. 2 of this series). FYI, this is what the structure of this GeoJSON file looks like, so feel free to hit me up on [Twitter](https://twitter.com/fubits){target="_blank"} if you know a solution:
@@ -243,8 +244,8 @@ berlin_bike <- sf::st_read("https://github.com/tagesspiegel/radmesser/blob/maste
 
 Nonetheless, we can quickly have a look at the traced roads where the **15K+ individual measurements** where taken, and also visualize the road class with `zcol = "variable"`.
 
-```{r echo=FALSE, cache=TRUE}
-berlin_bike <- readRDS(file = str_c(here::here("data", "GIS_workflows"), "/", "berlin_bike.rds"))
+```{r echo=FALSE}
+berlin_bike <- readRDS(file = str_c(here::here("static", "data", "GIS_workflows"), "/", "berlin_bike.rds"))
 ```
 
 ```{r eval=FALSE}
@@ -259,9 +260,11 @@ And now the data-based BBOX:
 berlin_bike_bbox <- sf::st_bbox(berlin_bike)
 ```
 
-```{r out.width='100%', cache=TRUE}
-mapview::mapview(list(berlin_bike, st_as_sfc(berlin_bike_bbox)))
+```{r out.width='100%', eval=FALSE}
+mapview::mapview(list(st_as_sfc(berlin_bike_bbox), berlin_bike))
 ```
+
+![](/img/GIS_workflow/bikedata3.jpg)
 
 Easy, right?
 
@@ -274,15 +277,15 @@ If neither the feature/object-based nor the geodata-based BBOX is sufficient for
 ```{r eval=FALSE}
 (berlin_custom <- mapview::mapview(berlin_bike) %>% mapedit::drawFeatures())
 
-# saveRDS(berlin_custom, file = str_c(here::here("data", "GIS_workflows", "/"), "berlin_custom.rds"))
-# berlin_custom <- readRDS(file = str_c(here::here("data", "GIS_workflows"), "/", "berlin_custom.rds"))
+# saveRDS(berlin_custom, file = str_c(here::here("static", "data", "GIS_workflows", "/"), "berlin_custom.rds"))
+# berlin_custom <- readRDS(file = str_c(here::here("static", "data", "GIS_workflows"), "/", "berlin_custom.rds"))
 ```
 
 ![](/img/GIS_workflow/mapedit.jpg)
 
 
-```{r echo=FALSE, cache=TRUE}
-berlin_custom <- readRDS(file = str_c(here::here("data", "GIS_workflows"), "/", "berlin_custom.rds"))
+```{r echo=FALSE}
+berlin_custom <- readRDS(file = str_c(here::here("static", "data", "GIS_workflows"), "/", "berlin_custom.rds"))
 ```
 
 The resulting object is not a BBOX, obviously, but we can just fetch the object's BBOX, and voila - *habemus BBOX*.
@@ -323,7 +326,7 @@ But see for yourself:
 
 So let's fetch roads, lakes, and rivers from Natural Earth.
 
-```{r eval=FALSE, cache=TRUE}
+```{r eval=FALSE}
 roads10 <- rnaturalearth::ne_download(scale = 10, type = "roads", category = "cultural", returnclass = "sf")
 
 # basic lakes data
@@ -331,16 +334,16 @@ lakes10 <- rnaturalearth::ne_download(scale = 10, type = "lakes", category = "ph
 
 # supplemental lakes data for Europe
 # lakes10 <- rnaturalearth::ne_download(scale = 10, type = "lakes_europe", category = "physical", returnclass = "sf")
-# saveRDS(lakes10, file = str_c(here::here("data", "GIS_workflows", "/"), "lakes10_europe.rds"))
-# lakes10 <- readRDS(file = str_c(here::here("data", "GIS_workflows"), "/", "lakes10_europe.rds"))
+# saveRDS(lakes10, file = str_c(here::here("static", "data", "GIS_workflows", "/"), "lakes10_europe.rds"))
+# lakes10 <- readRDS(file = str_c(here::here("static", "data", "GIS_workflows"), "/", "lakes10_europe.rds"))
 
 # basic river data
 rivers10_base <- rnaturalearth::ne_download(scale = 10, type = "rivers_lake_centerlines", category = "physical", returnclass = "sf")
 
 # supplemental river data for Europe
 rivers10_europe <- rnaturalearth::ne_download(scale = 10, type = "rivers_europe", category = "physical", returnclass = "sf")
-# saveRDS(rivers10, file = str_c(here::here("data", "GIS_workflows", "/"), "rivers10_europe.rds"))
-# rivers10 <- readRDS(file = str_c(here::here("data", "GIS_workflows"), "/", "rivers10_europe.rds"))
+# saveRDS(rivers10, file = str_c(here::here("static", "data", "GIS_workflows", "/"), "rivers10_europe.rds"))
+# rivers10 <- readRDS(file = str_c(here::here("static", "data", "GIS_workflows"), "/", "rivers10_europe.rds"))
 ```
 
 ```{r}
@@ -349,8 +352,8 @@ load("D:/GIS/vector/sf/lakes10.RData")
 load("D:/GIS/vector/sf/rivers10.RData")
 ```
 
-```{r echo=FALSE, cache=TRUE}
-rivers10_europe <- readRDS(file = str_c(here::here("data", "GIS_workflows"), "/", "rivers10_europe.rds"))
+```{r echo=FALSE}
+rivers10_europe <- readRDS(file = str_c(here::here("static", "data", "GIS_workflows"), "/", "rivers10_europe.rds"))
 ```
 
 Now we'll only pick those features which are needed aka are contained within our BBOX. There are a couple of approaches (i.e. by subsetting with a toponym, filtering by [topological relation between two features (i.e. X within Y, intersects with)](https://github.com/rugbyprof/4553-Spatial-DS/wiki/Topological-Relationships){target="_blank"}, or the brute way of cropping with a BBOX).
@@ -398,7 +401,7 @@ And now let's plot the result with `ggplot` and `berlin_sf` as the background an
 
 > If you need a particular CRS for your use case, [https://epsg.io/](https://epsg.io/){target="_blank"} might come in handy.
 
-```{r cache=TRUE}
+```{r }
 ggplot() +
   geom_sf(data = berlin_sf, fill = "lightgrey", color = "black") +
   geom_sf(data = lakes_berlin, fill = "blue") +
@@ -426,7 +429,7 @@ roads_berlin_sf <- roads10 %>%
 
 Here's the result (and Kudos to [Ryan Peek](https://ryanpeek.github.io/2017-11-05-mapping-with-sf-Part-2/){target="_blank"} for using the Google-friendly "clip object to shape" lingo):
 
-```{r cache=TRUE}
+```{r }
 ggplot() +
   geom_sf(data = berlin_sf) +
   geom_sf(data = sf::st_as_sfc(berlin_custom_bbox), alpha = 0.3) +
@@ -482,12 +485,12 @@ berlin_osm_roads <- osmdata::opq(bbox = berlin_bbox) %>% #  alternative B
   osmdata::add_osm_feature(key = "highway", value = c("primary", "trunk", "motorway", "secondary", "tertiary")) %>%
   # osmdata::add_osm_feature(key = "highway", value = "primary") %>% 
   osmdata::osmdata_sf()
-# saveRDS(berlin_osm_roads, file = str_c(here::here("data", "GIS_workflows", "/"), "berlin_osm_roads.rds"))
-# berlin_osm_roads <- readRDS(file = str_c(here::here("data", "GIS_workflows"), "/", "berlin_osm_roads.rds"))
+# saveRDS(berlin_osm_roads, file = str_c(here::here("static", "data", "GIS_workflows", "/"), "berlin_osm_roads.rds"))
+# berlin_osm_roads <- readRDS(file = str_c(here::here("static", "data", "GIS_workflows"), "/", "berlin_osm_roads.rds"))
 ```
 
-```{r echo=FALSE, cache=TRUE}
-berlin_osm_roads <- readRDS(file = str_c(here::here("data", "GIS_workflows"), "/", "berlin_osm_roads.rds"))
+```{r echo=FALSE}
+berlin_osm_roads <- readRDS(file = str_c(here::here("static", "data", "GIS_workflows"), "/", "berlin_osm_roads.rds"))
 ```
 
 The returning object is a bit messy (and huuuuge in-memory). It's a list of lists of simple features (since we used `osmdata::osmdata_sf()`)
@@ -500,7 +503,7 @@ berlin_osm_roads %>% names()
 
 As we are interested in roads and our query only queried for roads ("highway") as features, we should focus on `osm_lines` and `osm_multilines`.
 
-```{r cache=TRUE}
+```{r }
 berlin_osm_roads$osm_lines %>% 
   count(highway) %>% 
   arrange(desc(n)) %>% 
@@ -521,13 +524,13 @@ berlin_osm_roads_crop <- berlin_osm_roads$osm_lines %>% sf::st_intersection(berl
 
 Just to give you an idea: this is the level of granularity (and memory-intense granular vector data) we get:
 
-```{r cache=TRUE}
+```{r }
 plot(berlin_osm_roads_crop["highway"], key.pos = NULL)
 ```
 
 Or plotted with `ggplot`:
 
-```{r cache=TRUE}
+```{r }
 ggplot() +
   geom_sf(data = berlin_osm_roads_crop, aes(color = highway)) +
   # scale_size_discrete(c(0.1,2)) +

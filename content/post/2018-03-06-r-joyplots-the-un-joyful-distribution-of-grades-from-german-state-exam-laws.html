@@ -831,8 +831,7 @@ NA
 <pre class="r"><code>median_2017 &lt;- median(noten_raw$Dur, na.rm = TRUE)
 noten_raw %&gt;%
   select(-AZ) %&gt;% 
-  gather(key = Fach, value = noten_raw[,2:8]) %&gt;% 
-  rename(Punkte = `noten_raw[, 2:8]`) -&gt; noten_long
+  gather(key = Fach, value = Punkte) -&gt; noten_long
 
 head(noten_long) %&gt;% knitr::kable(&quot;html&quot;, 2)</code></pre>
 <table>
@@ -1713,8 +1712,7 @@ NA
 <pre class="r"><code>median_2018 &lt;- median(noten_raw_2018$Dur, na.rm = TRUE)
 noten_raw_2018 %&gt;%
   select(-AZ) %&gt;% 
-  gather(key = Fach, value = noten_raw_2018[,2:8]) %&gt;% 
-  rename(Punkte = `noten_raw_2018[, 2:8]`) -&gt; noten_long_2018
+  gather(key = Fach, value = Punkte) -&gt; noten_long_2018
 
 head(noten_long_2018, 1) %&gt;% knitr::kable(&quot;html&quot;, 2)</code></pre>
 <table>
@@ -1739,16 +1737,14 @@ Z_I
 </tr>
 </tbody>
 </table>
-<pre class="r"><code># Beschriftungen
-title_a &lt;- c(&quot;2. Juristisches Staatsexamen, GJPA Berlin/Brandenburg&quot;)
+<pre class="r"><code>title_a &lt;- c(&quot;2. Juristisches Staatsexamen, GJPA Berlin/Brandenburg&quot;)
 subtitle_a = paste0(&quot;Notenverteilung Kampagne 1/18; n = &quot;,nrow(noten_raw_2018),
                     &quot;; \&quot;Dur\&quot; = durchschnittl. Examensnote\r\nLinien: rot  = \&quot;bestanden (ausreichend)\&quot;, blau  = \&quot;vollbefriedigend\&quot;,\r\nschwarz  = Median Gesamtnote (&quot;,median_2018,&quot;)&quot;)
 caption_a = c(&quot;@fubits; Daten: GJPA 2018&quot;)</code></pre>
 <div id="i-joyplot" class="section level2">
 <h2><span class="header-section-number">2.1</span> 2018/I Joyplot</h2>
 <p>(Dur = overall result / final grade)</p>
-<pre class="r"><code># Plot
-noten_long_2018 %&gt;% 
+<pre class="r"><code>noten_long_2018 %&gt;% 
   ggplot() +
   geom_density_ridges(aes(x = Punkte, y = Fach, fill = Fach),
                       rel_min_height = 0.025,
@@ -1767,7 +1763,6 @@ noten_long_2018 %&gt;%
   # theme(legend.position = &quot;none&quot;)
   theme_minimal() +
   guides(fill = FALSE)</code></pre>
-<pre><code>## Warning: Removed 2 rows containing non-finite values (stat_density_ridges).</code></pre>
 <p><img src="/post/2018-03-06-r-joyplots-the-un-joyful-distribution-of-grades-from-german-state-exam-laws_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
 </div>
 <div id="i-boxplot" class="section level2">
@@ -1788,7 +1783,6 @@ ggplot() +
   geom_hline(yintercept = 10, color = &quot;blue&quot;, linetype = 4, size = 1) +
   geom_hline(yintercept = 4, color = &quot;red&quot;, linetype = 4, size = 1) +
   geom_hline(yintercept = median_2018, color = &quot;black&quot;, size = 1)</code></pre>
-<pre><code>## Warning: Removed 2 rows containing non-finite values (stat_boxplot).</code></pre>
 <p><img src="/post/2018-03-06-r-joyplots-the-un-joyful-distribution-of-grades-from-german-state-exam-laws_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
 </div>
 </div>

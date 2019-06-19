@@ -69,8 +69,7 @@ Now we need to tidy the data. We first drop the AZ column (Student id) and then 
 median_2017 <- median(noten_raw$Dur, na.rm = TRUE)
 noten_raw %>%
   select(-AZ) %>% 
-  gather(key = Fach, value = noten_raw[,2:8]) %>% 
-  rename(Punkte = `noten_raw[, 2:8]`) -> noten_long
+  gather(key = Fach, value = Punkte) -> noten_long
 
 head(noten_long) %>% knitr::kable("html", 2)
 ```
@@ -159,14 +158,12 @@ skimr::skim_to_wide(noten_raw_2018) %>% knitr::kable("html", 2)
 median_2018 <- median(noten_raw_2018$Dur, na.rm = TRUE)
 noten_raw_2018 %>%
   select(-AZ) %>% 
-  gather(key = Fach, value = noten_raw_2018[,2:8]) %>% 
-  rename(Punkte = `noten_raw_2018[, 2:8]`) -> noten_long_2018
+  gather(key = Fach, value = Punkte) -> noten_long_2018
 
 head(noten_long_2018, 1) %>% knitr::kable("html", 2)
 ```
 
 ```{r echo=TRUE}
-# Beschriftungen
 title_a <- c("2. Juristisches Staatsexamen, GJPA Berlin/Brandenburg")
 subtitle_a = paste0("Notenverteilung Kampagne 1/18; n = ",nrow(noten_raw_2018),
                     "; \"Dur\" = durchschnittl. Examensnote\r\nLinien: rot  = \"bestanden (ausreichend)\", blau  = \"vollbefriedigend\",\r\nschwarz  = Median Gesamtnote (",median_2018,")")
@@ -175,8 +172,7 @@ caption_a = c("@fubits; Daten: GJPA 2018")
 
 ## 2018/I Joyplot
 (Dur = overall result / final grade)
-```{r fig.asp=1, echo=TRUE, message=FALSE}
-# Plot
+```{r fig.asp=1, echo=TRUE, message=FALSE, warning=FALSE}
 noten_long_2018 %>% 
   ggplot() +
   geom_density_ridges(aes(x = Punkte, y = Fach, fill = Fach),
@@ -200,7 +196,7 @@ noten_long_2018 %>%
 
 
 ## 2018/I Boxplot
-```{r ECHO=TRUE, fig.asp=1}
+```{r ECHO=TRUE, fig.asp=1, warning=FALSE}
 noten_long_2018 %>% 
 ggplot() +
   geom_boxplot(aes(x = Fach, y = Punkte, fill = Fach)) +
