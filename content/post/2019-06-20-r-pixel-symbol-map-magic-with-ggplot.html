@@ -1,0 +1,344 @@
+---
+title: '[R] Pixel/Symbol Map Magic with ggplot'
+author: Ilja / fubits
+date: '2019-06-20'
+slug: r-pixel-symbol-map-magic-with-ggplot
+categories:
+  - DataViz
+  - Design
+  - Publishing
+tags:
+  - ggplot
+  - Map
+  - maps
+  - GIS
+  - Fonts
+draft: yes
+output:
+  blogdown::html_page:
+    number_sections: yes
+    toc: yes
+lastmod: '2019-06-20T12:40:54+02:00'
+description: 'Pixel maps are awesome. Short post on how to add symbols and create a production ready pixel/symbol map design with the ggplot, extrafont and emojifont packages.'
+abstract: 'Pixel maps are awesome. Short post on how to add symbols and create a production ready pixel/symbol map design with the ggplot, extrafont and emojifont packages.'
+thumbnail: /img/thumbs/pixel-symbol-map-magic-thumb.png
+rmdlink: yes
+keywords: []
+comment: no
+autoCollapseToc: no
+postMetaInFooter: no
+hiddenFromHomePage: no
+mathjax: no
+mathjaxEnableSingleDollar: no
+mathjaxEnableAutoNumber: no
+---
+
+
+<div id="TOC">
+<ul>
+<li><a href="#tidytuesday"><span class="toc-section-number">1</span> #TidyTuesday</a></li>
+<li><a href="#the-dots"><span class="toc-section-number">2</span> The Dots</a><ul>
+<li><a href="#world"><span class="toc-section-number">2.1</span> World</a></li>
+<li><a href="#capitals"><span class="toc-section-number">2.2</span> Capitals</a></li>
+</ul></li>
+<li><a href="#pixel-time"><span class="toc-section-number">3</span> Pixel Time</a><ul>
+<li><a href="#world-pixel-map"><span class="toc-section-number">3.1</span> World Pixel Map</a></li>
+<li><a href="#world-pixel-map-with-symbols"><span class="toc-section-number">3.2</span> World Pixel Map with Symbols</a></li>
+<li><a href="#world-pixel-map-with-symbols-and-inverted-color-logic"><span class="toc-section-number">3.3</span> World Pixel Map with Symbols and inverted color logic</a></li>
+</ul></li>
+</ul>
+</div>
+
+<div class="figure">
+<img src="/img/pixel_map/pixel-symbol-map-magic.png" title="What you see is what you get - Pixel Map+Symbol Magic with 300dpi" alt="“What you see is what you get - Pixel Map+Symbol Magic with R”" />
+<p class="caption">“What you see is what you get - Pixel Map+Symbol Magic with R”</p>
+</div>
+<div id="tidytuesday" class="section level1">
+<h1><span class="header-section-number">1</span> #TidyTuesday</h1>
+<p>Last week, <a href="https://twitter.com/DataPlanes" target="_blank">Lisa Hehnke’s</a> <a href="https://twitter.com/hashtag/TidyTuesday?src=hash" target="_blank">#TidyTuesday</a>-contribution on Twitter got me really excited: She created an animated pixel map of all meteoroid impacts from 1900 to 2010:</p>
+{{% tweet "1138532858442784768" %}}
+<p>As I was experimenting with symbols &amp; dataviz for a client recently, I felt inspired to play around a bit with the potentials of combining pixels + symbols and some basic design tweaks. I was surprised how straightforward this was with R so I decided to share my approach.</p>
+<p><strong>Prerequisites</strong></p>
+<pre class="r"><code>library(tidyverse)
+library(maps)
+library(extrafont) # + (Yanone Kaffeesatz and Font Awesome 4.7)
+# install.packages(c(&quot;ggthemes&quot;, &quot;emojifont&quot;, &quot;scales&quot;))</code></pre>
+</div>
+<div id="the-dots" class="section level1">
+<h1><span class="header-section-number">2</span> The Dots</h1>
+<p>First, we need to turn the world into pixels.</p>
+<blockquote>
+<p>All the Kudos here go to <a href="https://medium.com/taras-kaduk/r-walkthrough-create-a-pixel-map-537ce12c2f0c" target="_blank">Taras Kaduk</a> who pioneered the pixel map approach with <code>maps::map.where()</code> in 2017. Give his Medium piece some 👏!</p>
+</blockquote>
+<p>The toughest part is tweaking the proper relation between this “rasterisation” and the <code>geom_point</code> size / <code>fig.width</code> size parameters. This is probably something where you will need to play around. My primary approach was to keep the <code>geom_point</code> size / <code>fig.width</code> size constant for <code>ggplot</code> and tweak the <code>resolution</code> up here.</p>
+<div id="world" class="section level2">
+<h2><span class="header-section-number">2.1</span> World</h2>
+<pre class="r"><code>resolution &lt;- 3
+lat &lt;- tibble(lat = seq(-90, 90, by = resolution))
+long &lt;- tibble(long = seq(-180, 180, by = resolution))
+dots &lt;- merge(lat, long, all = TRUE) %&gt;%
+        mutate(country = maps::map.where(&quot;world&quot;, long, lat), # the magic
+               lakes = maps::map.where(&quot;lakes&quot;, long, lat)) %&gt;% 
+        filter(!is.na(country) &amp; is.na(lakes)) %&gt;%
+        select(-lakes)
+
+head(dots, 3) %&gt;% knitr::kable(&quot;html&quot;)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:right;">
+lat
+</th>
+<th style="text-align:right;">
+long
+</th>
+<th style="text-align:left;">
+country
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+66
+</td>
+<td style="text-align:right;">
+-165
+</td>
+<td style="text-align:left;">
+USA:Alaska
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+-84
+</td>
+<td style="text-align:right;">
+-162
+</td>
+<td style="text-align:left;">
+Antarctica
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+60
+</td>
+<td style="text-align:right;">
+-162
+</td>
+<td style="text-align:left;">
+USA:Alaska
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="capitals" class="section level2">
+<h2><span class="header-section-number">2.2</span> Capitals</h2>
+<p>Let’s also fetch all the world capitals with a population of 1 million and more. I sticked to the KISS-principle<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> here and just round the coordinates to the nearest whole number. Whatever works, works.</p>
+<pre class="r"><code>capitals &lt;- maps::world.cities %&gt;%
+  filter(capital == 1 &amp; pop &gt;= 1000000) %&gt;% 
+  mutate(lat = round(lat, 0),
+         long = round(long, 0)) %&gt;% 
+  rename(country = country.etc) %&gt;% 
+  select(lat, long, country, name, pop)
+
+head(capitals, 3) %&gt;% knitr::kable(&quot;html&quot;)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:right;">
+lat
+</th>
+<th style="text-align:right;">
+long
+</th>
+<th style="text-align:left;">
+country
+</th>
+<th style="text-align:left;">
+name
+</th>
+<th style="text-align:right;">
+pop
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+32
+</td>
+<td style="text-align:right;">
+36
+</td>
+<td style="text-align:left;">
+Jordan
+</td>
+<td style="text-align:left;">
+’Amman
+</td>
+<td style="text-align:right;">
+1303197
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:left;">
+Ghana
+</td>
+<td style="text-align:left;">
+Accra
+</td>
+<td style="text-align:right;">
+2029143
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+9
+</td>
+<td style="text-align:right;">
+39
+</td>
+<td style="text-align:left;">
+Ethiopia
+</td>
+<td style="text-align:left;">
+Addis Abeba
+</td>
+<td style="text-align:right;">
+2823167
+</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>You obviously could countries and capitals them into a single <code>data.frame</code> and then filter/subset.</p>
+</blockquote>
+</div>
+</div>
+<div id="pixel-time" class="section level1">
+<h1><span class="header-section-number">3</span> Pixel Time</h1>
+<div id="world-pixel-map" class="section level2">
+<h2><span class="header-section-number">3.1</span> World Pixel Map</h2>
+<p>We just need to resort to <code>geom_point(size = 1)</code>. Let’s have a look at the base map without the capitals, first:</p>
+<pre class="r"><code>(pixelmap_base &lt;- ggplot() + 
+   geom_point(data = dots, aes(x = long, y = lat), color = &quot;black&quot;, size = 1)
+)</code></pre>
+<p><img src="/post/2019-06-20-r-pixel-symbol-map-magic-with-ggplot_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<blockquote>
+<p>Not too bad, right? Now let’s add the capital cities and some opinionated design on top.</p>
+</blockquote>
+<pre class="r"><code>pixelmap_base + 
+   geom_point(data = capitals, aes(x = long, y = lat), color = &quot;#ffffff&quot;, size = 1) +
+   coord_sf(datum = NA,
+         # crs = 4326,
+         crs = 54009, 
+         clip = &quot;on&quot;,
+         ylim = c(-75, 85),
+         xlim = c(-160, 170)) +
+   labs(title = &quot;Pixel Map Magic&quot;,
+        subtitle = str_c(&quot;World capitals with a population of more than 1 million. Made with &quot;,
+                         emojifont::emoji(&quot;heart&quot;), &quot; and R&quot;),
+        caption = &quot;@fubits&quot;) +
+  # theme_void() +
+   ggthemes::theme_map() +
+   theme(text = element_text(family = &quot;Yanone Kaffeesatz Light&quot;, color = &quot;gold&quot;),
+         plot.background = element_rect(fill = &quot;#212121&quot;, colour = NA), 
+         title = element_text(face = &quot;bold&quot;, size = 18),
+         plot.subtitle = element_text(colour = &quot;#ffffff&quot;, face = &quot;plain&quot;, size = 12),
+         plot.caption = element_text(size = 10, vjust = 10, hjust = 0.98),
+         plot.margin = margin(12,12,0,12)
+         )</code></pre>
+<p><img src="/post/2019-06-20-r-pixel-symbol-map-magic-with-ggplot_files/figure-html/unnamed-chunk-6-1.png" width="100%" /></p>
+<blockquote>
+<p>Whoop whoop. What else can we do? Let’s replace the capital city <strong>dots</strong> with <strong>symbols</strong> (aka Font Awesome glyphs; but you could use <strong>Emojis</strong> or whatever <strong>Unicode</strong> symbol existing in a Font) and scale their size with the respective city’s population.</p>
+</blockquote>
+</div>
+<div id="world-pixel-map-with-symbols" class="section level2">
+<h2><span class="header-section-number">3.2</span> World Pixel Map with Symbols</h2>
+<p>Easiest way to handle fonts (at least on Windows) is to fetch the <code>.ttf</code> font file, install it on your system, and then use the <code>extrafont</code> package to import and load the fonts into the R session. This way, all you have to do post-import is to load the <code>extrafont</code> package or to run <code>extrafont::loadfonts(device)</code>. On windows, use <code>device = "win"</code>. Also, for reasons unknown, I could not get to render some glyphs from <code>Font Awesome 5</code>, so I just sticked to <code>Font Awesome 4.7</code>. And loading the `<code>emojifont</code> package kills the <code>extrafont</code> binding. So here’s my been-there-so-you-dont-have-to-struggle approach:</p>
+<pre class="r"><code>pixelmap_base + 
+   # geom_point(data = capitals, aes(x = long, y = lat), color = &quot;#ffffff&quot;, size = 1) + 
+   geom_text(data = capitals, aes(x = long, y = lat, size = pop),
+             label = emojifont::fontawesome(&quot;fa-male&quot;), # also: &quot;\uf183&quot; for Unicode
+             family = &quot;FontAwesome&quot;, color = &quot;#ffffff&quot;) + # or copy/paste glyphs
+   scale_size_continuous(labels = scales::number_format(), breaks = scales::pretty_breaks(2),
+                         range = c(1,4)) + # downscaling for web
+   coord_sf(datum = NA,
+             # crs = 4326,
+             crs = 54009,
+             clip = &quot;off&quot;,
+             ylim = c(-75, 85),
+             xlim = c(-160, 170)) +
+   labs(title = &quot;Pixel+Symbol Map Magic&quot;,
+        subtitle = str_c(&quot;World capitals with a population of more than 1 million. Made with &quot;,
+                         emojifont::emoji(&quot;heart&quot;), &quot; and R&quot;),
+        caption = &quot;@fubits&quot;) +
+   theme_void() +
+   theme(text = element_text(family = &quot;Yanone Kaffeesatz Light&quot;, color = &quot;gold&quot;),
+         plot.background = element_rect(fill = &quot;#212121&quot;, colour = NA), 
+         title = element_text(face = &quot;bold&quot;, size = 18),
+         plot.subtitle = element_text(colour = &quot;#ffffff&quot;, face = &quot;plain&quot;, size = 12),
+         plot.caption = element_text(size = 10, vjust = 10, hjust = 0.98),
+         plot.margin = margin(12,12,0,12),
+         legend.position = c(0.1,0.33),
+         legend.title = element_blank(),
+         legend.text = element_text(size = 10)
+        )</code></pre>
+<p><img src="/post/2019-06-20-r-pixel-symbol-map-magic-with-ggplot_files/figure-html/unnamed-chunk-7-1.png" width="100%" /></p>
+</div>
+<div id="world-pixel-map-with-symbols-and-inverted-color-logic" class="section level2">
+<h2><span class="header-section-number">3.3</span> World Pixel Map with Symbols and inverted color logic</h2>
+<p>When we do <strong>design</strong> or dataviz, we want to draw the reader’s full <strong>attention</strong> to our <strong>message</strong>. One easy way to do this here is to align the <strong>colors</strong> of the subtitle, the geom, and the legend’s key:</p>
+<pre class="r"><code>pixelmap_base + 
+   # geom_point(data = capitals, aes(x = long, y = lat), color = &quot;#ffffff&quot;, size = 1) + 
+   geom_text(data = capitals, aes(x = long, y = lat, size = pop),
+             label = emojifont::fontawesome(&quot;fa-male&quot;),
+             family = &quot;FontAwesome&quot;, color = &quot;gold&quot;) +
+   scale_size_continuous(labels = scales::number_format(), breaks = scales::pretty_breaks(2),
+                         range = c(1,4)) + # downscaling for web
+   coord_sf(datum = NA,
+             # crs = 4326,
+             crs = 54009,
+             clip = &quot;off&quot;,
+             ylim = c(-75, 85),
+             xlim = c(-160, 170)) +
+   labs(title = &quot;Pixel+Symbol Map Magic&quot;,
+        subtitle = str_c(&quot;World capitals with a population of more than 1 million. Made with &quot;,
+                         emojifont::emoji(&quot;heart&quot;), &quot; and R&quot;),
+        caption = &quot;@fubits&quot;) +
+   theme_void() +
+   theme(text = element_text(family = &quot;Yanone Kaffeesatz Light&quot;, color = &quot;#ffffff&quot;),
+         plot.background = element_rect(fill = &quot;#212121&quot;, colour = NA), 
+         title = element_text(face = &quot;bold&quot;, size = 18),
+         plot.subtitle = element_text(colour = &quot;gold&quot;, face = &quot;plain&quot;, size = 12),
+         plot.caption = element_text(size = 10, colour = &quot;gold&quot;, vjust = 10, hjust = 0.98),
+         plot.margin = margin(12,12,0,12),
+         legend.position = c(0.1,0.33),
+         legend.title = element_blank(),
+         legend.text = element_text(size = 10)
+        )</code></pre>
+<p><img src="/post/2019-06-20-r-pixel-symbol-map-magic-with-ggplot_files/figure-html/unnamed-chunk-8-1.png" width="100%" /></p>
+<blockquote>
+<p>Not too bad for an exclusively R-based approach.</p>
+</blockquote>
+<blockquote>
+<p>Of course, you’d still have to do some resolution + dpi + fig.width tweaking for using this in HiRes / print mode.</p>
+</blockquote>
+<p>So tell me again how you can’t use R in production …</p>
+</div>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>KISS := Keep It Simple, Stupid<a href="#fnref1" class="footnote-back">↩</a></p></li>
+</ol>
+</div>

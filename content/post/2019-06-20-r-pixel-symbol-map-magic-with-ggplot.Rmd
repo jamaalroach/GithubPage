@@ -1,0 +1,211 @@
+---
+title: '[R] Pixel/Symbol Map Magic with ggplot'
+author: Ilja / fubits
+date: '2019-06-20'
+slug: r-pixel-symbol-map-magic-with-ggplot
+categories:
+  - DataViz
+  - Design
+  - Publishing
+tags:
+  - ggplot
+  - Map
+  - maps
+  - GIS
+  - Fonts
+draft: yes
+output:
+  blogdown::html_page:
+    number_sections: yes
+    toc: yes
+lastmod: '2019-06-20T12:40:54+02:00'
+description: 'Pixel maps are awesome. Short post on how to add symbols and create a production ready pixel/symbol map design with the ggplot, extrafont and emojifont packages.'
+abstract: 'Pixel maps are awesome. Short post on how to add symbols and create a production ready pixel/symbol map design with the ggplot, extrafont and emojifont packages.'
+thumbnail: /img/thumbs/pixel-symbol-map-magic-thumb.png
+rmdlink: yes
+keywords: []
+comment: no
+autoCollapseToc: no
+postMetaInFooter: no
+hiddenFromHomePage: no
+mathjax: no
+mathjaxEnableSingleDollar: no
+mathjaxEnableAutoNumber: no
+---
+
+!["What you see is what you get - Pixel Map+Symbol Magic with R"](/img/pixel_map/pixel-symbol-map-magic.png "What you see is what you get - Pixel Map+Symbol Magic with 300dpi")
+
+# \#TidyTuesday
+
+Last week, [Lisa Hehnke's](https://twitter.com/DataPlanes){target="_blank"} [#TidyTuesday](https://twitter.com/hashtag/TidyTuesday?src=hash){target="_blank"}-contribution on Twitter got me really excited: She created an animated pixel map of all meteoroid impacts from 1900 to 2010:
+
+```{r echo=FALSE}
+blogdown::shortcode('tweet', '1138532858442784768')
+```
+
+As I was experimenting with symbols & dataviz for a client recently, I felt inspired to play around a bit with the potentials of combining pixels + symbols and some basic design tweaks. I was surprised how straightforward this was with R so I decided to share my approach. 
+
+**Prerequisites**
+
+```{r message=FALSE}
+library(tidyverse)
+library(maps)
+library(extrafont) # + (Yanone Kaffeesatz and Font Awesome 4.7)
+# install.packages(c("ggthemes", "emojifont", "scales"))
+```
+
+# The Dots
+
+First, we need to turn the world into pixels.
+
+> All the Kudos here go to [Taras Kaduk](https://medium.com/taras-kaduk/r-walkthrough-create-a-pixel-map-537ce12c2f0c){target="_blank"} who pioneered the pixel map approach with `maps::map.where()` in 2017. Give his Medium piece some `r emojifont::emoji("clap")`!
+
+The toughest part is tweaking the proper relation between this "rasterisation" and the `geom_point` size / `fig.width` size parameters. This is probably something where you will need to play around. My primary approach was to keep the `geom_point` size / `fig.width` size constant for `ggplot` and tweak the `resolution` up here.
+
+## World
+
+```{r}
+resolution <- 3
+lat <- tibble(lat = seq(-90, 90, by = resolution))
+long <- tibble(long = seq(-180, 180, by = resolution))
+dots <- merge(lat, long, all = TRUE) %>%
+        mutate(country = maps::map.where("world", long, lat), # the magic
+               lakes = maps::map.where("lakes", long, lat)) %>% 
+        filter(!is.na(country) & is.na(lakes)) %>%
+        select(-lakes)
+
+head(dots, 3) %>% knitr::kable("html")
+```
+
+## Capitals
+
+Let's also fetch all the world capitals with a population of 1 million and more. I sticked to the KISS-principle^[KISS := Keep It Simple, Stupid] here and just round the coordinates to the nearest whole number. Whatever works, works.
+
+```{r}
+capitals <- maps::world.cities %>%
+  filter(capital == 1 & pop >= 1000000) %>% 
+  mutate(lat = round(lat, 0),
+         long = round(long, 0)) %>% 
+  rename(country = country.etc) %>% 
+  select(lat, long, country, name, pop)
+
+head(capitals, 3) %>% knitr::kable("html")
+```
+
+> You obviously could countries and capitals them into a single `data.frame` and then filter/subset.
+
+# Pixel Time
+
+## World Pixel Map
+
+We just need to resort to `geom_point(size = 1)`. Let's have a look at the base map without the capitals, first:
+
+```{r}
+(pixelmap_base <- ggplot() + 
+   geom_point(data = dots, aes(x = long, y = lat), color = "black", size = 1)
+)
+```
+
+> Not too bad, right? Now let's add the capital cities and some opinionated design on top.
+
+```{r fig.width=7, out.width='100%'}
+pixelmap_base + 
+   geom_point(data = capitals, aes(x = long, y = lat), color = "#ffffff", size = 1) +
+   coord_sf(datum = NA,
+         # crs = 4326,
+         crs = 54009, 
+         clip = "on",
+         ylim = c(-75, 85),
+         xlim = c(-160, 170)) +
+   labs(title = "Pixel Map Magic",
+        subtitle = str_c("World capitals with a population of more than 1 million. Made with ",
+                         emojifont::emoji("heart"), " and R"),
+        caption = "@fubits") +
+  # theme_void() +
+   ggthemes::theme_map() +
+   theme(text = element_text(family = "Yanone Kaffeesatz Light", color = "gold"),
+         plot.background = element_rect(fill = "#212121", colour = NA), 
+         title = element_text(face = "bold", size = 18),
+         plot.subtitle = element_text(colour = "#ffffff", face = "plain", size = 12),
+         plot.caption = element_text(size = 10, vjust = 10, hjust = 0.98),
+         plot.margin = margin(12,12,0,12)
+         )
+```
+
+> Whoop whoop. What else can we do? Let's replace the capital city **dots** with **symbols** (aka Font Awesome glyphs; but you could use **Emojis** or whatever **Unicode** symbol existing in a Font) and scale their size with the respective city's population.
+
+## World Pixel Map with Symbols
+
+Easiest way to handle fonts (at least on Windows) is to fetch the `.ttf` font file, install it on your system, and then use the `extrafont` package to import and load the fonts into the R session. This way, all you have to do post-import is to load the `extrafont` package or to run `extrafont::loadfonts(device)`. On windows, use `device = "win"`. Also, for reasons unknown, I could not get to render some glyphs from `Font Awesome 5`, so I just sticked to `Font Awesome 4.7`. And loading the ``emojifont` package kills the `extrafont` binding. So here's my been-there-so-you-dont-have-to-struggle approach:
+
+```{r fig.width=7, out.width='100%'}
+pixelmap_base + 
+   # geom_point(data = capitals, aes(x = long, y = lat), color = "#ffffff", size = 1) + 
+   geom_text(data = capitals, aes(x = long, y = lat, size = pop),
+             label = emojifont::fontawesome("fa-male"), # also: "\uf183" for Unicode
+             family = "FontAwesome", color = "#ffffff") + # or copy/paste glyphs
+   scale_size_continuous(labels = scales::number_format(), breaks = scales::pretty_breaks(2),
+                         range = c(1,4)) + # downscaling for web
+   coord_sf(datum = NA,
+             # crs = 4326,
+             crs = 54009,
+             clip = "off",
+             ylim = c(-75, 85),
+             xlim = c(-160, 170)) +
+   labs(title = "Pixel+Symbol Map Magic",
+        subtitle = str_c("World capitals with a population of more than 1 million. Made with ",
+                         emojifont::emoji("heart"), " and R"),
+        caption = "@fubits") +
+   theme_void() +
+   theme(text = element_text(family = "Yanone Kaffeesatz Light", color = "gold"),
+         plot.background = element_rect(fill = "#212121", colour = NA), 
+         title = element_text(face = "bold", size = 18),
+         plot.subtitle = element_text(colour = "#ffffff", face = "plain", size = 12),
+         plot.caption = element_text(size = 10, vjust = 10, hjust = 0.98),
+         plot.margin = margin(12,12,0,12),
+         legend.position = c(0.1,0.33),
+         legend.title = element_blank(),
+         legend.text = element_text(size = 10)
+        )
+```
+
+## World Pixel Map with Symbols and inverted color logic
+
+When we do **design** or dataviz, we want to draw the reader's full **attention** to our **message**. One easy way to do this here is to align the **colors** of the subtitle, the geom, and the legend's key:
+
+```{r fig.width=7, out.width='100%'}
+pixelmap_base + 
+   # geom_point(data = capitals, aes(x = long, y = lat), color = "#ffffff", size = 1) + 
+   geom_text(data = capitals, aes(x = long, y = lat, size = pop),
+             label = emojifont::fontawesome("fa-male"),
+             family = "FontAwesome", color = "gold") +
+   scale_size_continuous(labels = scales::number_format(), breaks = scales::pretty_breaks(2),
+                         range = c(1,4)) + # downscaling for web
+   coord_sf(datum = NA,
+             # crs = 4326,
+             crs = 54009,
+             clip = "off",
+             ylim = c(-75, 85),
+             xlim = c(-160, 170)) +
+   labs(title = "Pixel+Symbol Map Magic",
+        subtitle = str_c("World capitals with a population of more than 1 million. Made with ",
+                         emojifont::emoji("heart"), " and R"),
+        caption = "@fubits") +
+   theme_void() +
+   theme(text = element_text(family = "Yanone Kaffeesatz Light", color = "#ffffff"),
+         plot.background = element_rect(fill = "#212121", colour = NA), 
+         title = element_text(face = "bold", size = 18),
+         plot.subtitle = element_text(colour = "gold", face = "plain", size = 12),
+         plot.caption = element_text(size = 10, colour = "gold", vjust = 10, hjust = 0.98),
+         plot.margin = margin(12,12,0,12),
+         legend.position = c(0.1,0.33),
+         legend.title = element_blank(),
+         legend.text = element_text(size = 10)
+        )
+```
+
+> Not too bad for an exclusively R-based approach.
+
+> Of course, you'd still have to do some resolution + dpi + fig.width tweaking for using this in HiRes / print mode. 
+
+So tell me again how you can't use R in production ...
