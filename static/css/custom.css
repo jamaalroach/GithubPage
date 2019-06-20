@@ -67,7 +67,7 @@
 
 .progress-bar-container {
 	width: 100%;
-	height: 4px;
+	height: 6px;
 	background: #ccc;
 	position: sticky;
 	top: 0;
@@ -75,7 +75,7 @@
   }
 
   .progress-bar {
-	height: 4px;
+	height: 6px;
 	background: #c05b4d;;
 	width: 0%;
   }
