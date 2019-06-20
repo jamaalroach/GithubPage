@@ -62,7 +62,24 @@
 		 url('../fonts/roboto-v19-latin-700.ttf') format('truetype'), /* Safari, Android, iOS */
 		 url('../fonts/roboto-v19-latin-700.svg#Roboto') format('svg'); /* Legacy iOS */
   }
-  
+
+/* scroll progress */
+
+.progress-bar-container {
+	width: 100%;
+	height: 4px;
+	background: #ccc;
+	position: sticky;
+	top: 0;
+	z-index: 9999;
+  }
+
+  .progress-bar {
+	height: 4px;
+	background: #c05b4d;;
+	width: 0%;
+  }
+
 .section hr {
 	width: 50%;
 	margin: 0 auto!important;
@@ -253,83 +270,17 @@ h4, h5, h6 {font-size: 1.25em!important;}
 	margin-bottom: 0.67em!important;
 }
 
-.post .post-header .post-meta, .post .post-header .post-meta .post-time {
-	font-size: 1em;
-	display: inline-flex;
-    justify-content: center;
-}
 
-.post .post-header .post-meta .post-category { 
-	display: inline-flex;
-	justify-content: center;
-	padding: 0 0.5em;
-}
 
-.post .post-header .post-meta .post-category a:before,
-.post .post-header .post-meta .rmd-link:before {
-    content: "";
-}
-
-.post .post-header .post-meta .post-category:before,
-.post .post-header .post-rmd-link:before {
-	content: "\B7";
-	font-weight: 700;
-	padding-right: 0.5em;
-}
-
-.post-category, .post-rmd-link {
-	justify-content: center;
-	align-items: center;
-	display: flex;
-	flex-wrap: wrap;
-	justify-content: flex-start;
-}
-
-.post-category span.tag, .post-rmd-link span.rmd-link {
-	border-radius: 4px;
-	display: inline-flex;
-	font-size: 0.75em;
-	height: 1.8em;
-	justify-content: center;
-	align-items: center;
-	line-height: 1.5;
-	padding-left: .75em;
-	padding-right: .75em;
-	margin-left: 0.1em;
-	margin-right: 0.1em;
-	white-space: nowrap;
-}
-
-.post-category span.tag {
-	background-color: #363636;
-	color: #f5f5f5!important;
-}
-
-.post-category span.tag.landing-page {
-	background-color: #363636;
-	color: #f5f5f5!important;
-}
-
-.post-rmd-link span.rmd-link {
-	background-color: #209cee;
-}
-
-.more-meta .rmd-link {
+.read-more-link {
+	display: block;
+	margin-top: 1em;
+	float: right;
 	color: #fff;
-	font-size: 1.2em;
-	display: inline-flex;
-	align-items: baseline;
-}
-
-/* .read-more-link {
-	color: #fff;
+	font-family: 'Roboto Condensed', 'Lato', sans-serif !important;
 	cursor: pointer;
 	font-size: 0.8em;
-	padding: 0 0.25em;
-	line-height: 1.6;
-	border: 1px solid #ddd;
-	border-radius: .25em;
-} */
+}
 
 /* Numbering suffix in Body/Content */
 
@@ -450,6 +401,7 @@ h4, h5, h6 {font-size: 1.25em!important;}
 	color: #000000;
 }
 
+
 /* START styles for regular screens */
 
 @media screen and (min-width: 800px) {
@@ -492,7 +444,7 @@ h4, h5, h6 {font-size: 1.25em!important;}
 		background-color: #fff;
 		width: 100%;
 		max-width: 900px;
-		z-index: 1;
+		z-index: 9998;
 		padding: 10px 0 0 0;
 		border-bottom: 1px dashed #c05b4d;
 		transition: 0.2s;
@@ -538,6 +490,80 @@ h4, h5, h6 {font-size: 1.25em!important;}
 		margin-right: -25%;
 	}
 	*/
+
+	/* Post Header Tags */
+	
+	.post-meta {
+		justify-content: space-between;
+	}
+
+	.post .post-header .post-meta, .post .post-header .post-meta .post-time {
+		font-size: 1em;
+		display: inline-flex;
+		justify-content: center;
+	}
+	
+	.post .post-header .post-meta .post-category { 
+		display: inline-flex;
+		justify-content: center;
+		padding: 0 0.5em;
+	}
+	
+	.post .post-header .post-meta .post-category a:before,
+	.post .post-header .post-meta .rmd-link:before {
+		content: "";
+	}
+	
+	.post .post-header .post-meta .post-category:before,
+	.post .post-header .post-rmd-link:before {
+		content: "\B7";
+		font-weight: 700;
+		padding-right: 0.5em;
+	}
+	
+	.post-category, .post-rmd-link {
+		justify-content: center;
+		align-items: center;
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: flex-start;
+	}
+	
+	.post-category span.tag, .post-rmd-link span.rmd-link {
+		border-radius: 4px;
+		display: inline-flex;
+		font-size: 0.75em;
+		height: 1.8em;
+		justify-content: center;
+		align-items: center;
+		line-height: 1.5;
+		padding-left: .75em;
+		padding-right: .75em;
+		margin-left: 0.1em;
+		margin-right: 0.1em;
+		white-space: nowrap;
+	}
+	
+	.post-category span.tag {
+		background-color: #363636;
+		color: #f5f5f5!important;
+	}
+	
+	.post-category span.tag.landing-page {
+		background-color: #363636;
+		color: #f5f5f5!important;
+	}
+	
+	.post-rmd-link span.rmd-link {
+		background-color: #209cee;
+	}
+	
+	.more-meta .rmd-link {
+		color: #fff;
+		font-size: 1.2em;
+		display: inline-flex;
+		align-items: baseline;
+	}
 }
 
 /* Post-TAGS */
