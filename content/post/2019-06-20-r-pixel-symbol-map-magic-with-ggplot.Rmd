@@ -91,7 +91,7 @@ capitals <- maps::world.cities %>%
 head(capitals, 3) %>% knitr::kable("html")
 ```
 
-> You obviously could countries and capitals them into a single `data.frame` and then filter/subset.
+> You obviously could bind `countries` and `capitals` into a single `data.frame` and then filter/subset.
 
 # Pixel Time
 
@@ -168,7 +168,7 @@ pixelmap_base +
         )
 ```
 
-## World Pixel Map with Symbols and inverted color logic
+## World Pixel Map with Symbols and inverted Color Logic
 
 When we do **design** or dataviz, we want to draw the reader's full **attention** to our **message**. One easy way to do this here is to align the **colors** of the subtitle, the geom, and the legend's key:
 
