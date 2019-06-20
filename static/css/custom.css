@@ -366,10 +366,10 @@ h4, h5, h6 {font-size: 1.25em!important;}
 /* Thumbnails */
 
 .thumbnail-post {
-	width: 40%;
-	max-width: 333px;
+	width: 45%;
+	max-width: 400px;
 	min-width: 200px;
-	max-height: 333px;
+	max-height: 400px;
 	min-height: 100px;
 	float: left;
 	padding-right: 1.5em;
@@ -397,7 +397,7 @@ h4, h5, h6 {font-size: 1.25em!important;}
 	.thumbnail-post {
 		height: 100%;
 		width: 100%;
-		max-width: 333px!important;
+		max-width: 400px!important;
 		margin: 0 auto;
 		padding-right: 0;
 		float: none;
