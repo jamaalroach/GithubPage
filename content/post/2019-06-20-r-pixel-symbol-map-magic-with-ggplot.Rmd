@@ -13,7 +13,6 @@ tags:
   - maps
   - GIS
   - Fonts
-draft: yes
 output:
   blogdown::html_page:
     number_sections: yes
